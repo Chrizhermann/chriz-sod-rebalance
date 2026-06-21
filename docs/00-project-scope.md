@@ -45,9 +45,13 @@ high-value tweaks. → `research/05`.
 4. Repo/mod naming, and whether Parts 2–3 ship as separate components.
 
 ## Status
-- [x] Rest-ambush mechanic verified + dataset built (`research/01`, `sod_areas_dataset.csv`)
-- [ ] SoD encounter inventory (1b) — research in progress
-- [ ] SoD XP economy (1d) — research in progress
-- [ ] SoD creature-danger audit — research in progress
-- [ ] Design docs (Part 1) — after research
-- [ ] Parts 2 & 3 research — after Part 1 direction confirmed
+- [x] Rest-ambush mechanic verified + dataset (`research/01`, `sod_areas_dataset.csv`)
+- [x] SoD encounter inventory — all regions (`research/02a/b/c/d`, `sod_encounters_full.csv`, ~1,300 mobs)
+- [x] SoD XP economy incl. dialogue (`research/03`, ~585k quest XP/char, no cap)
+- [x] SoD creature-danger audit (`research/06`)
+- [x] Travel-ambush system (`research/07`)
+- [x] **Part 1 design complete** — `design/00-part1-summary` (capstone) + `design/01–05`
+- [ ] **Awaiting user sign-off** on the 8 Part-1 decisions (`design/00` §Decisions)
+- [ ] Part 1 implementation (WeiDU tail-mod) — after sign-off
+- [ ] Part 2 (companions) — held for user's weakest-NPC shortlist
+- [ ] Part 3 (SCS / base-game tweaks) — after Part 1 locked

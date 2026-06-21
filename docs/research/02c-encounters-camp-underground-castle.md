@@ -12,8 +12,13 @@ Region scope: the SoD **mid/late** arc — every loose `BD2###`/`BD3###`/`BD4###
   `C:\tmp\sod_research\late\all_blocks.txt`.
 - **Placed actors** — parsed from the area `.are` Actors table (offset `0x54`, 0x110-byte entries;
   CRE resref at `+0x80`, friendly label at `+0x00`). The label field ("Crusader Elite", "GOBLIN_ARCHER",
-  "BF SOLDIER") is authoritative for friend/foe. Pristine SoD `.are` extracted from the BG1EE+SoD
-  install (`bggo` confirms only 4 of these areas are BGGO-modified; structure is unchanged by EET/SCS).
+  "BF SOLDIER") is authoritative for friend/foe. **Sourced from the LIVE install override**
+  (`override\BD*.ARE` — note the **uppercase `.ARE`** extension; a lowercase `*.are` glob silently
+  misses all 762 area files, which is why an earlier pass wrongly concluded the areas weren't in
+  override). **Re-verified 2026-06-21: live-override actor counts are identical to the pristine
+  BG1EE+SoD `.are` across all 20 areas** — the only difference is BD5300 carrying one extra actor
+  (`c0mnev01` "Black", a mod-added familiar; not an enemy). This confirms SCS/CDTweaks modify CRE
+  *stats* in place, not the area actor lists, so the placed-enemy counts here are valid for the live game.
 - **Allegiance** — `EA` byte (CRE `0x270`) read for the ambiguous families.
   **Key finding: almost every SoD crusader/monster CRE ships `EA=128 (NEUTRAL)` and is turned hostile
   by script** (`ChangeEnemyAlly`/`Enemy()`) when its battle fires — so `EA` alone under-counts enemies;
@@ -59,8 +64,17 @@ hostile spawns. "Ally" = excluded coalition/garrison combatants.
 ² BD6100: the ambush is a respawning loop — `bdfinal1-5` (Shadow Thieves) `CreateCreatureAtLocation`
 up to `bd_spawn_num=6` waves; it is a designed *loss* (party is put to sleep, leads into BG2 opening).
 
-**REGION TOTAL: 728 live enemy instances** (placed + scripted, excl. corpses/allies/ambient/objects/
-named NPCs). Plus **344 coalition-ally combatants** and the random rest tables above.
+**REGION TOTAL: ~728 enemy instances** (placed + scripted, excl. corpses/allies/ambient/objects/named
+NPCs). Plus **344 coalition-ally combatants** and the random rest tables above.
+
+> **Accuracy note on the scripted columns.** Placed-actor counts are **exact and difficulty-independent**
+> — the region's placed-enemy baseline is **460** and is the reliable figure for cut planning. The
+> **scripted** columns **sum across all difficulty branches and therefore over-count**: SoD battle
+> scripts branch on `Difficulty(...)`, and the engine fires only one branch per event. E.g. BD5000's
+> `CreateCreatureEffect(…,"SPMONSUM")` wandering-monster wave shows 9 bears + 9 phase-spiders + 6 snakes
+> across branches but spawns ~3 + 3 + 2 per trigger (the hardest branch on the user's Difficulty 5).
+> Treat scripted totals as an upper bound; the design doc (`docs/design/02c-...`) cuts on the exact
+> placed counts and names specific HARD/INSANE scripted branches to NOP.
 
 ### Enemy composition of the trash-heavy areas (for curation)
 
