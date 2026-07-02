@@ -1,18 +1,27 @@
 # chriz-sod-rebalance
 
-An SCS-style rebalance/remix mod project for **Siege of Dragonspear** (SoD) and broader
-BG balance, targeting a heavily-modded **BG2:EE + EET** install. Three parts:
+A **remix/overhaul + rebalance mod** for **Siege of Dragonspear** (SoD), targeting a
+heavily-modded **BG2:EE + EET** install (standalone BG:EE+SoD also in scope). Two parts:
 
-1. **SoD remix/rebalance** — far fewer trash mobs (~70%+ cut), a handful of fights made
-   *meaningful* instead of numerous, drastically lower rest-ambush rate, big-quest XP
-   re-weighting to compensate for removed trash, and (low priority) trimming useless filler.
-2. **Companion rebalance** — mostly buff the weakest joinable NPCs up to viability; nerf the
-   clear outliers (e.g. Baeloth).
-3. **Minor SCS + base-game rebalances.**
+1. **SoD remix** — slim SoD down hard: remove maps/conversations/plot points (removal over
+   rewriting), keep ALL companions at SoD start, remove the hooded-man/Irenicus and the
+   entire post-victory epilogue (Skie death, trial, jail), Caelar as main antagonist and
+   final boss, Skie playable, far fewer ambushes/trash, XP-neutral via a per-chapter ledger.
+   **Scope anchor + locked decisions: `docs/01-remix-wishlist.md`** (living document).
+2. **Companion rebalance** — buff the weakest joinables; nerf outliers (e.g. Baeloth).
+
+(Part 3, SCS/base-game tweaks, moved to the sibling repo `chriz-bg-rebalance`.)
+
+**Provenance warning:** `docs/design/00–05` were authored by a prior agent WITHOUT the user —
+proposals only, never user decisions. Decisions live in `docs/01-remix-wishlist.md` and
+`docs/design/wave1/`. Research docs (`docs/research/`) remain valid as data.
 
 This repo is **research/design/plan first**. Implementation (WeiDU tail-mods) comes after the
-design is approved. Nothing here is installed into the live game without explicit sign-off —
-the user has an **active playthrough** on the target install.
+user signs off each design. Process: global/system levers first (`docs/design/wave1/`), arc
+treatment up front, then chapter-by-chapter passes (map removals, cut lists, zero-ambush
+areas, XP ledger updates all decided there). **Implementation/testing happens on a separate
+game copy** (user maintains copies; dev-target path TBD) — never on the live install below.
+The user works sparring-style: no unsolicited decisions; designs list DECIDED vs OPEN.
 
 ## Target install (read-only reference, do NOT modify without sign-off)
 - Game dir: `C:\Games\Baldur's Gate II Enhanced Edition modded\`
@@ -42,9 +51,19 @@ uses `Rested()`. So lowering these numbers touches **zero** story/scripted encou
 To hit a target felt rate `F`, set the field to `100·(1−(1−F)^(1/8))` (≈ `F=15%→2`, `F=20%→3`).
 See `docs/research/01-rest-ambush-mechanic.md`.
 
+## Verified EET-transition hard requirement (for the ending rework)
+On EET, SoD→BG2 must end with the party in **BD6100** ("The Ambush"): gear banked into
+`K#ImportContainer` there and `CreateCreatureObject("K#TELBGT",Player1,...)` fired —
+`ar0602.bcs` hardcodes BD6100 as the gear source. **Never modify** `K#TELBGT.BCS`,
+`ar0602.bcs`, `CAMPAIGN.2DA`/`STARTARE.2DA`, or the `ENDOFBG1` global (third-party mods patch
+them). Mid-campaign hooded-man scenes set nothing the endgame reads (safe to remove); the
+trial/jail sequence is self-contained between clean seams (BDCUT61 entry / BD6200 exit).
+
 ## Layout
+- `docs/01-remix-wishlist.md` — **scope anchor**: the user's wishlist + locked decisions.
 - `docs/research/` — verified findings + data (the audit). Source of truth before design.
-- `docs/design/` — proposed changes + numbers, per part. Written after research, before code.
+- `docs/design/wave1/` — current design docs (user-era, DECIDED vs OPEN per doc).
+- `docs/design/` (00–05) — prior-agent proposals; data useful, decisions void.
 - `research/data/sod_baf/` — all 1232 decompiled SoD scripts (`.baf`) for analysis.
 - `research/scripts/` — Python analysis tooling (ARE rest parser, dataset builder).
 - `docs/research/sod_areas_dataset.csv` — master per-area rest + scripted-spawn dataset.
