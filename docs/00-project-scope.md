@@ -26,9 +26,11 @@ audit of every joinable NPC (class/kit/stats/spells/items) across BG1+SoD+BG2 on
 (kits are heavily modded — see install memory). User has strong opinions → design is
 collaborative. → `research/04`.
 
-## Part 3 — Minor SCS + Base-Game Rebalances
-Catalog SCS components active in this install + their SoD/balance touchpoints; identify small
-high-value tweaks. → `research/05`.
+## Part 3 — Minor SCS + Base-Game Rebalances → MOVED
+This scope migrated to the sibling repo **`chriz-bg-rebalance`**
+(github.com/Chrizhermann/chriz-bg-rebalance, created 2026-07-02): all SCS- and
+SR-adjacent balance adjustments live there. This repo stays focused on Parts 1–2
+(SoD remix + companions).
 
 ## Method
 - Research → design (numbers + rationale) → user sign-off → WeiDU tail-mod(s) → cautious test.
