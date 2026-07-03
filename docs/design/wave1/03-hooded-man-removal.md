@@ -1,7 +1,8 @@
 # Wave 1 — Hooded Man (Irenicus) Mid-Campaign Removal
 
-**Status:** awaiting user sign-off. Complete appearance inventory verified against the live
-install (no `.are` placements exist — every appearance is script-created; corpus-wide search).
+**Status: SIGNED OFF (user, 2026-07-03)**, including the dream decision below. Complete
+appearance inventory verified against the live install (no `.are` placements exist — every
+appearance is script-created; corpus-wide search).
 
 ## Decided (user, 2026-07-03)
 Remove the hooded man / Irenicus 100% from the plot. This component removes every
@@ -24,15 +25,27 @@ Optional string hygiene (recommended): False()-gate the Imoen reply "~What was t
 the hood doing here?~" (`BDIMOEN.dlg` state 67, transition 1) — states 68/69 become
 unreachable automatically. No `dialog.tlk` edits needed anywhere.
 
-## New finding — a SECOND Hooded Man (decision needed)
+## The chapter dreams — DECIDED (user, 2026-07-03): document, then SKIP
 `BDCCIRE.CRE` (same display name, different creature) appears **and speaks** in all four
-chapter rest-dreams (`PLAYER1D.BCS` → BDDDD1–4 chains, staged in bd0072). His dialogue states
-are load-bearing — they carry the dream conclusions and launch the exit cutscenes, so this is
-dialogue rework, not a `CreateCreature` deletion.
+chapter rest-dreams (`PLAYER1D.BCS` → BDDDD1–4 chains, staged in bd0072). User verdict: the
+dreams are very low quality — **skip them entirely**. Content is preserved in
+`docs/research/09-sod-dreams.md` for a maybe-someday rewrite.
 
-**Open question:** what happens to the dreams? Options: (a) leave the dreams for now (they're
-Bhaal-arc content; handle with the ending/arc work), (b) rework his lines/speaker, (c) cut
-the dreams entirely. This component ships without touching them unless you decide otherwise.
+**Skip mechanism (verified, ready to implement):** pre-set the sequence global past its
+terminal value. `bd_ddd` and `bd_dream_timer` have **zero consumers outside `PLAYER1D.BCS`**
+(exhaustive grep: all 1232 SoD scripts, all override `.bcs`/`.dlg`), and every launcher block
+requires `bd_ddd` exactly 0–3, so `bd_ddd=4` equals the natural post-all-dreams state.
+Implementation: `EXTEND_TOP` the master script (`BALDUR.BCS` on EET, `BDBALDUR.BCS` on
+standalone SoD) with:
+`IF GlobalLT("bd_ddd","global",4) GlobalGT("chapter","global",7) GlobalLT("chapter","global",13)
+THEN SetGlobal("bd_ddd","global",4) Continue()`
+Save-agnostic (catches mid-chain saves at bd_ddd 1–3), works on new playthroughs, never
+touches Beamdog/EET block text (`PLAYER1D.BCS` is EET-generated and extended by Xan/Sirene
+mods on this install — block surgery there would be compat-hostile), and automatically covers
+the orphaned alternate dream chain (BDDDD1AA) on any install variant.
+Mechanical cost of skipping: four guaranteed ambush-proof full-heal rests become normal
+rests — negligible under the 5× ambush reduction. The endgame celebration dream (`BDCUT60`,
+BD4100) runs on its own dialog-launched locals and is unaffected.
 
 ## Minor open question
 Three tavern-rumor lines (`BDRUMOR3`, chapters 8/9/10) mention "a hooded fellow asking about

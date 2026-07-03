@@ -100,6 +100,15 @@ chapter-pass docs only.
   blocks on it. (Lore verified: Caelar's crusade frees her **uncle**, Aun Argent, Order of
   the Aster, who sacrificed himself into Avernus for her.)
 
+## Wave-1 sign-off state (2026-07-03, session 3)
+- `design/wave1/01` rest-ambush 5× sweep: **SIGNED OFF** (as computed; pack size per-chapter).
+- `design/wave1/02` keep-all-companions: **SIGNED OFF**.
+- `design/wave1/03` hooded-man removal: **SIGNED OFF**; the 4 chapter rest-dreams ("very very
+  bad quality") are **skipped** — content documented first for a maybe-someday rewrite.
+- `design/wave1/04` travel ambushes: **deferred** to the per-area chapter passes.
+- `design/wave1/05` XP: calibrate only after testing; first lever = **+~10% main-quest
+  rewards** if the curve comes in low.
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.

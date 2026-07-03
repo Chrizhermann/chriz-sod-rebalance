@@ -1,6 +1,8 @@
 # Wave 1 — Travel-Ambush (URE) Degut
 
-**Status:** awaiting user sign-off. Supersedes the prior-agent proposal `design/05`.
+**Status: DEFERRED (user, 2026-07-03)** — decided per-area during the chapter passes, not as
+a global Wave-1 component. Kept here as the mechanism reference. Supersedes the prior-agent
+proposal `design/05`.
 **Scope:** the worldmap travel-ambush system (wishlist item 8): "kill the huge groups; fill
 with nothing or something more interesting/fun."
 

@@ -1,7 +1,7 @@
 # Wave 1 — Keep All Companions at SoD Start
 
-**Status:** awaiting user sign-off. All script facts below verified against the live install
-(file:line evidence in the session's verification transcripts).
+**Status: SIGNED OFF (user, 2026-07-03).** All script facts below verified against the live
+install (file:line evidence in the session's verification transcripts).
 
 ## Decided (user, 2026-07-03)
 - **Step 1 (this component):** nobody is force-stripped after Sarevok — the whole BG1 party,

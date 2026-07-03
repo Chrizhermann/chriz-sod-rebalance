@@ -29,6 +29,11 @@
 Awards live in **both** `.baf` and `.dlg` (dialogue is the bigger layer) — reweights must
 patch both; scale the award constant, not per-occurrence (reply-branch duplication).
 
+## Calibration stance (user, 2026-07-03)
+Numbers only matter once we test and see results. **First calibration lever if the curve
+comes in low: increase main-quest rewards by a small margin (~10%).** No reweight ships
+before playtesting shows the need.
+
 ## Prep task (before/during the first chapter pass)
 Recount the baseline **per chapter** (attribute every quest award and kill to its chapter)
 so each chapter pass sees its own budget. Tooling goes in `research/scripts/`; the prior

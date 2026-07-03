@@ -1,6 +1,8 @@
 # Wave 1 — Rest-Ambush 5× Reduction
 
-**Status:** awaiting user sign-off. Supersedes the prior-agent proposal `design/01`.
+**Status: SIGNED OFF (user, 2026-07-03)** — sweep as computed below (rounding accepted).
+Pack size (`max`/`difficulty`) stays vanilla in this component; it is decided per-chapter/
+per-map like the zero-ambush areas. Supersedes the prior-agent proposal `design/01`.
 **Scope:** the global sweep only. Per-area zero-ambush decisions come later, chapter by chapter.
 
 ## Decided (user, 2026-07-03)
