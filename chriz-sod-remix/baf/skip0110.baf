@@ -1,0 +1,8 @@
+IF
+  Global("BD_SPAWN_SAFANA","BD0110",0)
+  InPartyAllowDead("safana")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_SPAWN_SAFANA","BD0110",1)
+    Continue()
+END

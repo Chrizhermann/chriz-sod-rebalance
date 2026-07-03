@@ -1,0 +1,17 @@
+IF
+  Global("BD_MINSC","BD0108",0)
+  InPartyAllowDead("minsc")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_MINSC","BD0108",1)
+    Continue()
+END
+
+IF
+  Global("BD_DYNAHEIR","BD0108",0)
+  InPartyAllowDead("dynaheir")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_DYNAHEIR","BD0108",1)
+    Continue()
+END

@@ -1,0 +1,8 @@
+IF
+  Global("bd_jah_spawn","bd7100",0)
+  InPartyAllowDead("jaheira")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_jah_spawn","bd7100",1)
+    Continue()
+END

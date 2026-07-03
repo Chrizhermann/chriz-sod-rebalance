@@ -1,0 +1,194 @@
+BACKUP ~weidu_external/backup/chriz-sod-remix~
+AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
+VERSION ~v0.1.0~
+
+AUTO_TRA ~chriz-sod-remix/languages/%s~
+LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
+
+// ============================================================
+// chriz-sod-remix — Siege of Dragonspear remix/overhaul
+//
+// 100-199: Wave 1 — global system levers
+//   100 rest-ambush felt-rate 5x reduction
+//   110 keep all companions at SoD start
+//   120 hooded man removed from the mid-campaign
+//   130 skip the four chapter rest-dreams
+// 200+:    reserved (chapter passes, ending rework)
+//
+// Design + research: docs/ in the repo. Every component is a
+// tail-installable in-place patch; nothing is uninstalled or
+// replaced wholesale. EET and standalone BG:EE+SoD supported.
+// ============================================================
+
+// ============================================================
+// 100 — Rest-ambush chance: reduce the FELT rate ~5x
+// ============================================================
+// The engine rolls the .are rest-header day/night% PER IN-GAME
+// HOUR, so listed 6-18% is felt 39-80% per 8h rest (see
+// docs/research/01). This patch maps the CURRENT value through
+// felt->felt/5->inverted (lib/restmap.tpa), so it composes with
+// whatever another mod set. BDNOREST pseudo-tables (value 100,
+// "cannot rest here") are excluded by the <100 guard and by the
+// area list itself. Pack size (max/difficulty) is intentionally
+// untouched — that is a per-chapter decision.
+
+BEGIN @100 DESIGNATED 100 GROUP @1000 LABEL ~csr_rest_ambush_5x~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/restmap.tpa~
+
+// The 30 SoD areas with an active, non-BDNOREST random rest table
+// (docs/design/wave1/01, table generated from sod_areas_dataset.csv).
+ACTION_FOR_EACH csr_area IN
+  ~bd0060~ ~bd0061~ ~bd0062~ ~bd0064~ ~bd0066~ ~bd0067~
+  ~bd0113~ ~bd0114~ ~bd0115~ ~bd0120~ ~bd0130~
+  ~bd1000~ ~bd1010~ ~bd1100~ ~bd1200~
+  ~bd2000~ ~bd2010~
+  ~bd4400~ ~bd4500~
+  ~bd5000~ ~bd5100~ ~bd5110~
+  ~bd7000~ ~bd7100~ ~bd7110~ ~bd7200~ ~bd7220~ ~bd7230~ ~bd7300~ ~bd7400~
+BEGIN
+  ACTION_IF (FILE_EXISTS_IN_GAME ~%csr_area%.are~) BEGIN
+    COPY_EXISTING ~%csr_area%.are~ ~override~
+      READ_LONG 0xc0 csr_rest_off
+      PATCH_IF (csr_rest_off > 0) BEGIN
+        READ_SHORT (csr_rest_off + 0x98) csr_cnt   // creature-table entries
+        READ_SHORT (csr_rest_off + 0xa4) csr_max   // max spawned creatures
+        READ_SHORT (csr_rest_off + 0xa6) csr_enab  // enabled flag
+        // engine only ever spawns if count>0 && enabled && max>0
+        PATCH_IF ((csr_cnt > 0) AND (csr_max > 0) AND (csr_enab > 0)) BEGIN
+          READ_SHORT (csr_rest_off + 0xa8) csr_day
+          PATCH_IF ((csr_day > 0) AND (csr_day < 100)) BEGIN
+            WRITE_SHORT (csr_rest_off + 0xa8) $csr_restmap(~%csr_day%~)
+          END
+          READ_SHORT (csr_rest_off + 0xaa) csr_night
+          PATCH_IF ((csr_night > 0) AND (csr_night < 100)) BEGIN
+            WRITE_SHORT (csr_rest_off + 0xaa) $csr_restmap(~%csr_night%~)
+          END
+        END
+      END
+    BUT_ONLY
+  END
+END
+
+// ============================================================
+// 110 — Keep ALL companions at SoD start
+// ============================================================
+// The whole BG1 party transfers into SoD; the strip is 28
+// independent per-NPC blocks in BD0103.bcs (palace guest room,
+// gated BD_PLOT<51): LeaveParty() + DestroySelf(). We remove
+// exactly those two actions per NPC — bdresurr revives, the
+// backpack impound (PlayerChest00, migrates with the camps), the
+// mod-NPC strip blocks (Aura/Bristlelick own their SoD behavior),
+// and the scene block (TextScreen/timeskip/BD_PLOT=51, positions
+// all six sleepers) stay untouched.
+// The SoD recruiter sites fork on BeenInParty and the level-7
+// CREs share the originals' death variables, so kept companions
+// suppress duplicate spawns naturally. 12 revive-existing blocks
+// lack an in-party guard and would MoveGlobal-yank a kept party
+// member (and confiscate Dorn's gear) — each affected area script
+// gets an EXTEND_TOP skip-block that pre-sets the vanilla
+// spawn-guard variable when the NPC is in the party.
+// If a companion is dismissed BEFORE visiting a recruiter site,
+// the vanilla block still fires and correctly rescues the
+// world-copy into the SoD camp system.
+
+BEGIN @110 DESIGNATED 110 GROUP @1000 LABEL ~csr_keep_companions~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0103.bcs~) @9000
+
+COPY_EXISTING ~bd0103.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    PATCH_FOR_EACH csr_npc IN
+      ~kivan~ ~alora~ ~yeslick~ ~coran~ ~ajantis~ ~garrick~ ~faldorn~
+      ~branwen~ ~quayle~ ~xan~ ~skie~ ~eldoth~ ~xzar~ ~montaron~ ~tiax~
+      ~kagain~ ~shar-teel~ ~sharteel~ ~minsc~ ~dynaheir~ ~safana~
+      ~viconia~ ~baeloth~ ~edwin~ ~jaheira~ ~khalid~ ~neera~ ~rasaad~ ~dorn~
+    BEGIN
+      REPLACE_TEXTUALLY ~ActionOverride("%csr_npc%",LeaveParty())~ ~~
+      REPLACE_TEXTUALLY ~ActionOverride("%csr_npc%",DestroySelf())~ ~~
+    END
+  END
+BUT_ONLY
+
+EXTEND_TOP ~bd0101.bcs~ ~chriz-sod-remix/baf/skip0101.baf~   // Viconia
+EXTEND_TOP ~bd0108.bcs~ ~chriz-sod-remix/baf/skip0108.baf~   // Minsc, Dynaheir
+EXTEND_TOP ~bd0110.bcs~ ~chriz-sod-remix/baf/skip0110.baf~   // Safana
+EXTEND_TOP ~bd0111.bcs~ ~chriz-sod-remix/baf/skip0111.baf~   // Rasaad
+EXTEND_TOP ~bd1000.bcs~ ~chriz-sod-remix/baf/skip1000.baf~   // Edwin, Baeloth
+EXTEND_TOP ~bd2000.bcs~ ~chriz-sod-remix/baf/skip2000.baf~   // Khalid, Dorn (+gear grab)
+EXTEND_TOP ~bd2100.bcs~ ~chriz-sod-remix/baf/skip2100.baf~   // Neera
+EXTEND_TOP ~bd7000.bcs~ ~chriz-sod-remix/baf/skip7000.baf~   // Rasaad
+EXTEND_TOP ~bd7100.bcs~ ~chriz-sod-remix/baf/skip7100.baf~   // Jaheira
+
+// ============================================================
+// 120 — Remove the hooded man from the mid-campaign
+// ============================================================
+// All five mid-campaign appearances set nothing the endgame reads
+// (verified corpus-wide). The endgame chain (BD4100 dream, jail,
+// BDIRENI.dlg) is deliberately untouched here — it dies with the
+// ending rework. Per-scene surgery, minimal by design:
+//  BD0103: drop only his CreateCreature — Imoen's farewell chain
+//          is gated on !See("bdireni") and proceeds without him.
+//  BDCUT10: never launch the bdcut11 interrogation vision (the
+//          scene IS the hooded man; XP/chapter/party moves happen
+//          in BDCUT10 before this point).
+//  BDCUT28: keep the Bhaal-vision scene (movie, journals,
+//          bd_plot=295); drop him and end the cutscene where his
+//          dialog would have (the dialog was what ended it).
+//  BD5100: False()-gate his two silent-cameo blocks wholesale
+//          (avoids a stranded SetCutSceneLite).
+//  BDSCRY/BDIMOEN: False()-gate the dangling dialogue options.
+
+BEGIN @120 DESIGNATED 120 GROUP @1000 LABEL ~csr_no_hooded_man_midgame~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0103.bcs~) @9000
+
+COPY_EXISTING ~bd0103.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    REPLACE_TEXTUALLY ~CreateCreature("bdireni",\[300\.515\],W)~ ~~
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bdcut10.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    REPLACE_TEXTUALLY ~StartCutSceneEx("bdcut11",TRUE)~
+~FadeFromColor([20.0],0)
+    EndCutSceneMode()~
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bdcut28.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    REPLACE_TEXTUALLY ~CreateCreature("bdireni",\[650\.1320\],SE)~ ~~
+    REPLACE_TEXTUALLY ~ActionOverride("bdireni",MoveToPoint(\[875\.1490\]))~ ~~
+    REPLACE_TEXTUALLY ~ActionOverride("bdireni",StartDialogNoSet(Player1))~ ~EndCutSceneMode()~
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bd5100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    REPLACE_TEXTUALLY ~Global("bd_unnamed_ugr","bd5100",0)~
+~False()
+  Global("bd_unnamed_ugr","bd5100",0)~
+  END
+BUT_ONLY
+
+COMPILE ~chriz-sod-remix/dlg/csrhood.d~
+
+// ============================================================
+// 130 — Skip the four chapter rest-dreams
+// ============================================================
+// The PLAYER1D.BCS launchers require bd_ddd == 0..3; 4 is the
+// natural post-all-dreams value and bd_ddd/bd_dream_timer have
+// ZERO consumers outside PLAYER1D.BCS (verified exhaustively).
+// BDBALDUR.BCS is the SoD campaign master script on BOTH EET
+// (CAMPAIGN.2DA SOD row) and standalone, and PLAYER1D.BCS itself
+// stays untouched (it is EET-generated and mod-extended — block
+// surgery there would be compat-hostile). Content preserved in
+// docs/research/09-sod-dreams.md for a possible future rewrite.
+// Cost of skipping: those four nights become normal rests
+// (normal healing, normal — now 5x-reduced — ambush rolls).
+
+BEGIN @130 DESIGNATED 130 GROUP @1000 LABEL ~csr_skip_chapter_dreams~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbaldur.bcs~) @9000
+
+EXTEND_TOP ~bdbaldur.bcs~ ~chriz-sod-remix/baf/skipdrm.baf~

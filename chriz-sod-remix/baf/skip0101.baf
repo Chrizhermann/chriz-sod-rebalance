@@ -1,0 +1,8 @@
+IF
+  Global("bd_viconia_spawn","bd0101",0)
+  InPartyAllowDead("viconia")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_viconia_spawn","bd0101",1)
+    Continue()
+END

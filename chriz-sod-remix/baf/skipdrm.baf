@@ -1,0 +1,9 @@
+IF
+  GlobalLT("bd_ddd","GLOBAL",4)
+  GlobalGT("Chapter","GLOBAL",7)
+  GlobalLT("Chapter","GLOBAL",13)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_ddd","GLOBAL",4)
+    Continue()
+END

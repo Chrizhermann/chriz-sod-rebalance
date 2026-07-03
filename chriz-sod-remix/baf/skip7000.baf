@@ -1,0 +1,8 @@
+IF
+  Global("bd_rasaad_spawn","bd7000",0)
+  InPartyAllowDead("rasaad")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_rasaad_spawn","bd7000",1)
+    Continue()
+END

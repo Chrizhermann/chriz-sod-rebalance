@@ -1,0 +1,17 @@
+IF
+  Global("bd_khal_spawn","bd2000",0)
+  InPartyAllowDead("khalid")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_khal_spawn","bd2000",1)
+    Continue()
+END
+
+IF
+  Global("bd_dorn_spawn","bd2000",0)
+  InPartyAllowDead("dorn")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_dorn_spawn","bd2000",1)
+    Continue()
+END

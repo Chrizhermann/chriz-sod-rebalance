@@ -1,0 +1,8 @@
+IF
+  Global("BD_NEERA","BD2100",0)
+  InPartyAllowDead("neera")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_NEERA","BD2100",1)
+    Continue()
+END

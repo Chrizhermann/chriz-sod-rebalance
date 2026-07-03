@@ -1,0 +1,17 @@
+IF
+  Global("bd_edwin_spawn","bd1000",0)
+  InPartyAllowDead("edwin")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_edwin_spawn","bd1000",1)
+    Continue()
+END
+
+IF
+  Global("BD_BAELOTH_SPAWN","BD1000",0)
+  InPartyAllowDead("baeloth")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_BAELOTH_SPAWN","BD1000",1)
+    Continue()
+END
