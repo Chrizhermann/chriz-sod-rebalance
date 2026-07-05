@@ -53,10 +53,9 @@ onto our quest beat and replace the lone under-equipped mage with a designed par
   verified ⊆ her spellbook), gated `FILE_EXISTS_IN_GAME`; without SCS — scripted
   force-buff openers per caster (the vanilla rematch pattern: Stoneskin/MGoI/Mirror
   Image), so the fight is prebuffed on every install.
-- **Named, smaller, more interesting party** — template: the SCS-improved BG1 boss
-  parties (Undercity party before the Temple of Bhaal / Iron Throne top floor: 5-7 named
-  members, one distinct role each, SCS slot pattern per research 10d).
-  *(User phrase "the fight before Irenicus" read as the Undercity party — confirm.)*
+- **Named, smaller, more interesting party** — template CONFIRMED (user, 2026-07-06):
+  the **Undercity party before the Temple of Bhaal** (Rahvin/Haseo/Wudei/Gorf/Shaldrissa/
+  Carston — named members, one distinct role each, SCS slot pattern per research 10d).
 - **Scaling required** (user): v0.1 scales composition via explicit `Difficulty()`
   branches (the engine's only native mechanism for placed fights — the slider itself only
   doubles enemy damage on Insane). Party-level-reactive top-ups: roadmap.
@@ -69,27 +68,26 @@ Fiction that carries the loot: the Fist stored the **confiscated tomb assets in 
 palace treasury** (same room as your impounded gold); her crew **raided it mid-breakout**
 — everything worth keeping from the dungeon is on their bodies when you win.
 
-| # | who | chassis (verified) | level up to | role | carries (= the re-homed loot) |
+Roster locked person-by-person (user, 2026-07-06); Korlasz's exact level still open:
+
+| # | who | chassis (verified) | build (LOCKED) | role | carries (= the re-homed loot) |
 |---|-----|--------------------|------------|------|-------------------------------|
-| 1 | **Korlasz** | BDSHKORL/bdkorlas, Mage 8, HP 32 | Mage ~10, HP ~55 | boss caster; prebuffed; Confusion/Slow/Dire Charm rotation + restored consumables (Minor Globe + Prot. Elemental scrolls, Vocalize, Potion of Clarity — revives 4 dead vanilla AI blocks) | family papers (Sarevok's Notes*, Bhaal Research, her journal + orders), Knave's Robe, Cloak of Protection +1, Bracers AC6, Staff +1 |
-| 2 | **"Mother Hasska"** — cleric of Bhaal, the one who organized the break-out | BDKORME9, C6, plate/shield | Cleric ~9 | frontline anchor; heals/buffs Korlasz; smites | **Helm of Unwavering Purpose**, plate, morningstar, **Wand of the Heavens** (she uses it) |
-| 3 | **"Vhast"** — wizard-slayer bruiser | BDKORME8, F5 | Fighter(WS) ~10 | dives PC casters, miscast pressure | **Sword of Ruin +2** (2-hander) |
-| 4 | **"Sillune"** — shadowdancer | BDSHIS07, T5 | Thief ~9 | backstab + restealth threat | **gem bag**, the gems + ~4,100 gp tomb cash ("grabbed the valuables for the escape") |
-| 5 | **Porios** — the cowardly tomb sentry (existing named NPC, captured too) | BDPORIOS, M5 | Mage ~6 | support caster; panics below ~50% HP and tries to flee — the fight's one soft note, continuity from vanilla | his **Cloak of Minor Arcana** (unique) |
+| 1 | **Korlasz** | BDSHKORL/bdkorlas, Mage 8, HP 32 | Mage **10-12 (OPEN**; Semaj on this install = Mage 12, HP 53 — my rec: 12 = Semaj parity**)** | boss caster; **prebuffs "like a Semaj" — SCS-only** (matching dw#mg brain; no scripted prebuff fallback without SCS, per user); Confusion/Slow/Dire Charm rotation + restored consumables (Minor Globe + Prot. Elemental scrolls, Vocalize, Potion of Clarity — revives 4 dead vanilla AI blocks) | family papers (Sarevok's Notes*, Bhaal Research, her journal + orders), Knave's Robe, Cloak of Protection +1, Bracers AC6, Staff +1 |
+| 2 | **"Mother Hasska"** — cleric of Bhaal, organized the break-out | BDKORME9, C6, plate/shield | Cleric 9 | frontline anchor; heals/buffs Korlasz; smites; **cleric prebuffs like Wudei** (the Temple-of-Bhaal cleric, dw#pr brain) with SCS | **Helm of Unwavering Purpose**, plate, morningstar, **Wand of the Heavens** (she uses it), **treasury key BDKEY10** (raid fiction — verify Ophyllis-subplot interaction at implementation) |
+| 3 | **"Vhast"** | BDKORME8, F5 | **plain Fighter 10** | bruiser; **chugs an oil of speed at fight start** (SCS potion blocks when present — standard SCS behavior; scripted UseItem fallback otherwise) | **Sword of Ruin +2** (2-hander, wielded) |
+| 4 | **"Sillune"** | BDSHIS07, T5 | **plain Thief 9** | backstab + restealth; **3 invisibility potions** arm the restealth cycle | **gem bag**, the gems + ~4,100 gp tomb cash ("grabbed the valuables for the escape") |
+| 5 | **Porios** — the tomb sentry, captured too (existing named NPC) | BDPORIOS, M5 | **Mage 8; NO flee behavior — fights to the end** (user cut the coward beat) | support caster (Mirror Image/Haste/MM) | his **Cloak of Minor Arcana** (unique) |
 | 6 | **"Grit"** — Korlasz's dust-mephit familiar | BDSHKFAM | as-is | harassment, Glitterdust | — |
 
 *BDSHSARE's flag (`BD_SAREVOK_SECRET`, feeds the chapter-10 masks quest) is re-homed onto
 item acquisition (PartyHasItem watcher), not the old BD0130 container.
+**Wand of Fire: DROPPED entirely** (not carried, not loot). **Journal 266701 (assassin
+text): swapped for a new crusade-only .tra line.**
 
 **Scaling draft:** EASY/EASIEST = 1,2,3,5 · NORMAL = all six · HARD = + skeleton-guard
 pair (the cells' previous occupants, raised) · HARDEST = + one elite undead anchor
-(Unsleeping-Guardian tier). Numbers/AI per member to be locked in the person-by-person
-round. Non-casters get SCS generic brains + potions when SCS present; SoD-native stack
-otherwise (cookbook #13).
-
-**OPEN (fight):** wand of Fire — in anyone's hands, as inert loot, or dropped? Treasury
-key detail (does the raid fiction hand the player BDKEY10, and does that collide with the
-Ophyllis gold subplot?). Porios flee = gone forever, or later cameo?
+(Unsleeping-Guardian tier). Non-casters get SCS generic brains + potions when SCS
+present; SoD-native stack otherwise (cookbook #13).
 
 ## 3. Item re-homing — DECIDED
 
@@ -202,13 +200,38 @@ award. Calibrate after playtest per 05-xp-ledger policy.
 - Ships as separate components: dungeon-skip · jailbreak fight · night/council rework ·
   Imoen · celebration (fight/celebration require the skip).
 
+## 9. The hero's personal stake — Caelar's open challenge (user direction, 2026-07-06)
+
+User idea, building on the verified vanilla premise (her agents wanted the Bhaalspawn
+captured alive for the divine blood): instead of the cut covert kidnap attempt, **Caelar
+challenges the Bhaalspawn openly** — a public proclamation that she is coming for the
+hero of Baldur's Gate, no matter what. Why this works better than vanilla:
+- Fixes the exact logic hole the user called out: nobody follows a shining crusader who
+  sends assassins; an **open, honorable demand is on-brand** for a lawful-good aasimar.
+- The chapter-12 blood reveal (Darnas) stays fully intact — she really does need the
+  hero; only the *method* changes from covert to declared. Hephernaan's deception layer
+  is untouched.
+- Gives the MC stakes from minute one and sharpens the council pitch: the dukes send you
+  north partly because *you* are the one she's demanding.
+
+PROPOSED v0.1 delivery (cheap):
+1. **Repurpose the Crusader Pamphlet items** (BDSHPAM1/2 — currently dying with the
+   dungeon) as her posted proclamation with new text naming the Bhaalspawn; readable
+   during the city roam.
+2. **One new council line** (Belt/Eltan references the proclamation) — single .tra
+   addition to the otherwise zero-new-text council.
+3. Roadmap: street-crier vignette; chapter-8 parley rewording (she references her open
+   challenge instead of "the poison my agents sought to use") — parked for that pass;
+   feeds the Caelar arc-treatment doc.
+
+OPEN (stakes): proclamation tone — a demand ("surrender yourself to the crusade / join
+me") vs a warning ("I am coming for you")? And do you learn of it during the roam
+(pamphlet first, council references it — my rec) or first at the council?
+
 ## OPEN — next sparring round
-1. Confirm the fight template reading ("the fight before Irenicus" = the Undercity party
-   before the Temple of Bhaal?).
-2. Roster person-by-person: names, levels, kit per member (§2a is the draft to attack).
-3. Rioters on the 2nd floor: skip for v0.1 (my rec) or keep as flavor fight?
-4. Wand of Fire / treasury-key / Porios-flee details (§2a OPEN).
-5. Sign-off on the §4 cut surface (strangle-by-flag + council re-points + cheap-now
-   removal list) now that research 11a/11b is in.
-6. Journal 266701 QUEST_DONE text mentions the assassins — swap the strref (new .tra
-   line) or accept for v0.1?
+1. Korlasz's level: 10 (user's floor) vs 12 (Semaj parity — my rec; Semaj=M12/HP53
+   verified on this install).
+2. Rioters on the 2nd floor: skip for v0.1 (my rec) or keep as flavor fight?
+3. Sign-off on the §4 cut surface (strangle-by-flag + council re-points + cheap-now
+   removal list).
+4. §9 stakes: proclamation tone + where the player first learns of it.
