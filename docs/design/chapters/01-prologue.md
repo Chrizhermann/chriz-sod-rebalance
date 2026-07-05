@@ -72,7 +72,7 @@ Roster locked person-by-person (user, 2026-07-06); Korlasz's exact level still o
 
 | # | who | chassis (verified) | build (LOCKED) | role | carries (= the re-homed loot) |
 |---|-----|--------------------|------------|------|-------------------------------|
-| 1 | **Korlasz** | BDSHKORL/bdkorlas, Mage 8, HP 32 | Mage **10-12 (OPEN**; Semaj on this install = Mage 12, HP 53 — my rec: 12 = Semaj parity**)** | boss caster; **prebuffs "like a Semaj" — SCS-only** (matching dw#mg brain; no scripted prebuff fallback without SCS, per user); Confusion/Slow/Dire Charm rotation + restored consumables (Minor Globe + Prot. Elemental scrolls, Vocalize, Potion of Clarity — revives 4 dead vanilla AI blocks) | family papers (Sarevok's Notes*, Bhaal Research, her journal + orders), Knave's Robe, Cloak of Protection +1, Bracers AC6, Staff +1 |
+| 1 | **Korlasz** | BDSHKORL/bdkorlas, Mage 8, HP 32 | **Mage 12 (LOCKED** 2026-07-06 — Semaj parity; "more exciting than round 1, below Sarevok-tier"**)** | boss caster; **prebuffs "like a Semaj" — SCS-only** (matching dw#mg brain; no scripted prebuff fallback without SCS, per user); Confusion/Slow/Dire Charm rotation + restored consumables (Minor Globe + Prot. Elemental scrolls, Vocalize, Potion of Clarity — revives 4 dead vanilla AI blocks); **signature sequencer, see below** | family papers (Sarevok's Notes*, Bhaal Research, her journal + orders), Knave's Robe, Cloak of Protection +1, Bracers AC6, Staff +1 |
 | 2 | **"Mother Hasska"** — cleric of Bhaal, organized the break-out | BDKORME9, C6, plate/shield | Cleric 9 | frontline anchor; heals/buffs Korlasz; smites; **cleric prebuffs like Wudei** (the Temple-of-Bhaal cleric, dw#pr brain) with SCS | **Helm of Unwavering Purpose**, plate, morningstar, **Wand of the Heavens** (she uses it), **treasury key BDKEY10** (raid fiction — verify Ophyllis-subplot interaction at implementation) |
 | 3 | **"Vhast"** | BDKORME8, F5 | **plain Fighter 10** | bruiser; **chugs an oil of speed at fight start** (SCS potion blocks when present — standard SCS behavior; scripted UseItem fallback otherwise) | **Sword of Ruin +2** (2-hander, wielded) |
 | 4 | **"Sillune"** | BDSHIS07, T5 | **plain Thief 9** | backstab + restealth; **3 invisibility potions** arm the restealth cycle | **gem bag**, the gems + ~4,100 gp tomb cash ("grabbed the valuables for the escape") |
@@ -88,6 +88,33 @@ text): swapped for a new crusade-only .tra line.**
 pair (the cells' previous occupants, raised) · HARDEST = + one elite undead anchor
 (Unsleeping-Guardian tier). Non-casters get SCS generic brains + potions when SCS
 present; SoD-native stack otherwise (cookbook #13).
+
+### Korlasz's sequencer (verified SCS mechanics, 2026-07-06)
+
+How SCS does it (verified by decompiling Semaj's and Shaldrissa's brains on this
+install): sequencers are **fixed at install time** — the SSL loadout generator grants the
+mage a marker spell (`dw#msN`) and emits a `HaveSpellRES("dw#msN")`-gated block in the
+generated brain that fires the paired combined-SPL `dw#msNB` at the target (plus cosmetic
+force-casts of the components). Not runtime-random, not per-playthrough. And the contents
+are modest at this tier: **Semaj (M12) gets a Minor Sequencer = 2× Color Spray;
+Shaldrissa (M13) gets 2× Larloch's Minor Drain.** So SCS will NOT hand Korlasz anything
+juicy on its own — a hand-picked **full Spell Sequencer (3× ≤L4)** instantly puts her
+above her reference class without breaking tier.
+
+**Design (Option B, recommended):** roll our own the SCS way — marker SPL + combined-SPL
+pair + one HaveSpellRES-gated block mirroring the dw#mg437 pattern, layered on her
+override slot. Fires once at combat start after prebuffs; works both with SCS (on top of
+the assigned dw#mg brain — we simply don't grant any dw#ms token, so no double-fire) and
+without. Content candidates (all within her verified book, standard resrefs → SR-safe by
+composition):
+1. **Control bomb (rec):** Slow + Confusion + Glitterdust — her vanilla AI identity,
+   fight-defining opener, save-counterable.
+2. Alpha strike: 3× Flame Arrow on the squishiest target.
+3. Mixed: Slow + 2× Flame Arrow.
+
+**Per-playthrough randomization: DEFERRED** (user, 2026-07-06 — other mods do
+per-playthrough rolls, too much to plan now). Roadmap note: cheap later via a runtime
+roll among 2-3 sequencer variants at first combat.
 
 ## 3. Item re-homing — DECIDED
 
@@ -152,11 +179,9 @@ assassination block has its own once-flag, so a single new arrival block pre-set
   plot has zero mechanical dependency on the palace night; rewording those three later
   beats is text-only work for their passes. `bdgassa1.spl` is shared by Tiax/Dauston
   scenes — never delete the spell.
-- **Rioters instead of assassins on the 2nd floor:** user floated, undecided. **My
-  recommendation: skip them for v0.1** — rioters inside a guarded palace have the same
-  logic problem as assassins; crusade tension reads better as street/crowd vignettes
-  during the roam (cheap: existing crowd banter pools), roadmap item. The night already
-  has action nearby if the player times the basement visit late.
+- **Rioters instead of assassins on the 2nd floor: SKIPPED (user, 2026-07-06).** The
+  palace night stays quiet; crusade tension moves to street/crowd vignettes during the
+  roam — roadmap item.
 - Crusade premise note (user): SoD's premise is weak; the hero's personal stakes in the
   crusade get brainstormed later as a long-run fix. v0.1 = council pitch as-is minus
   assassination beats.
@@ -224,14 +249,18 @@ PROPOSED v0.1 delivery (cheap):
    challenge instead of "the poison my agents sought to use") — parked for that pass;
    feeds the Caelar arc-treatment doc.
 
-OPEN (stakes): proclamation tone — a demand ("surrender yourself to the crusade / join
-me") vs a warning ("I am coming for you")? And do you learn of it during the roam
+**Public reason (user-confirmed direction, 2026-07-06):** yes — at the surface it's
+simply *because Bhaalspawn*: her proclamation frames the child of Bhaal as necessary to
+her holy campaign ("even the blood of the Lord of Murder can serve the light" framing) —
+honest about the WHAT, silent about the WHY (the portal blood-price stays hidden until
+the Darnas reveal in ch12, unchanged).
+
+OPEN (stakes): proclamation tone — a demand ("come north and stand with the crusade") vs
+a warning ("I am coming for you, willing or no")? And do you learn of it during the roam
 (pamphlet first, council references it — my rec) or first at the council?
 
 ## OPEN — next sparring round
-1. Korlasz's level: 10 (user's floor) vs 12 (Semaj parity — my rec; Semaj=M12/HP53
-   verified on this install).
-2. Rioters on the 2nd floor: skip for v0.1 (my rec) or keep as flavor fight?
-3. Sign-off on the §4 cut surface (strangle-by-flag + council re-points + cheap-now
+1. Sign-off on the §4 cut surface (strangle-by-flag + council re-points + cheap-now
    removal list).
-4. §9 stakes: proclamation tone + where the player first learns of it.
+2. Korlasz's sequencer contents: control bomb (rec) / alpha strike / mixed (§2a).
+3. §9 stakes: proclamation tone + where the player first learns of it.
