@@ -23,7 +23,7 @@ Tooling: `scratchpad/palace_scan.py` (ARE parser: names via dialog.tlk, WED size
 - BD0121 — **Sorcerous Sundries** interior (71 actors; Halbazzer etc.), exits to BD0020 or crowd-copy BD0112; BD0122 = its back/potion room (black-market scene spawns bdkag/bdsethyl/bdyashna/bdwistak).
 - Streets: BD0020 (130 actors; Elfsong+Sundries doors; map edge), BD0030 (50; FF HQ door), BD0040 (114; Kegs door), BD0050 (103; Iron Throne door; 3 map edges).
 - **Cutscene-only crowd duplicates** (no travel regions/entrances): **BD0021** — departure-gate street, **385 crowd actors**, catches bd_plot 60-63; **BD0035** — the chapter-13 **public trial plaza** (BDBELT.d trial states all `AreaCheck("bd0035")`); **BD0112** — chapter-13 arrest-parade street (BDCUT61*, BDCHAINS).
-- **BD0118 — an UNUSED duplicate of the BD0100 palace hall** (wed=BD0100, 4 entrances, 3 doors, **zero actors/regions, empty script**; only referenced as an exclusion in BDBALDUR.baf:1656). **BD0119 does not exist** (no .are).
+- **BD0118 — a near-unused duplicate of the BD0100 palace hall** (wed=BD0100, 4 entrances, 3 doors, **zero actors/regions, empty script**; referenced as an exclusion in BDBALDUR.baf:1656). **CORRECTION (research 11b):** not fully unused — the chapter-12 scrying vision (`BDSCRY01.baf`) teleports the party here and stages Imoen + Liia; custom set-pieces must coordinate with that one tenant. **BD0119 does not exist** (no .are).
 - Tomb: BD0120↔BD0130 form a **closed loop** (stairs + rope only); no city-side travel region — after BDCUT00Z the tomb is unreachable except by script. (Also corrects 02a: BD0113→BD5100, BD0114→BD7200, BD0115→BD7000 — later-chapter caves, not the prologue tomb.)
 
 ## 2. Night assassination (bdgass1–4) — exact chain and every consumer
