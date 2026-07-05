@@ -23,6 +23,15 @@ areas, XP ledger updates all decided there). **Implementation/testing happens on
 game copy** (user maintains copies; dev-target path TBD) — never on the live install below.
 The user works sparring-style: no unsolicited decisions; designs list DECIDED vs OPEN.
 
+## Install matrix
+- **Dev/test target (install + test mods HERE):**
+  `C:\Games\Baldur's Gate II Enhanced Edition modded - dev eet install\` — clone of the live
+  install (417 WeiDU entries). Tail-install after the last log entry, same rules as live.
+- **Clean installs (later compat/hardening tests only):**
+  `C:\Games\Baldur's Gate Enhanced Edition modded - dev clean install\` (BG1:EE) and
+  `C:\Games\Baldur's Gate II Enhanced Edition modded - dev clean install\` (BG2:EE).
+- **Live install (read-only reference, do NOT modify without explicit sign-off):**
+
 ## Target install (read-only reference, do NOT modify without sign-off)
 - Game dir: `C:\Games\Baldur's Gate II Enhanced Edition modded\`
 - Launched via `InfinityLoader.exe` (EEex). WeiDU: `weidu.exe` (v24600) in game dir.
