@@ -36,6 +36,14 @@ THEN
     AddJournalEntry(267494,QUEST)
     // the bedtime servant (role a: "retire for the night?" — dlg/csrserv.d)
     CreateCreature("csrserv",[666.587],S)
+    // Close the dungeon-exit cutscene. BDCUT00Z never calls EndCutSceneMode —
+    // in vanilla the palace-night block's Imoen dialog ended cutscene mode
+    // (cookbook #6), and this component defers that block behind CSR_BEDTIME.
+    // Safe here: BDCUT00Z's action list (gold impound, SAFEHOUSE, all six
+    // LeaveAreaLUA) has fully executed by the first BD0103 pass — Player1's
+    // move is its last action. No-op when arriving outside a cutscene.
+    FadeFromColor([30.0],0)
+    EndCutSceneMode()
     Continue()
 END
 

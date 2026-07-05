@@ -1,0 +1,13 @@
+// chriz-sod-remix component 140 — instant black cover on BD0120 landing.
+// BDSODTRN fades to black before MoveToCampaign, but the fade does not
+// survive the campaign load: BD0120 renders normally until the first script
+// pass. EXTEND_TOP makes this the first ACTION of that pass, instead of the
+// launcher's fade which sits below ~5500 lines of bootstrap in the same
+// pass — cuts the visible dungeon flash to area-load time only.
+IF
+  GlobalLT("bd_plot","GLOBAL",2)
+THEN
+  RESPONSE #100
+    FadeToColor([1.0],0)
+    Continue()
+END

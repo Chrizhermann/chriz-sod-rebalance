@@ -220,6 +220,12 @@ BUT_ONLY
 // response — no interference.
 EXTEND_BOTTOM ~bd0120.bcs~ ~chriz-sod-remix/baf/exit0120.baf~
 
+// Instant black cover on landing: BDSODTRN's pre-MoveToCampaign fade does
+// not survive the campaign load, so BD0120 renders visibly until a script
+// fades it. EXTEND_TOP makes the fade the FIRST action of the first pass
+// (the vanilla launcher's fade sits below ~5500 bootstrap lines).
+EXTEND_TOP ~bd0120.bcs~ ~chriz-sod-remix/baf/blk0120.baf~
+
 // ------------------------------------------------------------
 // Ground piles: BDSODTRN copy target BD0120 -> BD0103
 // ------------------------------------------------------------
