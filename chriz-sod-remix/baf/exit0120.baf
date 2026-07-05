@@ -1,10 +1,19 @@
+// chriz-sod-remix component 140 — the deterministic dungeon exit.
+// ONE-SHOT and minimal, mirroring how vanilla itself launches this cutscene
+// (BDIMOEN farewell action list = a bare StartCutSceneEx("bdcut00z",FALSE)).
+// The earlier launcher-recipe version (ClearAllActions + StartCutSceneMode +
+// StartCutSceneEx, un-flagged) re-fired on every BD0120 pass during
+// bdcut00z's internal waits: each re-fire killed the running cutscene's
+// action queue and stacked another StartCutSceneMode — un-endable by the
+// single EndCutSceneMode at the palace (playtest soft-lock #2).
+// bdcut00z itself owns the gold impound, BD_SAFEHOUSE_DONE and the party
+// move to BD0103 — never reimplemented here.
 IF
   Global("bd_plot","global",50)
+  Global("CSR_EXIT0120","GLOBAL",0)
 THEN
   RESPONSE #100
+    SetGlobal("CSR_EXIT0120","GLOBAL",1)
     FadeToColor([1.0],0)
-    ClearAllActions()
-    SetCutSceneLite(FALSE)
-    StartCutSceneMode()
     StartCutSceneEx("bdcut00z",FALSE)
 END
