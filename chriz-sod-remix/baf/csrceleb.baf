@@ -1,0 +1,25 @@
+IF
+  Global("BD_PLOT","GLOBAL",50)
+  Global("CSR_CELEB","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_CELEB","GLOBAL",1)
+    StartCutSceneMode()
+    PlaySound("AMBDLCHE")
+    CreateCreature("BDLIIA",[919.722],NW)
+    CreateCreature("BDBELT",[680.390],NE)
+    ActionOverride("BDLIIA",SetDialogue("csrcele"))
+    ActionOverride(Player1,MoveToPoint([719.491]))
+    MoveViewPoint([719.491],BD_NORMAL)
+    SmallWait(8)
+    ActionOverride("BDBELT",FaceObject(Player1))
+    ActionOverride("BDLIIA",MoveToPoint([792.499]))
+    ActionOverride("BDBELT",MoveToPoint([712.438]))
+    Wait(2)
+    PlaySound("AMBDLCHE")
+    ActionOverride("BDLIIA",FaceObject(Player1))
+    ActionOverride("BDBELT",FaceObject(Player1))
+    SmallWait(3)
+    ActionOverride("BDLIIA",StartDialogNoSet(Player1))
+    Continue()
+END

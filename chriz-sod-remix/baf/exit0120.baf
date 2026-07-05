@@ -1,0 +1,10 @@
+IF
+  Global("bd_plot","global",50)
+THEN
+  RESPONSE #100
+    FadeToColor([1.0],0)
+    ClearAllActions()
+    SetCutSceneLite(FALSE)
+    StartCutSceneMode()
+    StartCutSceneEx("bdcut00z",FALSE)
+END

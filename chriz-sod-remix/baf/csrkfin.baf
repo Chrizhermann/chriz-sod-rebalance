@@ -1,0 +1,71 @@
+// chriz-sod-remix component 170 - csrkfin: jailbreak-crew group sync (override slot on
+// csrhass/csrvhas/csrsill/csrpori/csrgrit). Adaptation of vanilla BDSHKFIN.baf (the
+// BD0130 bodyguard sync, research 10d section 2): the crew idles NEUTRAL until Korlasz
+// turns hostile or dies, then everyone goes Enemy()+Help() as one group; attacking any
+// of them starts the fight for all.
+// Changes vs BDSHKFIN (each is load-bearing):
+//  - Global("BD_Korlasz_Fight","BD0130",...) re-scoped to CSR_JB_FIGHT/GLOBAL - the
+//    vanilla flag belongs to the (skipped) BD0130 fight.
+//  - the Global("BD_KORLASZ_SURRENDER","GLOBAL",0) gates are DROPPED: component 140
+//    sets that global to 1 as the canonical dungeon outcome, which would permanently
+//    disarm the vanilla blocks (verified BDSHKFIN.baf:17,29,38).
+//  - vanilla block 1 (force back to NEUTRAL pre-fight) is replaced by a NoAction()
+//    parking block at the END: while peacefully neutral it stops the lower-slot SCS
+//    brains (class dw#gpsht / default dw1mel*) from acting - the documented fix for
+//    SCS genai firing on neutral scripted encounters (bg-modding scs-compatibility.md,
+//    "GenAI Default Script Assignment Breaks Scripted Encounters").
+// "BDKORLAS" here is csrkorl's death variable (kept from the chassis by design - all
+// downstream BD0116 consumers key on it).
+
+// attacked while neutral -> the whole crew fights (BDSHKFIN.baf:37-49)
+IF
+  Global("CSR_JB_FIGHT","GLOBAL",0)
+  Allegiance(Myself,NEUTRAL)
+  IsActive(Myself)
+  OR(2)
+    AttackedBy([GOODCUTOFF],DEFAULT)
+    TookDamage()
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_FIGHT","GLOBAL",1)
+    Enemy()
+END
+
+// Korlasz hostile or dead -> join her (BDSHKFIN.baf:11-25 minus the SURRENDER gate)
+IF
+  OR(2)
+    Allegiance("BDKORLAS",EVILCUTOFF)
+    Dead("BDKORLAS")
+  !Allegiance(Myself,EVILCUTOFF)
+  IsActive(Myself)
+THEN
+  RESPONSE #100
+    SetGlobal("BD_Engaged","LOCALS",1)
+    SetGlobalTimer("BD_Rest","LOCALS",EIGHT_HOURS)
+    SetGlobal("CSR_JB_FIGHT","GLOBAL",1)
+    Enemy()
+    Help()
+    Continue()
+END
+
+// fight already flagged -> stragglers turn hostile (BDSHKFIN.baf:27-35)
+IF
+  Global("CSR_JB_FIGHT","GLOBAL",1)
+  !Allegiance(Myself,EVILCUTOFF)
+  IsActive(Myself)
+THEN
+  RESPONSE #100
+    Enemy()
+END
+
+// park while peacefully neutral: first-match-wins across all script slots, so this
+// suppresses class/default brains until the fight is on (see header comment)
+IF
+  Global("CSR_JB_FIGHT","GLOBAL",0)
+  Allegiance(Myself,NEUTRAL)
+  !Allegiance("BDKORLAS",EVILCUTOFF)
+  !Dead("BDKORLAS")
+THEN
+  RESPONSE #100
+    NoAction()
+END

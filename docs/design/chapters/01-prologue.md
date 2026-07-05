@@ -1,9 +1,15 @@
 # Chapter Pass — Prologue (Korlasz dungeon + Baldur's Gate city opening)
 
-**Status: v2 after sparring round 1 (2026-07-05).** Most of the shape is DECIDED; the
-Korlasz roster is a DRAFT to be discussed person-by-person; council-seam mechanics and the
-assassination-mention sweep are being verified (results → `docs/research/11*`).
-Research basis: `docs/research/10a–10d`. Builds on installed components 110/120.
+**Status: IMPLEMENTED as components 140-180 (v0.2.0), installed on the dev EET copy
+2026-07-06, file-level verification green (24/24 markers + resource/CRE read-back).
+IN-GAME PLAYTEST PENDING.** All design decisions below are user-locked through sparring
+rounds 1-4 (2026-07-05/06). Research basis: `docs/research/10a-11b`.
+Implementation deviations approved during build: (a) comp 140 exits via an
+EXTEND_BOTTOM block on bd0120.bcs (bd_plot=50 → bdcut00z) instead of a direct cutscene
+chain — required so EET fresh-start Bhaalspawn-ability grants still fire; (b) comp 150
+gates three transitions beyond the 11b list (BDBELT 40 t2, BDRASAAD 28.0/32.1/36.0,
+BDDYNAHE 23 t1) to avoid dialog dead-ends — pending user sign-off; (c) sequencer =
+Slow + Confusion (SPWI401, not the spec's typo SPWI410) + Glitterdust.
 
 ---
 

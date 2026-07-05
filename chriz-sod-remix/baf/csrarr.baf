@@ -1,0 +1,56 @@
+// chriz-sod-remix component 150 — BD0103 arrival block (EXTEND_TOP).
+// Strangle-by-flag (docs/research/11a §3A): pre-set the vanilla once-flags
+// that gate every assassination block, so none of them ever fires. Runs on
+// the first script pass after the party lands (bd_plot=50 from bdcut00z);
+// Continue() so the K#/mod bootstrap blocks still run in the same pass.
+IF
+  GlobalLT("BD_PLOT","GLOBAL",51)
+  Global("CSR_ARRIVE","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_ARRIVE","GLOBAL",1)
+    // suite exits are DEACTIVATED in the ARE (flags 0x704); only the cut
+    // Liia triage scene opened them in vanilla (11a §3)
+    TriggerActivation("TranBD0100a",TRUE)
+    TriggerActivation("TranBD0100b",TRUE)
+    // parks every bd_001_plot LT/EQ trigger, incl. all of placed Imoen's
+    // vanilla dialog states (component 160 gives her new ones)
+    SetGlobal("bd_001_plot","bd0103",10)
+    // BDCUT02 launcher has NO plot gate and sits at the living-room
+    // center [666.587] — first stroll would fire the assassination (11b (d)1)
+    SetGlobal("BD_INTRO_IMOEN_CUT","BD0103",1)
+    // kills the dead-Imoen dressing block (plot 52-53)
+    SetGlobal("bd_imoen_bed","bd0103",1)
+    // kills the Hooded-Man bedside-morning block (needs MDD007=0) AND
+    // pre-arms the Skie 3 a.m. scene (needs MDD007=2) — zero trigger
+    // edits needed there (11a §4b)
+    SetGlobal("BD_MDD007","BD0103",2)
+    // kills the BD0100 hall assassin-wave block (CloseDoor + bdgass1-3)
+    SetGlobal("BD_ORIGINAL_ASSASSIN_INTRO","BD0100",1)
+    // selects the Liia-first council variants V3/V4 (11a §2)
+    SetGlobal("BD_HELPED_KILL_ASSASSINS","GLOBAL",1)
+    // Treasury Note + impounded-gold journal, moved here from the night
+    // block — the only pointer to the confiscated gold, and the basement
+    // errand it creates walks the player toward the jailbreak (11b (d)7)
+    GiveItemCreate("bdscrl04",Player1,0,0,0)
+    AddJournalEntry(267494,QUEST)
+    // the bedtime servant (role a: "retire for the night?" — dlg/csrserv.d)
+    CreateCreature("csrserv",[666.587],S)
+    Continue()
+END
+
+// Murder-proofing: if the player kills the servant before choosing to
+// retire, CSR_BEDTIME could never be set and the prologue would soft-lock
+// at bd_plot=50. Replace her once (bddest also clears the corpse).
+IF
+  GlobalLT("BD_PLOT","GLOBAL",51)
+  Global("CSR_BEDTIME","GLOBAL",0)
+  Global("CSR_SERV_RESPAWN","GLOBAL",0)
+  Dead("csrserv")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SERV_RESPAWN","GLOBAL",1)
+    ApplySpellRES("bddest","csrserv")
+    CreateCreature("csrserv",[666.587],S)
+    Continue()
+END

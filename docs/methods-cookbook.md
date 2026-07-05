@@ -101,7 +101,20 @@ Scale composition with explicit `Difficulty()` branches (engine slider never buf
 creatures; Insane only doubles enemy damage). Cheap upgrade: give bosses the consumables
 their vanilla AI already references — often shipped itemless.
 
-## 14. Live-save semantics (recurring caveat)
+## 14. WeiDU tra/variable landmines (proved the hard way: prologue build, v0.2.0)
+- `%MOD_FOLDER%` is NOT the mod's folder on WeiDU 24600 — it resolved to
+  `weidu_external` at install time. Big mods (SCS) define it themselves before use.
+  In this mod: always write literal `chriz-sod-remix/...` paths in tpa bodies.
+- `COMPILE`/`EXTEND_TOP` of `.d`/`.baf` files take their `@ref` strings from
+  **AUTO_TRA** (looks up `languages/<lang>/<source-basename>.tra`) or an explicit
+  `USING` clause — NEVER from tp2-level `LOAD_TRA`. With our `AUTO_TRA` header, every
+  compiled source that uses `@refs` needs a matching `languages/english/<basename>.tra`
+  (a copy of the component tra is fine). `LOAD_TRA` still needed for @refs used in
+  tpa code itself (SAY, RESOLVE_STR_REF).
+- WeiDU decompiles (`weidu file.bcs`) land in the CURRENT WORKING DIRECTORY and
+  ignore `--out` for positional args — run with cwd in a scratch dir, never the game root.
+
+## 15. Live-save semantics (recurring caveat)
 `.are` rest-header/actor changes: only areas NOT yet visited on that save. `.bcs`/`.dlg`:
 next area (re)load; scenes whose gate global already advanced never re-fire (usually the
 desired behavior). `.cre`: newly spawned instances only; joined companions are baked into

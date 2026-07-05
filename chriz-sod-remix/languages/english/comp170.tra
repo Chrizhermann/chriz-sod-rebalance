@@ -1,0 +1,18 @@
+// chriz-sod-remix component 170 - the Korlasz jailbreak
+
+// component name (mirrored here for reference; the tp2 BEGIN uses a literal)
+@17000 = ~SoD remix: prologue - the Korlasz jailbreak~
+
+// jailbreak crew names (design docs/design/chapters/01-prologue.md section 2a;
+// csrkorl keeps the chassis name "Korlasz", csrpori keeps "Porios",
+// csrfistd keeps "Flaming Fist Enforcer")
+@17001 = ~Mother Hasska~
+@17002 = ~Vhast~
+@17003 = ~Sillune~
+@17004 = ~Grit~
+
+// the dying guard's one line at the stairs-top hint beat
+@17005 = ~Korlasz... she's loose... her followers came for her... the cells... get help...~
+
+// name of the signature sequencer pair (shown as her casting string)
+@17012 = ~Spell Sequencer~

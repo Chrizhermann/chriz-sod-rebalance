@@ -1,0 +1,402 @@
+// ============================================================
+// Component 170 — Prologue: the Korlasz jailbreak (body)
+// ============================================================
+// Design: docs/design/chapters/01-prologue.md §2/§2a (roster LOCKED) + §3.
+// Research ground truth: docs/research/10a (items), 10c §5 (staging), 10d
+// (Korlasz anatomy + SCS pattern), 11a §5 (hint assets). All surgical edits
+// below cite their evidence line.
+//
+// Shape: the vanilla BD0116 jailbreak scaffolding (cell spawn → TrapBDKorlasz
+// → BD_KORLAS_FREED → BDKORLAS.baf breakout → BDCUTKOR → dialog states 24-27
+// → Enemy() + BD_SPAWN_KORLASZ=2 → journal 261627) is kept VERBATIM; we only
+// (a) swap the under-equipped cell clone for the rebuilt csrkorl,
+// (b) spawn her jailbreak crew on the same flag, difficulty-branched,
+// (c) re-time the trigger onto a stairs-top hint beat in BD0102,
+// (d) re-home the BD_SAREVOK_SECRET setter from the skipped dungeon.
+// SCS integration is detect-and-adapt per creature (cookbook #13): every SCS
+// script assignment is FILE_EXISTS_IN_GAME-guarded with the SoD-native stack
+// as fallback, so the fight is complete on every install.
+
+LOAD_TRA ~chriz-sod-remix/languages/english/comp170.tra~
+
+// ------------------------------------------------------------
+// 0. Loud preconditions: every game resource this component wires up must
+//    exist NOW — a missing chassis/spell/item must abort the install, not
+//    produce a silently broken fight.
+// ------------------------------------------------------------
+ACTION_FOR_EACH csr_req IN
+  ~bd0116.bcs~ ~bd0102.bcs~ ~bdkorlas.dlg~ ~bdkorlas.bcs~ ~bdcutkor.bcs~
+  ~bdkorlas.cre~ ~bdkorme9.cre~ ~bdkorme8.cre~ ~bdshis07.cre~ ~bdporios.cre~
+  ~bdshkfam.cre~ ~bdfist1b.cre~ ~bdskgr03.cre~ ~bdunslgu.cre~
+  ~spwi312.spl~ ~spwi401.spl~ ~spwi224.spl~ ~spwi303.spl~ ~spwi305.spl~
+  ~spwi406.spl~ ~spwi408.spl~ ~spwi505.spl~ ~spwi507.spl~ ~spwi508.spl~
+  ~spwi522.spl~ ~spwi609.spl~
+  ~sppr315.spl~ ~sppr401.spl~ ~sppr403.spl~ ~sppr405.spl~ ~sppr413.spl~
+  ~sppr503.spl~ ~sppr508.spl~
+  ~bdshsare.itm~ ~bdshbhr.itm~ ~bdshkorj.itm~ ~bdshkoro.itm~
+  ~clck12.itm~ ~clck01.itm~ ~bdbrac13.itm~ ~staf02.itm~
+  ~scrl1z.itm~ ~scrl6h.itm~ ~scrl3g.itm~ ~potn21.itm~
+  ~bdhelm10.itm~ ~bdkey10.itm~ ~bdsw2h03.itm~ ~potn14.itm~ ~potn10.itm~
+  ~misc07.itm~ ~misc25.itm~ ~misc43.itm~
+BEGIN
+  ACTION_IF !(FILE_EXISTS_IN_GAME ~%csr_req%~) BEGIN
+    FAIL ~chriz-sod-remix #170: required game resource %csr_req% is missing — refusing to install a broken jailbreak.~
+  END
+END
+
+// ------------------------------------------------------------
+// 1. SCS detect-and-adapt, per creature (research 10d §3: slot recipe is
+//    override=coordination, class=dw#gpsht, default=combat brain; dw#NNN
+//    numbering is install-generated, hence per-script existence guards).
+//    Fallback = the SoD-native stack the chassis already use.
+// ------------------------------------------------------------
+ACTION_IF ((FILE_EXISTS_IN_GAME ~dw#gpsht.bcs~) AND (FILE_EXISTS_IN_GAME ~dw#mg437.bcs~)) BEGIN
+  OUTER_SET csr_scs_korl = 1        // Semaj's generated brain: prebuffs + full book use
+  OUTER_SPRINT csr_korl_cls ~dw#gpsht~
+  OUTER_SPRINT csr_korl_rac ~csrkorls~
+  OUTER_SPRINT csr_korl_def ~dw#mg437~
+END ELSE BEGIN
+  OUTER_SET csr_scs_korl = 0
+  OUTER_SPRINT csr_korl_cls ~BDENSHTV~
+  OUTER_SPRINT csr_korl_rac ~csrkorlb~
+  OUTER_SPRINT csr_korl_def ~~
+END
+
+ACTION_IF ((FILE_EXISTS_IN_GAME ~dw#gpsht.bcs~) AND (FILE_EXISTS_IN_GAME ~dw#pr303.bcs~)) BEGIN
+  OUTER_SPRINT csr_hass_cls ~dw#gpsht~  // Wudei's generated priest brain (10d: Undercity roster)
+  OUTER_SPRINT csr_hass_gen ~BDSHTAUN~
+  OUTER_SPRINT csr_hass_def ~dw#pr303~
+END ELSE BEGIN
+  OUTER_SPRINT csr_hass_cls ~BDENSHTV~
+  OUTER_SPRINT csr_hass_gen ~BDSHTAUN~
+  OUTER_SPRINT csr_hass_def ~BDPRI00~   // chassis default: SoD generic priest brain
+END
+
+ACTION_IF ((FILE_EXISTS_IN_GAME ~dw#gpsht.bcs~) AND (FILE_EXISTS_IN_GAME ~dw1melge.bcs~)) BEGIN
+  OUTER_SPRINT csr_vhas_cls ~dw#gpsht~
+  OUTER_SPRINT csr_vhas_def ~dw1melge~  // SCS generic melee brain
+END ELSE BEGIN
+  OUTER_SPRINT csr_vhas_cls ~BDENSHTV~
+  OUTER_SPRINT csr_vhas_def ~BDFIG00~   // SoD generic fighter brain (chassis BDARCH00 is
+END                                     // the dart-thrower brain; he wields a 2-hander now)
+
+ACTION_IF ((FILE_EXISTS_IN_GAME ~dw#gpsht.bcs~) AND (FILE_EXISTS_IN_GAME ~dw1melth.bcs~)) BEGIN
+  OUTER_SPRINT csr_sill_cls ~dw#gpsht~
+  OUTER_SPRINT csr_sill_def ~dw1melth~  // SCS thief brain (Thaldorn model, 10d §3)
+END ELSE BEGIN
+  OUTER_SPRINT csr_sill_cls ~BDENSHTV~
+  OUTER_SPRINT csr_sill_def ~BDTHF00~   // chassis default: SoD generic thief brain
+END
+
+ACTION_IF ((FILE_EXISTS_IN_GAME ~dw#gpsht.bcs~) AND (FILE_EXISTS_IN_GAME ~dw#mg13.bcs~)) BEGIN
+  OUTER_SPRINT csr_pori_cls ~dw#gpsht~
+  OUTER_SPRINT csr_pori_rac ~~
+  OUTER_SPRINT csr_pori_def ~dw#mg13~   // Alai's brain: prebuff set ⊆ mage books here (10d §3)
+END ELSE BEGIN
+  OUTER_SPRINT csr_pori_cls ~BDENSHTV~
+  OUTER_SPRINT csr_pori_rac ~csrkorlb~  // shared fallback brain — every cast HaveSpell-guarded
+  OUTER_SPRINT csr_pori_def ~~
+END
+
+// ------------------------------------------------------------
+// 2. The signature sequencer (design §2a, option 1 "control bomb": Slow +
+//    Confusion + Glitterdust — all three verified IN her spellbook; standard
+//    resrefs, so whatever Spell Revisions made them is what fires).
+//    Binary pair generated by research/scripts/build_csrseq_spl.py as an
+//    exact structural mirror of SCS's dw#ms3/dw#ms3B (dumped from the dev
+//    install), minus the delayed op171 re-grant: a full 3-spell sequencer
+//    must fire once per fight, not re-arm.
+// ------------------------------------------------------------
+COPY ~chriz-sod-remix/spl/csrseq1.spl~  ~override~
+  SAY 0x08 @17012
+COPY ~chriz-sod-remix/spl/csrseq1b.spl~ ~override~
+  SAY 0x08 @17012
+
+// ------------------------------------------------------------
+// 3. Scripts. csrkorls uses SCS-only IDS symbols (DO_NOT_TARGET_SPELLS) and
+//    is only compiled — and only referenced — in the SCS branch.
+// ------------------------------------------------------------
+COMPILE ~chriz-sod-remix/baf/csrkfin.baf~   // crew group-sync (BDSHKFIN adaptation)
+COMPILE ~chriz-sod-remix/baf/csrkorlb.baf~  // no-SCS brain (BDSHKORL port + sequencer)
+COMPILE ~chriz-sod-remix/baf/csrvhasb.baf~  // Vhast's oil-of-speed opener
+ACTION_IF (csr_scs_korl = 1) BEGIN
+  COMPILE ~chriz-sod-remix/baf/csrkorls.baf~
+END
+
+// ------------------------------------------------------------
+// 4. The creatures. All built at install from the verified SoD chassis so
+//    later CRE-wide mod patches (Artisan class effects etc.) are inherited.
+//    Level/THAC0/save numbers follow the 2e class tables for the new levels.
+// ------------------------------------------------------------
+
+// --- csrkorl: Korlasz, Mage 12 (LOCKED: Semaj parity) -------------------
+// Chassis bdkorlas.cre = the BD0116 surrender clone (Mage 8, HP 32, NEUTRAL,
+// deathvar/dialog BDKORLAS — BOTH KEPT: every downstream consumer keys on
+// them, research 10d §1). XP 2500→4500: Semaj (M12) is worth 3000; she adds
+// a full sequencer, restored consumables and real gear — above Semaj, below
+// the 6000+ boss tier ("more exciting than round 1, below Sarevok-tier").
+COPY_EXISTING ~bdkorlas.cre~ ~override/csrkorl.cre~
+  PATCH_IF ((BYTE_AT 0x273) != 1) BEGIN  // class byte must be MAGE
+    PATCH_FAIL ~chriz-sod-remix #170: bdkorlas.cre is not the expected Mage chassis — aborting.~
+  END
+  WRITE_LONG  0x14 4500                 // XP value
+  WRITE_SHORT 0x24 55                   // current HP
+  WRITE_SHORT 0x26 55                   // max HP
+  WRITE_BYTE  0x52 17                   // THAC0, wizard L12
+  WRITE_BYTE  0x54 11                   // save vs death   (wizard 11-15)
+  WRITE_BYTE  0x55 7                    // save vs wands
+  WRITE_BYTE  0x56 9                    // save vs polymorph
+  WRITE_BYTE  0x57 11                   // save vs breath
+  WRITE_BYTE  0x58 8                    // save vs spells
+  WRITE_BYTE  0x234 12                  // Mage 12, generalist kit kept
+  WRITE_ASCIIE 0x250 ~%csr_korl_cls%~ #8
+  WRITE_ASCIIE 0x258 ~%csr_korl_rac%~ #8
+  WRITE_ASCIIE 0x268 ~%csr_korl_def%~ #8
+  // override slot stays BDKORLAS: it owns the breakout cutscene + dialog funnel
+  // spellbook: vanilla book extended sanely to L5/L6 (M12 slots 4/4/4/4/4/1);
+  // memorization emphasizes Slow/Confusion/Dire Charm/Flame Arrow/Stoneskin/
+  // Mirror Image per the locked design row
+  ADD_MEMORIZED_SPELL ~spwi212~ #1 wizard (1)  // Mirror Image ×2 total
+  ADD_MEMORIZED_SPELL ~spwi303~ #2 wizard (1)  // Flame Arrow
+  ADD_MEMORIZED_SPELL ~spwi401~ #3 wizard (1)  // Confusion ×2 total
+  ADD_MEMORIZED_SPELL ~spwi406~ #3 wizard (1)  // Minor Globe of Invulnerability
+  ADD_MEMORIZED_SPELL ~spwi507~ #4 wizard (2)  // Hold Monster ×2 (vanilla+SR same slot)
+  ADD_MEMORIZED_SPELL ~spwi508~ #4 wizard (1)  // Chaos (vanilla) / Waves of Fatigue (SR)
+  ADD_MEMORIZED_SPELL ~spwi522~ #4 wizard (1)  // Minor Spell Turning (vanilla) / Spell Deflection (SR)
+  ADD_MEMORIZED_SPELL ~spwi609~ #5 wizard (1)  // True Sight/Seeing — her one L6 slot
+  ADD_KNOWN_SPELL     ~spwi505~ #4 wizard      // Shadow Door, known only
+  ADD_MEMORIZED_SPELL ~csrseq1~ #0 innate (1)  // the sequencer marker (HaveSpellRES hook)
+  // restored consumables — revives her four dead vanilla AI scroll/potion
+  // blocks (research 10d §1: dead code on this install because SCS #6100 left
+  // her itemless); loot = the re-homed family papers + her BD0130 kit (10a §2)
+  ADD_CRE_ITEM ~scrl1z~   #1 #0 #0 ~IDENTIFIED~ ~inv~     // Minor Globe scroll
+  ADD_CRE_ITEM ~scrl6h~   #1 #0 #0 ~IDENTIFIED~ ~inv~     // Prot. from Elemental Energy
+  ADD_CRE_ITEM ~scrl3g~   #1 #0 #0 ~IDENTIFIED~ ~inv~     // Vocalize
+  ADD_CRE_ITEM ~potn21~   #1 #0 #0 ~IDENTIFIED~ ~QITEM~   // Potion of Clarity (usable slot)
+  ADD_CRE_ITEM ~bdshsare~ #0 #0 #0 ~IDENTIFIED~ ~inv~     // Page from Sarevok's Notes (P1)
+  ADD_CRE_ITEM ~bdshbhr~  #0 #0 #0 ~IDENTIFIED~ ~inv~     // Bhaal Research (P1)
+  ADD_CRE_ITEM ~bdshkorj~ #0 #0 #0 ~IDENTIFIED~ ~inv~     // Korlasz's Journal
+  ADD_CRE_ITEM ~bdshkoro~ #0 #0 #0 ~IDENTIFIED~ ~inv~     // Orders from Korlasz
+  ADD_CRE_ITEM ~clck12~   #0 #0 #0 ~IDENTIFIED~ ~ARMOR~   // Knave's Robe (worn)
+  ADD_CRE_ITEM ~clck01~   #0 #0 #0 ~IDENTIFIED~ ~CLOAK~   // Cloak of Protection +1
+  ADD_CRE_ITEM ~bdbrac13~ #0 #0 #0 ~IDENTIFIED~ ~GLOVES~  // Bracers of Defense AC 6
+  ADD_CRE_ITEM ~staf02~   #0 #0 #0 ~IDENTIFIED~ ~WEAPON1~ EQUIP  // Quarterstaff +1
+  SET_BG2_PROFICIENCY PROFICIENCYQUARTERSTAFF 1
+BUT_ONLY
+
+// --- csrhass: "Mother Hasska", Cleric 9 — frontline anchor ---------------
+// Chassis bdkorme9.cre (C6, plate+shield+morningstar, full L1-3 priest book).
+COPY_EXISTING ~bdkorme9.cre~ ~override/csrhass.cre~
+  PATCH_IF ((BYTE_AT 0x273) != 3) BEGIN  // class byte must be CLERIC
+    PATCH_FAIL ~chriz-sod-remix #170: bdkorme9.cre is not the expected Cleric chassis — aborting.~
+  END
+  SAY NAME1 @17001
+  SAY NAME2 @17001
+  WRITE_BYTE  0x270 128                 // EA NEUTRAL — turns with Korlasz via csrkfin
+  WRITE_LONG  0x14 1400
+  WRITE_SHORT 0x24 60
+  WRITE_SHORT 0x26 60
+  WRITE_BYTE  0x52 16                   // THAC0, priest L9
+  WRITE_BYTE  0x54 7                    // priest 7-9 saves
+  WRITE_BYTE  0x55 11
+  WRITE_BYTE  0x56 10
+  WRITE_BYTE  0x57 13
+  WRITE_BYTE  0x58 12
+  WRITE_BYTE  0x234 9
+  WRITE_ASCIIE 0x248 ~csrkfin~ #8       // group sync + pre-fight parking
+  WRITE_ASCIIE 0x250 ~%csr_hass_cls%~ #8
+  WRITE_ASCIIE 0x258 ~~ #8              // chassis race slot was BDENSHTV; moved to class
+  WRITE_ASCIIE 0x260 ~%csr_hass_gen%~ #8
+  WRITE_ASCIIE 0x268 ~%csr_hass_def%~ #8
+  WRITE_ASCIIE 0x280 ~csrhass~ #32      // own death variable
+  // priest book through L5 (C9 slots 4/4/3/2/1); resrefs valid vanilla AND SR
+  ADD_MEMORIZED_SPELL ~sppr315~ #2 priest (1)  // Cure Serious Wounds (already known)
+  ADD_MEMORIZED_SPELL ~sppr401~ #3 priest (1)  // cure line L4 (SR: Cure Critical)
+  ADD_MEMORIZED_SPELL ~sppr405~ #3 priest (1)  // Mental Domination
+  ADD_MEMORIZED_SPELL ~sppr503~ #4 priest (1)  // Flame Strike (SR) / Cure Critical (vanilla)
+  ADD_KNOWN_SPELL     ~sppr403~ #3 priest      // Free Action
+  ADD_KNOWN_SPELL     ~sppr413~ #3 priest      // Negative Plane Protection
+  ADD_KNOWN_SPELL     ~sppr508~ #4 priest      // Chaotic Commands
+  // Helm of Unwavering Purpose replaces the plain helm (re-homed unique, 10a);
+  // Wand of the Heavens in a usable slot — both priest brains carry wand blocks;
+  // treasury key BDKEY10 = the raid fiction. Verified safe: Ophyllis regenerates
+  // his own key and bd_stole_ophyllis_key only trips if HIS copy is gone
+  // (BDOPHYLL.baf:35-46, BD0116.baf:56-63) — a second copy on her body is inert.
+  REMOVE_CRE_ITEM ~helm01~
+  ADD_CRE_ITEM ~bdhelm10~ #0 #0 #0 ~IDENTIFIED~ ~HELMET~
+  ADD_CRE_ITEM ~wand11~   #5 #0 #0 ~IDENTIFIED~ ~QITEM~
+  ADD_CRE_ITEM ~bdkey10~  #0 #0 #0 ~IDENTIFIED~ ~inv~
+  SET_BG2_PROFICIENCY PROFICIENCYFLAILMORNINGSTAR 1
+  SET_BG2_PROFICIENCY PROFICIENCYSWORDANDSHIELD 1
+BUT_ONLY
+
+// --- csrvhas: "Vhast", plain Fighter 10 — bruiser -------------------------
+// Chassis bdkorme8.cre (F5 "wizard slayer"-flavored elite). Kit stripped to
+// trueclass; the dart-thrower loadout stays as ranged backup + loot, but his
+// wielded weapon becomes the re-homed Sword of Ruin.
+COPY_EXISTING ~bdkorme8.cre~ ~override/csrvhas.cre~
+  PATCH_IF ((BYTE_AT 0x273) != 2) BEGIN  // class byte must be FIGHTER
+    PATCH_FAIL ~chriz-sod-remix #170: bdkorme8.cre is not the expected Fighter chassis — aborting.~
+  END
+  SAY NAME1 @17002
+  SAY NAME2 @17002
+  WRITE_BYTE  0x270 128
+  WRITE_LONG  0x14 1400
+  WRITE_SHORT 0x24 90
+  WRITE_SHORT 0x26 90
+  WRITE_BYTE  0x52 11                   // THAC0, warrior L10
+  WRITE_BYTE  0x53 2                    // 2 APR (F10 + specialization)
+  WRITE_BYTE  0x54 8                    // warrior 9-10 saves
+  WRITE_BYTE  0x55 10
+  WRITE_BYTE  0x56 9
+  WRITE_BYTE  0x57 9
+  WRITE_BYTE  0x58 11
+  WRITE_BYTE  0x234 10
+  WRITE_LONG  0x244 0x40000000          // strip kit → TRUECLASS
+  WRITE_ASCIIE 0x248 ~csrkfin~ #8
+  WRITE_ASCIIE 0x250 ~%csr_vhas_cls%~ #8
+  WRITE_ASCIIE 0x258 ~csrvhasb~ #8      // oil-of-speed opener, both branches
+  WRITE_ASCIIE 0x260 ~~ #8              // chassis GEN was BDSHIS08 (an illusionist's
+                                        // spell script — Beamdog copy/paste; wrong here)
+  WRITE_ASCIIE 0x268 ~%csr_vhas_def%~ #8
+  WRITE_ASCIIE 0x280 ~csrvhas~ #32
+  REMOVE_CRE_ITEM ~sw1h07~
+  ADD_CRE_ITEM ~bdsw2h03~ #0 #0 #0 ~IDENTIFIED~ ~WEAPON2~ EQUIP TWOHANDED  // Sword of Ruin +2
+  ADD_CRE_ITEM ~potn14~   #1 #0 #0 ~IDENTIFIED~ ~QITEM~                    // Oil of Speed ×1
+  SET_BG2_PROFICIENCY PROFICIENCYTWOHANDEDSWORD 3
+  SET_BG2_PROFICIENCY PROFICIENCY2HANDED 2
+  SET_BG2_PROFICIENCY PROFICIENCYDART 1
+BUT_ONLY
+
+// --- csrsill: "Sillune", plain Thief 9 — backstab + restealth --------------
+// Chassis bdshis07.cre (shadowdancer T5; kit stripped). The 3 invisibility
+// potions arm the restealth cycle; she carries the tomb's cash + gems (10a §1:
+// container gold totals 4,161 gp — the "grabbed the valuables" fiction).
+COPY_EXISTING ~bdshis07.cre~ ~override/csrsill.cre~
+  PATCH_IF ((BYTE_AT 0x273) != 4) BEGIN  // class byte must be THIEF
+    PATCH_FAIL ~chriz-sod-remix #170: bdshis07.cre is not the expected Thief chassis — aborting.~
+  END
+  SAY NAME1 @17003
+  SAY NAME2 @17003
+  WRITE_BYTE  0x270 128
+  WRITE_LONG  0x14 975
+  WRITE_SHORT 0x24 50
+  WRITE_SHORT 0x26 50
+  WRITE_BYTE  0x52 16                   // THAC0, rogue L9
+  WRITE_BYTE  0x54 11                   // rogue 9-12 saves
+  WRITE_BYTE  0x55 10
+  WRITE_BYTE  0x56 10
+  WRITE_BYTE  0x57 14
+  WRITE_BYTE  0x58 11
+  WRITE_BYTE  0x234 9
+  WRITE_LONG  0x244 0x40000000          // strip shadowdancer kit → TRUECLASS
+  WRITE_ASCIIE 0x248 ~csrkfin~ #8
+  WRITE_ASCIIE 0x250 ~%csr_sill_cls%~ #8
+  WRITE_ASCIIE 0x258 ~BDSHTAUN~ #8      // keep the chassis taunt flavor
+  WRITE_ASCIIE 0x268 ~%csr_sill_def%~ #8
+  WRITE_ASCIIE 0x280 ~csrsill~ #32
+  // SCS thief brains restealth off SCS's own potion resref; SoD-native gets the
+  // vanilla one. Same potion either way, so loot value is identical.
+  PATCH_IF (FILE_EXISTS_IN_GAME ~dw#ptn10.itm~) AND (FILE_EXISTS_IN_GAME ~dw1melth.bcs~) BEGIN
+    ADD_CRE_ITEM ~dw#ptn10~ #3 #0 #0 ~IDENTIFIED~ ~QITEM~  // Potion of Invisibility ×3
+  END ELSE BEGIN
+    ADD_CRE_ITEM ~potn10~   #3 #0 #0 ~IDENTIFIED~ ~QITEM~
+  END
+  PATCH_IF (FILE_EXISTS_IN_GAME ~bag02i.itm~) BEGIN
+    ADD_CRE_ITEM ~bag02i~ #0 #0 #0 ~IDENTIFIED~ ~inv~      // Gem Bag (early-QoL re-home)
+  END
+  ADD_CRE_ITEM ~misc25~ #5 #0 #0 ~IDENTIFIED~ ~inv~        // Zircons ×5
+  ADD_CRE_ITEM ~misc25~ #5 #0 #0 ~IDENTIFIED~ ~inv~        // Zircons ×5
+  ADD_CRE_ITEM ~misc43~ #1 #0 #0 ~IDENTIFIED~ ~inv~        // Emerald
+  ADD_CRE_ITEM ~misc07~ #3000 #0 #0 ~IDENTIFIED~ ~inv~     // the Chest_korlasz jackpot
+  ADD_CRE_ITEM ~misc07~ #1100 #0 #0 ~IDENTIFIED~ ~inv~     // + the smaller stacks (≈4,100 gp)
+BUT_ONLY
+
+// --- csrpori: Porios, Mage 8 — support caster, fights to the end -----------
+// Chassis bdporios.cre. His vanilla race script BDPORIOS is the tomb-sentry
+// flee/surrender questline (user cut the coward beat) — replaced wholesale by
+// the shared brain; his dialog (would hand out the dead tomb key) is stripped,
+// as is BDKEY05 itself (its door died with the dungeon).
+COPY_EXISTING ~bdporios.cre~ ~override/csrpori.cre~
+  PATCH_IF ((BYTE_AT 0x273) != 1) BEGIN  // class byte must be MAGE
+    PATCH_FAIL ~chriz-sod-remix #170: bdporios.cre is not the expected Mage chassis — aborting.~
+  END
+  WRITE_BYTE  0x270 128
+  WRITE_LONG  0x14 975
+  WRITE_SHORT 0x24 33
+  WRITE_SHORT 0x26 33
+  WRITE_BYTE  0x52 18                   // THAC0, wizard L8
+  WRITE_BYTE  0x54 13                   // wizard 6-10 saves
+  WRITE_BYTE  0x55 9
+  WRITE_BYTE  0x56 11
+  WRITE_BYTE  0x57 13
+  WRITE_BYTE  0x58 10
+  WRITE_BYTE  0x234 8
+  WRITE_LONG  0x244 0x40000000          // plain mage
+  WRITE_ASCIIE 0x248 ~csrkfin~ #8
+  WRITE_ASCIIE 0x250 ~%csr_pori_cls%~ #8
+  WRITE_ASCIIE 0x258 ~%csr_pori_rac%~ #8
+  WRITE_ASCIIE 0x268 ~%csr_pori_def%~ #8
+  WRITE_ASCIIE 0x280 ~csrpori~ #32
+  WRITE_ASCIIE 0x2CC ~~ #8              // no dialog: NO flee/surrender parley
+  // Mirror Image/Haste/MM identity (design §2a): top up book for M8 (4/3/3/2)
+  ADD_MEMORIZED_SPELL ~spwi305~ #2 wizard (1)  // Haste
+  ADD_MEMORIZED_SPELL ~spwi408~ #3 wizard (1)  // Stoneskin
+  ADD_MEMORIZED_SPELL ~spwi406~ #3 wizard (1)  // Minor Globe of Invulnerability
+  REMOVE_CRE_ITEM ~bdkey05~
+BUT_ONLY
+
+// --- csrgrit: "Grit", Korlasz's dust-mephit familiar — as-is + name --------
+COPY_EXISTING ~bdshkfam.cre~ ~override/csrgrit.cre~
+  SAY NAME1 @17004
+  SAY NAME2 @17004
+  WRITE_BYTE  0x270 128                 // NEUTRAL until she turns
+  WRITE_ASCIIE 0x248 ~csrkfin~ #8       // override was empty on the chassis
+  WRITE_ASCIIE 0x280 ~csrgrit~ #32
+BUT_ONLY
+
+// --- csrfistd: the dying Fist guard for the stairs-top hint beat -----------
+// Clone of bdfist1b (the guard the vanilla breakout kills). All script slots
+// and the dialog are blanked so nothing overrides the SEQ_DIE pose or opens
+// his vanilla dialog; his line comes from the area script (jbhint.baf).
+COPY_EXISTING ~bdfist1b.cre~ ~override/csrfistd.cre~
+  WRITE_ASCIIE 0x248 ~~ #8
+  WRITE_ASCIIE 0x250 ~~ #8
+  WRITE_ASCIIE 0x258 ~~ #8
+  WRITE_ASCIIE 0x260 ~~ #8
+  WRITE_ASCIIE 0x268 ~~ #8
+  WRITE_ASCIIE 0x280 ~csrfistd~ #32
+  WRITE_ASCIIE 0x2CC ~~ #8
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 5. BD0116 staging. Surgical swap of the vanilla cell spawn: the rebuilt
+//    csrkorl replaces the itemless clone, and the DestroyAllEquipment line —
+//    which would vaporize her re-homed loot — goes with it. The 3 Fist guard
+//    spawns and everything else in the block stay (the breakout cutscene
+//    kills/downs them on cue, BDKORLAS.baf:24-25).
+//    Patterns matched against the dev-install decompile of bd0116.bcs
+//    (identical to research/data/sod_baf/BD0116.baf:1-13, diff-verified
+//    2026-07-06); a mismatch aborts the install loudly.
+// ------------------------------------------------------------
+COPY_EXISTING ~bd0116.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CreateCreature("BDKORLAS",\[1003\.298\],SW)~ csr_cnt_spawn
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~ActionOverride("bdkorlas",DestroyAllEquipment())~ csr_cnt_strip
+    PATCH_IF ((csr_cnt_spawn != 1) OR (csr_cnt_strip != 1)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #170: bd0116.bcs cell-spawn block does not match the expected vanilla text (spawn=%csr_cnt_spawn% strip=%csr_cnt_strip%, want 1/1) — another mod changed it; aborting instead of silently skipping.~
+    END
+    REPLACE_TEXTUALLY ~CreateCreature("BDKORLAS",\[1003\.298\],SW)~
+                      ~CreateCreature("csrkorl",[1003.298],SW)~
+    REPLACE_TEXTUALLY ~ActionOverride("bdkorlas",DestroyAllEquipment())~ ~~
+  END
+BUT_ONLY
+
+// crew spawn on the breakout flag + difficulty tiers + BD_SAREVOK_SECRET re-home
+EXTEND_TOP ~bd0116.bcs~ ~chriz-sod-remix/baf/jb116.baf~
+
+// ------------------------------------------------------------
+// 6. BD0102 hint beat: sounds from below + dying guard + journal 261626 +
+//    BD_KORLAS_FREED pre-set at the basement stairs (see jbhint.baf header).
+// ------------------------------------------------------------
+EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/jbhint.baf~

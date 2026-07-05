@@ -1,0 +1,51 @@
+// chriz-sod-remix component 180 — Prologue: celebration + Caelar's proclamation
+// @18000-@18099. All strings pure ASCII (no charset handling needed on EE).
+
+// Liia's closing line of the celebration beat: (a) Korlasz held in the palace
+// cells awaiting the player's statement (opens journal @18001, the opener of the
+// "Sarevok's Servant" chain that component 170's vanilla entries 261626/261627
+// continue and close), and (b) hands over Caelar's proclamation (csrpam) and
+// notes it is posted across the city.
+@18000 = ~One more matter, before I return you to the festivities. The sorcerer Korlasz, last of your half-brother's followers, sits in the cells beneath this palace awaiting judgment. The Flaming Fist will want your statement before sentence is passed - visit the basement when you are able.
+
+And... there is something you should see, <CHARNAME>. Caelar's crusade has posted these proclamations across every district of the city. Read this one carefully. It names you.~
+
+// Journal opener. First line must stay "Sarevok's Servant" — the EE journal
+// groups entries by title, and 170's kill entry (261627, QUEST_DONE, same title)
+// is what closes this quest group.
+@18001 = ~Sarevok's Servant
+
+Korlasz awaits judgment in the palace cells.
+
+During the celebration in the Ducal Palace, Duchess Liia Jannath asked me to look in on Korlasz, the last of Sarevok's followers, who is being held in the cells beneath the palace. The Flaming Fist wants my statement before the dukes pass sentence. I should visit the palace basement when I have a moment.~
+
+// Player replies to Liia's opener ("We would have you join them..."). The second
+// deliberately claims Sarevok's followers are finished — Liia's closing line
+// then corrects it (the last of them sits in the cells below).
+@18002 = ~I only did what was needed.~
+@18003 = ~Sarevok is dust and his followers scattered. The city may rest easy.~
+
+// Player's exit line; the transition carries the journal/item/despawn actions.
+@18004 = ~I will give my statement. Enjoy the celebration, Your Grace.~
+
+// csrpam.itm — Caelar's proclamation (BDSHPAM1 clone). Name + description.
+@18010 = ~Crusade Proclamation~
+
+// Description: crusade recruitment framing + the user-approved warning closing
+// (design doc 01-prologue sec. 9: honest about the WHAT — the child of Bhaal is
+// needed — silent about the WHY; the blood-price stays hidden until chapter 12).
+@18011 = ~PEOPLE OF BALDUR'S GATE!
+
+North of the Winding Water, the Shining Lady builds a host such as the Sword Coast has never seen. She calls every soul of courage to her banner: the lost shall be found, the fallen shall be redeemed, and none who offer themselves to this holy work shall be turned away. Lay down your doubts. March with the crusade, and be remembered in the light.
+
+And to the child of Bhaal, hero of this city: I know what sleeps in your veins. It is needed, and I will have it. Come north willingly and be honored among us - or remain, and I will come for you.
+
+- Caelar Argent, the Shining Lady~
+
+// Belt's added war-council line (I_C_T after BDBELT 36, before Eltan's "every
+// sword north"). Only plays if the player holds the proclamation.
+@18020 = ~There is one thing more, <CHARNAME>, and it concerns you directly. You have seen the proclamations her crusade nails up across our city. They name you. The Shining Lady demands the hero of Baldur's Gate come north - willing or no.~
+
+// Component name (reserved for migration into setup.tra as the BEGIN string if
+// the tp2 ever switches this component from a literal name to a tra ref).
+@18099 = ~SoD remix: prologue - celebration and Caelar's proclamation~

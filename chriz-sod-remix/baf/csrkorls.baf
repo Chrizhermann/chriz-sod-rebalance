@@ -1,0 +1,33 @@
+// chriz-sod-remix component 170 - csrkorls: Korlasz's SCS-branch race-slot mini script.
+// ONLY the signature-sequencer fire block. Under SCS her slots are
+// OVR=BDKORLAS (vanilla breakout, untouched) / CLS=dw#gpsht / RAC=this / DEF=dw#mg437,
+// so this block outranks the dw#mg437 rotation exactly once (the marker spell csrseq1
+// is burned by csrseq1b's op172, then this never matches again and dw#mg437 runs the
+// fight). Trigger set mirrors the install-generated dw#ms3 block in dw#mg437.bcs
+// (dumped from the dev install 2026-07-06; see docs/research/10d section 3), minus the
+// Range(7) melee-range gates that belong to its Color Spray payload, with the preset
+// LastSeenBy target replaced by the self-contained NearestEnemyOf.
+// COMPILED ONLY IN THE SCS BRANCH: DO_NOT_TARGET_SPELLS is an SCS-added splstate and
+// FIN_TIME_STOP_RUNNING is SCS's timestop convention - neither exists vanilla.
+
+IF
+  !GlobalTimerNotExpired("castspell","LOCALS")
+  HaveSpellRES("csrseq1")
+  Allegiance(Myself,ENEMY)
+  See(NearestEnemyOf(Myself))
+  !StateCheck(NearestEnemyOf(Myself),STATE_NOT_TARGETABLE)
+  !CheckSpellState(NearestEnemyOf(Myself),DO_NOT_TARGET_SPELLS)
+  !CheckStatGT(Myself,0,WIZARD_IMPROVED_ALACRITY)
+  !StateCheck(Myself,STATE_DISABLED)
+  HPGT(Myself,0)
+  Global("FIN_TIME_STOP_RUNNING","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("castspell","LOCALS",ONE_ROUND)
+    ReallyForceSpellRES("csrseq1b",NearestEnemyOf(Myself))
+    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_SLOW)
+    SmallWait(1)
+    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_CONFUSION)
+    SmallWait(1)
+    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_GLITTERDUST)
+END

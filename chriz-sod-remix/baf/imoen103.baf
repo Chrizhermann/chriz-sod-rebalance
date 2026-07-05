@@ -1,0 +1,46 @@
+// chriz-sod-remix component 160 — BD0103 Imoen swap state machine.
+// Invariant: never two living IMOEN2 death variables in one area
+// (research 10b §3 — three palace CREs share her DV). Stages:
+//   0 -> destroy the pre-placed scene actor (BDIMOEN.CRE at
+//        (221,459); the only IMOEN2 in BD0103 at arrival — the
+//        imported instance is still parked in BD0120).
+//   1 -> one script pass later (the queued DestroySelf has
+//        resolved): import = MoveGlobal pulls the parked import
+//        from BD0120; fresh = spawn csrimo at the actor's exact
+//        spot/facing (BD0103.are actor 0: (221,459), orient 8=N).
+//   2 -> done.
+// The stage-1 blocks sit ABOVE the stage-0 block so they can
+// never fire in the same pass that queued the DestroySelf.
+// Everything Continue()s: component 150's arrival flag pre-sets
+// (EXTEND_TOP'd earlier = below us) still run on the first pass.
+
+IF
+  Global("CSR_IMOEN_STAGE","BD0103",1)
+  Global("CSR_IMOEN_IMPORT","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMOEN_STAGE","BD0103",2)
+    MoveGlobal("BD0103","IMOEN2",[221.459])
+    ActionOverride("IMOEN2",Face(N))
+    Continue()
+END
+
+IF
+  Global("CSR_IMOEN_STAGE","BD0103",1)
+  Global("CSR_IMOEN_IMPORT","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMOEN_STAGE","BD0103",2)
+    CreateCreature("csrimo",[221.459],N)
+    Continue()
+END
+
+IF
+  Global("CSR_IMOEN_STAGE","BD0103",0)
+  GlobalLT("BD_PLOT","GLOBAL",51)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMOEN_STAGE","BD0103",1)
+    ActionOverride("IMOEN2",DestroySelf())
+    Continue()
+END

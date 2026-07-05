@@ -1,0 +1,26 @@
+// chriz-sod-remix component 150 — BD0100 placed night-set sweep (EXTEND_TOP).
+// The ARE pre-places the assassination-night set with schedule 0xFFFFFF;
+// at bd_plot<52 the hall is a live ambush (hostile BDGASS5 assassins) and
+// clicking placed Corwin opens the council dialog in the wrong room
+// (docs/research/11a §3B, 11b (d)2). Object names mirror the vanilla >51
+// cleanup block in this same script verbatim.
+// Deliberately NO Continue(): ending the first pass here suppresses the
+// OnCreation "To arms!" rally blocks (they reference the actors destroyed
+// below); on later loads at bd_plot>51 the vanilla cleanup block dresses
+// the hall normally.
+IF
+  GlobalLT("BD_PLOT","GLOBAL",52)
+  Global("CSR_SWEEP","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SWEEP","GLOBAL",1)
+    ApplySpellRES("bddest","Assassin1")
+    ApplySpellRES("bddest","Assassin2")
+    ApplySpellRES("bddest","Assassin3")
+    ApplySpellRES("bddest","bdschael")
+    ApplySpellRES("bddest","FF Dead 1")
+    ApplySpellRES("bddest","FF Dead 2")
+    ApplySpellRES("bddest","FF Dead 3")
+    ApplySpellRES("bddest","FF Guard 1")
+    ApplySpellRES("bddest","FF Guard 2")
+END

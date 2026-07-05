@@ -1,0 +1,26 @@
+// chriz-sod-remix component 160 — Prologue: Imoen stays / recruitable
+
+// component name (mirrored in setup.tra as @160 for the BEGIN line)
+@16000 = ~SoD remix: prologue - Imoen stays and is recruitable~
+
+// --- csrimoen.d ---
+
+// greet: first meeting in the BD0103 palace bedroom
+@16001 = ~Heya! Took you long enough, sleepyhead. The whole palace is buzzin' about some big shiny crusade up north - and if you think I'm gettin' left behind AGAIN, you've got another think coming. So? Together again, hey?~
+
+@16002 = ~Together again, Imoen. Just like old times.~
+
+@16003 = ~Not yet, Imoen. Stay here for now - I'll come back for you.~
+
+// she waits
+@16004 = ~Fiiine. I'll just sit here and count the tapestries. Don't dawdle too long, all right?~
+
+// dismissed, offering to rejoin
+@16005 = ~Heya. Done leavin' me behind? 'Cause I'm ready when you are.~
+
+@16006 = ~Come on, then - rejoin the party.~
+
+@16007 = ~Not just yet.~
+
+// in-party small talk
+@16008 = ~Quit pokin' me. I'm savin' my strength for the road!~

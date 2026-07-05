@@ -1,0 +1,6 @@
+// chriz-sod-remix — component 140 (prologue: skip the Korlasz dungeon)
+// @14000 is the component name. The BEGIN block currently carries it as a
+// literal (a component .tra is not loaded when WeiDU resolves component
+// names for --list-components); move this string into setup.tra as @140
+// if/when house style consolidates the prologue component names there.
+@14000 = ~SoD remix: prologue - skip the Korlasz dungeon~

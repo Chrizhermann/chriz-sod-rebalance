@@ -1,0 +1,165 @@
+// ============================================================
+// Component 160 body — Prologue: Imoen stays / recruitable
+// ============================================================
+// Design: docs/design/chapters/01-prologue.md §5 (DECIDED).
+// Ground truth: docs/research/10b (BD0120 import strip + the
+// IMOEN2 death-variable collision map), docs/research/11a
+// (bd_001_plot=10 parking + placed-actor hazards); all patterns
+// re-verified against the DEV install decompiles 2026-07-06.
+//
+// Invariant this component enforces: at every moment there is at
+// most ONE living creature with death variable IMOEN2 per area —
+// every vanilla "IMOEN2" reference (and our own MoveGlobal /
+// ActionOverride targeting) then resolves deterministically.
+//   import: the BD0120 strip block (research 10b, BD0120.baf:
+//           651-663) is patched to keep her gear, LeaveParty,
+//           switch her dialog to csrimoen — and deliberately
+//           LEAVES HER PARKED IN BD0120. Our BD0103 block first
+//           destroys the pre-placed scene actor (the only local
+//           IMOEN2), then — one script pass later — MoveGlobal
+//           pulls her into the bedroom. MoveGlobal from the strip
+//           block itself would stack two IMOEN2 DVs in BD0103 and
+//           make the placed-actor despawn ambiguous (10b §3 tail).
+//   fresh:  the pre-placed scene actor (BDIMOEN.CRE at (221,459),
+//           facing N — BD0103.are actor 0, dev ARE parse) is
+//           swapped for csrimo.cre at the same spot. Escort clone
+//           bdshimoe is never created (component 140 removed the
+//           BDINTRO staging block), bdimdead/bdimoen scene spawns
+//           are parked by component 150's flag pre-sets
+//           (bd_imoen_bed=1, BD_MDD007=2, BD_INTRO_IMOEN_CUT=1;
+//           dev BD0103 blocks re-verified: the only two
+//           ActionOverride("IMOEN2",DestroySelf()) left in
+//           bd0103.bcs are gated bd_imoen_bed=0 / BD_MDD007=0).
+
+LOAD_TRA ~chriz-sod-remix/languages/english/comp160.tra~
+
+// ------------------------------------------------------------
+// 160.0 — hard preconditions: fail loudly, never silently skip
+// ------------------------------------------------------------
+// Chassis for the fresh-start Imoen is the game's own recruitable
+// BG1 Imoen, imoen2.cre (dev parse: Thief 2, XP 1,304, DV IMOEN2,
+// dlg IMOEN2J, scripts IMOEN_/INITDLG/WTRUNSGT/WTARSGT). Present
+// on EET (BG1 resource, kept without EET underscore-rename) and on
+// standalone BG:EE+SoD; BG2:EE-only installs are already excluded
+// by the component's bd0120.are REQUIRE_PREDICATE.
+ACTION_IF NOT FILE_EXISTS_IN_GAME ~imoen2.cre~ BEGIN
+  FAIL ~chriz-sod-remix comp160: imoen2.cre not found in game - cannot build the joinable Imoen (csrimo.cre). This is not the expected EET / BG:EE+SoD layout; refusing to guess a chassis.~
+END
+ACTION_IF NOT FILE_EXISTS_IN_GAME ~bddialog.2da~ BEGIN
+  FAIL ~chriz-sod-remix comp160: bddialog.2da (the SoD campaign pdialog table, CAMPAIGN.2DA SOD row) not found in game.~
+END
+
+// ------------------------------------------------------------
+// 160.1 — csrimo.cre: the fresh-start / no-import joinable Imoen
+// ------------------------------------------------------------
+COPY_EXISTING ~imoen2.cre~ ~override/csrimo.cre~
+  // SoD fresh-start XP floor = SODSTRTA.2DA START_XP 64000
+  // (research 10b §1b). Base CRE stays at its low level on
+  // purpose: JoinParty() auto-levels level<XP-implied creatures,
+  // rolling HP/skills per step (bg-modding gotchas, NPC
+  // auto-leveling) — the import case keeps its own XP instead.
+  READ_LONG 0x18 csr_xp
+  PATCH_IF (csr_xp < 64000) BEGIN
+    WRITE_LONG 0x18 64000
+  END
+  // Death variable stays IMOEN2 BY DESIGN: SoD/EET content keys
+  // on it, and the swap logic (baf/imoen103.baf) guarantees the
+  // placed BDIMOEN scene actor is dead before csrimo spawns, so
+  // the DV never collides. Assert rather than assume.
+  READ_ASCII 0x280 csr_dv (32) NULL
+  TO_UPPER csr_dv
+  PATCH_IF NOT (~%csr_dv%~ STRING_EQUAL_CASE ~IMOEN2~) BEGIN
+    WRITE_ASCII 0x280 ~IMOEN2~ #32
+  END
+  // Pre-join dialog: csrimoen, NOT the BG2-era IMOEN2J — those
+  // states must not answer in the palace (design §5). After
+  // join/dismiss the patched BDDIALOG.2DA row (160.2) keeps
+  // csrimoen active during the SoD campaign.
+  WRITE_ASCII 0x2cc ~csrimoen~ #8
+  // Blank the BG1 street-NPC scripts: INITDLG force-opens dialog
+  // on sight (would fire mid-arrival, before component 150's
+  // staging flags settle, or during the bedtime cutscene);
+  // WTRUNSGT/WTARSGT make her wander off her mark; IMOEN_ is
+  // EET's BG1-campaign behavior script (63 KB of BG1-era blocks
+  // we don't want evaluated in the palace). She must stand at
+  // (221,459) and answer only when clicked.
+  WRITE_ASCII 0x248 ~~ #8   // override (was IMOEN_)
+  WRITE_ASCII 0x250 ~~ #8   // class    (was INITDLG)
+  WRITE_ASCII 0x260 ~~ #8   // general  (was WTRUNSGT)
+  WRITE_ASCII 0x268 ~~ #8   // default  (was WTARSGT)
+
+// ------------------------------------------------------------
+// 160.2 — BDDIALOG.2DA: keep csrimoen through join/dismiss
+// ------------------------------------------------------------
+// The SoD campaign's pdialog table (CAMPAIGN.2DA SOD row ->
+// BDDIALOG.2DA) HAS an IMOEN2 row: POST/JOIN/DREAM all = BDIMOEN
+// (verified on dev). Unpatched, the engine flips her dialog to
+// BDIMOEN the moment she joins — and BDIMOEN's states are all
+// parked at bd_001_plot=10 (research 11a), leaving her mute in
+// the party and PERMANENTLY unrecruitable after a dismissal.
+// Re-point POST_DIALOG_FILE and JOIN_DIALOG_FILE at csrimoen.
+// DREAM_SCRIPT_FILE stays BDIMOEN: its only party-relevant block
+// (BDIMOEN.baf:9-21 bedside talk) needs BD_MDD007=1, and
+// component 150 pre-sets 2 — verified inert. No other mod on the
+// 417-entry install touches this row (vanilla never lets her join
+// in SoD, so the row was write-only until now).
+COPY_EXISTING ~bddialog.2da~ ~override~
+  SET csr_row = 0 - 1
+  COUNT_2DA_ROWS 4 csr_rows
+  FOR (csr_i = 0; csr_i < csr_rows; ++csr_i) BEGIN
+    READ_2DA_ENTRY csr_i 0 4 csr_name
+    TO_UPPER csr_name
+    PATCH_IF (~%csr_name%~ STRING_EQUAL_CASE ~IMOEN2~) BEGIN
+      SET csr_row = csr_i
+      SET csr_i = csr_rows   // found — stop scanning
+    END
+  END
+  PATCH_IF (csr_row < 0) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp160: no IMOEN2 row in BDDIALOG.2DA - the SoD pdialog table does not look like the verified one; refusing to install a half-working Imoen.~
+  END
+  SET_2DA_ENTRY csr_row 1 4 ~CSRIMOEN~   // POST_DIALOG_FILE
+  SET_2DA_ENTRY csr_row 2 4 ~CSRIMOEN~   // JOIN_DIALOG_FILE
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 160.3 — BD0120.bcs: defuse the import strip (research 10b,
+//         BD0120.baf:651-663 — dev text verified identical)
+// ------------------------------------------------------------
+// KEEP:   SetGlobal("BD_Imoen_Items","GLOBAL",1) — BDINTRO's
+//         Safana auto-join (:508-539) and BD0103's container-move
+//         block (:122-129, now a harmless no-op on the empty
+//         container) both require it.
+// KEEP:   ActionOverride("IMOEN2",LeaveParty()).
+// REMOVE: the TakeCreatureItems gear strip — she keeps her build.
+// REPLACE:DestroySelf -> SetDialogue("csrimoen") (action name per
+//         BDINTRO's own companion rewiring, e.g. BDINTRO.baf:230)
+//         + CSR_IMOEN_IMPORT=1 for the BD0103 swap logic. She
+//         stays parked in BD0120 — see the invariant note on top.
+COPY_EXISTING ~bd0120.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // Pattern guards: both action lines must exist EXACTLY once
+    // (dev-verified, case-insensitive) — anything else means a
+    // foreign mod rewrote the strip block and blind textual
+    // surgery could corrupt it. Fail loudly instead.
+    COUNT_REGEXP_INSTANCES ~ActionOverride("Imoen_import_eq",TakeCreatureItems("IMOEN2",ALL))~ csr_cnt_strip
+    COUNT_REGEXP_INSTANCES ~ActionOverride("IMOEN2",DestroySelf())~ csr_cnt_destroy
+    PATCH_IF NOT ((csr_cnt_strip = 1) AND (csr_cnt_destroy = 1)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp160: BD0120.bcs import-strip block does not match the verified layout (TakeCreatureItems x%csr_cnt_strip%, DestroySelf x%csr_cnt_destroy%; expected exactly 1 of each). Another mod has altered Imoen's import handling - resolve manually before installing.~
+    END
+    REPLACE_TEXTUALLY ~ActionOverride("Imoen_import_eq",TakeCreatureItems("IMOEN2",ALL))~ ~~
+    REPLACE_TEXTUALLY ~ActionOverride("IMOEN2",DestroySelf())~
+~ActionOverride("IMOEN2",SetDialogue("csrimoen"))
+    SetGlobal("CSR_IMOEN_IMPORT","GLOBAL",1)~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 160.4 — her dialog + the BD0103 swap state machine
+// ------------------------------------------------------------
+COMPILE ~chriz-sod-remix/dlg/csrimoen.d~
+
+// EXTEND_TOP is additive — no pattern-matching against the
+// component-150-patched bd0103.bcs text needed. Installing after
+// 150 puts these blocks ABOVE 150's arrival block; every block
+// Continue()s so 150's flag pre-sets still run on the same pass.
+EXTEND_TOP ~bd0103.bcs~ ~chriz-sod-remix/baf/imoen103.baf~

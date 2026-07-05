@@ -1,0 +1,121 @@
+// ============================================================
+// 180 — Prologue: celebration + Caelar's proclamation (body)
+// ============================================================
+// Design: docs/design/chapters/01-prologue.md sec. 6 (light praise
+// beat, v0.1) + sec. 9 (the hero's personal stake: Caelar's open
+// challenge). Mechanics: docs/research/11a-council-seam.md.
+//
+// Beat: on the party's first walk into the great hall (BD0102)
+// during the bd_plot=50 roam (components 140+150 create that roam),
+// crowd cheer + forced praise dialog from Liia and Belt built from
+// existing SoD lines, then Liia opens the "give your statement on
+// Korlasz" journal (the opener for component 170's jailbreak chain)
+// and hands over Caelar's proclamation (csrpam, a retextured
+// BDSHPAM1 clone — the pamphlet otherwise dies with the dungeon,
+// research 10a) naming the Bhaalspawn. One added Belt line at the
+// war council references the proclamation.
+
+LOAD_TRA ~chriz-sod-remix/languages/english/comp180.tra~
+
+// ------------------------------------------------------------
+// Loud environment guards: every resource this component builds
+// on must exist, or the install must abort — not silently skip.
+// ------------------------------------------------------------
+ACTION_FOR_EACH csr_res IN
+  ~bd0102.bcs~ ~bdliia.cre~ ~bdbelt.cre~ ~bdliia.dlg~ ~bdbelt.dlg~ ~bdshpam1.itm~
+BEGIN
+  ACTION_IF NOT (FILE_EXISTS_IN_GAME ~%csr_res%~) BEGIN
+    FAIL ~chriz-sod-remix component 180: required SoD resource [%csr_res%] not found in this game.~
+  END
+END
+
+// ------------------------------------------------------------
+// Resolve the existing praise strrefs from the CURRENT dialog
+// state tables. EET remaps imported SoD strrefs (this install:
+// BDLIIA 11 = #234300, BDBELT 38 = #264733, BDBELT 41 = #264741 —
+// verified 2026-07-06 on the dev install) while standalone
+// BG:EE+SoD uses different numbers; the state INDEX is the stable
+// handle (research 11a sec. 2 maps the council states). Each read
+// is text-anchored so a reshuffled/foreign dialog FAILS the
+// install loudly instead of playing the wrong line in-game.
+// DLG V1.0: 0x08 = state count, 0x0C = state table offset,
+// 0x10-byte state entries, SAY strref at +0x00 (verified against
+// the dev files with a binary probe).
+// ------------------------------------------------------------
+COPY_EXISTING - ~bdliia.dlg~ ~override~
+  READ_LONG 0x08 csr_nstates
+  READ_LONG 0x0c csr_soff
+  PATCH_IF (csr_nstates > 11) BEGIN
+    READ_LONG   (csr_soff + (11 * 0x10)) csr_praise_liia
+    READ_STRREF (csr_soff + (11 * 0x10)) csr_txt
+    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~once again called upon~) == 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix component 180: BDLIIA.dlg state 11 is not the expected council-pitch line ("...once again called upon..."). Dialog layout differs from SoD — aborting rather than reusing the wrong line.~
+    END
+  END ELSE BEGIN
+    PATCH_FAIL ~chriz-sod-remix component 180: BDLIIA.dlg has fewer than 12 states — not the SoD war-council dialog this component expects.~
+  END
+
+COPY_EXISTING - ~bdbelt.dlg~ ~override~
+  READ_LONG 0x08 csr_nstates
+  READ_LONG 0x0c csr_soff
+  PATCH_IF (csr_nstates > 41) BEGIN
+    READ_LONG   (csr_soff + (38 * 0x10)) csr_praise_belt1
+    READ_STRREF (csr_soff + (38 * 0x10)) csr_txt
+    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~faith in you was not misplaced~) == 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg state 38 is not the expected praise line ("...faith in you was not misplaced..."). Aborting.~
+    END
+    READ_LONG   (csr_soff + (41 * 0x10)) csr_praise_belt2
+    READ_STRREF (csr_soff + (41 * 0x10)) csr_txt
+    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~great service~) == 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg state 41 is not the expected praise line ("...a great service..."). Aborting.~
+    END
+    // State 36 is only the I_C_T anchor (no strref reuse), but a wrong
+    // anchor would graft the proclamation line into the wrong scene —
+    // verify it too. Text per research 11a sec. 2 (crusade-report chain).
+    READ_STRREF (csr_soff + (36 * 0x10)) csr_txt
+    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~Waterdeep and Daggerford~) == 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg state 36 is not the expected crusade-report line ("...Waterdeep and Daggerford..."). The council insertion anchor moved — aborting.~
+    END
+  END ELSE BEGIN
+    PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg has fewer than 42 states — not the SoD war-council dialog this component expects.~
+  END
+
+// ------------------------------------------------------------
+// Caelar's proclamation: clone the Crusader Pamphlet (readable
+// scroll-type handout, 0 abilities) and replace name + text. Both
+// name slots and both description slots point at the same strrefs
+// in the donor (verified: 0x08=0x0C=264376, 0x50=0x54=264378), so
+// all four are SAYed. The donor keeps existing untouched.
+// ------------------------------------------------------------
+COPY_EXISTING ~bdshpam1.itm~ ~override/csrpam.itm~
+  SAY 0x08 @18010
+  SAY 0x0c @18010
+  SAY 0x50 @18011
+  SAY 0x54 @18011
+
+// ------------------------------------------------------------
+// Celebration trigger. EXTEND_TOP only — zero edits to Beamdog or
+// mod text in bd0102.bcs (which component 150 also patches; this
+// composes with it in any state). The block mirrors the vanilla
+// council variant V1's staging skeleton and uses its exact
+// coordinates (BD0102.baf:21-68: Liia spawn/walk [919.722] ->
+// [792.499], Belt [680.390] -> [712.438], Player1 to hall center
+// [719.491]) so the walk-and-talk pathing is vanilla-proven from
+// both stair entrances; dev bd0102.bcs decompile is byte-identical
+// to the corpus baf. AMBDLCHE is SoD's own crowd-cheer cue
+// (BD0021.baf:7, BD0101.baf:303; confirmed present in chitin.key).
+// Gated to BD_PLOT exactly 50 and NOT OnCreation-based: at plot 51
+// the five council variants own the area-entry OnCreation pass
+// (research 11a sec. 1) and an EXTEND_TOP block firing there would
+// consume that pass and dead-lock the council. Since the council
+// itself only ever fires in BD0102 at plot 51, any player who
+// reaches it has already walked the hall at 50 — the beat cannot
+// be permanently skipped by normal play (see design sec. 4 flow).
+// ------------------------------------------------------------
+EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/csrceleb.baf~
+
+// ------------------------------------------------------------
+// The dialog (csrcele + BDBELT praise states + council I_C_T).
+// EVALUATE_BUFFER substitutes the strrefs resolved above.
+// ------------------------------------------------------------
+COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csrcele.d~

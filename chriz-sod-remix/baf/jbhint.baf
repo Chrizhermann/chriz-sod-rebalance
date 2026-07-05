@@ -1,0 +1,60 @@
+// chriz-sod-remix component 170 - EXTEND_TOP payload for bd0102.bcs (palace ground
+// floor): the "prepare for a fight" hint beat (design 01-prologue.md sec 2).
+// Fires once when a PC first approaches the basement stairs (entrance ExitBD0116
+// @591,198; travel region TranBD0116 bb 556,107-614,187 - verified from the dev ARE)
+// at bd_plot>=50, i.e. any time during the city phase - self-contained, no dependency
+// on other components. It pre-sets BD_KORLAS_FREED("BD0116") - the exact scope/value
+// the vanilla TrapBDKorlasz region sets (BD0116.baf:15-21) - so the breakout cutscene
+// runs the moment the player descends; the forced-dialog funnel (BDCUTKOR -> states
+// 24-27 -> BD_SPAWN_KORLASZ=2) stays fully intact, which journal 261627 QUEST_DONE
+// requires (research 11a section 5).
+// Sound dressing = Beamdog's own off-screen-fight faker trio sorcr05/poisn05/fchil05
+// (BD0109.baf:103-117) twice through, plus the HIT_03B door-banging cue BD0116 itself
+// uses for the doppelganger (BD0116.baf:76-90). Journal 261626 QUEST is the vanilla
+// "Korlasz is loose in the Ducal Palace" entry (re-added by dialog state 27 later;
+// same-strref adds do not duplicate).
+
+IF
+  GlobalGT("bd_plot","GLOBAL",49)
+  Global("CSR_JB_HINT","GLOBAL",0)
+  Global("BD_KORLAS_FREED","BD0116",0)
+  !Dead("BDKORLAS")
+  NearLocation([PC],591,198,10)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_HINT","GLOBAL",1)
+    SetGlobal("BD_KORLAS_FREED","BD0116",1)
+    CreateCreature("csrfistd",[622.246],NW)
+    ActionOverride("csrfistd",SetSequence(SEQ_DIE))
+    DisplayStringHead("csrfistd",@17005)
+    AddJournalEntry(261626,QUEST)
+    PlaySound("sorcr05")
+    SmallWait(8)
+    PlaySound("poisn05")
+    SmallWait(8)
+    PlaySound("fchil05")
+    SmallWait(6)
+    PlaySound("HIT_03B")
+    SmallWait(4)
+    PlaySound("sorcr05")
+    SmallWait(8)
+    PlaySound("poisn05")
+    SmallWait(8)
+    PlaySound("fchil05")
+    SmallWait(6)
+    PlaySound("HIT_03B")
+END
+
+// housekeeping: once Korlasz is dead the wounded guard has been "carried off" -
+// keeps the palace ground floor clean for the rest of the campaign
+IF
+  Global("CSR_JB_HINT","GLOBAL",1)
+  Global("CSR_JB_SWEPT","GLOBAL",0)
+  Dead("BDKORLAS")
+  Exists("csrfistd")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_SWEPT","GLOBAL",1)
+    ActionOverride("csrfistd",DestroySelf())
+    Continue()
+END

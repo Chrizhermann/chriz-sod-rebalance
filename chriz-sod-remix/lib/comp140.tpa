@@ -1,0 +1,236 @@
+// ============================================================
+// 140 — Prologue: skip the Korlasz dungeon (lib/comp140.tpa)
+// ============================================================
+// Spine = Beamdog's own debug skip (BDDEBUG.baf:151-160): bd_plot=50 +
+// bd_npc_camp_chapter=1 + bdcut00z. Implemented as the "instant exit"
+// of docs/research/10b §3-4 (methods-cookbook #11): the party still
+// lands in BD0120, so every bootstrap block — the EET K# new-game
+// machinery, gear/gold handouts, BDKEYR, the Imoen import strip, the
+// BG1 journal cleanup — and every BDINTRO companion block (import
+// wiring, the fresh-flow JoinPartyOverride pool, Safana auto-join,
+// C0Aura/L#BRIST mod hooks; 10b: BDINTRO.baf:1-539) runs untouched.
+// One implementation covers EET import AND fresh start. Only three
+// seams are patched, each single-occurrence-guarded so a text
+// mismatch ABORTS the install instead of half-patching.
+//
+// Seam 1 — BDINTRO staging True() block (10b: BDINTRO.baf:541-582):
+//   drop the walk-in warm-up (intro_follower2), the party JumpToPoint
+//   staging, the bdshimoe escort, the Ammon timer and the
+//   cutscene-breakable rig (there is no scene left to skip; the rig's
+//   disarm lived in the walk-in blocks, so arming it would strand
+//   BD0120's area script on "cutskip"). Keep the vanilla bootstrap
+//   (chapter=7, DREAM=7, BD_TURNOFF_GEARSCRIPT — it gates the BD0120
+//   gear blocks off for the extra passes below —, sprite_is_dead
+//   resets, rejuve, bdplayer AI on Player1). Add the skip state:
+//   bd_npc_camp_chapter=1 (BDDEBUG parity), BD_KORLASZ_SURRENDER=1 +
+//   journal chain open/surrender/wrap-up (design §1 default outcome:
+//   "the Fist cleared the tomb; Korlasz surrendered" — she is never
+//   created, so BD0116.baf:1-13 spawns her in the palace cell for
+//   free, which component 170 builds on; the flag also disarms
+//   BD0120's bd_leaving_ot Minsc-nag blocks during the extra passes).
+//   bd_plot=50 is written LAST, directly before EndCutSceneMode():
+//   area scripts keep running during cutscene mode (SoD's own
+//   cutscene-skip rig depends on that), so nothing that must still
+//   happen may follow the trigger the seam-3 exit block keys on.
+//   bd_plot=50 satisfies every reader: <51 for all BD0103 blocks,
+//   >27 for the JAHEIRAJ/BDTUTOR banter reads, and no content reads
+//   41-50 (10b §2).
+//
+// Seam 2 — the two walk-in scene blocks (10b: BDINTRO.baf:584-688)
+//   are trigger-gated variants of one scene (InMyArea("minsc") /
+//   !InMyArea("minsc")), and bdintro is launched with
+//   StartCutSceneEx("bdintro",TRUE) = triggers ARE evaluated
+//   (BD0120.baf:5502-5511) — so False()-gating both (cookbook #7)
+//   kills the scene without touching its actions.
+//
+// Seam 3 — bd0120.bcs gets ONE appended block (baf/exit0120.baf):
+//   bd_plot==50 -> the vanilla intro-launcher recipe
+//   (BD0120.baf:5502-5511) aimed at bdcut00z. WHY NOT chain bdcut00z
+//   straight from the staging block the way BDDEBUG does: the EET
+//   fresh-start Bhaalspawn-ability grants (BD0120.baf:481-573,
+//   SPIN101-106 via Switch("K#BhaalSpawnAbilityN")) only fire on an
+//   ordinary BD0120 area-script pass with bd_plot!=0 + K#NewGame=2 —
+//   in vanilla those passes happen during dungeon play, which the
+//   skip removes; a direct cutscene chain silently costs fresh starts
+//   their Bhaalspawn abilities. Appending at the BOTTOM guarantees
+//   the grant blocks (earlier in the script, Continue()-chained) have
+//   fired in the same pass before the exit launches — deterministic,
+//   no timing assumptions. The 1-3 interposed passes run on a black
+//   screen (the intro launcher faded out and nothing fades back in
+//   until BD0103's own palace-night block, BD0103.baf:771; bdcut00z
+//   re-fades to black itself, BDCUT00Z.baf:11). Import flow: the
+//   grants stay false (NEWGAME_SOD unset) and the exit fires on the
+//   first pass. bdcut00z is never reimplemented — it owns the gold
+//   impound, BD_EXTRA_GOLD, BD_SAFEHOUSE_DONE and the bd0103 move
+//   (10b §5).
+//
+// Also: BDSODTRN.bcs (the BG1->SoD transition cutscene, EET and
+// standalone) copies imported ground piles to BD0120 [949.1686]
+// (10b: BDSODTRN.baf:15) — stranded loot if the dungeon is never
+// walked. Re-target to BD0103 beside the player beds (10b §3 item 7).
+//
+// XP compensation: NONE in v0.1 — the removed ~32.5k+ (30k Imoen
+// award + 2.5k Korlasz + kill XP) is calibrated via the prologue XP
+// ledger entry after the jailbreak fight locks (design §7).
+// Never touched: SODSTRTA/CAMPAIGN.2DA, bdcut00z, K#* blocks, mod-NPC
+// blocks, the BD0120 IMOEN2 strip (component 160's seam).
+
+// --- journal strrefs: EET merges the BG:EE/SoD TLK at +200000 ---
+// (verified on both targets: 256379/259573/269028 on the EET dev
+// install, 56379/59573/69028 on standalone BG:EE+SoD — all three
+// strings name Korlasz)
+ACTION_IF (GAME_IS ~eet~) BEGIN
+  OUTER_SET csr140_jbase = 200000
+END ELSE BEGIN
+  OUTER_SET csr140_jbase = 0
+END
+OUTER_SET csr140_j_open = csr140_jbase + 56379 // "I must find Korlasz..." (QUEST)
+OUTER_SET csr140_j_surr = csr140_jbase + 59573 // "Korlasz has surrendered..." (QUEST_DONE)
+OUTER_SET csr140_j_done = csr140_jbase + 69028 // "...return to the Ducal Palace." (QUEST_DONE)
+
+// A wrong base would file garbage strings into the journal — verify
+// the actual TLK content and fail loudly instead.
+ACTION_FOR_EACH csr140_j IN ~%csr140_j_open%~ ~%csr140_j_surr%~ ~%csr140_j_done%~ BEGIN
+  ACTION_GET_STRREF %csr140_j% csr140_jtxt
+  ACTION_IF (~%csr140_jtxt%~ STRING_CONTAINS_REGEXP ~Korlasz~) BEGIN
+    FAIL ~chriz-sod-remix #140: dialog.tlk strref %csr140_j% does not mention Korlasz — the EET +200000 journal-strref assumption does not hold on this install~
+  END
+END
+
+// --- fail-loud single-occurrence replace ---
+// Every surgical edit runs through this: exactly one match or the
+// component aborts (quality bar: a mismatch must fail at install
+// time, never silently skip). CASE_SENSITIVE because the patterns
+// were taken verbatim from the dev-install decompile.
+DEFINE_PATCH_FUNCTION ~csr140_replace_exact~
+  STR_VAR
+    csr140_match = ~~
+    csr140_with  = ~~
+    csr140_why   = ~~
+BEGIN
+  COUNT_REGEXP_INSTANCES CASE_SENSITIVE ~%csr140_match%~ csr140_found
+  PATCH_IF (csr140_found != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #140 [%csr140_why%]: expected exactly 1 match of [%csr140_match%] in %SOURCE_RES%, found %csr140_found% — script text differs from the researched install; aborting instead of half-patching~
+  END
+  REPLACE_TEXTUALLY CASE_SENSITIVE ~%csr140_match%~ ~%csr140_with%~
+END
+
+// ------------------------------------------------------------
+// Seams 1 + 2: BDINTRO.bcs
+// ------------------------------------------------------------
+COPY_EXISTING ~bdintro.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+
+    // Seam 1 — staging block, removals (10b: BDINTRO.baf:546-547,
+    // 563-574, 576-577, 579-580). Deleting only the action text
+    // leaves the decompiler's trailing comments behind as bare
+    // comment lines — valid BAF, same residue component 120 leaves.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: walk-in warm-up (bdslow)~
+      csr140_match = ~ApplySpellRES("bdslow","intro_follower2")~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: walk-in warm-up (polymorph)~
+      csr140_match = ~ActionOverride("intro_follower2",Polymorph(FIGHTER_FEMALE_HUMAN))~ END
+    // bd_plot leaves its vanilla slot; re-added at the tail (see
+    // header: the write must be the last meaningful action).
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: bd_plot out of vanilla slot~
+      csr140_match = ~SetGlobal("bd_plot","global",2)~ END
+    // BDDEBUG parity (BDDEBUG.baf:151-160); BD0103.baf:737 sets the
+    // same value again — harmless.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: camp chapter~
+      csr140_match = ~SetGlobal("bd_npc_camp_chapter","global",0)~
+      csr140_with  = ~SetGlobal("bd_npc_camp_chapter","global",1)~ END
+    // No party staging: the party never plays BD0120, and bdcut00z
+    // re-positions everyone into BD0103 anyway.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P1 jump~
+      csr140_match = ~JumpToPoint(\[905\.1615\])~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P2 jump~
+      csr140_match = ~ActionOverride(Player2,JumpToPoint(\[728\.1602\]))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P3 jump~
+      csr140_match = ~ActionOverride(Player3,JumpToPoint(\[776\.1602\]))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P4 jump~
+      csr140_match = ~ActionOverride(Player4,JumpToPoint(\[776\.1744\]))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P5 jump~
+      csr140_match = ~ActionOverride(Player5,JumpToPoint(\[840\.1746\]))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P6 jump~
+      csr140_match = ~ActionOverride(Player6,JumpToPoint(\[824\.1782\]))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P2 face~
+      csr140_match = ~ActionOverride(Player2,Face(E))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P3 face~
+      csr140_match = ~ActionOverride(Player3,Face(E))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P4 face~
+      csr140_match = ~ActionOverride(Player4,Face(NE))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P5 face~
+      csr140_match = ~ActionOverride(Player5,Face(NE))~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P6 face~
+      csr140_match = ~ActionOverride(Player6,Face(NE))~ END
+    // MUST run after the ActionOverride(...,Face(NE)) removals above:
+    // only then is the bare Player1 Face(NE) the single occurrence.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P1 face~
+      csr140_match = ~Face(NE)~ END
+    // No escort: bdshimoe belonged to the removed dungeon walkthrough
+    // (design §1: do not create the escort).
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: bdshimoe escort~
+      csr140_match = ~CreateCreature("bdshimoe",\[881\.1652\],NE)~ END
+    // Ammon-quest pacing timer — dungeon-internal, dies with it.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: Ammon timer~
+      csr140_match = ~SetGlobalTimer("BD_Ammon_stop","BD0120",TWO_MINUTES)~ END
+    // Cutscene-breakable rig: its disarm (SetAreaScript(""), flag=0,
+    // breakable FALSE) lived in the walk-in blocks we gate off below;
+    // arming it here would leave BD0120's OVERRIDE area script stuck
+    // on "cutskip" and the breakable flag dangling.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: cutskip area script~
+      csr140_match = ~SetAreaScript("cutskip",OVERRIDE)~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: breakable flag~
+      csr140_match = ~SetGlobal("BD_CUTSCENE_BREAKABLE","GLOBAL",1)~ END
+    // Skip-state tail replaces the rig arm (last vanilla action of
+    // the block): default Korlasz outcome + journal chain (design §1),
+    // then bd_plot=50 as the very last global write, then end the
+    // cutscene so BD0120 area passes resume (seam 3 takes over).
+    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: skip-state tail~
+      csr140_match = ~SetCutSceneBreakable(TRUE)~
+      csr140_with  = EVAL ~SetGlobal("BD_KORLASZ_SURRENDER","GLOBAL",1)
+    AddJournalEntry(%csr140_j_open%,QUEST)
+    AddJournalEntry(%csr140_j_surr%,QUEST_DONE)
+    AddJournalEntry(%csr140_j_done%,QUEST_DONE)
+    SetGlobal("bd_plot","global",50)
+    EndCutSceneMode()~ END
+
+    // Seam 2 — False()-gate both walk-in variants (cookbook #7).
+    // "IF directly followed by InMyArea" is unique to the walk-in
+    // block: the join/wiring blocks put a SOD_fromimport check first.
+    LPF csr140_replace_exact STR_VAR csr140_why = ~walk-in scene, Minsc variant~
+      csr140_match = EVAL ~IF[ %TAB%%WNL%%LNL%%MNL%]+InMyArea("minsc")~
+      csr140_with  = ~IF
+  False()
+  InMyArea("minsc")~ END
+    LPF csr140_replace_exact STR_VAR csr140_why = ~walk-in scene, no-Minsc variant~
+      csr140_match = ~!InMyArea("minsc")~
+      csr140_with  = ~False()
+  !InMyArea("minsc")~ END
+
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// Seam 3: the deterministic exit (see header for why not a chain)
+// ------------------------------------------------------------
+// Appended at the BOTTOM so the K# Bhaalspawn grants earlier in the
+// script have already fired (Continue()-chained) in any pass that
+// reaches it. Trigger bd_plot==50 has no vanilla setter besides
+// BDDEBUG's own skip, which launches bdcut00z itself in the same
+// response — no interference.
+EXTEND_BOTTOM ~bd0120.bcs~ ~chriz-sod-remix/baf/exit0120.baf~
+
+// ------------------------------------------------------------
+// Ground piles: BDSODTRN copy target BD0120 -> BD0103
+// ------------------------------------------------------------
+// 10b §3 item 7: imported BG1 ground loot lands at BD0120 [949.1686],
+// unreachable once the dungeon is skipped. [190.540] sits between the
+// bdcut00z player landing points [179.544] and [202.567]
+// (BDCUT00Z.baf:24-30) — guaranteed-walkable floor at the guest beds.
+COPY_EXISTING ~bdsodtrn.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr140_replace_exact STR_VAR csr140_why = ~BG1 ground-pile copy target~
+      csr140_match = ~CopyGroundPilesTo("BD0120",\[949\.1686\])~
+      csr140_with  = ~CopyGroundPilesTo("BD0103",[190.540])~ END
+  END
+BUT_ONLY

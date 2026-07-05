@@ -1,0 +1,220 @@
+// ============================================================
+// chriz-sod-remix component 150 — Prologue: no assassination
+// night, crusade council (body; BEGIN block lives in the tp2)
+// ============================================================
+// The palace assassination night is cut by STRANGLE-BY-FLAG
+// (docs/research/11a §3): every assassination block has its own
+// vanilla once-flag, so one new arrival block pre-sets them all.
+// Only three scripts need real surgery:
+//   BD0103 — AND-gate the night block behind CSR_BEDTIME (set by
+//            a new servant dialog) and swap its Imoen-wake tail
+//            for a wake-for-council beat (11a §3C),
+//   BD0100 — despawn the ARE-placed night set (11a §3B),
+//   BD0102 — re-gate the five council variants to BD_PLOT=51 and
+//            drop the BDGASS6 corpse (11a §3D).
+// Council dialog is re-pointed to a crusade-only path with zero
+// new NPC text (11a §2); assassination references in surviving
+// city dialogs are False()-gated (11b list b).
+//
+// ORDER MATTERS: the DECOMPILE_AND_PATCH passes run BEFORE the
+// EXTEND_TOP calls on the same scripts — the arrival block also
+// contains GiveItemCreate("bdscrl04")/AddJournalEntry(267494),
+// and the uniqueness guards below would miscount after extension.
+//
+// Every surgical edit is guarded: an install-time text mismatch
+// PATCH_FAILs (loud) instead of silently skipping. Patterns were
+// verified against the DEV install decompiles 2026-07-06 (they
+// must match the comp-110/120-patched text, not vanilla).
+
+LOAD_TRA ~chriz-sod-remix/languages/english/comp150.tra~
+
+// WeiDU's decompiler emits CRLF on Windows; repo strings are LF.
+// %csr_nl% is a line-break regex that matches either.
+OUTER_SPRINT ~csr_nl~ ~%MNL%?%LNL%~
+
+// Guarded textual replace: refuses to install if the pattern does
+// not occur exactly %csr_expect% times in the decompiled buffer.
+DEFINE_PATCH_MACRO ~csr150_replace~ BEGIN
+  COUNT_REGEXP_INSTANCES ~%csr_pat%~ csr_cnt
+  PATCH_IF (csr_cnt = csr_expect) BEGIN
+    REPLACE_TEXTUALLY ~%csr_pat%~ ~%csr_rep%~
+  END ELSE BEGIN
+    PATCH_FAIL ~chriz-sod-remix #150 [%csr_what%]: expected %csr_expect% occurrence(s), found %csr_cnt%. The installed script text differs from what this component was verified against - aborting instead of mis-patching.~
+  END
+END
+
+// ------------------------------------------------------------
+// BD0103 (guest suite) — night block surgery
+// ------------------------------------------------------------
+COPY_EXISTING ~bd0103.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+
+    // (1) AND-gate the palace-night block behind CSR_BEDTIME so the
+    // 14-day timeskip fires on the player's "retire" choice instead
+    // of on arrival (11a §3C). The IF/THEN header alone is unique to
+    // this block (every other LT51 block has additional triggers);
+    // FadeToColor/TextScreen are included as belt-and-braces anchors.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bd0103 night-block CSR_BEDTIME gate~
+    SPRINT ~csr_pat~ ~IF%csr_nl%  GlobalLT("BD_PLOT","GLOBAL",51)%csr_nl%THEN%csr_nl%  RESPONSE #100%csr_nl%    FadeToColor(\[1\.0\],0)%csr_nl%    TextScreen("DPALACE")~
+    SPRINT ~csr_rep~ ~IF
+  Global("CSR_BEDTIME","GLOBAL",1)
+  GlobalLT("BD_PLOT","GLOBAL",51)
+THEN
+  RESPONSE #100
+    FadeToColor([1.0],0)
+    TextScreen("DPALACE")~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+    // (2)+(3) MOVE the Treasury Note + its journal opener out of the
+    // night block — the new arrival block (baf/csrarr.baf) grants them
+    // on arrival so the basement gold errand is live during the roam
+    // (11a §3A / design 01-prologue §4). Deleting only the action text
+    // may strand a trailing decompiler comment, which is harmless
+    // (proved by component 110's action deletions).
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bd0103 Treasury Note move (bdscrl04)~
+    SPRINT ~csr_pat~ ~GiveItemCreate("bdscrl04",Player1,0,0,0)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bd0103 journal 267494 move~
+    SPRINT ~csr_pat~ ~AddJournalEntry(267494,QUEST)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+    // (4) Replace the block's Imoen-wake tail (IMOEN2 SEQ_CAST wake +
+    // StartDialogNoSet, 11a §3C) with the wake-for-council beat:
+    //  - BD_LEFT_THE_PALACE=0 reset here, because BD0010.baf:10-16
+    //    unconditionally sets it to 2 during the pre-council roam and
+    //    that would skip Corwin's post-council hub state 29 (11a §4c);
+    //  - a fresh csrserv (the bedtime instance is bddest'ed first so
+    //    exactly one exists) enters from the door and wakes Player1 —
+    //    spawn/approach points come from the Skie 3 a.m. staging
+    //    template in this same script (11a §3D);
+    //  - her StartDialogNoSet is what ends the block's cutscene mode
+    //    (vanilla relied on IMOEN2's dialog for this — cookbook #6).
+    // TextScreen / bd_plot=51 / AdvanceTime / bed staging all stay.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bd0103 night-block wake tail~
+    SPRINT ~csr_pat~ ~    ActionOverride("IMOEN2",SetSequence(SEQ_CAST))%csr_nl%    SmallWait(16)%csr_nl%    ActionOverride(Player1,SetSequence(SEQ_AWAKE))%csr_nl%    SmallWait(4)%csr_nl%    ActionOverride(Player1,Face(SW))%csr_nl%    SmallWait(1)%csr_nl%    ActionOverride(Player1,JumpToPoint(\[184\.428\]))%csr_nl%    ActionOverride(Player1,SetSequence(SEQ_READY))%csr_nl%    ActionOverride(Player1,FaceObject("IMOEN2"))%csr_nl%    SmallWait(3)%csr_nl%    ActionOverride("IMOEN2",FaceObject(Player1))%csr_nl%    SmallWait(6)%csr_nl%    ActionOverride("IMOEN2",StartDialogNoSet(Player1))~
+    SPRINT ~csr_rep~ ~    ApplySpellRES("bddest","csrserv")
+    SetGlobal("BD_LEFT_THE_PALACE","GLOBAL",0)
+    CreateCreature("csrserv",[443.476],NW)
+    ActionOverride("csrserv",MoveToPoint([230.470]))
+    Wait(2)
+    ActionOverride(Player1,SetSequence(SEQ_AWAKE))
+    SmallWait(4)
+    ActionOverride(Player1,Face(SW))
+    SmallWait(1)
+    ActionOverride(Player1,JumpToPoint([184.428]))
+    ActionOverride(Player1,SetSequence(SEQ_READY))
+    ActionOverride(Player1,FaceObject("csrserv"))
+    SmallWait(3)
+    ActionOverride("csrserv",FaceObject(Player1))
+    SmallWait(6)
+    ActionOverride("csrserv",StartDialogNoSet(Player1))~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+  END
+BUT_ONLY
+
+// Arrival flag pre-set + bedtime servant spawn + murder-proofing
+// (must come AFTER the patch above — see ordering note in header).
+EXTEND_TOP ~bd0103.bcs~ ~chriz-sod-remix/baf/csrarr.baf~
+
+// ------------------------------------------------------------
+// BD0100 (upper hall) — placed night-set sweep
+// ------------------------------------------------------------
+// The ARE pre-places a live ambush (hostile Assassin1-3 = BDGASS5,
+// Corwin, FF Guard 1/2, 3 corpses, all schedule 0xFFFFFF) that
+// vanilla only cleans up at bd_plot>51 (11a §3B, 11b (d)2). The
+// sweep block despawns them the first time the player enters at
+// bd_plot<52; the vanilla >51 cleanup then dresses the hall
+// normally on a later load.
+EXTEND_TOP ~bd0100.bcs~ ~chriz-sod-remix/baf/csrswp.baf~
+
+// ------------------------------------------------------------
+// BD0102 (council hall) — re-gate the five council variants
+// ------------------------------------------------------------
+COPY_EXISTING ~bd0102.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+
+    // Re-gate all five OnCreation council variants from LT52 to =51:
+    // LT52 is already true at bd_plot=50, so without this the council
+    // fires on the player's FIRST descent toward the city (11a §3D).
+    // "LT52 + OnCreation" identifies exactly the five variants — the
+    // music block at the top of the script also tests LT52 but pairs
+    // it with BD_INIT_MUSIC, and the bd_actor_positions block puts
+    // OnCreation() after its own once-flag (dev decompile 2026-07-06).
+    SET csr_expect = 5
+    SPRINT ~csr_what~ ~bd0102 council variant re-gate (5x)~
+    SPRINT ~csr_pat~ ~GlobalLT("BD_plot","global",52)%csr_nl%  OnCreation()~
+    SPRINT ~csr_rep~ ~Global("BD_plot","global",51)
+  OnCreation()~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+    // Drop the "captured assassin" from all five variants — BDGASS6
+    // is a CORPSE (CRE state 0x800, no dialog; there was never an
+    // interrogation — 11a §1). No assassination, no body. The
+    // bddest("bdgass6") in the post-council cleanup block harmlessly
+    // no-ops on the never-created corpse. Two spawn points:
+    // [1182.630] in V1/V4/V5, [635.249] in V2/V3.
+    SET csr_expect = 3
+    SPRINT ~csr_what~ ~bd0102 BDGASS6 corpse removal (stairs-A variants)~
+    SPRINT ~csr_pat~ ~CreateCreature("BDGASS6",\[1182\.630\],SW)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+    SET csr_expect = 2
+    SPRINT ~csr_what~ ~bd0102 BDGASS6 corpse removal (stairs-B variants)~
+    SPRINT ~csr_pat~ ~CreateCreature("BDGASS6",\[635\.249\],NW)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr150_replace~
+
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// csrserv — palace servant (bedtime offer / wake-for-council)
+// ------------------------------------------------------------
+// Clone of BDSERV.cre, which is verified spawner-less in the whole
+// prologue (11a §3D) — but it MUST get a new dialog: vanilla
+// BDSERV.dlg state 2 triggers on bd_plot=54 alone and its exits set
+// bd_plot=55, which would bypass the Skie enlistment scene entirely.
+COPY_EXISTING ~bdserv.cre~ ~override/csrserv.cre~
+  WRITE_ASCII 0x248 ~None~ #8      // CRE names a "BDSERV" override script that does not exist as a resource; clear the dangling ref so nothing can ever supply behavior for it
+  WRITE_ASCII 0x280 ~csrserv~ #32  // death variable — the object name every csr* script block targets
+  WRITE_ASCII 0x2cc ~csrserv~ #8   // NEW dialog, never vanilla BDSERV.dlg (see above)
+
+COMPILE ~chriz-sod-remix/dlg/csrserv.d~
+
+// ------------------------------------------------------------
+// Council re-points + assassination text gates
+// ------------------------------------------------------------
+COMPILE ~chriz-sod-remix/dlg/csrcncl.d~
+
+// ------------------------------------------------------------
+// EE quest bookkeeping for the swapped council QUEST_DONE entry
+// ------------------------------------------------------------
+// Journal 266701 ("...The assassins appear to have been sent by
+// Caelar...") is replaced by @15010 in BDBELT state 41 (csrcncl.d).
+// bgee.lua groups 266701 under quest 266700 ("Important Events");
+// registering the replacement strref under the same quest keeps the
+// quest-UI closure identical to vanilla. Cosmetic-only, so a text
+// mismatch here WARNs instead of failing the whole component (the
+// unregistered entry would still display, just ungrouped).
+ACTION_IF (FILE_EXISTS_IN_GAME ~bgee.lua~) BEGIN
+  OUTER_SET csr_jdone = RESOLVE_STR_REF(@15010)
+  COPY_EXISTING ~bgee.lua~ ~override~
+    COUNT_REGEXP_INSTANCES ~createEntry    ( 266700, -1, 266701, {}, 277 )~ csr_cnt
+    PATCH_IF (csr_cnt = 1) BEGIN
+      REPLACE_TEXTUALLY ~createEntry    ( 266700, -1, 266701, {}, 277 )~ ~createEntry    ( 266700, -1, 266701, {}, 277 )%LNL%%TAB%createEntry    ( 266700, -1, %csr_jdone%, {}, 277 )~
+    END ELSE BEGIN
+      PATCH_WARN ~chriz-sod-remix #150: bgee.lua quest row for 266701 not found (%csr_cnt% matches) - the replacement council journal entry will display ungrouped. Everything else installed normally.~
+    END
+  BUT_ONLY
+END ELSE BEGIN
+  WARN ~chriz-sod-remix #150: bgee.lua not found in game - the replacement council journal entry will display ungrouped. Everything else installed normally.~
+END

@@ -1,0 +1,26 @@
+// chriz-sod-remix — component 150 strings (@15000-@15099)
+
+// component name (referenced as a literal in the tp2 BEGIN line; kept here
+// for translators and a possible future setup.tra consolidation)
+@15000 = ~SoD remix: prologue - no assassination night, crusade council~
+
+// --- csrserv, the palace servant (neutral palace-staff tone) ---
+// bedtime offer (bd_plot < 51, CSR_BEDTIME unset)
+@15001 = ~Your rooms are made up whenever you wish to retire for the night. Shall I tell the staff you're done for the evening, or will you be about the palace a while yet?~
+@15002 = ~We'll retire now. The day has been long enough.~
+// wake-for-council (bd_plot = 51)
+@15003 = ~Your pardon for waking you, but the Grand Dukes are assembled in the council chamber below. They ask that you come down as soon as you're able.~
+@15004 = ~Tell them we'll be down shortly.~
+// bedtime offer, declined
+@15005 = ~Not yet. There are matters I mean to see to first.~
+// re-clicked after agreeing to retire
+@15006 = ~Rest well. The staff will see that you're not disturbed.~
+// clicked after the council (bd_plot > 51)
+@15007 = ~Is there anything you require? The palace staff is at your service.~
+
+// --- journal ---
+// replaces 266701 (QUEST_DONE, quest 266700 "Important Events"), whose text
+// blamed the palace assassins; same title so the journal reads consistently
+@15010 = ~The Siege of Dragonspear
+
+The war council has concluded. The dukes are sending every sword they can muster against Caelar Argent's crusade, and they have asked me to march north with the Flaming Fist expedition to Dragonspear Castle.~

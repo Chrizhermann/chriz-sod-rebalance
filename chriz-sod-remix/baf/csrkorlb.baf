@@ -1,0 +1,779 @@
+// chriz-sod-remix component 170 - csrkorlb: Korlasz's no-SCS combat brain (race slot).
+// Port of her vanilla personal brain BDSHKORL.baf (research 10d section 1; block line
+// numbers cited below refer to research/data/sod_baf/BDSHKORL.baf) with:
+//   - every AreaCheck("BD0130")/Massive_Door gate dropped (the fight now lives in BD0116),
+//   - the talk-first/surrender machinery (:12-75) NOT ported - design 01-prologue.md
+//     section 2 locks "NO surrender/parley; a real fight to the death",
+//   - the signature-sequencer fire block added (dw#mg437 HaveSpellRES pattern, 10d/11a),
+//   - one Hold Monster and one Flame Arrow block added for the L5/L6 book extension,
+//   - 6x nearest-rank spam per spell condensed to the first 2-3 ranks (a 6-slot party
+//     never needs rank 4-6; keeps the script reviewable).
+// Every cast is HaveSpell()-guarded (vanilla property), so this brain is also safe as
+// the shared fallback brain for csrpori (Mage 8): missing spells silently no-op, the
+// scroll/potion blocks are HasItem()-guarded and he carries none.
+// Only vanilla-EE IDS symbols are used - this file must compile WITHOUT SCS installed.
+
+// out-of-combat 8-hour reset, ported from BDSHKORL.baf:1-10
+IF
+  !GlobalTimerNotExpired("BD_Rest","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Rest","LOCALS",EIGHT_HOURS)
+    ApplySpell(Myself,RESTORE_FULL_HEALTH)
+    SetGlobal("BD_MSeq","LOCALS",0)
+    Rest()
+END
+
+// NEW self-arming block: vanilla relied on the BDENSHTV class script to set BD_Engaged;
+// her dialog-driven Enemy() in BD0116 must never leave her parked on the gate below if
+// that engage path misses, so arm explicitly on first sight of an opponent.
+IF
+  Allegiance(Myself,EVILCUTOFF)
+  Global("BD_Engaged","LOCALS",0)
+  See([GOODCUTOFF])
+THEN
+  RESPONSE #100
+    SetGlobal("BD_Engaged","LOCALS",1)
+    SetGlobalTimer("BD_Rest","LOCALS",EIGHT_HOURS)
+    Continue()
+END
+
+// master combat gate, ported from BDSHKORL.baf:125-134
+IF
+  OR(4)
+    !Allegiance(Myself,EVILCUTOFF)
+    StateCheck(Myself,STATE_IMMOBILE)
+    StateCheck(Myself,STATE_REALLY_DEAD)
+    Global("BD_Engaged","LOCALS",0)
+THEN
+  RESPONSE #100
+    NoAction()
+END
+
+// ported from BDSHKORL.baf:136-142
+IF
+  !InActiveArea(Myself)
+  !Range(NearestEnemyOf(Myself),30)
+THEN
+  RESPONSE #100
+    NoAction()
+END
+
+// ported from BDSHKORL.baf:144-149
+IF
+  StateCheck(Myself,STATE_PANIC)
+THEN
+  RESPONSE #100
+    RandomWalkContinuous()
+END
+
+// emulated Minor Sequencer (instant Mirror Image + Shield), BDSHKORL.baf:151-164
+// minus the AreaCheck. NOTE: shared with csrpori - ReallyForceSpell ignores the book,
+// so he also opens with MI+Shield; accepted (he is the Mirror Image support caster).
+IF
+  Allegiance(Myself,ENEMY)
+  Global("BD_MSeq","LOCALS",0)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_MSeq","LOCALS",1)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    DisplayString(Myself,226469)  // ~Minor Sequencer~ (vanilla strref, BDSHKORL.baf:160)
+    SetSequence(SEQ_CAST)
+    ReallyForceSpell(Myself,WIZARD_MIRROR_IMAGE)
+    ReallyForceSpell(Myself,WIZARD_SHIELD)
+END
+
+// NEW: signature Spell Sequencer, no-SCS variant. Mirrors the install-generated
+// dw#mg437 dw#ms3 block (dumped from the dev install, see docs/research/10d and
+// lib/comp170.tpa): HaveSpellRES marker -> ReallyForceSpellRES of the combined SPL
+// (which burns the marker via op172 -> fires exactly once) + forced component casts.
+// Sets both BD_Cast (this brain's rhythm) and castspell (SCS convention) timers.
+IF
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpellRES("csrseq1")
+  Allegiance(Myself,ENEMY)
+  See(NearestEnemyOf(Myself))
+  !StateCheck(NearestEnemyOf(Myself),STATE_NOT_TARGETABLE)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    SetGlobalTimer("castspell","LOCALS",ONE_ROUND)
+    ReallyForceSpellRES("csrseq1b",NearestEnemyOf(Myself))
+    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_SLOW)
+    SmallWait(1)
+    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_CONFUSION)
+    SmallWait(1)
+    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_GLITTERDUST)
+END
+
+// Vocalize scroll, ported from BDSHKORL.baf:166-178 (revived by restoring SCRL3G)
+IF
+  StateCheck(Myself,STATE_SILENCED)
+  HasItem("SCRL3G",Myself)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    DisplayStringHead(Myself,266958)  // ~*uses a scroll*~
+    DestroyItem("SCRL3G")
+    SpellNoDec(Myself,WIZARD_VOCALIZE)
+    SetInterrupt(TRUE)
+END
+
+// Stoneskin recast, ported from BDSHKORL.baf:180-193
+IF
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  CheckStatLT(Myself,1,STONESKINS)
+  HaveSpell(WIZARD_STONE_SKIN)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(Myself,WIZARD_STONE_SKIN)
+END
+
+// Mirror Image, ported from BDSHKORL.baf:195-217
+IF
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  !StateCheck(Myself,STATE_MIRRORIMAGE)
+  HaveSpell(WIZARD_MIRROR_IMAGE)
+  !CheckStatGT(Myself,0,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  !CheckStatGT(Player1,0,TRUE_SIGHT)
+  !CheckStatGT(Player2,0,TRUE_SIGHT)
+  !CheckStatGT(Player3,0,TRUE_SIGHT)
+  !CheckStatGT(Player4,0,TRUE_SIGHT)
+  !CheckStatGT(Player5,0,TRUE_SIGHT)
+  !CheckStatGT(Player6,0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.PLANATAR],0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.DARKPLANATAR],0,TRUE_SIGHT)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(Myself,WIZARD_MIRROR_IMAGE)
+END
+
+// Minor Globe scroll, ported from BDSHKORL.baf:219-234; the vanilla
+// OpenState("Massive_Door")/AreaCheck fight-started proxy becomes Allegiance(ENEMY)
+IF
+  Allegiance(Myself,ENEMY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  CheckStat(Myself,0,MINORGLOBE)
+  HasItem("SCRL1Z",Myself)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    DisplayStringHead(Myself,266958)  // ~*uses a scroll*~
+    DestroyItem("SCRL1Z")
+    SpellNoDec(Myself,WIZARD_MINOR_GLOBE_OF_INVULNERABILITY)
+    SetInterrupt(TRUE)
+END
+
+// Protection from Elemental Energy scroll, ported from BDSHKORL.baf:87-104
+// (same gate replacement as above)
+IF
+  Allegiance(Myself,ENEMY)
+  HasItem("SCRL6H",Myself)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  OR(2)
+    StateCheck(Myself,STATE_MIRRORIMAGE)
+    !Range(NearestEnemyOf(Myself),30)
+  !StateCheck(Myself,STATE_REALLY_DEAD)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    DisplayStringHead(Myself,266958)  // ~*uses a scroll*~
+    DestroyItem("SCRL6H")
+    SpellNoDec(Myself,WIZARD_PROTECTION_FROM_FIRE)
+    SetInterrupt(TRUE)
+END
+
+// Potion of Clarity, ported from BDSHKORL.baf:106-123
+IF
+  Allegiance(Myself,ENEMY)
+  HasItem("POTN21",Myself)
+  !CheckSpellState(Myself,POTION_OF_CLARITY)
+  DifficultyGT(EASY)
+  OR(2)
+    StateCheck(Myself,STATE_MIRRORIMAGE)
+    !Range(NearestEnemyOf(Myself),30)
+  !StateCheck(Myself,STATE_REALLY_DEAD)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    UseItem("POTN21",Myself)
+    DisplayStringHead(Myself,256560)  // ~*quaffs a potion*~
+    SetInterrupt(TRUE)
+END
+
+// Haste an unhasted ally, ported from BDSHKORL.baf:236-254
+IF
+  DifficultyGT(EASY)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_HASTE)
+  See([EVILCUTOFF])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStat(LastSeenBy(Myself),0,IMPROVEDHASTE)
+  !StateCheck(LastSeenBy(Myself),STATE_HASTED)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_HASTE)
+END
+
+// NEW: Hold Monster (L5 book extension, design 01-prologue.md sec 2a); guard set
+// copied from the vanilla Confusion block so the counterplay is identical
+IF
+  DifficultyGT(EASY)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_HOLD_MONSTER)
+  See([GOODCUTOFF])
+  !General(LastSeenBy(Myself),UNDEAD)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),-2,SAVEVSSPELL)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_FREE_ACTION)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckStat(LastSeenBy(Myself),5,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_HOLD_MONSTER)
+END
+
+// Confusion vs the 3 nearest, ported from BDSHKORL.baf:256-338 (ranks 4-6 dropped)
+IF
+  DifficultyGT(EASY)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_CONFUSION)
+  See([GOODCUTOFF])
+  !General(LastSeenBy(Myself),UNDEAD)
+  !Race(LastSeenBy(Myself),DEMONIC)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),-2,SAVEVSSPELL)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStat(LastSeenBy(Myself),4,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_CONFUSION)
+END
+
+IF
+  DifficultyGT(EASY)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_CONFUSION)
+  See(SecondNearest([GOODCUTOFF]))
+  !General(LastSeenBy(Myself),UNDEAD)
+  !Race(LastSeenBy(Myself),DEMONIC)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),-2,SAVEVSSPELL)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStat(LastSeenBy(Myself),4,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_CONFUSION)
+END
+
+IF
+  DifficultyGT(EASY)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_CONFUSION)
+  See(ThirdNearest([GOODCUTOFF]))
+  !General(LastSeenBy(Myself),UNDEAD)
+  !Race(LastSeenBy(Myself),DEMONIC)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),-2,SAVEVSSPELL)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStat(LastSeenBy(Myself),4,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_CONFUSION)
+END
+
+// Slow vs the 3 nearest, ported from BDSHKORL.baf:424-611 (ranks 4-6 dropped)
+IF
+  !Difficulty(EASIEST)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_SLOW)
+  See([GOODCUTOFF])
+  !Class(LastSeenBy(Myself),MONK)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_HARMLESS)
+  !StateCheck(LastSeenBy(Myself),STATE_SLOWED)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !HasItemEquiped("RING09",LastSeenBy(Myself))
+  !HasItemEquipedReal("SW2H06",LastSeenBy(Myself))
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_FREE_ACTION)
+  CheckStatGT(LastSeenBy(Myself),-4,SAVEVSSPELL)
+  !CheckStat(LastSeenBy(Myself),8,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_SLOW)
+END
+
+IF
+  !Difficulty(EASIEST)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_SLOW)
+  See(SecondNearest([GOODCUTOFF]))
+  !Class(LastSeenBy(Myself),MONK)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_HARMLESS)
+  !StateCheck(LastSeenBy(Myself),STATE_SLOWED)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !HasItemEquiped("RING09",LastSeenBy(Myself))
+  !HasItemEquipedReal("SW2H06",LastSeenBy(Myself))
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_FREE_ACTION)
+  CheckStatGT(LastSeenBy(Myself),-4,SAVEVSSPELL)
+  !CheckStat(LastSeenBy(Myself),8,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_SLOW)
+END
+
+IF
+  !Difficulty(EASIEST)
+  OR(2)
+    !GlobalTimerNotExpired("BD_Cast","LOCALS")
+    CheckStatGT(Myself,0,AURACLEANSING)
+  HaveSpell(WIZARD_SLOW)
+  See(ThirdNearest([GOODCUTOFF]))
+  !Class(LastSeenBy(Myself),MONK)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_HARMLESS)
+  !StateCheck(LastSeenBy(Myself),STATE_SLOWED)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !HasItemEquiped("RING09",LastSeenBy(Myself))
+  !HasItemEquipedReal("SW2H06",LastSeenBy(Myself))
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_FREE_ACTION)
+  CheckStatGT(LastSeenBy(Myself),-4,SAVEVSSPELL)
+  !CheckStat(LastSeenBy(Myself),8,WIZARD_SPELL_IMMUNITY)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_SLOW)
+END
+
+// Dire Charm vs warriors, ported from BDSHKORL.baf:683-786 (FIGHTER_ALL ranks 1-2 +
+// RANGER_ALL rank 1 kept, single-class/elf-exclusion spam dropped)
+IF
+  DifficultyGT(EASY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_DIRE_CHARM)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !StateCheck(Myself,STATE_SILENCED)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  See([GOODCUTOFF.HUMANOID.0.FIGHTER_ALL])
+  !Class(LastSeenBy(Myself),MONK)
+  !Race(LastSeenBy(Myself),ELF)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckStat(LastSeenBy(Myself),4,WIZARD_SPELL_IMMUNITY)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStat(LastSeenBy(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStatGT(LastSeenBy(Myself),0,MINORGLOBE)
+  !HasItemEquiped("MISC73",LastSeenBy(Myself))
+  !HasItemEquiped("HELM06",LastSeenBy(Myself))
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_DIRE_CHARM)
+    SetInterrupt(TRUE)
+END
+
+IF
+  DifficultyGT(EASY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_DIRE_CHARM)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !StateCheck(Myself,STATE_SILENCED)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  See(SecondNearest([GOODCUTOFF.HUMANOID.0.FIGHTER_ALL]))
+  !Class(LastSeenBy(Myself),MONK)
+  !Race(LastSeenBy(Myself),ELF)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckStat(LastSeenBy(Myself),4,WIZARD_SPELL_IMMUNITY)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStat(LastSeenBy(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStatGT(LastSeenBy(Myself),0,MINORGLOBE)
+  !HasItemEquiped("MISC73",LastSeenBy(Myself))
+  !HasItemEquiped("HELM06",LastSeenBy(Myself))
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_DIRE_CHARM)
+    SetInterrupt(TRUE)
+END
+
+IF
+  DifficultyGT(EASY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_DIRE_CHARM)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !StateCheck(Myself,STATE_SILENCED)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  See([GOODCUTOFF.HUMANOID.0.RANGER_ALL])
+  !Race(LastSeenBy(Myself),ELF)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStatGT(LastSeenBy(Myself),0,CLERIC_CHAOTIC_COMMANDS)
+  !CheckStat(LastSeenBy(Myself),4,WIZARD_SPELL_IMMUNITY)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStat(LastSeenBy(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStatGT(LastSeenBy(Myself),0,MINORGLOBE)
+  !HasItemEquiped("MISC73",LastSeenBy(Myself))
+  !HasItemEquiped("HELM06",LastSeenBy(Myself))
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_DIRE_CHARM)
+    SetInterrupt(TRUE)
+END
+
+// Glitterdust vs warriors then anyone, ported from BDSHKORL.baf:1112-1205
+IF
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_GLITTERDUST)
+  See([GOODCUTOFF.0.0.FIGHTER])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_BLIND)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !CheckStat(LastSeenBy(Myself),2,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_GLITTERDUST)
+END
+
+IF
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_GLITTERDUST)
+  See([GOODCUTOFF.0.0.RANGER])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_BLIND)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !CheckStat(LastSeenBy(Myself),2,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_GLITTERDUST)
+END
+
+IF
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_GLITTERDUST)
+  See([GOODCUTOFF])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_BLIND)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !CheckStat(LastSeenBy(Myself),2,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_GLITTERDUST)
+END
+
+// NEW: Flame Arrow (L3 memorization emphasis, design 01-prologue.md sec 2a); guard
+// set copied from the vanilla Magic Missile caster-priority block (:1562-1588)
+IF
+  DifficultyGT(EASY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_FLAME_ARROW)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  OR(4)
+    See([GOODCUTOFF.0.0.BARD_ALL])
+    See([GOODCUTOFF.0.0.DRUID_ALL])
+    See([GOODCUTOFF.0.0.CLERIC_ALL])
+    See([GOODCUTOFF.0.0.MAGE_ALL])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  CheckStatLT(LastSeenBy(Myself),31,RESISTMAGIC)
+  !CheckStat(LastSeenBy(Myself),2,DEFENSIVE_MODIFIER)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStat(LastSeenBy(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStat(LastSeenBy(Myself),3,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_FLAME_ARROW)
+END
+
+IF
+  DifficultyGT(EASY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_FLAME_ARROW)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  See(NearestEnemyOf(Myself))
+  !StateCheck(NearestEnemyOf(Myself),STATE_NOT_TARGETABLE)
+  CheckStat(NearestEnemyOf(Myself),0,MINORGLOBE)
+  CheckStatLT(NearestEnemyOf(Myself),31,RESISTMAGIC)
+  !CheckStat(NearestEnemyOf(Myself),2,DEFENSIVE_MODIFIER)
+  !CheckStatGT(NearestEnemyOf(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStatGT(NearestEnemyOf(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(NearestEnemyOf(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStat(NearestEnemyOf(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStat(NearestEnemyOf(Myself),3,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(NearestEnemyOf(Myself),WIZARD_FLAME_ARROW)
+END
+
+// Spook vs warriors, ported from BDSHKORL.baf:1302-1334 (rank 1 only)
+IF
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_SPOOK)
+  OR(2)
+    See([PC.0.0.RANGER])
+    See([PC.0.0.FIGHTER])
+  !General(LastSeenBy(Myself),UNDEAD)
+  !Race(LastSeenBy(Myself),DEMONIC)
+  !Kit(LastSeenBy(Myself),CAVALIER)
+  !Kit(LastSeenBy(Myself),Blackguard)
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  !StateCheck(LastSeenBy(Myself),STATE_DISABLED)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  CheckStatGT(LastSeenBy(Myself),0,SAVEVSSPELL)
+  CheckStatLT(LastSeenBy(Myself),50,RESISTMAGIC)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  !CheckSpellState(LastSeenBy(Myself),RESIST_FEAR)
+  !CheckSpellState(LastSeenBy(Myself),BARBARIAN_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),BERSERKER_RAGE)
+  !CheckSpellState(LastSeenBy(Myself),MINSC_BERSERK)
+  !CheckSpellState(LastSeenBy(Myself),POTION_OF_CLARITY)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStat(LastSeenBy(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStat(LastSeenBy(Myself),5,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_SPOOK)
+END
+
+// Magic Missile: caster-priority block ported from BDSHKORL.baf:1562-1588,
+// plus one generic nearest-enemy fallback
+IF
+  DifficultyGT(EASY)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_MAGIC_MISSILE)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  OR(4)
+    See([GOODCUTOFF.0.0.BARD_ALL])
+    See([GOODCUTOFF.0.0.DRUID_ALL])
+    See([GOODCUTOFF.0.0.CLERIC_ALL])
+    See([GOODCUTOFF.0.0.MAGE_ALL])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
+  CheckStat(LastSeenBy(Myself),0,MINORGLOBE)
+  CheckStatLT(LastSeenBy(Myself),31,RESISTMAGIC)
+  CheckStatLT(LastSeenBy(Myself),31,MAGICDAMAGERESISTANCE)
+  !CheckStat(LastSeenBy(Myself),2,DEFENSIVE_MODIFIER)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(LastSeenBy(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStat(LastSeenBy(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStat(LastSeenBy(Myself),6,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(LastSeenBy(Myself),WIZARD_MAGIC_MISSILE)
+END
+
+IF
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  HaveSpell(WIZARD_MAGIC_MISSILE)
+  CheckStatLT(Myself,50,SPELLFAILUREMAGE)
+  !CheckStatGT(Myself,0,CLERIC_INSECT_PLAGUE)
+  !StateCheck(Myself,STATE_SILENCED)
+  See(NearestEnemyOf(Myself))
+  !StateCheck(NearestEnemyOf(Myself),STATE_NOT_TARGETABLE)
+  CheckStat(NearestEnemyOf(Myself),0,MINORGLOBE)
+  CheckStatLT(NearestEnemyOf(Myself),31,RESISTMAGIC)
+  CheckStatLT(NearestEnemyOf(Myself),31,MAGICDAMAGERESISTANCE)
+  !CheckStat(NearestEnemyOf(Myself),2,DEFENSIVE_MODIFIER)
+  !CheckStatGT(NearestEnemyOf(Myself),0,WIZARD_SPELL_TRAP)
+  !CheckStatGT(NearestEnemyOf(Myself),0,WIZARD_SPELL_DEFLECTION)
+  !CheckStatGT(NearestEnemyOf(Myself),0,WIZARD_SPELL_TURNING)
+  !CheckStat(NearestEnemyOf(Myself),1,CLERIC_SHIELD_OF_THE_ARCHONS)
+  !CheckStat(NearestEnemyOf(Myself),6,WIZARD_SPELL_IMMUNITY)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    Spell(NearestEnemyOf(Myself),WIZARD_MAGIC_MISSILE)
+END
+
+// weapon/positioning tail, ported from BDSHKORL.baf:1784-1819
+IF
+  Range(NearestEnemyOf(Myself),6)
+  IsWeaponRanged(Myself)
+THEN
+  RESPONSE #100
+    EquipMostDamagingMelee()
+    Continue()
+END
+
+IF
+  !Range(NearestEnemyOf(Myself),6)
+  CanEquipRanged()
+  !IsWeaponRanged(Myself)
+THEN
+  RESPONSE #100
+    EquipRanged()
+    Continue()
+END
+
+IF
+  HaveSpell(WIZARD_MAGIC_MISSILE)
+  Range(NearestEnemyOf(Myself),6)
+  CheckStat(Myself,0,ENTANGLE)
+  CheckStat(Myself,0,GREASE)
+THEN
+  RESPONSE #100
+    RandomWalkContinuous()
+END
+
+IF
+  !HaveSpell(WIZARD_MAGIC_MISSILE)
+  See(NearestEnemyOf(Myself))
+THEN
+  RESPONSE #100
+    AttackReevaluate(NearestEnemyOf(Myself),15)
+END

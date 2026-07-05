@@ -1,0 +1,77 @@
+// chriz-sod-remix component 170 - EXTEND_TOP payload for bd0116.bcs (palace basement).
+// Rides the vanilla jailbreak scaffolding: BD_KORLAS_FREED("BD0116") is set by the
+// stairs-top hint beat in BD0102 (jbhint.baf) or, belt-and-suspenders, by the vanilla
+// TrapBDKorlasz region (BD0116.baf:15-21). Korlasz herself (csrkorl) is spawned by the
+// vanilla cell block - this file only adds her jailbreak crew and re-homed state.
+// Composition scaling uses explicit Difficulty() branches - the engine's only native
+// mechanism for placed fights (research 10d section 4; slider only doubles damage).
+// Coordinates cluster around the verified cell block / corridor spawns (Korlasz cell
+// map note [1030.300], vanilla spawns [1003.298]/[893.407]/[643.477], BD0116.baf:1-13).
+
+// crew core - spawns NEUTRAL (EA baked into the csr*.cre), synced via csrkfin
+IF
+  Global("BD_KORLAS_FREED","BD0116",1)
+  Global("CSR_JB_PARTY","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_PARTY","GLOBAL",1)
+    CreateCreature("csrhass",[957.375],SW)   // Mother Hasska - frontline anchor
+    CreateCreature("csrvhas",[903.407],SW)   // Vhast - bruiser
+    CreateCreature("csrpori",[943.300],SE)   // Porios - support caster
+    Continue()
+END
+
+// NORMAL and up: the thief and the familiar join (design sec 2a scaling draft:
+// EASY/EASIEST field only Korlasz + Hasska + Vhast + Porios)
+IF
+  Global("BD_KORLAS_FREED","BD0116",1)
+  Global("CSR_JB_PARTY2","GLOBAL",0)
+  DifficultyGT(EASY)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_PARTY2","GLOBAL",1)
+    CreateCreature("csrsill",[1085.370],SW)  // Sillune - backstab/restealth
+    CreateCreature("csrgrit",[1035.330],SW)  // Grit - dust-mephit familiar
+    Continue()
+END
+
+// HARD and up: the cells' previous occupants, raised. Keyed on BD_SPAWN_KORLASZ=2
+// (set only by her forced dialog state 27 as she turns hostile - BDKORLAS.d) so the
+// hostile-EA undead cannot jump the player during the forced-dialog funnel.
+IF
+  Global("BD_SPAWN_KORLASZ","BD0116",2)
+  Global("CSR_JB_PARTY3","GLOBAL",0)
+  DifficultyGT(NORMAL)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_PARTY3","GLOBAL",1)
+    CreateCreature("bdskgr03",[1060.290],S)  // Bladed Skeleton
+    CreateCreature("bdskgr03",[965.265],S)   // Bladed Skeleton
+    Continue()
+END
+
+// HARDEST only: one elite undead anchor
+IF
+  Global("BD_SPAWN_KORLASZ","BD0116",2)
+  Global("CSR_JB_PARTY4","GLOBAL",0)
+  Difficulty(HARDEST)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_PARTY4","GLOBAL",1)
+    CreateCreature("bdunslgu",[1003.430],S)  // Unsleeping Guardian
+    Continue()
+END
+
+// BD_SAREVOK_SECRET re-home: the flag feeds the chapter-10 masks quest (BD7230) and
+// its vanilla setter lives in the skipped dungeon. Exact mirror of BD0130.baf:374-381
+// (scope GLOBAL, value 1, journal 264295 QUEST), re-keyed to looting the page from
+// csrkorl's body here (research 10a: BDSHSARE is P1, zero other copies in the game).
+IF
+  Global("BD_SAREVOK_SECRET","GLOBAL",0)
+  PartyHasItem("bdshsare")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_SAREVOK_SECRET","GLOBAL",1)
+    AddJournalEntry(264295,QUEST)
+    Continue()
+END

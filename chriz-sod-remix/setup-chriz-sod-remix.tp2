@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.1.0~
+VERSION ~v0.2.0~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -8,12 +8,18 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 // ============================================================
 // chriz-sod-remix — Siege of Dragonspear remix/overhaul
 //
-// 100-199: Wave 1 — global system levers
+// 100-139: Wave 1 — global system levers
 //   100 rest-ambush felt-rate 5x reduction
 //   110 keep all companions at SoD start
 //   120 hooded man removed from the mid-campaign
 //   130 skip the four chapter rest-dreams
-// 200+:    reserved (chapter passes, ending rework)
+// 140-189: Prologue chapter pass
+//   140 skip the Korlasz dungeon (instant exit)
+//   150 no assassination night, crusade council
+//   160 Imoen stays / recruitable          (requires 140+150)
+//   170 the Korlasz jailbreak              (requires 140)
+//   180 celebration + Caelar's proclamation (requires 140+150)
+// 200+:    reserved (later chapter passes, ending rework)
 //
 // Design + research: docs/ in the repo. Every component is a
 // tail-installable in-place patch; nothing is uninstalled or
@@ -192,3 +198,95 @@ BEGIN @130 DESIGNATED 130 GROUP @1000 LABEL ~csr_skip_chapter_dreams~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbaldur.bcs~) @9000
 
 EXTEND_TOP ~bdbaldur.bcs~ ~chriz-sod-remix/baf/skipdrm.baf~
+
+// ============================================================
+// 140 — Prologue: skip the Korlasz dungeon (instant exit)
+// ============================================================
+// Beamdog's own debug-skip spine (BDDEBUG: bd_plot=50 + bdcut00z),
+// productionized per docs/research/10b: land in BD0120 invisibly so
+// all bootstrap (EET K#, gear/gold, BDKEYR, Imoen strip, companion
+// wiring incl. mod hooks) still runs, patch only BDINTRO's staging +
+// walk-in blocks. The exit is an EXTEND_BOTTOM block on bd0120.bcs
+// (bd_plot=50 -> bdcut00z) rather than a direct cutscene chain: the
+// EET fresh-start Bhaalspawn-ability grants only fire on a BD0120
+// area pass with bd_plot!=0, which a direct chain never yields.
+// Details: lib/comp140.tpa.
+
+BEGIN @140 DESIGNATED 140 GROUP @1001 LABEL ~csr_skip_dungeon~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp140.tpa~
+
+// ============================================================
+// 150 — Prologue: no assassination night, crusade council
+// ============================================================
+// The assassination night is removed by pre-setting its vanilla
+// once-flags (strangle-by-flag, research 11a); what survives is
+// the DPALACE timeskip — now behind a "retire for the night"
+// servant choice (csrserv) — and the war council, re-pointed to
+// a crusade-only dialog path with zero new duke text. City-side
+// assassination references are False()-gated (11b list b). All
+// script edits are count-guarded and FAIL LOUDLY on mismatch.
+// Full edit inventory + citations: lib/comp150.tpa.
+
+BEGIN @150 DESIGNATED 150 GROUP @1001 LABEL ~csr_no_assassination~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp150.tpa~
+
+// ============================================================
+// 160 — Prologue: Imoen stays / recruitable
+// ============================================================
+// SoD's import flow strips and destroys Imoen in BD0120
+// (research 10b) and the palace fakes her with scene clones
+// sharing her death variable. This keeps her for real: imports
+// keep build/XP/gear and land in the BD0103 bedroom; fresh starts
+// get a joinable BG1-chassis clone (csrimo, XP floor 64000) at
+// the placed actor's exact spot. One dialog (csrimoen) covers
+// greet/join/rejoin/small-talk; the SoD pdialog row (BDDIALOG.2DA
+// IMOEN2) is re-pointed at it so join/dismiss never flips her to
+// the parked BDIMOEN dialog. Swap state machine guarantees never
+// two living IMOEN2 DVs in one area: lib/comp160.tpa.
+
+BEGIN @160 DESIGNATED 160 GROUP @1001 LABEL ~csr_imoen~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 160 (Imoen stays) requires component 140 (skip the Korlasz dungeon).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 160 (Imoen stays) requires component 150 (palace night / council rework).~
+
+INCLUDE ~chriz-sod-remix/lib/comp160.tpa~
+
+// ============================================================
+// 170 — Prologue: the Korlasz jailbreak
+// ============================================================
+// The vanilla BD0116 rematch scaffolding (TrapBDKorlasz ->
+// BD_KORLAS_FREED -> BDKORLAS.baf breakout -> BDCUTKOR -> dialog
+// 24-27 -> Enemy()) re-timed onto a stairs-top hint beat, with the
+// rebuilt Korlasz (Mage 12, signature sequencer, restored
+// consumables) and her named jailbreak crew carrying the re-homed
+// dungeon loot. SCS detect-and-adapt per creature, native fallback.
+// Body: lib/comp170.tpa (design docs/design/chapters/01-prologue.md).
+
+BEGIN @170 DESIGNATED 170 GROUP @1001 LABEL ~csr_jailbreak~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 170 (the Korlasz jailbreak) requires component 140 (skip the Korlasz dungeon).~
+
+INCLUDE ~chriz-sod-remix/lib/comp170.tpa~
+
+// ============================================================
+// 180 — Prologue: celebration + Caelar's proclamation
+// ============================================================
+// First walk into the great hall (BD0102) during the bd_plot=50
+// roam: crowd cheer (AMBDLCHE) + a short praise beat from Liia and
+// Belt built from existing SoD lines (strrefs resolved at install
+// time from the dialog state tables, so EET remapping and
+// standalone BG:EE+SoD both work), then Liia opens the Korlasz
+// journal and hands over Caelar's proclamation naming the
+// Bhaalspawn (csrpam). One added Belt line at the war council
+// references it (fall-through-safe I_C_T, gated CSR_CELEB_QUEST).
+
+BEGIN @180 DESIGNATED 180 GROUP @1001 LABEL ~csr_celebration~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 180 (celebration + proclamation) requires component 140 (remove the Korlasz dungeon).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 180 (celebration + proclamation) requires component 150 (palace night + council rework).~
+
+INCLUDE ~chriz-sod-remix/lib/comp180.tpa~

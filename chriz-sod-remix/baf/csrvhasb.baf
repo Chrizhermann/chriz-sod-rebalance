@@ -1,0 +1,19 @@
+// chriz-sod-remix component 170 - csrvhasb: Vhast's race-slot opener (both branches).
+// Design 01-prologue.md sec 2a: he "chugs an oil of speed at fight start". SCS potion
+// blocks in dw1melge key on SCS's own dw#ptn* resrefs, and the SoD-native BDFIG00 has
+// no oil-of-speed block at all, so this explicit once-per-spawn UseItem covers both
+// stacks with one script. POTN14 lives in his quick-item slot (creature UseItem needs
+// a usable slot). Vanilla display strref 256560 = *quaffs a potion* (BDSHKORL.baf:121).
+
+IF
+  Global("CSR_JB_OIL","LOCALS",0)
+  Allegiance(Myself,EVILCUTOFF)
+  HasItem("POTN14",Myself)
+  See(NearestEnemyOf(Myself))
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_JB_OIL","LOCALS",1)
+    UseItem("POTN14",Myself)
+    DisplayStringHead(Myself,256560)  // ~*quaffs a potion*~
+    Continue()
+END
