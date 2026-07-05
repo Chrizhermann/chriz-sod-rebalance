@@ -222,6 +222,11 @@ crowd set-piece, street vignettes of crusade tension.
 Removed: dungeon kills/quests, 30k wrap-up award, surrender cascade. Added: jailbreak
 fight (six+ real kills incl. leveled boss), jailbreak quest award, celebration/completion
 award. Calibrate after playtest per 05-xp-ledger policy.
+**Delivery rule (user, 2026-07-06):** any remix XP compensation is granted as ONE
+collected `AddexperienceParty` award after Korlasz's defeat — never dripped as separate
+grants at arrival. (v0.2.0 grants zero remix XP; the XP messages seen at arrival are
+vanilla/EET catch-up systems — SoD's per-companion XP-floor snap — which stay as-is per
+user.)
 
 ## 8. Compatibility notes
 - Tail-mod patches on BD0120/BDINTRO/BD0103/BD0116 + new .d/.cre; no engine 2DAs; K#/mod
