@@ -235,6 +235,24 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp150.tpa~
 
 // ============================================================
+// 145 — Prologue: no auto-granted starting party (new / import)
+// ============================================================
+// A fresh SoD start (SOD_fromimport=0 — new SoD character or a BG1
+// char imported into fresh SoD) is normally handed a default
+// alignment party by BDINTRO's JoinPartyOverride pool; with the
+// dungeon skipped they appear in the bedroom from nowhere. This
+// removes only those fresh-pool joins so you start solo and gather
+// your own party from the city (Imoen included). The continuous
+// BG1->SoD transition (SOD_fromimport=1) is untouched — component
+// 110 keeps your real carried party.
+
+BEGIN @145 DESIGNATED 145 GROUP @1001 LABEL ~csr_no_start_party~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 145 (no starting party) requires component 140 (skip the Korlasz dungeon).~
+
+INCLUDE ~chriz-sod-remix/lib/comp145.tpa~
+
+// ============================================================
 // 160 — Prologue: Imoen stays / recruitable
 // ============================================================
 // SoD's import flow strips and destroys Imoen in BD0120

@@ -12,7 +12,10 @@ BEGIN csrimoen
 // First meeting in the palace bedroom — not yet joined in SoD.
 IF ~Global("CSR_IMOEN_JOINED","GLOBAL",0)~ THEN BEGIN greet
   SAY @16001
-  IF ~NumInPartyLT(6)~ THEN REPLY @16002 DO ~SetGlobal("CSR_IMOEN_JOINED","GLOBAL",1) JoinParty()~ EXIT
+  // Join is NOT gated on NumInPartyLT(6): SoD recruiters keep the join option
+  // visible even with a full party and let the engine pop the reform-party
+  // screen on JoinParty() (matches every other companion; user, 2026-07-06).
+  IF ~~ THEN REPLY @16002 DO ~SetGlobal("CSR_IMOEN_JOINED","GLOBAL",1) JoinParty()~ EXIT
   IF ~~ THEN REPLY @16003 GOTO stay
 END
 
@@ -25,7 +28,7 @@ END
 // Dismissed after having joined — always re-recruitable.
 IF ~Global("CSR_IMOEN_JOINED","GLOBAL",1) !InParty(Myself)~ THEN BEGIN rejoin
   SAY @16005
-  IF ~NumInPartyLT(6)~ THEN REPLY @16006 DO ~JoinParty()~ EXIT
+  IF ~~ THEN REPLY @16006 DO ~JoinParty()~ EXIT
   IF ~~ THEN REPLY @16007 EXIT
 END
 

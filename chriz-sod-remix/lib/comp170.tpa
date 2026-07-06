@@ -123,6 +123,11 @@ ACTION_IF (csr_scs_korl = 1) BEGIN
   COMPILE ~chriz-sod-remix/baf/csrkorls.baf~
 END
 
+// Rewrite Korlasz's breakout opener (state 24) — vanilla line assumes the PC
+// caught her in the now-removed dungeon. AUTO_TRA pulls the @17020 string from
+// languages/english/csrkorld.tra (a copy of comp170.tra).
+COMPILE ~chriz-sod-remix/dlg/csrkorld.d~
+
 // ------------------------------------------------------------
 // 4. The creatures. All built at install from the verified SoD chassis so
 //    later CRE-wide mod patches (Artisan class effects etc.) are inherited.
@@ -238,6 +243,11 @@ COPY_EXISTING ~bdkorme8.cre~ ~override/csrvhas.cre~
   PATCH_IF ((BYTE_AT 0x273) != 2) BEGIN  // class byte must be FIGHTER
     PATCH_FAIL ~chriz-sod-remix #170: bdkorme8.cre is not the expected Fighter chassis — aborting.~
   END
+  // Chassis is a HALFLING (race 5, anim 0x6113); design calls for a plain human
+  // bruiser (2026-07-06, user: the halfling is awkward/quirky). Race + animation
+  // to human male fighter (0x6100, matching BDSHIS01-04 human mercs).
+  WRITE_BYTE 0x272 1        // race HALFLING -> HUMAN
+  WRITE_LONG 0x28  0x6100   // halfling male fighter anim -> human male fighter
   SAY NAME1 @17002
   SAY NAME2 @17002
   WRITE_BYTE  0x270 128
@@ -392,8 +402,38 @@ COPY_EXISTING ~bd0116.bcs~ ~override~
   END
 BUT_ONLY
 
-// crew spawn on the breakout flag + difficulty tiers + BD_SAREVOK_SECRET re-home
-EXTEND_TOP ~bd0116.bcs~ ~chriz-sod-remix/baf/jb116.baf~
+// HARDEST-only defensive layer (user 2026-07-06): PfMW on Korlasz, Stoneskin on
+// Porios, Luck on Vhast (+ a Superior Healing potion). Spell Revisions SHIFTS these
+// slots — on this install PfMW=spwi611 / Luck=spwi209 / Stoneskin=spwi408, but
+// vanilla has them at spwi610 / spwi212 / spwi415 (and the SR slots hold OTHER
+// spells there). So resolve each by NAME at install and inject via EVALUATE_BUFFER,
+// giving the right spell on vanilla, SR and SCS alike. (POTN55 Superior Healing is
+// a plain item, not SR-shuffled.)
+DEFINE_ACTION_FUNCTION csr_find_spell
+  STR_VAR a = ~~ b = ~~ pat = ~~
+  RET res
+BEGIN
+  OUTER_SPRINT res ~%a%~          // default to the primary (SR-era) slot
+  OUTER_SET csr_done = 0
+  ACTION_IF (FILE_EXISTS_IN_GAME ~%a%.spl~) BEGIN
+    COPY_EXISTING ~%a%.spl~ ~override~ READ_STRREF 0x08 csr_nm BUT_ONLY
+    ACTION_IF (~%csr_nm%~ STRING_CONTAINS_REGEXP ~%pat%~ = 0) BEGIN
+      OUTER_SPRINT res ~%a%~ OUTER_SET csr_done = 1
+    END
+  END
+  ACTION_IF (csr_done = 0) AND (FILE_EXISTS_IN_GAME ~%b%.spl~) BEGIN
+    COPY_EXISTING ~%b%.spl~ ~override~ READ_STRREF 0x08 csr_nm BUT_ONLY
+    ACTION_IF (~%csr_nm%~ STRING_CONTAINS_REGEXP ~%pat%~ = 0) BEGIN
+      OUTER_SPRINT res ~%b%~
+    END
+  END
+END
+LAF csr_find_spell STR_VAR a=~spwi611~ b=~spwi610~ pat=~[Mm]agical [Ww]eapon~ RET csr_pfmw  = res END
+LAF csr_find_spell STR_VAR a=~spwi209~ b=~spwi212~ pat=~Luck~                 RET csr_luck  = res END
+LAF csr_find_spell STR_VAR a=~spwi408~ b=~spwi415~ pat=~[Ss]toneskin~         RET csr_stone = res END
+
+// crew spawn on the breakout flag + difficulty tiers + HARDEST buff + BD_SAREVOK_SECRET
+EXTEND_TOP ~bd0116.bcs~ ~chriz-sod-remix/baf/jb116.baf~ EVALUATE_BUFFER
 
 // ------------------------------------------------------------
 // 6. BD0102 hint beat: sounds from below + dying guard + journal 261626 +

@@ -3,21 +3,30 @@
 // stairs-top hint beat in BD0102 (jbhint.baf) or, belt-and-suspenders, by the vanilla
 // TrapBDKorlasz region (BD0116.baf:15-21). Korlasz herself (csrkorl) is spawned by the
 // vanilla cell block - this file only adds her jailbreak crew and re-homed state.
-// Composition scaling uses explicit Difficulty() branches - the engine's only native
-// mechanism for placed fights (research 10d section 4; slider only doubles damage).
-// Coordinates cluster around the verified cell block / corridor spawns (Korlasz cell
-// map note [1030.300], vanilla spawns [1003.298]/[893.407]/[643.477], BD0116.baf:1-13).
+//
+// GEOMETRY (verified from BD0116.are): the cell sits at the NORTH (~[1003.298],
+// Infopoint05 bb 1001,145-1129,283); the player enters from the SOUTH-EAST
+// (TranBD0102 bb 953,876-1057,1006); the fight room is the TrapBDKorlasz cellar
+// bb (378,371-1147,907). The crew therefore spawns SOUTH of the cell, spread across
+// the room between the cell and the entrance, so they are visible as the player
+// advances (the earlier Y~300 spawns jammed them into the cell, out of sight).
+//
+// Composition scaling is membership-by-Difficulty() (research 10d section 4). The
+// filler undead were removed (2026-07-06, user: they do not fit a palace jailbreak);
+// higher-difficulty sharpening comes from SCS AI + the Insane damage doubling, with
+// a strength bump TBD (design pending).
 
-// crew core - spawns NEUTRAL (EA baked into the csr*.cre), synced via csrkfin
+// crew core - spawns NEUTRAL (EA baked into the csr*.cre), synced via csrkfin.
+// Back line (Porios) near the cell/Korlasz; front line (Hasska, Vhast) forward.
 IF
   Global("BD_KORLAS_FREED","BD0116",1)
   Global("CSR_JB_PARTY","GLOBAL",0)
 THEN
   RESPONSE #100
     SetGlobal("CSR_JB_PARTY","GLOBAL",1)
-    CreateCreature("csrhass",[957.375],SW)   // Mother Hasska - frontline anchor
-    CreateCreature("csrvhas",[903.407],SW)   // Vhast - bruiser
-    CreateCreature("csrpori",[943.300],SE)   // Porios - support caster
+    CreateCreature("csrhass",[950.560],S)    // Mother Hasska - frontline anchor
+    CreateCreature("csrvhas",[1050.610],S)   // Vhast - bruiser, forward
+    CreateCreature("csrpori",[850.470],S)    // Porios - support caster, back line
     Continue()
 END
 
@@ -30,35 +39,26 @@ IF
 THEN
   RESPONSE #100
     SetGlobal("CSR_JB_PARTY2","GLOBAL",1)
-    CreateCreature("csrsill",[1085.370],SW)  // Sillune - backstab/restealth
-    CreateCreature("csrgrit",[1035.330],SW)  // Grit - dust-mephit familiar
+    CreateCreature("csrsill",[1090.520],S)   // Sillune - backstab/restealth, east flank
+    CreateCreature("csrgrit",[1000.500],S)   // Grit - dust-mephit familiar, mid
     Continue()
 END
 
-// HARD and up: the cells' previous occupants, raised. Keyed on BD_SPAWN_KORLASZ=2
-// (set only by her forced dialog state 27 as she turns hostile - BDKORLAS.d) so the
-// hostile-EA undead cannot jump the player during the forced-dialog funnel.
+// HARDEST only: an extra defensive layer on the three anchors (user 2026-07-06).
+// Fires as Korlasz turns hostile (BD_SPAWN_KORLASZ=2, her dialog state 27) - the
+// crew is spawned by then. Spell resrefs are injected at install (EVALUATE_BUFFER)
+// so they are correct under Spell Revisions or vanilla.
 IF
   Global("BD_SPAWN_KORLASZ","BD0116",2)
-  Global("CSR_JB_PARTY3","GLOBAL",0)
-  DifficultyGT(NORMAL)
-THEN
-  RESPONSE #100
-    SetGlobal("CSR_JB_PARTY3","GLOBAL",1)
-    CreateCreature("bdskgr03",[1060.290],S)  // Bladed Skeleton
-    CreateCreature("bdskgr03",[965.265],S)   // Bladed Skeleton
-    Continue()
-END
-
-// HARDEST only: one elite undead anchor
-IF
-  Global("BD_SPAWN_KORLASZ","BD0116",2)
-  Global("CSR_JB_PARTY4","GLOBAL",0)
+  Global("CSR_JB_HARDBUFF","GLOBAL",0)
   Difficulty(HARDEST)
 THEN
   RESPONSE #100
-    SetGlobal("CSR_JB_PARTY4","GLOBAL",1)
-    CreateCreature("bdunslgu",[1003.430],S)  // Unsleeping Guardian
+    SetGlobal("CSR_JB_HARDBUFF","GLOBAL",1)
+    ApplySpellRES("%csr_pfmw%","BDKORLAS")   // Korlasz: Protection from Magical Weapons
+    ApplySpellRES("%csr_stone%","csrpori")   // Porios: Stoneskin
+    ApplySpellRES("%csr_luck%","csrvhas")    // Vhast: Luck
+    ActionOverride("csrvhas",CreateItem("potn55",0,0,0))  // + Potion of Superior Healing
     Continue()
 END
 
