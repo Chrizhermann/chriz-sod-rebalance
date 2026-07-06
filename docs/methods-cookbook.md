@@ -113,6 +113,15 @@ their vanilla AI already references — often shipped itemless.
   tpa code itself (SAY, RESOLVE_STR_REF).
 - WeiDU decompiles (`weidu file.bcs`) land in the CURRENT WORKING DIRECTORY and
   ignore `--out` for positional args — run with cwd in a scratch dir, never the game root.
+- **ALWAYS fully close the game (Baldur.exe + InfinityLoader.exe) before installing.**
+  A running game holds `lang/en_US/dialog.tlk` open. WeiDU writes the override files
+  (`.dlg` referencing new strrefs) as it goes, then flushes the TLK strings at the very
+  END — a locked TLK makes that flush die with `Sys_error("...dialog.tlk: Permission
+  denied")` AFTER every component already printed "Installed". Result: dialogs point at
+  strrefs the TLK never got → in-game "Invalid: NNNNNN". Symptom to recognize instantly:
+  `dialog.tlk` mtime older than the install; entry count unchanged. Fix = close game,
+  `--force-install-list` the affected components again (re-flushes the TLK). Verify by
+  re-decompiling one patched `.dlg` and confirming the SAY strref resolves to real text.
 
 ## 15. Live-save semantics (recurring caveat)
 `.are` rest-header/actor changes: only areas NOT yet visited on that save. `.bcs`/`.dlg`:
