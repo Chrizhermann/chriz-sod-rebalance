@@ -1,0 +1,9 @@
+// chriz-sod-remix component 180 - override script for the celebration guests
+// (csrnobm/csrnobf/csrffgd). They exist only for the plot-50 evening; vanilla
+// dresses the palace with its own wandering nobles from plot 52 (BD0102.baf:307).
+IF
+  !Global("BD_PLOT","GLOBAL",50)
+THEN
+  RESPONSE #100
+    DestroySelf()
+END

@@ -5,15 +5,20 @@
 // beat, v0.1) + sec. 9 (the hero's personal stake: Caelar's open
 // challenge). Mechanics: docs/research/11a-council-seam.md.
 //
-// Beat: on the party's first walk into the great hall (BD0102)
-// during the bd_plot=50 roam (components 140+150 create that roam),
-// crowd cheer + forced praise dialog from Liia and Belt built from
-// existing SoD lines, then Liia opens the "give your statement on
-// Korlasz" journal (the opener for component 170's jailbreak chain)
-// and hands over Caelar's proclamation (csrpam, a retextured
-// BDSHPAM1 clone — the pamphlet otherwise dies with the dungeon,
-// research 10a) naming the Bhaalspawn. One added Belt line at the
-// war council references the proclamation.
+// Beat (2026-07-07 rewrite, playtest 3): on the party's first walk
+// into the great hall (BD0102) during the bd_plot=50 evening
+// (components 140+150 create that window), a victory celebration —
+// all-custom text in the BG1 duchess register, no crowd-cheer sound,
+// hall dressed with nobles + Flaming Fist guards (despawn at night's
+// end). Liia toasts, Belt seconds, then Liia opens the "give your
+// statement on Korlasz" journal (the opener for component 170's
+// jailbreak chain) and hands over Caelar's proclamation (csrpam, a
+// retextured BDSHPAM1 clone — the pamphlet otherwise dies with the
+// dungeon, research 10a) naming the Bhaalspawn. The palace front
+// door is locked for the evening (ARE-default state restored next
+// morning); after the jailbreak, Liia returns to ask what happened
+// and sends the Fist below. One added Belt line at the war council
+// references the proclamation.
 
 LOAD_TRA ~chriz-sod-remix/languages/english/comp180.tra~
 
@@ -22,7 +27,8 @@ LOAD_TRA ~chriz-sod-remix/languages/english/comp180.tra~
 // on must exist, or the install must abort — not silently skip.
 // ------------------------------------------------------------
 ACTION_FOR_EACH csr_res IN
-  ~bd0102.bcs~ ~bdliia.cre~ ~bdbelt.cre~ ~bdliia.dlg~ ~bdbelt.dlg~ ~bdshpam1.itm~
+  ~bd0102.bcs~ ~bd0102.are~ ~bdliia.cre~ ~bdbelt.cre~ ~bdliia.dlg~ ~bdbelt.dlg~
+  ~bdshpam1.itm~ ~bdnobm1.cre~ ~bdnobf1.cre~ ~bdffsol1.cre~
 BEGIN
   ACTION_IF NOT (FILE_EXISTS_IN_GAME ~%csr_res%~) BEGIN
     FAIL ~chriz-sod-remix component 180: required SoD resource [%csr_res%] not found in this game.~
@@ -30,54 +36,62 @@ BEGIN
 END
 
 // ------------------------------------------------------------
-// Resolve the existing praise strrefs from the CURRENT dialog
-// state tables. EET remaps imported SoD strrefs (this install:
-// BDLIIA 11 = #234300, BDBELT 38 = #264733, BDBELT 41 = #264741 —
-// verified 2026-07-06 on the dev install) while standalone
-// BG:EE+SoD uses different numbers; the state INDEX is the stable
-// handle (research 11a sec. 2 maps the council states). Each read
-// is text-anchored so a reshuffled/foreign dialog FAILS the
-// install loudly instead of playing the wrong line in-game.
+// Anchor check: BDBELT state 36 is the I_C_T anchor for the
+// war-council proclamation line — a wrong anchor would graft the
+// line into the wrong scene. (2026-07-07 rewrite: the celebration
+// no longer reuses any vanilla praise strrefs — BDLIIA state 11's
+// council pitch now plays only where it belongs, at the plot-51
+// council — so the old state 11/38/41 strref resolution is gone.)
 // DLG V1.0: 0x08 = state count, 0x0C = state table offset,
-// 0x10-byte state entries, SAY strref at +0x00 (verified against
-// the dev files with a binary probe).
+// 0x10-byte state entries, SAY strref at +0x00.
 // ------------------------------------------------------------
-COPY_EXISTING - ~bdliia.dlg~ ~override~
-  READ_LONG 0x08 csr_nstates
-  READ_LONG 0x0c csr_soff
-  PATCH_IF (csr_nstates > 11) BEGIN
-    READ_LONG   (csr_soff + (11 * 0x10)) csr_praise_liia
-    READ_STRREF (csr_soff + (11 * 0x10)) csr_txt
-    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~once again called upon~) == 1) BEGIN
-      PATCH_FAIL ~chriz-sod-remix component 180: BDLIIA.dlg state 11 is not the expected council-pitch line ("...once again called upon..."). Dialog layout differs from SoD — aborting rather than reusing the wrong line.~
-    END
-  END ELSE BEGIN
-    PATCH_FAIL ~chriz-sod-remix component 180: BDLIIA.dlg has fewer than 12 states — not the SoD war-council dialog this component expects.~
-  END
-
 COPY_EXISTING - ~bdbelt.dlg~ ~override~
   READ_LONG 0x08 csr_nstates
   READ_LONG 0x0c csr_soff
-  PATCH_IF (csr_nstates > 41) BEGIN
-    READ_LONG   (csr_soff + (38 * 0x10)) csr_praise_belt1
-    READ_STRREF (csr_soff + (38 * 0x10)) csr_txt
-    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~faith in you was not misplaced~) == 1) BEGIN
-      PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg state 38 is not the expected praise line ("...faith in you was not misplaced..."). Aborting.~
-    END
-    READ_LONG   (csr_soff + (41 * 0x10)) csr_praise_belt2
-    READ_STRREF (csr_soff + (41 * 0x10)) csr_txt
-    PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~great service~) == 1) BEGIN
-      PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg state 41 is not the expected praise line ("...a great service..."). Aborting.~
-    END
-    // State 36 is only the I_C_T anchor (no strref reuse), but a wrong
-    // anchor would graft the proclamation line into the wrong scene —
-    // verify it too. Text per research 11a sec. 2 (crusade-report chain).
+  PATCH_IF (csr_nstates > 36) BEGIN
     READ_STRREF (csr_soff + (36 * 0x10)) csr_txt
     PATCH_IF ((~%csr_txt%~ STRING_CONTAINS_REGEXP ~Waterdeep and Daggerford~) == 1) BEGIN
       PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg state 36 is not the expected crusade-report line ("...Waterdeep and Daggerford..."). The council insertion anchor moved — aborting.~
     END
   END ELSE BEGIN
-    PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg has fewer than 42 states — not the SoD war-council dialog this component expects.~
+    PATCH_FAIL ~chriz-sod-remix component 180: BDBELT.dlg has fewer than 37 states — not the SoD war-council dialog this component expects.~
+  END
+
+// ------------------------------------------------------------
+// ARE-default door states for the palace lock (csrceleb.baf
+// blocks 2/3). Region flags bit 0x100 = deactivated. EET keeps
+// TranBD0010 (BG1-era city) active with TranBD0101 off; standalone
+// SoD the reverse — so the unlock replays whatever THIS install's
+// ARE says instead of hardcoding either. Vanilla only touches
+// these doors at bd_plot 55->56 (BD0102.baf:303, verified
+// identical in the installed bcs), so restoring the ARE default
+// at 51 reproduces the exact vanilla runtime state for days 51-55.
+// ------------------------------------------------------------
+COPY_EXISTING - ~bd0102.are~ ~override~
+  READ_LONG  0x5c csr_ro
+  READ_SHORT 0x5a csr_rc
+  SPRINT csr_door0101 ~UNRESOLVED~
+  SPRINT csr_door0010 ~UNRESOLVED~
+  FOR (csr_i = 0; csr_i < csr_rc; csr_i += 1) BEGIN
+    READ_ASCII (csr_ro + (csr_i * 0xc4)) csr_rname (32) NULL
+    READ_LONG  (csr_ro + (csr_i * 0xc4) + 0x60) csr_rflags
+    PATCH_IF (~%csr_rname%~ STRING_EQUAL_CASE ~TranBD0101~) BEGIN
+      PATCH_IF ((csr_rflags BAND 0x100) = 0x100) BEGIN
+        SPRINT csr_door0101 ~FALSE~
+      END ELSE BEGIN
+        SPRINT csr_door0101 ~TRUE~
+      END
+    END
+    PATCH_IF (~%csr_rname%~ STRING_EQUAL_CASE ~TranBD0010~) BEGIN
+      PATCH_IF ((csr_rflags BAND 0x100) = 0x100) BEGIN
+        SPRINT csr_door0010 ~FALSE~
+      END ELSE BEGIN
+        SPRINT csr_door0010 ~TRUE~
+      END
+    END
+  END
+  PATCH_IF ((~%csr_door0101%~ STRING_EQUAL_CASE ~UNRESOLVED~) OR (~%csr_door0010%~ STRING_EQUAL_CASE ~UNRESOLVED~)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix component 180: TranBD0101/TranBD0010 not found in bd0102.are — the palace front door moved; aborting.~
   END
 
 // ------------------------------------------------------------
@@ -92,6 +106,61 @@ COPY_EXISTING ~bdshpam1.itm~ ~override/csrpam.itm~
   SAY 0x0c @18010
   SAY 0x50 @18011
   SAY 0x54 @18011
+
+// ------------------------------------------------------------
+// Celebration guests (user 2026-07-07): nobles + Flaming Fist in
+// the hall. Chassis keep their vanilla names (Nobleman/Noblewoman/
+// Flaming Fist Mercenary); all five script slots stripped to the
+// despawn-at-night override, no death variable, click-dialogs
+// csrnob/csrffgd. csrffgx = the return-beat pair that marches to
+// the basement stairs on Liia's order (CSR_KORL_RET=2).
+// ------------------------------------------------------------
+COPY_EXISTING ~bdnobm1.cre~ ~override/csrnobm.cre~
+  WRITE_BYTE 0x270 128
+  WRITE_ASCIIE 0x248 ~csrnobx~ #8
+  WRITE_ASCIIE 0x250 ~~ #8
+  WRITE_ASCIIE 0x258 ~~ #8
+  WRITE_ASCIIE 0x260 ~~ #8
+  WRITE_ASCIIE 0x268 ~~ #8
+  WRITE_ASCIIE 0x280 ~~ #32
+  WRITE_ASCIIE 0x2cc ~csrnob~ #8
+BUT_ONLY
+
+COPY_EXISTING ~bdnobf1.cre~ ~override/csrnobf.cre~
+  WRITE_BYTE 0x270 128
+  WRITE_ASCIIE 0x248 ~csrnobx~ #8
+  WRITE_ASCIIE 0x250 ~~ #8
+  WRITE_ASCIIE 0x258 ~~ #8
+  WRITE_ASCIIE 0x260 ~~ #8
+  WRITE_ASCIIE 0x268 ~~ #8
+  WRITE_ASCIIE 0x280 ~~ #32
+  WRITE_ASCIIE 0x2cc ~csrnob~ #8
+BUT_ONLY
+
+COPY_EXISTING ~bdffsol1.cre~ ~override/csrffgd.cre~
+  WRITE_BYTE 0x270 128
+  WRITE_ASCIIE 0x248 ~csrnobx~ #8
+  WRITE_ASCIIE 0x250 ~~ #8
+  WRITE_ASCIIE 0x258 ~~ #8
+  WRITE_ASCIIE 0x260 ~~ #8
+  WRITE_ASCIIE 0x268 ~~ #8
+  WRITE_ASCIIE 0x280 ~~ #32
+  WRITE_ASCIIE 0x2cc ~csrffgd~ #8
+BUT_ONLY
+
+COPY_EXISTING ~bdffsol1.cre~ ~override/csrffgx.cre~
+  WRITE_BYTE 0x270 128
+  WRITE_ASCIIE 0x248 ~csrffgx~ #8
+  WRITE_ASCIIE 0x250 ~~ #8
+  WRITE_ASCIIE 0x258 ~~ #8
+  WRITE_ASCIIE 0x260 ~~ #8
+  WRITE_ASCIIE 0x268 ~~ #8
+  WRITE_ASCIIE 0x280 ~~ #32
+  WRITE_ASCIIE 0x2cc ~csrffgd~ #8
+BUT_ONLY
+
+COMPILE ~chriz-sod-remix/baf/csrnobx.baf~
+COMPILE ~chriz-sod-remix/baf/csrffgx.baf~
 
 // ------------------------------------------------------------
 // Celebration trigger. EXTEND_TOP only — zero edits to Beamdog or
@@ -112,10 +181,12 @@ COPY_EXISTING ~bdshpam1.itm~ ~override/csrpam.itm~
 // reaches it has already walked the hall at 50 — the beat cannot
 // be permanently skipped by normal play (see design sec. 4 flow).
 // ------------------------------------------------------------
-EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/csrceleb.baf~
+EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/csrceleb.baf~ EVALUATE_BUFFER
 
 // ------------------------------------------------------------
-// The dialog (csrcele + BDBELT praise states + council I_C_T).
-// EVALUATE_BUFFER substitutes the strrefs resolved above.
+// The dialogs (csrcele + BDBELT toast state + council I_C_T,
+// plus the guest click-dialogs). All-custom text via AUTO_TRA
+// (csrcele.tra / csrnob.tra copies of comp180.tra).
 // ------------------------------------------------------------
-COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csrcele.d~
+COMPILE ~chriz-sod-remix/dlg/csrcele.d~
+COMPILE ~chriz-sod-remix/dlg/csrnob.d~

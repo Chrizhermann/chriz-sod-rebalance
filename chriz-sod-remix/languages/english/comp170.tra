@@ -24,3 +24,15 @@
 // killer instead; the three existing replies still fit (they reference the
 // Sarevok conspiracy / "this hell" / delivering her to worse).
 @17020 = ~You! You are the one who cut Sarevok down — and doomed all of us who served his cause. His work lies in ruins, and I am flung into this hell... while his killer walks free through the palace above.~
+
+// States 25-27, BG2 villain register (user 2026-07-07). @17021 keeps the
+// punish/murder vocabulary for Minsc's interjection (see dlg/csrkorld.d).
+@17021 = ~Punished? Sarevok would have raised this city into an empire, and you murdered him for it. They pour wine for his killer in the hall above while his faithful rot in cells below. No, <CHARNAME> — the only punishment still owed under this roof is yours.~
+
+@17022 = ~Did you expect to find me weeping in a cell, waiting on your dukes' justice? The faithful do not abandon Bhaal's own — mine came for me the moment your jailers turned to their wine. All that kept me here was you. One debt, <CHARNAME>. One grave left to fill.~
+
+@17023 = ~Your faithful should have kept running.~
+@17024 = ~In truth, I never thought of you at all, Korlasz. I still don't.~
+@17025 = ~Come and collect it, then.~
+
+@17026 = ~Then we are done with words. Sarevok saw a god waking in your blood — let us see if it bleeds.~

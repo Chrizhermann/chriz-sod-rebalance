@@ -1,3 +1,18 @@
+// chriz-sod-remix component 180 - EXTEND_TOP payload for bd0102.bcs (great hall).
+// Four blocks: (1) the celebration beat, (2) palace lock at bd_plot=50,
+// (3) unlock restoring the ARE-default door state, (4) the Korlasz return beat.
+// Compiled with EVALUATE_BUFFER: %csr_door0101%/%csr_door0010% are the ARE-default
+// activation states of the two front-door variants, read at install time from
+// bd0102.are region flags (bit 0x100 = deactivated) - platform-neutral (EET keeps
+// TranBD0010 active, standalone SoD keeps TranBD0101; hardcoding either breaks
+// the other). Vanilla only touches these doors at bd_plot 55->56 (BD0102.baf:303),
+// so restoring the ARE default at 51 reproduces the exact vanilla runtime state.
+
+// (1) Celebration on first hall entry during the plot-50 evening. No crowd-cheer
+// PlaySound (user 2026-07-07: removed); the hall is dressed with nobles and
+// Flaming Fist guards instead (all csr* guests despawn via their override script
+// when the night passes). Skeleton + coordinates mirror the vanilla council
+// staging (BD0102.baf:21-68), which proves the walk paths.
 IF
   Global("BD_PLOT","GLOBAL",50)
   Global("CSR_CELEB","GLOBAL",0)
@@ -5,10 +20,19 @@ THEN
   RESPONSE #100
     SetGlobal("CSR_CELEB","GLOBAL",1)
     StartCutSceneMode()
-    PlaySound("AMBDLCHE")
     CreateCreature("BDLIIA",[919.722],NW)
     CreateCreature("BDBELT",[680.390],NE)
     ActionOverride("BDLIIA",SetDialogue("csrcele"))
+    CreateCreature("csrnobm",[845.520],SW)
+    CreateCreature("csrnobf",[760.560],NW)
+    CreateCreature("csrnobm",[700.545],NE)
+    CreateCreature("csrnobf",[655.470],SE)
+    CreateCreature("csrnobm",[770.425],S)
+    CreateCreature("csrnobf",[835.450],SW)
+    CreateCreature("csrnobm",[905.585],W)
+    CreateCreature("csrnobf",[665.520],E)
+    CreateCreature("csrffgd",[470.720],NE)
+    CreateCreature("csrffgd",[620.240],S)
     ActionOverride(Player1,MoveToPoint([719.491]))
     MoveViewPoint([719.491],BD_NORMAL)
     SmallWait(8)
@@ -16,10 +40,64 @@ THEN
     ActionOverride("BDLIIA",MoveToPoint([792.499]))
     ActionOverride("BDBELT",MoveToPoint([712.438]))
     Wait(2)
-    PlaySound("AMBDLCHE")
     ActionOverride("BDLIIA",FaceObject(Player1))
     ActionOverride("BDBELT",FaceObject(Player1))
     SmallWait(3)
+    ActionOverride("BDLIIA",StartDialogNoSet(Player1))
+    Continue()
+END
+
+// (2) Palace lock: the celebration evening happens INSIDE the palace (user
+// 2026-07-07 - vanilla never lets the player roam at 50 either; the city visit
+// belongs to the next days). Both front-door variants off; basement (TranBD0116)
+// and the BD0100/BD0103 floors stay open - the whole quest surface is interior.
+IF
+  Global("BD_PLOT","GLOBAL",50)
+  Global("CSR_PLOCK","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_PLOCK","GLOBAL",1)
+    TriggerActivation("TranBD0101",FALSE)
+    TriggerActivation("TranBD0010",FALSE)
+    Continue()
+END
+
+// (3) Unlock on the morning after (bd_plot leaves 50): restore the ARE-default
+// state so days 51-55 behave exactly as if we never touched the doors. The
+// vanilla 55->56 block then re-asserts its own parade-day state untouched.
+IF
+  !Global("BD_PLOT","GLOBAL",50)
+  Global("CSR_PLOCK","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_PLOCK","GLOBAL",2)
+    TriggerActivation("TranBD0101",%csr_door0101%)
+    TriggerActivation("TranBD0010",%csr_door0010%)
+    Continue()
+END
+
+// (4) Korlasz return beat (user 2026-07-07): when the player comes back up
+// after the jailbreak fight, Liia wants to know what happened below, orders
+// Flaming Fist down to secure the cells, and thanks the player again. The
+// celebration Liia instance is long despawned, so a fresh one walks in; the
+// two csrffgx guards march to the basement stairs when her closing line sets
+// CSR_KORL_RET=2 (see baf/csrffgx.baf) and despawn with the night.
+IF
+  Global("BD_PLOT","GLOBAL",50)
+  Global("CSR_CELEB","GLOBAL",1)
+  Global("CSR_KORL_RET","GLOBAL",0)
+  Dead("BDKORLAS")
+  CombatCounter(0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_KORL_RET","GLOBAL",1)
+    CreateCreature("BDLIIA",[919.722],NW)
+    ActionOverride("BDLIIA",SetDialogue("csrcele"))
+    CreateCreature("csrffgx",[890.700],NW)
+    CreateCreature("csrffgx",[860.670],NW)
+    ActionOverride("BDLIIA",MoveToPoint([792.499]))
+    SmallWait(10)
+    ActionOverride("BDLIIA",FaceObject(Player1))
     ActionOverride("BDLIIA",StartDialogNoSet(Player1))
     Continue()
 END

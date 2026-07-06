@@ -230,10 +230,42 @@ assassination block has its own once-flag, so a single new arrival block pre-set
   Liia in BD0118) assumes she's in Baldur's Gate — needs an in-party gate when we get
   there. (Also corrects 10c: BD0118 is not unused; that vision is its one tenant.)
 
-## 6. Celebration — DECIDED: light for v0.1, bigger scene on the roadmap
+## 6. Celebration — DECIDED; REWRITTEN 2026-07-07 (playtest 3, user direction)
 
-Arrival → short praise beat in the great hall built from existing duke lines (Liia
-234300, Belt 264733/264741, blessing chain) + the mini-quest hook (§2) → free roam.
+~~Short praise beat built from existing duke lines~~ — the reused BDLIIA council pitch
+("We would have you join them") opened the scene with a dangling "them"; scrapped.
+**Standing style rule locked here (applies to ALL remix writing): BG1/BG2 register over
+SoD's — Liia speaks like her BG1 speeches, villains like Sarevok/Irenicus ("peak
+writing"); dropping voice-overs to rewrite is always acceptable.** The v1 scene:
+
+- **All-custom text, no VO, no crowd-cheer sound** (user cut it). Liia toasts the
+  victory over Sarevok (BG1 duchess register), Belt seconds soldier-blunt, then Liia's
+  closing keeps the two hooks: Korlasz statement (jailbreak opener journal) + Caelar's
+  proclamation hand-over.
+- **The hall is dressed:** 8 nobles + 2 Flaming Fist guards spawn for the evening
+  (click-dialogs: nobles congratulate, guards mind the doors — BG1-style one-liners);
+  all despawn when the night passes (vanilla dresses the palace with its own nobles
+  from plot 52).
+- **The palace is locked for the evening** (user: you shouldn't be able to just walk
+  out): both front-door variants (TranBD0101/TranBD0010) deactivated at bd_plot=50,
+  ARE-default state restored the next morning — read from the ARE at install time, so
+  EET (BD0010 active) and standalone SoD (BD0101 active) both restore correctly.
+  Basement + upper floors stay open; the whole quest surface is interior. Vanilla only
+  touches these doors at plot 55→56, so days 51–55 are untouched.
+- **Korlasz return beat (user 2026-07-07):** coming back up after the jailbreak, a
+  fresh Liia meets the player — what happened below? — simple answers, she orders two
+  Fist guards down to secure the cells (they march to the basement stairs), thanks the
+  player a second time. Very short, ambient (no cutscene).
+- **Korlasz dialogue polished** (§2a funnel, states 24–27 now all custom): the
+  "tortured in private... this horror" melodrama (nonsense mid-jailbreak — she stands
+  free and armed) replaced; BG2 villain register; Minsc's interjection vocabulary
+  ("punish/murder") and Safana's "That makes two of us." kept tracking.
+- **Council next morning audited (2026-07-07): left vanilla.** With the celebration no
+  longer burning BDLIIA state 11, the council chain reads coherently (trade disruption
+  → forces dispatched → "not enough" → "we would have you join them" now has its
+  antecedent → Belt backs you → cutscene). Voiced throughout except Liia 11/Eltan 8;
+  rewrite only if the user calls specific lines.
+
 No fireworks (no VFX asset in SoD; roadmap if ever). Roadmap: staged celebration scene,
 crowd set-piece, street vignettes of crusade tension.
 

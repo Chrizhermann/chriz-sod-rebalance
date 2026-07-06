@@ -1,5 +1,7 @@
 // chriz-sod-remix component 180 — Prologue: celebration + Caelar's proclamation
 // @18000-@18099. All strings pure ASCII (no charset handling needed on EE).
+// Rewritten 2026-07-07 (user, playtest 3): all celebration text is now ours, in
+// the BG1 duchess register — no vanilla SoD strref reuse, no VO.
 
 // Liia's closing line of the celebration beat: (a) Korlasz held in the palace
 // cells awaiting the player's statement (opens journal @18001, the opener of the
@@ -19,14 +21,24 @@ Korlasz awaits judgment in the palace cells.
 
 During the celebration in the Ducal Palace, Duchess Liia Jannath asked me to look in on Korlasz, the last of Sarevok's followers, who is being held in the cells beneath the palace. The Flaming Fist wants my statement before the dukes pass sentence. I should visit the palace basement when I have a moment.~
 
-// Player replies to Liia's opener ("We would have you join them..."). The second
-// deliberately claims Sarevok's followers are finished — Liia's closing line
-// then corrects it (the last of them sits in the cells below).
+// Player replies to Liia's celebration opener (@18005). The second deliberately
+// claims Sarevok's followers are finished — Liia's closing line then corrects it
+// (the last of them sits in the cells below).
 @18002 = ~I only did what was needed.~
 @18003 = ~Sarevok is dust and his followers scattered. The city may rest easy.~
 
 // Player's exit line; the transition carries the journal/item/despawn actions.
 @18004 = ~I will give my statement. Enjoy the celebration, Your Grace.~
+
+// Liia's celebration opener (BG1 duchess register: formal, warm, measured — the
+// user's style rule after playtest 3; replaces the reused BDLIIA council line
+// that opened the scene with a dangling "them").
+@18005 = ~Ah - here is our guest of honor at last. Friends! Your cups, if you please: to <CHARNAME>, who met Sarevok's madness with steel and good sense, and gave us back our city.
+
+Grand Duke Eltan still mends, so the pleasant duties fall to Belt and myself tonight. Baldur's Gate does not forget its debts, <CHARNAME>. Least of all this one.~
+
+// Belt's toast (soldier-blunt, one line; APPENDed BDBELT state, no VO).
+@18007 = ~I will keep it short - speeches are Liia's weapon of choice, not mine. You did what the Fist could not, and half my officers know it. The city stands because you do. Drink well tonight, <CHARNAME>. You have earned the quiet.~
 
 // csrpam.itm — Caelar's proclamation (BDSHPAM1 clone). Name + description.
 @18010 = ~Crusade Proclamation~
@@ -42,9 +54,30 @@ And to the child of Bhaal, hero of this city: I know what sleeps in your veins. 
 
 - Caelar Argent, the Shining Lady~
 
+// --- Korlasz return beat (user 2026-07-07): Liia meets the player coming back
+// up from the basement after the jailbreak fight. Very short; simple answers.
+@18012 = ~<CHARNAME> - thank the gods. The guards speak of fighting beneath us. Steel and spellfire in the palace cells, in the middle of the celebration! What has happened down there?~
+
+@18013 = ~Korlasz's followers broke in to free her. She is dead. It is over.~
+@18014 = ~Nothing your cells could hold, it seems. It is dealt with.~
+
+@18015 = ~Then the Fist will see to what remains. Sergeant - take a detachment below and secure the cells.
+
+Twice in one night the city finds itself in your debt, <CHARNAME>. Go, enjoy what is left of the evening. You have more than earned it.~
+
 // Belt's added war-council line (I_C_T after BDBELT 36, before Eltan's "every
 // sword north"). Only plays if the player holds the proclamation.
 @18020 = ~There is one thing more, <CHARNAME>, and it concerns you directly. You have seen the proclamations her crusade nails up across our city. They name you. The Shining Lady demands the hero of Baldur's Gate come north - willing or no.~
+
+// --- Celebration guests: noble congratulations (click-dialog csrnob, random).
+@18030 = ~The hero of Baldur's Gate, within arm's reach! Forgive me - I must be the tenth to say it tonight: our thanks, and our cups, are yours.~
+@18031 = ~They say you stood over Sarevok's body in the Undercity itself. To your health, my friend - and may the Gate never need you so badly again.~
+@18032 = ~A toast! To the dukes, to the Gate - and to the one who kept the first upon the second.~
+@18033 = ~My cousin marched with the Fist against that dreadful temple. She came home. I know whom to thank for that, and I shan't forget it.~
+
+// Flaming Fist guards (click-dialog csrffgd, random).
+@18034 = ~Duke Belt doubled the watch tonight, hero or no hero. Enjoy the wine - we will mind the doors.~
+@18035 = ~I stood the palace line the night the doppelgangers came. It is good to have you on our side of it, <CHARNAME>.~
 
 // Component name (reserved for migration into setup.tra as the BEGIN string if
 // the tp2 ever switches this component from a literal name to a tra ref).

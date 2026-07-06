@@ -1,0 +1,20 @@
+// chriz-sod-remix component 180 - override script for the two return-beat
+// Flaming Fist guards. When Liia's closing line sets CSR_KORL_RET=2 ("take a
+// detachment below and secure the cells") they march to the basement stairs
+// (TranBD0116 sits at bb 556,107-614,187) and stand guard; like all celebration
+// spawns they despawn when the night passes.
+IF
+  !Global("BD_PLOT","GLOBAL",50)
+THEN
+  RESPONSE #100
+    DestroySelf()
+END
+
+IF
+  Global("CSR_KORL_RET","GLOBAL",2)
+  Global("CSR_MARCH","LOCALS",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_MARCH","LOCALS",1)
+    MoveToPoint([585.210])
+END
