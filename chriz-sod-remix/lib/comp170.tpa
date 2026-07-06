@@ -27,7 +27,8 @@ LOAD_TRA ~chriz-sod-remix/languages/english/comp170.tra~
 ACTION_FOR_EACH csr_req IN
   ~bd0116.bcs~ ~bd0102.bcs~ ~bdkorlas.dlg~ ~bdkorlas.bcs~ ~bdcutkor.bcs~
   ~bdkorlas.cre~ ~bdkorme9.cre~ ~bdkorme8.cre~ ~bdshis07.cre~ ~bdporios.cre~
-  ~bdshkfam.cre~ ~bdfist1b.cre~ ~bdskgr03.cre~ ~bdunslgu.cre~
+  ~bdshkfam.cre~ ~bdfist1b.cre~
+  ~plat04.itm~ ~helm01.itm~ ~sw1h08.itm~ ~potn55.itm~
   ~spwi312.spl~ ~spwi401.spl~ ~spwi224.spl~ ~spwi303.spl~ ~spwi305.spl~
   ~spwi406.spl~ ~spwi408.spl~ ~spwi505.spl~ ~spwi507.spl~ ~spwi508.spl~
   ~spwi522.spl~ ~spwi609.spl~
@@ -271,6 +272,14 @@ COPY_EXISTING ~bdkorme8.cre~ ~override/csrvhas.cre~
   WRITE_ASCIIE 0x268 ~%csr_vhas_def%~ #8
   WRITE_ASCIIE 0x280 ~csrvhas~ #32
   REMOVE_CRE_ITEM ~sw1h07~
+  // Armory pass (user 2026-07-07): full plate + helmet, both undroppable. The
+  // chassis carried an UNEQUIPPED chan04 in inventory plus a droppable helm01 —
+  // both removed. plat04 verified = plain "Full Plate Mail" on this install
+  // (plat02 is Fallorain's +1 — resref numbering is not tier order).
+  REMOVE_CRE_ITEM ~chan04~
+  REMOVE_CRE_ITEM ~helm01~
+  ADD_CRE_ITEM ~plat04~ #0 #0 #0 ~IDENTIFIED&UNDROPPABLE~ ~ARMOR~ EQUIP    // Full Plate Mail
+  ADD_CRE_ITEM ~helm01~ #0 #0 #0 ~IDENTIFIED&UNDROPPABLE~ ~HELMET~ EQUIP   // Helmet
   ADD_CRE_ITEM ~bdsw2h03~ #0 #0 #0 ~IDENTIFIED~ ~WEAPON2~ EQUIP TWOHANDED  // Sword of Ruin +2
   ADD_CRE_ITEM ~potn14~   #1 #0 #0 ~IDENTIFIED~ ~QITEM~                    // Oil of Speed ×1
   SET_BG2_PROFICIENCY PROFICIENCYTWOHANDEDSWORD 3
@@ -305,6 +314,11 @@ COPY_EXISTING ~bdshis07.cre~ ~override/csrsill.cre~
   WRITE_ASCIIE 0x258 ~BDSHTAUN~ #8      // keep the chassis taunt flavor
   WRITE_ASCIIE 0x268 ~%csr_sill_def%~ #8
   WRITE_ASCIIE 0x280 ~csrsill~ #32
+  // Blade pass (user 2026-07-07): magical short sword, undroppable — her loot
+  // value stays the gems/gold below. Chassis plain sw1h07 replaced by sw1h08
+  // (verified = "Short Sword +1" on this install).
+  REMOVE_CRE_ITEM ~sw1h07~
+  ADD_CRE_ITEM ~sw1h08~ #0 #0 #0 ~IDENTIFIED&UNDROPPABLE~ ~WEAPON1~ EQUIP
   // SCS thief brains restealth off SCS's own potion resref; SoD-native gets the
   // vanilla one. Same potion either way, so loot value is identical.
   PATCH_IF (FILE_EXISTS_IN_GAME ~dw#ptn10.itm~) AND (FILE_EXISTS_IN_GAME ~dw1melth.bcs~) BEGIN

@@ -109,6 +109,20 @@ chapter-pass docs only.
 - `design/wave1/05` XP: calibrate only after testing; first lever = **+~10% main-quest
   rewards** if the curve comes in low.
 
+## Decisions locked (2026-07-06/07, prologue playtests)
+- **Entar Silvershield stays DEAD.** SoD shows him alive (Skie's father — palace/city
+  content, the epilogue trial) despite his BG1 Ch.7 assassination; "him being alive
+  again is just cringe." Locked direction: **remove him entirely and rewrite whatever
+  references him so he remains dead** — the epilogue removal already deletes his trial
+  role, and we may add our own content in his place in phase 2/3. **Implementation
+  deferred** to a later chapter pass. Scope marker: 16 SoD scripts reference
+  Entar/Silvershield (incl. BD0102/BD0104/BDPALACE/BDBALDUR/BDCUT62); the dialog
+  surface is still to be audited.
+- **Fresh-start/import party grant cut** (prologue §10, component 145): the vanilla
+  default-party grant on fresh SoD starts is removed — you wake alone and gather your
+  party in the city. Item 1's "keep everyone" applies to the *continuous* BG1→SoD
+  path, which is untouched.
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.

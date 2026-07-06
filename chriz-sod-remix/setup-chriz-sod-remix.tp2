@@ -15,6 +15,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   130 skip the four chapter rest-dreams
 // 140-189: Prologue chapter pass
 //   140 skip the Korlasz dungeon (instant exit)
+//   145 no auto-granted starting party      (requires 140)
 //   150 no assassination night, crusade council
 //   160 Imoen stays / recruitable          (requires 140+150)
 //   170 the Korlasz jailbreak              (requires 140)

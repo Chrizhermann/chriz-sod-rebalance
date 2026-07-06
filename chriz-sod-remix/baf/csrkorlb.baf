@@ -89,22 +89,26 @@ END
 // lib/comp170.tpa): HaveSpellRES marker -> ReallyForceSpellRES of the combined SPL
 // (which burns the marker via op172 -> fires exactly once) + forced component casts.
 // Sets both BD_Cast (this brain's rhythm) and castspell (SCS convention) timers.
+// TARGET = nearest PC, not nearest enemy: the vanilla cell guards (bdfist1b,
+// GOODCUTOFF) usually stand closest when she turns, and the one-shot control
+// bomb must land on the party, never a guard (user 2026-07-07). If no PC is
+// visible yet the marker simply waits; the rest of the brain fights on.
 IF
   !GlobalTimerNotExpired("BD_Cast","LOCALS")
   HaveSpellRES("csrseq1")
   Allegiance(Myself,ENEMY)
-  See(NearestEnemyOf(Myself))
-  !StateCheck(NearestEnemyOf(Myself),STATE_NOT_TARGETABLE)
+  See([PC])
+  !StateCheck(LastSeenBy(Myself),STATE_NOT_TARGETABLE)
 THEN
   RESPONSE #100
     SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
     SetGlobalTimer("castspell","LOCALS",ONE_ROUND)
-    ReallyForceSpellRES("csrseq1b",NearestEnemyOf(Myself))
-    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_SLOW)
+    ReallyForceSpellRES("csrseq1b",LastSeenBy(Myself))
+    ReallyForceSpell(LastSeenBy(Myself),WIZARD_SLOW)
     SmallWait(1)
-    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_CONFUSION)
+    ReallyForceSpell(LastSeenBy(Myself),WIZARD_CONFUSION)
     SmallWait(1)
-    ReallyForceSpell(NearestEnemyOf(Myself),WIZARD_GLITTERDUST)
+    ReallyForceSpell(LastSeenBy(Myself),WIZARD_GLITTERDUST)
 END
 
 // Vocalize scroll, ported from BDSHKORL.baf:166-178 (revived by restoring SCRL3G)

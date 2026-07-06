@@ -1,9 +1,15 @@
 # Chapter Pass — Prologue (Korlasz dungeon + Baldur's Gate city opening)
 
-**Status: IMPLEMENTED as components 140-180 (v0.2.0), installed on the dev EET copy
-2026-07-06, file-level verification green (24/24 markers + resource/CRE read-back).
-IN-GAME PLAYTEST PENDING.** All design decisions below are user-locked through sparring
-rounds 1-4 (2026-07-05/06). Research basis: `docs/research/10a-11b`.
+**Status: IMPLEMENTED as components 140-180 + 145 (v0.2.x), installed on the dev EET
+copy, file-level verification green. THREE IMPORT PLAYTESTS DONE (2026-07-06/07):**
+playtest 1-2 soft-locks fixed (bdcut00z ender + one-shot exit launch), playtest 3
+"looked pretty good" — fixes locked from it: no auto-granted party on fresh/import
+(comp 145, §10), Imoen join ungated, Korlasz opener rewritten, undead filler cut +
+Insane defensive layer (§2a scaling), crew repositioned, Vhast human + full plate,
+Sillune Short Sword +1, sequencer targets nearest PC (§2a). **Continuous BG1→SoD path
+(SOD_fromimport=1) not yet playtested.** All design decisions below are user-locked
+through sparring rounds 1-4 (2026-07-05/06) + playtest lock-ins (2026-07-06/07).
+Research basis: `docs/research/10a-11b`.
 Implementation deviations approved during build: (a) comp 140 exits via an
 EXTEND_BOTTOM block on bd0120.bcs (bd_plot=50 → bdcut00z) instead of a direct cutscene
 chain — required so EET fresh-start Bhaalspawn-ability grants still fire; (b) comp 150
@@ -80,8 +86,8 @@ Roster locked person-by-person (user, 2026-07-06); Korlasz's exact level still o
 |---|-----|--------------------|------------|------|-------------------------------|
 | 1 | **Korlasz** | BDSHKORL/bdkorlas, Mage 8, HP 32 | **Mage 12 (LOCKED** 2026-07-06 — Semaj parity; "more exciting than round 1, below Sarevok-tier"**)** | boss caster; **prebuffs "like a Semaj" — SCS-only** (matching dw#mg brain; no scripted prebuff fallback without SCS, per user); Confusion/Slow/Dire Charm rotation + restored consumables (Minor Globe + Prot. Elemental scrolls, Vocalize, Potion of Clarity — revives 4 dead vanilla AI blocks); **signature sequencer, see below** | family papers (Sarevok's Notes*, Bhaal Research, her journal + orders), Knave's Robe, Cloak of Protection +1, Bracers AC6, Staff +1 |
 | 2 | **"Mother Hasska"** — cleric of Bhaal, organized the break-out | BDKORME9, C6, plate/shield | Cleric 9 | frontline anchor; heals/buffs Korlasz; smites; **cleric prebuffs like Wudei** (the Temple-of-Bhaal cleric, dw#pr brain) with SCS | **Helm of Unwavering Purpose**, plate, morningstar, **Wand of the Heavens** (she uses it), **treasury key BDKEY10** (raid fiction — verify Ophyllis-subplot interaction at implementation) |
-| 3 | **"Vhast"** | BDKORME8, F5 | **plain Fighter 10** | bruiser; **chugs an oil of speed at fight start** (SCS potion blocks when present — standard SCS behavior; scripted UseItem fallback otherwise) | **Sword of Ruin +2** (2-hander, wielded) |
-| 4 | **"Sillune"** | BDSHIS07, T5 | **plain Thief 9** | backstab + restealth; **3 invisibility potions** arm the restealth cycle | **gem bag**, the gems + ~4,100 gp tomb cash ("grabbed the valuables for the escape") |
+| 3 | **"Vhast"** | BDKORME8, F5 (chassis is a halfling → rebuilt **human**, user 2026-07-07) | **plain Fighter 10, human** | bruiser; **chugs an oil of speed at fight start** (SCS potion blocks when present — standard SCS behavior; scripted UseItem fallback otherwise) | **Sword of Ruin +2** (2-hander, wielded); **full plate + helmet, both UNDROPPABLE** (plat04/helm01, user 2026-07-07); on Insane also a **Potion of Superior Healing** (droppable if unused) |
+| 4 | **"Sillune"** | BDSHIS07, T5 | **plain Thief 9** | backstab + restealth; **3 invisibility potions** arm the restealth cycle; wields a **Short Sword +1, UNDROPPABLE** (sw1h08, user 2026-07-07 — "magical shortsword") | **gem bag**, the gems + ~4,100 gp tomb cash ("grabbed the valuables for the escape") |
 | 5 | **Porios** — the tomb sentry, captured too (existing named NPC) | BDPORIOS, M5 | **Mage 8; NO flee behavior — fights to the end** (user cut the coward beat) | support caster (Mirror Image/Haste/MM) | his **Cloak of Minor Arcana** (unique) |
 | 6 | **"Grit"** — Korlasz's dust-mephit familiar | BDSHKFAM | as-is | harassment, Glitterdust | — |
 
@@ -90,10 +96,17 @@ item acquisition (PartyHasItem watcher), not the old BD0130 container.
 **Wand of Fire: DROPPED entirely** (not carried, not loot). **Journal 266701 (assassin
 text): swapped for a new crusade-only .tra line.**
 
-**Scaling draft:** EASY/EASIEST = 1,2,3,5 · NORMAL = all six · HARD = + skeleton-guard
-pair (the cells' previous occupants, raised) · HARDEST = + one elite undead anchor
-(Unsleeping-Guardian tier). Non-casters get SCS generic brains + potions when SCS
-present; SoD-native stack otherwise (cookbook #13).
+**Scaling (LOCKED 2026-07-07, playtest 3):** EASY/EASIEST = 1,2,3,5 · NORMAL and up =
+all six. **Undead filler CUT** (user: undead don't fit a palace jailbreak — no added
+bodies at any difficulty). Insane (HARDEST) instead adds a **defensive layer on the
+anchors**: Protection from Magical Weapons on Korlasz, Stoneskin on Porios, Luck + a
+Potion of Superior Healing on Vhast. Spell resrefs are resolved **by name at install**
+(Spell Revisions shifts the slots — PfMW=spwi611 / Luck=spwi209 / Stoneskin=spwi408 on
+this install vs vanilla spwi610/212/415) and injected via EVALUATE_BUFFER, so the layer
+is correct on vanilla, SR, and SCS alike. Crew spawn positions sit SOUTH of the cell in
+the open room (playtest 3: the draft Y≈300 spots jammed them into the cell, off-screen).
+Non-casters get SCS generic brains + potions when SCS present; SoD-native stack
+otherwise (cookbook #13).
 
 ### Korlasz's sequencer (verified SCS mechanics, 2026-07-06)
 
@@ -117,6 +130,12 @@ composition):
    fight-defining opener, save-counterable.
 2. Alpha strike: 3× Flame Arrow on the squishiest target.
 3. Mixed: Slow + 2× Flame Arrow.
+
+**DECIDED (2026-07-06): option 1, the control bomb** — built as csrseq1/csrseq1b.
+**Targeting fix (2026-07-07, playtest 3):** the opener fires at the **nearest PC**
+(`See([PC])`/`LastSeenBy`), never nearest-enemy — the vanilla cell guards (bdfist1b,
+GOODCUTOFF) usually stand closest when she turns, and nearest-enemy targeting wasted
+the one-shot bomb on a guard. If no PC is visible the marker waits; the brain fights on.
 
 **Per-playthrough randomization: DEFERRED** (user, 2026-07-06 — other mods do
 per-playthrough rolls, too much to plan now). Roadmap note: cheap later via a runtime
@@ -270,8 +289,39 @@ OPEN (stakes): proclamation tone — a demand ("come north and stand with the cr
 a warning ("I am coming for you, willing or no")? And do you learn of it during the roam
 (pamphlet first, council references it — my rec) or first at the council?
 
+## 10. Fresh start / import: NO auto-granted party — DECIDED (2026-07-07, playtest 3)
+
+A fresh SoD start (new SoD character, or a BG1 character imported into fresh SoD —
+both `SOD_fromimport=0`) is vanilla-granted an alignment-picked default party via
+BDINTRO's `JoinPartyOverride` pool; with the dungeon skipped they materialized in the
+palace bedroom out of nowhere (playtest 3: Jaheira/Khalid/Minsc/Dynaheir/Safana). **Cut:
+you wake alone** (Imoen at the bedside per §5) **and gather your own party in the city**
+— the SoD recruiters are all there anyway. The continuous BG1→SoD transition
+(`SOD_fromimport=1`) keeps the full carried party (wave-1 component 110), untouched;
+Safana's import auto-join blocks are preserved. Implemented as component 145 (requires
+140).
+
+Also locked in playtest 3 (2026-07-07):
+- **Imoen's join/rejoin replies are NOT party-size-gated** — they stay visible with a
+  full party and `JoinParty()` pops the engine's reform screen (matches every SoD
+  recruiter).
+- **Korlasz's breakout opener rewritten** (BDKORLAS state 24, new line unvoiced):
+  vanilla "you delivered me to this hell" assumed the player caught her in the removed
+  dungeon; the new line blames the PC as **Sarevok's killer**. All four replies
+  unchanged.
+- **Skie double-appearance guard DEFERRED to the Skie pass:** her 3 a.m. scene
+  (`CreateCreature("bdskie")`, bd0103.baf) has no in-party guard — with Skie carried
+  from BG1 it would spawn a second Skie. Guarding it needs a replacement for the
+  `bd_plot` 54→55 advance the scene owns. User direction: if she's in the party she
+  should just *start the conversation* herself — and generally, **the more Beamdog
+  cutscenes removed, the better**.
+
 ## OPEN — next sparring round
 1. Sign-off on the §4 cut surface (strangle-by-flag + council re-points + cheap-now
    removal list).
-2. Korlasz's sequencer contents: control bomb (rec) / alpha strike / mixed (§2a).
-3. §9 stakes: proclamation tone + where the player first learns of it.
+2. ~~Korlasz's sequencer contents~~ — DECIDED 2026-07-06: the control bomb (§2a).
+3. §9 stakes tone — DECIDED 2026-07-06 (proclamation shipped in comp180). Delivery edge
+   still open: retiring for the night without entering the great hall skips the
+   proclamation — fix or accept.
+4. Component 150's three beyond-spec dialog gates (BDBELT 40 t2, BDRASAAD
+   28.0/32.1/36.0, BDDYNAHE 23 t1) — build deviation pending sign-off.
