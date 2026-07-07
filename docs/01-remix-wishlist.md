@@ -123,6 +123,23 @@ chapter-pass docs only.
   party in the city. Item 1's "keep everyone" applies to the *continuous* BG1→SoD
   path, which is untouched.
 
+## Decisions locked (2026-07-08, Coast Way round 1)
+- **No no-save/no-roll cheese, anywhere:** shadowed souls (BDSHSOUL — touch with no
+  save and no attack roll) are removed from EVERY SoD area they appear in, not just
+  the dig site ("those creatures should not exist anywhere"). Apply the same
+  judgment forward: bone bats and the Unsleeping Guardian are on the not-fun list.
+- **Removed-content treasure = one mod-wide choice component:** every chapter pass
+  that deletes content routes its loot through a single component with two flavors —
+  "collected conveniently in a container" or "removed with the content." First
+  payload: the BD7000 items (Gemblade etc.).
+- **SoD's Skie plot: removed/heavily rewritten** (companion piece to Entar-stays-dead
+  above; her BD7000 sub-quest dies with that area). Skie PLAYABLE (item 12) stands.
+- Coast Way tier round-1 decisions live in `docs/design/chapters/02-coastway.md`:
+  BD7000 removed (Rasaad to the BD1000 camp), west spider installation cut, bridge
+  magic wall cut, interrupt timer FIVE_ROUNDS, dig-site garrison replaced by
+  1 horde room + a couple scary-few encounters + ~3 pushover groups + 1 hard group;
+  lich-fight rework deferred.
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.
