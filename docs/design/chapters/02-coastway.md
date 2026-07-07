@@ -1,9 +1,9 @@
 # Chapter Pass — Coast Way tier (BD1000 / BD1100 / BD1200 / BD7000)
 
-**Status: ROUND 1 DECIDED (2026-07-08) — round 2 open on dungeon layout details.**
+**Status: DESIGN LOCKED (rounds 1+2, 2026-07-08) — implementation next.**
 Inputs: the user's parked notes (`02-coastway-notes.md`) + the verified census
-(`docs/research/12-coastway-census.md`) + sparring round 1 (all decisions user-made).
-Nothing below is implemented yet.
+(`docs/research/12-coastway-census.md`) + two sparring rounds (all decisions
+user-made). Nothing below is implemented yet.
 
 ## 0. What the census corrects
 
@@ -80,33 +80,48 @@ a mid-fight power-down (strips his defenses) instead of a hidden kill-permission
 instead of raw level inflation. The 22,000 XP clean-kill award and quest scripts
 are untouched by the garrison cut.
 
-**[ROUND 2 — proposed layout, awaiting user tweaks]** (numbers are proposals):
-- L1 (upper): pushover group A (4-5 zombies, entrance corridor), pushover group B
-  (3-4 ghouls), one scary single (a lone mummy in a burial niche). Dig-monsters
-  (26 crawlers/umber hulks/otyughs) — OPEN: cut to one small scare (e.g. an umber
-  hulk pair, save-able gaze) or delete entirely.
-- L2 (lower): the HORDE ROOM (~16-18 weak: shambling zombies + skeletons + a few
-  ghouls) in the big ossuary chamber; one scary pair (greater ghasts — paralysis
-  saves, no drain); pushover group C; the HARD group at the Secret02 threshold.
-- Hard-group composition options (all SoD-native, no cheap mechanics):
-  (a) honor guard: 2× mummy (BDMUMM01) + 2× elite skeleton guard (BDSKGR07/08) —
-      recommended: big, tough, everything save-able/curable;
-  (b) all-elite skeleton pack: 4-5 top-tier BDSKGR — pure armored melee, wants
-      blunt weapons (tactical, never unfair);
-  (c) mummy anchor: 1 leveled-up mummy mini-boss (Korlasz-crew treatment) + 2
-      greater ghasts.
-- XP ledger row sized after the layout locks (delivery per prologue §7 rule if
-  compensation is wanted).
+**ROUND 2 LOCKED (2026-07-08):**
+- **Hard group = option (a) "honor guard"**: 2× mummy (BDMUMM01) + 2× elite
+  skeleton guard (top-tier BDSKGR), placed at the Secret02 threshold before the
+  lich.
+- **Layout as proposed**: L1 = pushover group A (4-5 zombies, entrance), pushover
+  group B (3-4 ghouls), one lone-mummy scare in a burial niche; L2 = the HORDE
+  ROOM (~16-18 weak: zombies/skeletons/a few ghouls, big ossuary chamber), one
+  greater-ghast pair, pushover group C, the hard group at the door.
+- **Dig-monsters**: DELETE the carrion crawlers (BDMCARRI/BDCCRAW1/CARRIO) and
+  otyughs; **KEEP only umber hulks** ("just leave some umber hulks") — plan: one
+  group of 3 of the 4 placed BDUMBER1 (burrowers are the one thing that fits the
+  dig fiction).
+- **SEMAHL CONSTRAINT (user)**: some creatures fight the giant Semahl (BDSEMAHL,
+  the L1 rescue beat) — "nothing crazy." Verify his fight wiring before cutting
+  and keep whatever small group his beat needs.
+- **XP compensation**: collect MOST of the cut kill-XP and grant it as **ONE
+  chunk, all at once, as a quest reward on the LICH** (user proposal, agreed).
+  Implementation point: the existing clean-kill `AddExperienceParty(22000)`
+  block (`BD1200.baf:10-18`) gets the chunk added. Caveat (surfaced): that path
+  requires the phylactery destroyed first — vanilla's only closure, coherent
+  with "finish the dungeon, collect the dungeon's XP"; the deferred lich rework
+  keeps clean-kill as the standard path. Chunk sized at implementation from the
+  summed CRE kill-XP (0x14) of every cut actor — "most" ≈ 80%, exact number when
+  the sums are in.
+- **Treasure container ("keep" flavor)**: an EXISTING BD1000 container that
+  makes sense (camp area preferred) — picked at implementation from the ARE
+  container list ("just do something that somewhat makes sense").
 
 ## 4. Backtracking without EET — [USER NOTE, global lever]
 
 Parity with EET's backtracking on standalone. Global design (not this tier alone);
 parked here until its own pass.
 
-## OPEN — round 2
+## Implementation-time verifications (before/while building)
 
-1. §3 layout sign-off: the proposed distribution above (counts, rooms), hard-group
-   option (a)/(b)/(c), dig-monster disposition, horde-room placement (L2 ossuary
-   vs an L1 chamber).
-2. §3 XP ledger: compensate the cut garrison (one collected award) or let it go.
-3. §2 container spot for the "keep removed-content treasure" flavor (camp crate?).
+1. Semahl's fight wiring on BD1100 — which undead engage him; keep the beat
+   functional with a small group.
+2. `Sddskie1`/`Skie_escape` + SDD123 globals — confirm nothing downstream reads
+   them before deleting BD7000 content.
+3. BD7000 worldmap reveal mechanism (EET vs standalone) for the removal shape.
+4. Tsolak/Isabella/Ikros carried gear — completes the treasure-component payload.
+5. BD1000 container enumeration — pick the treasure crate.
+6. Actor-coordinate layout for BD1100/BD1200 — choose kept clusters per the
+   locked layout, position the hard group at Secret02, sum the cut kill-XP.
+7. Rasaad's camp spot among the `BD1000.baf:149-283` relocation points.

@@ -134,11 +134,14 @@ chapter-pass docs only.
   payload: the BD7000 items (Gemblade etc.).
 - **SoD's Skie plot: removed/heavily rewritten** (companion piece to Entar-stays-dead
   above; her BD7000 sub-quest dies with that area). Skie PLAYABLE (item 12) stands.
-- Coast Way tier round-1 decisions live in `docs/design/chapters/02-coastway.md`:
-  BD7000 removed (Rasaad to the BD1000 camp), west spider installation cut, bridge
-  magic wall cut, interrupt timer FIVE_ROUNDS, dig-site garrison replaced by
-  1 horde room + a couple scary-few encounters + ~3 pushover groups + 1 hard group;
-  lich-fight rework deferred.
+- Coast Way tier decisions (rounds 1+2, design LOCKED) live in
+  `docs/design/chapters/02-coastway.md`: BD7000 removed (Rasaad to the BD1000
+  camp), west spider installation cut, bridge magic wall cut, interrupt timer
+  FIVE_ROUNDS, dig-site garrison replaced by 1 horde room + a couple scary-few
+  encounters + ~3 pushover groups + 1 hard group (2 mummies + 2 elite skeleton
+  guards at the sealed door); of the dig-monsters only umber hulks survive;
+  Semahl's fight beat preserved (small); cut XP returns as ONE chunk on the lich
+  clean-kill award; lich-fight rework deferred.
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
