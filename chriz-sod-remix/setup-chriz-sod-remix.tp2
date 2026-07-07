@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.2.0~
+VERSION ~v0.3.0~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -20,7 +20,14 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   160 Imoen stays / recruitable          (requires 140+150)
 //   170 the Korlasz jailbreak              (requires 140)
 //   180 celebration + Caelar's proclamation (requires 140+150)
-// 200+:    reserved (later chapter passes, ending rework)
+// 200-299: Coast Way chapter pass
+//   200 Coast Way Crossing: west spiders cut, no magic wall,
+//       5-round bridge fight
+//   210 Coast Way Forest (BD7000) removed; Rasaad at the camp
+//   220 the dwarven dig site re-garrisoned (+XP chunk on the lich)
+// 900-999: mod-wide choice components
+//   900/901 treasure from removed content: collect / remove
+//           (requires 210)
 //
 // Design + research: docs/ in the repo. Every component is a
 // tail-installable in-place patch; nothing is uninstalled or
@@ -309,3 +316,71 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 1
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 180 (celebration + proclamation) requires component 150 (palace night + council rework).~
 
 INCLUDE ~chriz-sod-remix/lib/comp180.tpa~
+
+// ============================================================
+// 200 — Coast Way Crossing: fewer spiders, fairer bridge fight
+// ============================================================
+// The 8-spider west installation (placed group + wandering spawn
+// point + web trap) is removed — the east group stays; the bridge
+// cutscene loses its wall of force; the crusader-fight window
+// before Caelar's parley grows from 3 to 5 rounds. Design:
+// docs/design/chapters/02-coastway.md §1 (user-decided round 1).
+
+BEGIN @200 DESIGNATED 200 GROUP @1002 LABEL ~csr_coastway_field~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp200.tpa~
+
+// ============================================================
+// 210 — Coast Way Forest (BD7000) removed; Rasaad at the camp
+// ============================================================
+// The vampire-hunters map never appears on the worldmap (its
+// static WMP visibility flag is the ONLY thing that reveals it —
+// no script does). Rasaad's recruitment moves to the Flaming Fist
+// camp on BD1000, cloned from his verified BD7000 state machine.
+// docs/design/chapters/02-coastway.md §2.
+
+BEGIN @210 DESIGNATED 210 GROUP @1002 LABEL ~csr_no_bd7000~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7000.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp210.tpa~
+
+// ============================================================
+// 220 — the dwarven dig site re-garrisoned
+// ============================================================
+// BD1100/BD1200's ~200 pre-placed hostiles become a handful of
+// purposeful fights (dwarf barricade, horde room, honor guard at
+// the sealed door); shadowed souls / bone bats / the Unsleeping
+// Guardian are hard-banned; 80% of the cut kill-XP returns as one
+// chunk on the lich clean-kill. Quest wiring (Semahl's five
+// attackers, Deepvein's wight, Coldhearth machinery) preserved by
+// construction. docs/design/chapters/02-coastway.md §3.
+
+BEGIN @220 DESIGNATED 220 GROUP @1002 LABEL ~csr_digsite~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1100.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1200.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp220.tpa~
+
+// ============================================================
+// 900/901 — treasure from removed content (mod-wide choice)
+// ============================================================
+// One choice, reused by every future removal pass: notable loot
+// from removed content is either collected somewhere convenient
+// (currently: the camp chest at the Coast Way crossing) or gone
+// with the content. docs/01-remix-wishlist.md (locked 2026-07-08).
+
+BEGIN @900 DESIGNATED 900 SUBCOMPONENT @902 GROUP @1002 LABEL ~csr_treasure_keep~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~The treasure component covers loot from removed content - install component 210 (Coast Way Forest removed) first.~
+
+OUTER_SET csr_keep_treasure = 1
+INCLUDE ~chriz-sod-remix/lib/comp900.tpa~
+
+BEGIN @901 DESIGNATED 901 SUBCOMPONENT @902 GROUP @1002 LABEL ~csr_treasure_remove~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~The treasure component covers loot from removed content - install component 210 (Coast Way Forest removed) first.~
+
+OUTER_SET csr_keep_treasure = 0
+INCLUDE ~chriz-sod-remix/lib/comp900.tpa~

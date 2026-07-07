@@ -1,0 +1,91 @@
+// chriz-sod-remix component 210 - Rasaad recruits at the Coast Way camp.
+// BD7000 (Coast Way Forest) is removed from the worldmap, so his vanilla
+// recruitment blocks there (BD7000.baf:20-78, cloned below with the camp
+// coordinates) can never run. Same state machine, same guard variable
+// (bd_rasaad_spawn "bd7000") so nothing can ever double-spawn him even if a
+// save still reaches BD7000. The vanilla Chapter==8 gate is deliberately
+// dropped: BD1000 only exists during the SoD campaign, and without the gate
+// he stays recruitable at the camp all campaign instead of silently expiring
+// after chapter 8 (vanilla makes him missable; camp spot [640.3690] sits in
+// the companion row - Minsc [700.3785], Dynaheir [735.3755]).
+// The first block also belts-and-suspenders the removed vampire quest's
+// city messenger: BDBALDUR.baf:1652-1672 reads bd_123_messenger_* at GLOBAL
+// scope with no quest-status guard; SDD123's completion dialog (removed with
+// BD7000) is the only thing that ever arms the timer, and vanilla proves an
+// un-set timer never fires - but pre-setting the spawned flag costs nothing
+// and closes the engine-semantics question for good.
+
+IF
+  Global("CSR_BD7000_GONE","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_BD7000_GONE","GLOBAL",1)
+    SetGlobal("bd_123_messenger_spawned","GLOBAL",1)
+    Continue()
+END
+
+IF
+  Global("bd_rasaad_spawn","bd7000",0)
+  InPartyAllowDead("rasaad")  // ~Rasaad~
+THEN
+  RESPONSE #100
+    SetGlobal("bd_rasaad_spawn","bd7000",1)
+    Continue()
+END
+
+IF
+  Global("bd_rasaad_spawn","bd7000",0)
+  !StateCheck("Rasaad",STATE_REALLY_DEAD)  // ~Rasaad~
+  Global("BD_RASAAD_DIED_IN_BG","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_rasaad_spawn","bd7000",1)
+    Continue()
+END
+
+IF
+  Global("BD_RASAAD_DIED_IN_BG","GLOBAL",0)
+  Global("bd_rasaad_spawn","bd7000",0)
+  !StateCheck("Rasaad",STATE_REALLY_DEAD)  // ~Rasaad~
+  BeenInParty("rasaad")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_rasaad_spawn","bd7000",1)
+    MoveGlobal("bd1000","RASAAD",[640.3690])
+    ApplySpellRES("bdresurr","RASAAD")
+    SmallWait(1)
+    ActionOverride("RASAAD",Face(NW))
+    ApplySpellRES("bdrejuve","rasaad")
+    ChangeEnemyAlly("rasaad",NEUTRAL)
+    ChangeSpecifics("rasaad",ALLIES)
+    ActionOverride("RASAAD",SetGlobal("bd_joined","locals",0))
+    ActionOverride("RASAAD",SetGlobal("bd_retreat","locals",0))
+    ActionOverride("RASAAD",SaveObjectLocation("LOCALS","bd_default_loc",Myself))
+    ActionOverride("rasaad",ChangeAIScript("bdrasaad",OVERRIDE))
+    ActionOverride("rasaad",ChangeAIScript("",CLASS))
+    ActionOverride("rasaad",ChangeAIScript("BDSHOUT",RACE))
+    ActionOverride("rasaad",ChangeAIScript("BDMONK01",GENERAL))
+    ActionOverride("rasaad",ChangeAIScript("",DEFAULT))
+    ActionOverride("rasaad",SetDialogue("bdrasaad"))
+    Continue()
+END
+
+IF
+  Global("BD_RASAAD_DIED_IN_BG","GLOBAL",0)
+  Global("bd_rasaad_spawn","bd7000",0)
+  !StateCheck("Rasaad",STATE_REALLY_DEAD)  // ~Rasaad~
+  !BeenInParty("rasaad")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_rasaad_spawn","bd7000",1)
+    SetGlobal("SPRITE_IS_DEADRASAAD","GLOBAL",0)
+    CreateCreature("rasaad7",[640.3690],NW)  // ~Rasaad~
+    ActionOverride("rasaad",MakeGlobalOverride())
+    ChangeSpecifics("rasaad",ALLIES)
+    ActionOverride("rasaad",ChangeAIScript("bdrasaad",OVERRIDE))
+    ActionOverride("rasaad",ChangeAIScript("",CLASS))
+    ActionOverride("rasaad",ChangeAIScript("BDSHOUT",RACE))
+    ActionOverride("rasaad",ChangeAIScript("BDMONK01",GENERAL))
+    ActionOverride("rasaad",ChangeAIScript("",DEFAULT))
+    Continue()
+END

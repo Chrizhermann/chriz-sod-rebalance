@@ -1,9 +1,29 @@
 # Chapter Pass — Coast Way tier (BD1000 / BD1100 / BD1200 / BD7000)
 
-**Status: DESIGN LOCKED (rounds 1+2, 2026-07-08) — implementation next.**
-Inputs: the user's parked notes (`02-coastway-notes.md`) + the verified census
-(`docs/research/12-coastway-census.md`) + two sparring rounds (all decisions
-user-made). Nothing below is implemented yet.
+**Status: IMPLEMENTED v0.3.0 (2026-07-08) — installed + verified on dev,
+user playtest pending.** Components: 200 (Crossing field pass), 210 (BD7000
+removal + Rasaad at camp), 220 (dig-site re-garrison + XP chunk), 900/901
+(treasure choice). Inputs: the user's parked notes (`02-coastway-notes.md`) +
+the verified census (`docs/research/12-coastway-census.md`) + two sparring
+rounds (all decisions user-made).
+
+Implemented specifics (final numbers): removal mechanism = actor appearance-
+schedule 0 (verified live hour-bits; matched by CRE@x@y, count-guarded);
+garrison 175,495 kill-XP → kept 46,875, cut 128,620 → **chunk 17,100/char**
+on the lich clean-kill (`AddexperienceParty(22000)` + `(17100)`); Rasaad camp
+spot [640.3690] (companion row, no Chapter gate — recruitable all campaign,
+guarded by vanilla's own `bd_rasaad_spawn`); BD7000 removal = its static WMP
+visibility flag zeroed (the only reveal mechanism; save-baked worldmaps keep
+it — applies to runs that haven't generated the SoD map yet); treasure chest =
+Container009 (509,3220): SW1H01 + Gemblade + Suncatcher +2 + Boot and a Half
+of Speed + Wand of Paralyzation (5) + Ring of Free Action + SODTRE08 ×2 +
+SODTRE09 (skipped: mundane hunter gear, BDSTAKE, Crusader Tract, DW#*
+randomiser items); honor guard placed on the Door08→Secret02 corridor at
+(3832,1962)/(3905,1983)/(3978,2003)/(4040,2022) facing west; horde-ins landed
+on vacated cluster-A coordinates (known-walkable); dwarf-barricade beat = the
+quest wight BD_DOD_WIGHT1 + 4 zombies (Deepvein's `Dead("BD_DOD_WIGHT1")`
+dialog trigger verified); Semahl's five BDATKSEM untouched
+(SPRITE_IS_DEADBDATKSEM==5 win condition verified).
 
 ## 0. What the census corrects
 

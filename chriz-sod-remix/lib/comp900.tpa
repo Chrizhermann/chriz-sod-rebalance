@@ -1,0 +1,105 @@
+// ============================================================
+// Component 900 body — treasure from removed content
+// ============================================================
+// Design: docs/01-remix-wishlist.md (locked 2026-07-08): every
+// chapter pass that deletes content routes its notable loot
+// through this ONE choice component — either collected somewhere
+// convenient, or removed along with the content. The install-time
+// variable csr_keep_treasure (set by the subcomponent stubs in the
+// tp2) selects the flavor; the "remove" flavor installs as a pure
+// preference marker (future passes read it via MOD_IS_INSTALLED).
+//
+// Current payload — BD7000 Coast Way Forest (component 210):
+//   BDDAGG03  Gemblade +1            (victim-pile container)
+//   BDSHLD02  The Suncatcher +2      (Isabella; also SDD122's
+//                                     journal beat keys on holding
+//                                     it - collecting keeps that
+//                                     quest thread reachable)
+//   BDBOOT04  Boot and a Half of Speed (Tsolak)
+//   WAND04    Wand of Paralyzation x5 (Ikros)
+//   RING09    Ring of Free Action    (Tsolak's vampreg transform)
+//   SODTRE08 x2, SODTRE09            (treasure pile)
+// Skipped as trash/quest-paper: plain gear (PLAT01/SW1H05/HELM06/
+// STAF02/CLCK14/potions/darts), BDSTAKE (mundane without the
+// vampire), BDMISC63 "Crusader Tract" (SDD123 quest paper), all
+// DW#* randomiser injections (owned by that mod).
+//
+// Destination: Container009, the camp chest at (509,3220) beside
+// the Flaming Fist tents (dev-verified: holds one SW1H01). ARE
+// container item lists are contiguous index runs into the shared
+// items array, so the array is RELOCATED to end-of-file and grown
+// there: the only header fields touched are items count (0x76) and
+// items offset (0x78), both dev-verified; every other container's
+// indices stay valid, the old array bytes become dead padding, and
+// no other section moves. The chest's run is rebuilt as
+// [old SW1H01 + payload] at the array tail.
+
+ACTION_IF (csr_keep_treasure = 1) BEGIN
+
+  // payload rows (resref, charges1) — index-parallel arrays
+  ACTION_CLEAR_ARRAY csr_pay
+  ACTION_CLEAR_ARRAY csr_chg
+  OUTER_SPRINT $csr_pay(~0~) ~SW1H01~   OUTER_SET $csr_chg(~0~) = 0
+  OUTER_SPRINT $csr_pay(~1~) ~BDDAGG03~ OUTER_SET $csr_chg(~1~) = 0
+  OUTER_SPRINT $csr_pay(~2~) ~BDSHLD02~ OUTER_SET $csr_chg(~2~) = 0
+  OUTER_SPRINT $csr_pay(~3~) ~BDBOOT04~ OUTER_SET $csr_chg(~3~) = 0
+  OUTER_SPRINT $csr_pay(~4~) ~WAND04~   OUTER_SET $csr_chg(~4~) = 5
+  OUTER_SPRINT $csr_pay(~5~) ~RING09~   OUTER_SET $csr_chg(~5~) = 0
+  OUTER_SPRINT $csr_pay(~6~) ~SODTRE08~ OUTER_SET $csr_chg(~6~) = 0
+  OUTER_SPRINT $csr_pay(~7~) ~SODTRE08~ OUTER_SET $csr_chg(~7~) = 0
+  OUTER_SPRINT $csr_pay(~8~) ~SODTRE09~ OUTER_SET $csr_chg(~8~) = 0
+
+  COPY_EXISTING ~bd1000.are~ ~override~
+    READ_SHORT 0x76 csr_ic
+    READ_LONG  0x78 csr_io
+    // find Container009 and sanity-check its current single item
+    READ_LONG  0x70 csr_co
+    READ_SHORT 0x74 csr_cc
+    SET csr_c9 = 0 - 1
+    FOR (csr_i = 0; csr_i < csr_cc; csr_i += 1) BEGIN
+      SET csr_b = csr_co + csr_i * 0xc0
+      READ_ASCII csr_b csr_nm (32) NULL
+      PATCH_IF (~%csr_nm%~ STRING_EQUAL_CASE ~Container009~) BEGIN
+        SET csr_c9 = csr_b
+      END
+    END
+    PATCH_IF (csr_c9 < 0) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: Container009 not found in BD1000.are.~
+    END
+    READ_LONG (csr_c9 + 0x40) csr_c9first
+    READ_LONG (csr_c9 + 0x44) csr_c9cnt
+    READ_ASCII (csr_io + csr_c9first * 0x14) csr_c9item (8) NULL
+    PATCH_IF NOT ((csr_c9cnt = 1) AND (~%csr_c9item%~ STRING_EQUAL_CASE ~SW1H01~)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: Container009 does not hold exactly the verified SW1H01 (count %csr_c9cnt%, first item %csr_c9item%). Another mod re-seeded the chest - re-verify before installing.~
+    END
+    // relocate the items array to EOF and append the payload run
+    SET csr_new = BUFFER_LENGTH
+    SET csr_k = 9                            // SW1H01 re-seed + 8 payload entries
+    INSERT_BYTES csr_new (csr_ic * 0x14 + csr_k * 0x14)
+    FOR (csr_i = 0; csr_i < csr_ic * 0x14; csr_i += 4) BEGIN
+      READ_LONG (csr_io + csr_i) csr_v
+      WRITE_LONG (csr_new + csr_i) csr_v
+    END
+    SET csr_e = csr_new + csr_ic * 0x14
+    FOR (csr_j = 0; csr_j < csr_k; csr_j += 1) BEGIN
+      TEXT_SPRINT csr_res $csr_pay(~%csr_j%~)
+      WRITE_ASCIIE csr_e ~%csr_res%~ #8
+      WRITE_SHORT (csr_e + 0x08) 0                       // expiration
+      WRITE_SHORT (csr_e + 0x0a) $csr_chg(~%csr_j%~)     // charges/quantity 1
+      WRITE_SHORT (csr_e + 0x0c) 0
+      WRITE_SHORT (csr_e + 0x0e) 0
+      WRITE_LONG  (csr_e + 0x10) 1                       // identified
+      SET csr_e += 0x14
+    END
+    WRITE_LONG  0x78 csr_new
+    WRITE_SHORT 0x76 (csr_ic + csr_k)
+    WRITE_LONG (csr_c9 + 0x40) csr_ic         // run starts at old count
+    WRITE_LONG (csr_c9 + 0x44) csr_k
+  BUT_ONLY
+
+END
+// flavor "remove": nothing to do — the removals themselves already
+// deleted the content; installing the marker records the choice.
+ACTION_IF (csr_keep_treasure = 0) BEGIN
+  OUTER_SET csr_treasure_removed = 1
+END

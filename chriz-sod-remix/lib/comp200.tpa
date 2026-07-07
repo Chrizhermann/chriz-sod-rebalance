@@ -1,0 +1,110 @@
+// ============================================================
+// Component 200 body — Coast Way Crossing (BD1000) field pass
+// ============================================================
+// Design: docs/design/chapters/02-coastway.md §1 (DECIDED).
+// Ground truth: docs/research/12-coastway-census.md; all offsets
+// re-verified against the DEV install 2026-07-08 (scratchpad
+// probe2/probe3): actor appearance-schedule dword at +0x40 is
+// live hour-bits (BD1000 ships actors with a 0x000FFFC0 day-only
+// schedule), so 0 = present at no hour = never spawns — placed-
+// actor removal without ARE structural surgery.
+
+// ------------------------------------------------------------
+// 200.1 — BD1000.are: west spider installation removed
+// ------------------------------------------------------------
+// The 8 placed NW spiders (verified idx 117-124), the Spiders02
+// wandering spawn point (never spawns again even though the area
+// script re-arms it by name 1 day after a clear — an empty
+// creature table has nothing to pick), and the WEST web trap.
+// Trap_web01 is the EAST group's web (bbox 4443-4916/3228-3427,
+// probe3) and stays; Trap_web02 (bbox 347-765/1437-1563) goes.
+// The east spider group is untouched (user decision, round 1).
+
+ACTION_CLEAR_ARRAY csr_cut_bd1000
+OUTER_SPRINT $csr_cut_bd1000(~SPIDGI@530@1562~)   ~1~
+OUTER_SPRINT $csr_cut_bd1000(~SPIDGI@644@1594~)   ~1~
+OUTER_SPRINT $csr_cut_bd1000(~SPIDHU@548@1459~)   ~1~
+OUTER_SPRINT $csr_cut_bd1000(~SPIDPH@616@1502~)   ~1~
+OUTER_SPRINT $csr_cut_bd1000(~SPIDPH@468@1468~)   ~1~
+OUTER_SPRINT $csr_cut_bd1000(~SPIDPH@467@1532~)   ~1~
+OUTER_SPRINT $csr_cut_bd1000(~BDSPIDGA@563@1523~) ~1~
+OUTER_SPRINT $csr_cut_bd1000(~BDSPIDGA@498@1496~) ~1~
+
+COPY_EXISTING ~bd1000.are~ ~override~
+  // placed spiders -> appearance schedule 0 (never present)
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd1000(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != 8) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp200: expected exactly 8 west-group spiders in BD1000.are, matched %csr_hits%. Another mod has moved or changed the placed actors - regenerate the cut list before installing.~
+  END
+  // Spiders02 spawn point: empty the creature table (count word at
+  // +0x74, dev-verified layout; SpawnPtActivate then re-arms a
+  // point that can spawn nothing)
+  READ_LONG 0x60 csr_so
+  READ_LONG 0x64 csr_sc
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_sc; csr_i += 1) BEGIN
+    SET csr_b = csr_so + csr_i * 0xc8
+    READ_ASCII csr_b csr_nm (32) NULL
+    PATCH_IF (~%csr_nm%~ STRING_EQUAL_CASE ~Spiders02~) BEGIN
+      WRITE_SHORT (csr_b + 0x74) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp200: spawn point Spiders02 not found exactly once in BD1000.are (%csr_hits%).~
+  END
+  // west web trap: disarm (trapped word at region +0x6C, dev-verified)
+  READ_LONG  0x5c csr_ro
+  READ_SHORT 0x5a csr_rc
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_rc; csr_i += 1) BEGIN
+    SET csr_b = csr_ro + csr_i * 0xc4
+    READ_ASCII csr_b csr_nm (32) NULL
+    PATCH_IF (~%csr_nm%~ STRING_EQUAL_CASE ~Trap_web02~) BEGIN
+      READ_SHORT (csr_b + 0x22) csr_bx1
+      PATCH_IF (csr_bx1 > 2000) BEGIN
+        PATCH_FAIL ~chriz-sod-remix comp200: Trap_web02 is not the west web (bbox x1=%csr_bx1%) - region layout differs from the verified one.~
+      END
+      WRITE_SHORT (csr_b + 0x6c) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp200: region Trap_web02 not found exactly once in BD1000.are (%csr_hits%).~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 200.2 — BDCUT14.bcs: no magic wall, 5-round fight window
+// ------------------------------------------------------------
+// The bridge cutscene walls the party off with a wall of force
+// (bdwforce cast + SPFLESHS VFX + force_wall ambient + hidden
+// force_wall_door, BDCUT14 :397-403) and gives the crusader fight
+// THREE_ROUNDS before Caelar's parley timer fires (:417). User
+// decisions: wall gone, window FIVE_ROUNDS (~167%). GTIMES.IDS
+// carries FIVE_ROUNDS=30 on this install (verified).
+
+COPY_EXISTING ~bdcut14.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~ActionOverride("bdcrus13",ForceSpellPointRES("bdwforce",\[3780\.1110\]))[ %TAB%%LNL%%MNL%]+SmallWait(30)[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3540\.1135\])[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3625\.1195\])[ %TAB%%LNL%%MNL%]+SmallWait(10)[ %TAB%%LNL%%MNL%]+AmbientActivate("force_wall",TRUE)[ %TAB%%LNL%%MNL%]+CloseDoor("force_wall_door")~ csr_cnt_wall
+    COUNT_REGEXP_INSTANCES ~SetGlobalTimer("bd_caelar_timer","bd1000",THREE_ROUNDS)~ csr_cnt_timer
+    PATCH_IF NOT ((csr_cnt_wall = 1) AND (csr_cnt_timer = 1)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp200: BDCUT14.bcs does not match the verified bridge-fight layout (wall block x%csr_cnt_wall%, timer x%csr_cnt_timer%; expected 1 each). Another mod rewrote the cutscene - resolve manually.~
+    END
+    REPLACE_TEXTUALLY ~ActionOverride("bdcrus13",ForceSpellPointRES("bdwforce",\[3780\.1110\]))[ %TAB%%LNL%%MNL%]+SmallWait(30)[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3540\.1135\])[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3625\.1195\])[ %TAB%%LNL%%MNL%]+SmallWait(10)[ %TAB%%LNL%%MNL%]+AmbientActivate("force_wall",TRUE)[ %TAB%%LNL%%MNL%]+CloseDoor("force_wall_door")~ ~SmallWait(1)~
+    REPLACE_TEXTUALLY ~SetGlobalTimer("bd_caelar_timer","bd1000",THREE_ROUNDS)~ ~SetGlobalTimer("bd_caelar_timer","bd1000",FIVE_ROUNDS)~
+  END
+BUT_ONLY

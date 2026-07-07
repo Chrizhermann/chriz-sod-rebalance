@@ -1,0 +1,64 @@
+// ============================================================
+// Component 210 body — Coast Way Forest (BD7000) removed
+// ============================================================
+// Design: docs/design/chapters/02-coastway.md §2 (DECIDED).
+// Ground truth: docs/research/12-coastway-census.md §§4-6.
+//
+// BD7000 is made visible/reachable purely by a STATIC flag on its
+// worldmap area entry (0x2 at entry+0x30) — no script anywhere in
+// the SoD corpus reveals it (verified; its script-revealed
+// neighbors BD2000/BD7100 ship 0x0 and are flipped at runtime by
+// BD1000.baf:487-488). Zeroing the flag puts BD7000 in exactly
+// that pre-reveal state, permanently: never shown, never
+// travelable. Everything on it (Tsolak/SDD123, the orc warband,
+// the Skie vignette, Rasaad's recruitment spot) is thereby
+// unreachable without touching a single script other mods might
+// patch. Rasaad instead recruits at the Coast Way camp
+// (baf/rasaad1k.baf, cloned from his verified BD7000 state
+// machine, same guard variable).
+//
+// Downstream audit (census §5): every global the removed content
+// sets is internal to the removed cluster, EXCEPT the SDD123
+// city-messenger block in BDBALDUR (reads bd_123_messenger_* at
+// GLOBAL scope); rasaad1k.baf pre-sets bd_123_messenger_spawned=1.
+// Skie is safe: her BD4100 story spawn is unconditional
+// (BD4100.baf:547-550), independent of the BD7000 vignette.
+//
+// KNOWN LIMIT (engine, applies to every worldmap mod): the
+// worldmap is baked into each save at campaign start — the removal
+// applies to saves that have not yet generated their SoD worldmap.
+// On an in-flight save BD7000 stays reachable (harmlessly; Rasaad
+// spawns wherever the party goes first, guarded either way).
+
+// ------------------------------------------------------------
+// 210.1 — worldmap: clear BD7000's static visible flag
+// ------------------------------------------------------------
+// Name-anchored across every map entry in the WMP, so EET's merged
+// worldmap.wmp and standalone's own WORLDMAP.WMP both work.
+COPY_EXISTING ~worldmap.wmp~ ~override~
+  READ_LONG 0x08 csr_nmaps
+  READ_LONG 0x0c csr_moff
+  SET csr_hits = 0
+  FOR (csr_m = 0; csr_m < csr_nmaps; csr_m += 1) BEGIN
+    SET csr_mb = csr_moff + csr_m * 0xb8
+    READ_LONG (csr_mb + 0x20) csr_na
+    READ_LONG (csr_mb + 0x24) csr_ao
+    FOR (csr_i = 0; csr_i < csr_na; csr_i += 1) BEGIN
+      SET csr_ab = csr_ao + csr_i * 0xf0
+      READ_ASCII csr_ab csr_res (8) NULL
+      TO_UPPER csr_res
+      PATCH_IF (~%csr_res%~ STRING_EQUAL_CASE ~BD7000~) BEGIN
+        WRITE_LONG (csr_ab + 0x30) 0
+        SET csr_hits += 1
+      END
+    END
+  END
+  PATCH_IF (csr_hits = 0) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp210: no BD7000 area entry found in worldmap.wmp - cannot remove the Coast Way Forest from the map.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 210.2 — Rasaad recruits at the camp (BD1000)
+// ------------------------------------------------------------
+EXTEND_TOP ~bd1000.bcs~ ~chriz-sod-remix/baf/rasaad1k.baf~

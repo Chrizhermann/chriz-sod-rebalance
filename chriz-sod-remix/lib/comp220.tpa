@@ -1,0 +1,114 @@
+// ============================================================
+// Component 220 body — the dwarven dig site re-garrisoned
+// ============================================================
+// Design: docs/design/chapters/02-coastway.md §3 (LOCKED, rounds
+// 1+2). The ~200-hostile pre-placed garrison becomes: the dwarf-
+// barricade beat + a ghoul pocket + a lone mummy + 3 umber hulks
+// upstairs; a 17-shambler horde room, a greater-ghast pair, a
+// 4-skeleton pushover and the honor guard (2 mummies + 2 elite
+// skeleton warriors) at the Secret02 threshold downstairs.
+// Everything else — including ALL shadowed souls, ALL bone bats
+// and the Unsleeping Guardian (hard bans) — never spawns.
+//
+// Mechanism: appearance-schedule dword (actor +0x40) = 0, verified
+// live hour-bits on this engine (see comp200 header). Quest wiring
+// preserved by construction: Semahl's five BDATKSEM attackers stay
+// (his script counts SPRITE_IS_DEADBDATKSEM==5), Brother
+// Deepvein's dialog trigger BD_DOD_WIGHT1 stays, the Coldhearth
+// boss/phylactery/arena machinery is untouched.
+//
+// Cut/move lists are GENERATED from the shipped AREs
+// (lib/comp220_lists.tpa) and matched by CRE@X@Y — order-
+// independent, and any drift from another mod fails loudly.
+
+ACTION_CLEAR_ARRAY csr_cut_bd1100
+ACTION_CLEAR_ARRAY csr_cut_bd1200
+ACTION_CLEAR_ARRAY csr_mvx_bd1200
+ACTION_CLEAR_ARRAY csr_mvy_bd1200
+ACTION_CLEAR_ARRAY csr_mvo_bd1200
+INCLUDE ~chriz-sod-remix/lib/comp220_lists.tpa~
+
+// ------------------------------------------------------------
+// 220.1 — BD1100 (upper level): cuts only
+// ------------------------------------------------------------
+COPY_EXISTING ~bd1100.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd1100(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != csr_cutn_bd1100) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp220: BD1100.are matched %csr_hits% of %csr_cutn_bd1100% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp220_lists.tpa before installing.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 220.2 — BD1200 (lower level): cuts + repositioned keepers
+// ------------------------------------------------------------
+// Moves land on coordinates VACATED by cut actors (known-walkable)
+// or on the Door08->Secret02 corridor line for the honor guard;
+// destination point (+0x24) and orientation (+0x34) move with the
+// position so nobody walks back home.
+COPY_EXISTING ~bd1200.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  SET csr_mhits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    TEXT_SPRINT csr_key ~%csr_cre%@%csr_x%@%csr_y%~
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd1200(~%csr_key%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+    PATCH_IF (VARIABLE_IS_SET $csr_mvx_bd1200(~%csr_key%~)) BEGIN
+      TEXT_SPRINT csr_nx $csr_mvx_bd1200(~%csr_key%~)
+      TEXT_SPRINT csr_ny $csr_mvy_bd1200(~%csr_key%~)
+      TEXT_SPRINT csr_no $csr_mvo_bd1200(~%csr_key%~)
+      WRITE_SHORT (csr_b + 0x20) %csr_nx%
+      WRITE_SHORT (csr_b + 0x22) %csr_ny%
+      WRITE_SHORT (csr_b + 0x24) %csr_nx%
+      WRITE_SHORT (csr_b + 0x26) %csr_ny%
+      WRITE_SHORT (csr_b + 0x34) %csr_no%
+      SET csr_mhits += 1
+    END
+  END
+  PATCH_IF NOT ((csr_hits = csr_cutn_bd1200) AND (csr_mhits = csr_movn_bd1200)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp220: BD1200.are matched %csr_hits%/%csr_cutn_bd1200% cuts and %csr_mhits%/%csr_movn_bd1200% moves. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp220_lists.tpa before installing.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 220.3 — the XP ledger chunk on the lich clean-kill
+// ------------------------------------------------------------
+// User rule: the cut garrison's kill-XP comes back as ONE chunk,
+// all at once, on the lich (docs/design/chapters/02-coastway.md
+// §3). AddexperienceParty grants the amount to EACH party member;
+// kill XP is split — so the chunk is cut-XP * 0.8 / 6 (party-of-6
+// ledger baseline), computed by the list generator. It rides the
+// existing clean-kill award block (phylactery destroyed ->
+// Dead("BDCOLDH") -> 22000), the dungeon's single closure point.
+COPY_EXISTING ~bd1200.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~AddexperienceParty(22000)~ csr_cnt_xp
+    PATCH_IF NOT (csr_cnt_xp = 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp220: expected exactly one AddexperienceParty(22000) in BD1200.bcs, found %csr_cnt_xp%. The clean-kill award block differs from the verified layout.~
+    END
+    REPLACE_TEXTUALLY ~AddexperienceParty(22000)~
+~AddexperienceParty(22000)
+    AddexperienceParty(%csr_xp_chunk%)~
+  END
+BUT_ONLY
