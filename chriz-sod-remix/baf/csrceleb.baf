@@ -76,12 +76,14 @@ THEN
     Continue()
 END
 
-// (4) Korlasz return beat (user 2026-07-07): when the player comes back up
-// after the jailbreak fight, Liia wants to know what happened below, orders
-// Flaming Fist down to secure the cells, and thanks the player again. The
-// celebration Liia instance is long despawned, so a fresh one walks in; the
-// two csrffgx guards march to the basement stairs when her closing line sets
-// CSR_KORL_RET=2 (see baf/csrffgx.baf) and despawn with the night.
+// (4) Korlasz return beat (user 2026-07-07): when Korlasz dies, a fresh Liia
+// gathers in the hall (this block fires even while the party is still in the
+// basement - BD0102's script keeps running, shared master area). The DIALOG
+// does NOT start here: her csrliiax override brain walks her up to the player
+// only when See(Player1) passes (same area + LOS - playtest 4 fix; the old
+// area-script StartDialogNoSet reached the player down in BD0116). Her closing
+// line sets CSR_KORL_RET=2, sending the two csrffgx guards to the basement
+// stairs (baf/csrffgx.baf); all of them despawn with the night.
 IF
   Global("BD_PLOT","GLOBAL",50)
   Global("CSR_CELEB","GLOBAL",1)
@@ -93,11 +95,9 @@ THEN
     SetGlobal("CSR_KORL_RET","GLOBAL",1)
     CreateCreature("BDLIIA",[919.722],NW)
     ActionOverride("BDLIIA",SetDialogue("csrcele"))
+    ActionOverride("BDLIIA",ChangeAIScript("csrliiax",OVERRIDE))
     CreateCreature("csrffgx",[890.700],NW)
     CreateCreature("csrffgx",[860.670],NW)
     ActionOverride("BDLIIA",MoveToPoint([792.499]))
-    SmallWait(10)
-    ActionOverride("BDLIIA",FaceObject(Player1))
-    ActionOverride("BDLIIA",StartDialogNoSet(Player1))
     Continue()
 END

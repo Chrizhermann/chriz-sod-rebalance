@@ -83,7 +83,12 @@ COPY_EXISTING ~imoen2.cre~ ~override/csrimo.cre~
   // EET's BG1-campaign behavior script (63 KB of BG1-era blocks
   // we don't want evaluated in the palace). She must stand at
   // (221,459) and answer only when clicked.
-  WRITE_ASCII 0x248 ~~ #8   // override (was IMOEN_)
+  // Override slot: the SoD companion XP catch-up ladder (baf/csrimoxp.baf).
+  // Vanilla gives EVERY SoD joinable this ladder in its personal script
+  // EXCEPT Imoen (BDIMOEN.baf has none - in vanilla she leaves at the
+  // safehouse before it could matter), so without it she joins at the 64000
+  // floor and never snaps to Player1's tier (playtest 4, 2026-07-07).
+  WRITE_ASCII 0x248 ~csrimoxp~ #8   // override (was IMOEN_)
   WRITE_ASCII 0x250 ~~ #8   // class    (was INITDLG)
   WRITE_ASCII 0x260 ~~ #8   // general  (was WTRUNSGT)
   WRITE_ASCII 0x268 ~~ #8   // default  (was WTARSGT)
@@ -149,13 +154,20 @@ COPY_EXISTING ~bd0120.bcs~ ~override~
     REPLACE_TEXTUALLY ~ActionOverride("Imoen_import_eq",TakeCreatureItems("IMOEN2",ALL))~ ~~
     REPLACE_TEXTUALLY ~ActionOverride("IMOEN2",DestroySelf())~
 ~ActionOverride("IMOEN2",SetDialogue("csrimoen"))
+    ActionOverride("IMOEN2",ChangeAIScript("csrimoxp",RACE))
     SetGlobal("CSR_IMOEN_IMPORT","GLOBAL",1)~
   END
 BUT_ONLY
 
 // ------------------------------------------------------------
-// 160.4 — her dialog + the BD0103 swap state machine
+// 160.4 — her dialog + the BD0103 swap state machine + XP ladder
 // ------------------------------------------------------------
+// The catch-up ladder both Imoen instances run: csrimo's override
+// slot (160.1) and the imported IMOEN2's race slot (160.3 strip
+// patch; her RACE slot ships as the "None" placeholder, her
+// OVERRIDE keeps EET's IMOEN_ behaviors).
+COMPILE ~chriz-sod-remix/baf/csrimoxp.baf~
+
 COMPILE ~chriz-sod-remix/dlg/csrimoen.d~
 
 // EXTEND_TOP is additive — no pattern-matching against the

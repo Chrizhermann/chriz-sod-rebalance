@@ -1,0 +1,117 @@
+// chriz-sod-remix component 160 - csrimoxp: Imoen's SoD XP catch-up ladder.
+// VERBATIM copy of the vanilla per-companion ladder (dumped from the installed
+// bdminsc.bcs 2026-07-07, byte-identical to the SoD corpus - vanilla, not EET):
+// snaps the companion to an XP tier keyed on Player1's XP, once at join
+// (BD_JOINXP LOCALS defaults 0) and once more after BD_SAFEHOUSE_DONE (the
+// handshake block re-arms it). Every OTHER SoD joinable carries this ladder in
+// its personal script; BDIMOEN.baf does NOT (vanilla Imoen leaves at the
+// safehouse before it could matter) - which left our recruitable Imoen stuck
+// at her join XP (user playtest 4, 2026-07-07). Assigned to csrimo's override
+// slot at build and to the imported IMOEN2's race slot by the BD0120 strip
+// patch (its OVERRIDE slot keeps EET's IMOEN_).
+// ChangeStat(...,XP,N,SET) never lowers: every block is XPLT(Myself,N)-gated.
+
+IF
+  Global("BD_JOINXP","LOCALS",1)
+  Global("BD_SAFEHOUSE_DONE","GLOBAL",1)
+  Global("BDSODXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BDSODXP","LOCALS",1)
+    SetGlobal("BD_JOINXP","LOCALS",0)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPGT(Player1,249999)
+  XPLT(Myself,250000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    ChangeStat(Myself,XP,250000,SET)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPGT(Player1,199999)
+  XPLT(Myself,200000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    ChangeStat(Myself,XP,200000,SET)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPGT(Player1,160999)
+  XPLT(Myself,161000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    ChangeStat(Myself,XP,161000,SET)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPGT(Player1,134999)
+  XPLT(Player1,161000)
+  XPLT(Myself,135000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    ChangeStat(Myself,XP,135000,SET)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPGT(Player1,109999)
+  XPLT(Player1,135000)
+  XPLT(Myself,110000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    ChangeStat(Myself,XP,110000,SET)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPGT(Player1,89999)
+  XPLT(Player1,110000)
+  XPLT(Myself,90000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    ChangeStat(Myself,XP,90000,SET)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPLT(Player1,90000)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_JOINXP","LOCALS",1)
+    SetInterrupt(TRUE)
+END

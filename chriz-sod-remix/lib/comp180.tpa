@@ -161,6 +161,7 @@ BUT_ONLY
 
 COMPILE ~chriz-sod-remix/baf/csrnobx.baf~
 COMPILE ~chriz-sod-remix/baf/csrffgx.baf~
+COMPILE ~chriz-sod-remix/baf/csrliiax.baf~   // return-beat Liia: walk up on See(Player1)
 
 // ------------------------------------------------------------
 // Celebration trigger. EXTEND_TOP only — zero edits to Beamdog or

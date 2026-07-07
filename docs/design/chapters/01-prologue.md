@@ -255,7 +255,17 @@ writing"); dropping voice-overs to rewrite is always acceptable.** The v1 scene:
 - **Korlasz return beat (user 2026-07-07):** coming back up after the jailbreak, a
   fresh Liia meets the player — what happened below? — simple answers, she orders two
   Fist guards down to secure the cells (they march to the basement stairs), thanks the
-  player a second time. Very short, ambient (no cutscene).
+  player a second time. Very short, ambient (no cutscene). **Playtest-4 fix:** she
+  spawns on the news but only **walks up and talks on See(Player1)** (own brain,
+  csrliiax) — the area-script dialog start had reached the player down in BD0116
+  (BD0102's script keeps running; shared master area).
+- **Imoen XP catch-up (playtest-4 fix):** vanilla gives every SoD joinable a
+  per-companion XP-tier ladder (snap toward Player1's tier at join + after the
+  safehouse flag; 250k/200k/161k/135k/110k/90k, `ChangeStat XP SET`) — **except
+  Imoen** (BDIMOEN.baf has none; she leaves before it matters in vanilla). Component
+  160 now compiles the verbatim ladder as `csrimoxp` and assigns it to both
+  instances (csrimo override slot; imported IMOEN2's race slot via the strip patch).
+  Join floor stays 64,000 (CRE 0x18 — the joinable-XP field, NOT 0x14 kill-XP).
 - **Korlasz dialogue polished** (§2a funnel, states 24–27 now all custom): the
   "tortured in private... this horror" melodrama (nonsense mid-jailbreak — she stands
   free and armed) replaced; BG2 villain register; Minsc's interjection vocabulary

@@ -1,0 +1,25 @@
+// chriz-sod-remix component 180 - csrliiax: override brain for the return-beat
+// Liia instance (spawned by csrceleb.baf block 4 when Korlasz dies). She waits
+// in the hall and WALKS UP to the player the moment she sees them (user
+// 2026-07-07) - which also fixes playtest 4's cross-area misfire: BD0102's
+// area script keeps running while the party fights in BD0116 (shared master
+// area), so an area-script StartDialogNoSet reached the player downstairs.
+// See(Player1) can only pass with both in the same area + line of sight.
+// Her closing dialog line sets CSR_KORL_RET=2 and DestroySelfs her.
+
+// Never linger past the celebration evening: the plot-51 council spawns its
+// own canonical BDLIIA - a leftover instance would double her.
+IF
+  !Global("BD_PLOT","GLOBAL",50)
+THEN
+  RESPONSE #100
+    DestroySelf()
+END
+
+IF
+  Global("CSR_KORL_RET","GLOBAL",1)
+  See(Player1)
+THEN
+  RESPONSE #100
+    StartDialogNoSet(Player1)
+END
