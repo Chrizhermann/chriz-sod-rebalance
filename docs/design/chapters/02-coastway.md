@@ -140,7 +140,20 @@ placement → the guard never engaged. The 7 horde-room moves that DID work all 
 vacated cut-actor coords. **Rule learned: place only on vacated coords (walkable by
 construction) or WED-verified tiles — never interpolate.**
 
-Execution plan (data ready 2026-07-10; the two OPEN calls below for sign-off):
+**EXECUTED 2026-07-10 (user decisions):** the six drowned are CUT and the honor guard
+stands ON four of their vacated coords — mummies on the flanks (3533,1643)/(3315,1772),
+skeleton warriors centre (3482,1682)/(3471,1632) — literal replacement, per the new
+locked rule: **never place creatures where no enemy was placed before** (vacated
+original-actor coords or searchmap-verified tiles only). NO backfill bodies: the
+drowned's 4,800 party XP returns through the ledger chunk instead, regenerated
+**17,100 → 17,800/char** (generator = research/scripts/gen220.py, which now reads the
+pre-220 pristine AREs from the WeiDU backup — regenerating from the post-install
+override would bake in wrong keys). Reinstalled + verified on dev (ARE parse: guard
+live on the four coords, all 10 BDDEAD01 schedule-0; bd1200.bcs carries 22,000+17,800).
+Placement options B/C below are kept for the record only. The BG2-style XP-tiered
+miniboss idea ("lich-lite") is noted for LATER — research docs 17/18 in flight.
+
+The gathered data (kept for the record):
 1. **Drop the 6 BDDEAD01** ("Drowned in Blood", 800 XP each) from KEEP_1200 —
    idx 4/5/6/7/103/104, clustered in the Crimson-Pool room (x3235–3576, the room
    before the lich).

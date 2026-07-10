@@ -40,6 +40,7 @@ logged under the v0.3.0 label just before the repo bumped to v0.4.0).
 | 150 | No assassination night, crusade council | "Strangle-by-flag" kills the first-night palace assassination; 14-day timeskip moved behind a "retire for the night" servant choice (csrserv); BD0100 night-ambush set swept; BD0102 council re-gated LT52 → exactly `bd_plot=51`, crusade-only, captured-assassin corpse dropped. **Prereq for 160/180/185/190/195.** | pred `bd0120.are` |
 | 160 | Imoen stays and is recruitable | Imports keep build/XP/gear (defused BD0120 strip → parked → swapped into bedroom); fresh starts get `csrimo` BG1-chassis clone (XP floor 64k); BDDIALOG IMOEN2 row re-pointed to `csrimoen`; adds the XP catch-up ladder vanilla omits for Imoen. | REQUIRE 140+150 |
 | 170 | The Korlasz jailbreak | Re-timed BD0116 fight on vanilla rematch scaffolding: rebuilt `csrkorl` (Mage 12, Slow+Confusion+Glitterdust sequencer) + named 6-member crew (Hasska/Vhast/Sillune/Porios/Grit/dying Fist) carrying the re-homed dungeon loot; difficulty-branched roster; HARDEST buff layer resolved by spell NAME; SCS detect-and-adapt. Stairs-top BD0102 hint beat re-times the trigger. | REQUIRE 140 |
+| 175 | XP ledger: Liia's reward after the jailbreak | The skipped dungeon carried ~24,700/char guaranteed XP; the jailbreak returns ~1,600/char in kills. Liia's return-beat close pays **24,000/char** as one quest reward (user option c, 2026-07-10; anchor-checked patch of csrcele state 2, award before DestroySelf). | REQUIRE 170+180 |
 | 180 | Celebration + Caelar's proclamation | Victory beat on first walk into BD0102 (nobles + Fist dressing w/ click-dialogs, Liia toast / Belt seconds, BG1 register, palace locked for the night); opens the jailbreak-quest journal and hands over Caelar's proclamation naming the Bhaalspawn (`csrpam`); Liia return beat + Fist march after the jailbreak. | REQUIRE 140+150 |
 | 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. **City chapter only** (trial/BDCUT62/CRE-DLG deferred to the epilogue pass). | REQUIRE 140+150 |
 | 190 | Skie's second-night bedroom visit removed | A Skie-free dawn wake mirrors the two BD0103 night blocks and pre-sets `BD_MDD005=1` so they can never fire (party sleeps to dawn, `bd_plot` 54→55 as before); BDSKIE night root (state 16) sealed with False(). | REQUIRE 150 |
@@ -51,7 +52,7 @@ logged under the v0.3.0 label just before the repo bumped to v0.4.0).
 |---|---------|--------------|------|
 | 200 | Coast Way Crossing: fewer spiders, fairer bridge | Cuts the 8-spider west installation (appearance dword zeroed) + the Spiders02 re-arm point + the two west web traps (east group stays); drops the bridge wall-of-force from BDCUT14; interrupt timer THREE_ROUNDS → FIVE_ROUNDS. | pred `bd1000.are` |
 | 210 | Coast Way Forest removed; Rasaad recruits at camp | Zeroes BD7000's static WMP visibility flag (the only reveal) → area permanently unreachable; Rasaad's spawn state machine cloned to the BD1000 Fist camp `[640.3690]`; the Skie sub-quest dies with the area. Save-baked worldmaps keep BD7000 visible on in-flight saves (harmless). **Prereq for 900/901.** | pred `bd1000.are` + `bd7000.are` |
-| 220 | Dwarven dig site re-garrisoned | Cuts ~163 pre-placed undead (BD1100 69 cuts / BD1200 94 cuts + 11 moves) to a designed shape: 1 horde room, an honor guard (2 mummies + 2 elite skeleton guards) at Secret02, pushover groups, umber-hulks-only dig monsters; shadowed souls / bone bats / Unsleeping Guardian hard-banned; 80% of cut kill-XP returns as one **17,100/char** chunk on the lich clean-kill. Quest wiring (Semahl, Deepvein, Coldhearth) preserved. | pred `bd1100.are` + `bd1200.are` |
+| 220 | Dwarven dig site re-garrisoned | Cuts ~169 pre-placed undead (BD1100 69 / BD1200 100 + 11 moves) to a designed shape: 1 horde room, an honor guard (2 mummies + 2 elite skeleton warriors) standing on the vacated "Drowned in Blood" coords before the lich (2026-07-10 polish — literal replacement per the locked placement rule), pushover groups, umber-hulks-only dig monsters; no-save cheese hard-banned; 80% of cut kill-XP returns as one **17,800/char** chunk on the lich clean-kill. Quest wiring (Semahl, Deepvein, Coldhearth) preserved. | pred `bd1100.are` + `bd1200.are` |
 | 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. **Installed on dev.** | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 | 901 | Treasure from removed content: **remove** | Alternative flavor: loot gone with the content; pure preference marker (`csr_treasure_removed=1`) future passes read via MOD_IS_INSTALLED. **Built but not installed** (900 chosen; the two are exclusive). | SUBCOMPONENT @902 (XOR 900); REQUIRE 210 |
 
@@ -177,17 +178,23 @@ predates it.)*
 
 ---
 
-## Queued for the next session (2026-07-10)
+## Queued (updated 2026-07-10 after the triage round)
 
-1. **Commit** the pending v0.4.0 work (components 185/190/195 + docs) — awaiting go-ahead.
-2. **Prologue XP chunk decision** — exact vanilla numbers + proposal in 01-prologue.md §7; pick size + placement, then build (new tail component; do NOT reinstall 170).
-3. **Coast Way §3a execution** — data in 02-coastway.md §3a; regen lists, reinstall 220, playtest.
-4. **Chapter-3 sparring round 1** — from docs/research/13-roadnorth-census.md.
-5. **Ending/epilogue design kickoff** — from docs/research/14-ending-epilogue-map.md (+ the Belhifet call).
-6. **Skie talk-to-join design** — from docs/research/15-skie-recruitment.md.
-7. **Corwin rewrite scoping** — from docs/research/16-corwin-dialogue-surface.md.
-8. City chapter (185/190/195) is installed on dev and **ready to playtest**.
+Done today: commits; comp175 (24k Liia reward) built+installed; dig-site §3a executed
+(guard replaces drowned, chunk 17,800); ch9 early directions recorded (03-roadnorth.md);
+ending scope confirmed pure-removal; placement + XP-fill principles locked.
 
-**Frontier:** Wave 1 + the whole prologue-city pass are complete; the current edge is the
-Coast Way pass (two §3a polish fixes queued). Chapter 3+ and the ending/epilogue rework
-are the unbuilt frontier — the ending being the hinge that unblocks most deferred tails.
+1. **Playtest** — the city chapter (185/190/195), the jailbreak reward (175), and the
+   dig site (guard + 17,800 chunk) are all installed on dev.
+2. **Chapter-9 sparring round 1** — user takes a closer look at research/13 +
+   03-roadnorth.md early directions (temple relocation is the big structural call).
+3. **Ending/epilogue pass** — pure removal (band 590–671, research/14); seam mechanics
+   only, no rewrites; unblocks Skie-death/Entar/hooded-man/BDRUMOR3 tails.
+4. **Skie pass** — talk-to-join re-gating + full remaining plot removal (research/15).
+5. **Tiered dig-site encounter (later)** — research/17+18 in flight (BG2 mechanism +
+   lich-lite candidates).
+6. **BG1 soundsets for returning BG1 companions in SoD** (backlog component).
+7. **Corwin rewrite** (deferred; scope in research/16).
+
+**Frontier:** Wave 1 + prologue + Coast Way (incl. polish) are complete and installed.
+Chapter 9 and the ending/epilogue pass are the frontier.

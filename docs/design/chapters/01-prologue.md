@@ -279,7 +279,7 @@ writing"); dropping voice-overs to rewrite is always acceptable.** The v1 scene:
 No fireworks (no VFX asset in SoD; roadmap if ever). Roadmap: staged celebration scene,
 crowd set-piece, street vignettes of crusade tension.
 
-## 7. XP ledger entry (prologue) — NUMBERS VERIFIED 2026-07-10; chunk PROPOSED (OPEN)
+## 7. XP ledger entry (prologue) — VERIFIED + DECIDED + SHIPPED (component 175)
 
 **Delivery rule (user, 2026-07-06):** any remix XP compensation is granted as ONE
 collected `AddexperienceParty` award after Korlasz's defeat — never dripped as separate
@@ -313,20 +313,19 @@ Remix currently grants: jailbreak kill-XP only — csrkorl 4,500 + crew 4,750 (+
 familiar chassis) ≈ 9,250–9,700 party ≈ **1,600/char** — and closes journal 261627 with
 zero XP. **Gap ≈ 23,000/char.**
 
-**PROPOSED chunk** (pick one; all land as the single locked-rule award):
-- **(a) 23,000/char — strict XP-neutral** (24,663 − 1,600, rounded). *Recommended.*
-- (b) 21,700/char — dig-site convention (80% of kill-XP + 100% of quest XP − remix kills).
-- (c) 24,000/char — (a) + the optional Sarevok-trap XP folded in.
+**DECIDED (user, 2026-07-10): option (c) — 24,000/char, delivered as Liia's quest
+reward on the return beat** (the turn-in feel), not on the kill. Still ONE award per
+the locked delivery rule.
 
-**Delivery hook (verified):** BD0116.baf's one-shot journal-close block —
-`Dead("BDKORLAS") + Global("BD_SPAWN_KORLASZ","BD0116",2) + bd_sdd011b_korlasz_journal_entry=0
-→ AddJournalEntry(261627,QUEST_DONE)` — gets `AddexperienceParty(N)` appended,
-count-guarded. Fires exactly once, at the moment of her defeat. The Liia return-beat
-stays XP-less per the locked rule (alternative, if the turn-in feel is preferred: land
-the same single chunk on her return-beat dialog action instead — still one award).
-
-**Component shape:** a NEW tail component (proposed: 175 "prologue XP ledger",
-REQUIRE 140+170) — comp170 is already installed on dev and must not be reinstalled.
+**SHIPPED as component 175** (REQUIRE 170+180; declared after 180 in the tp2, since it
+patches 180's dialog) and installed+verified on dev: csr175.d ALTER_TRANSes csrcele
+state 2 ("korlret2" — Liia's closer, reached only while CSR_KORL_RET=1 and flipping it
+to 2, so the award cannot repeat), inserting `AddexperienceParty(24000)` BEFORE the
+`DestroySelf()` (actions queued after DestroySelf on the speaker are dropped by the
+engine). comp175.tpa anchor-checks the dialog first, comp180-style (exactly 4 states;
+state 2 SAY contains "see to what remains") and FAILs loud on mismatch.
+Build note: WeiDU's `STATE_WHICH_SAYS` was tried first and is a GLR parse error in
+this position on weidu 24600 — the binary anchor-check pattern is the house standard.
 
 ## 8. Compatibility notes
 - Tail-mod patches on BD0120/BDINTRO/BD0103/BD0116 + new .d/.cre; no engine 2DAs; K#/mod

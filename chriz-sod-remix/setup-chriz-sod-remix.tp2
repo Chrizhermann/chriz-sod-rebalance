@@ -19,6 +19,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   150 no assassination night, crusade council
 //   160 Imoen stays / recruitable          (requires 140+150)
 //   170 the Korlasz jailbreak              (requires 140)
+//   175 XP ledger: Liia's reward after the jailbreak (requires 170+180)
 //   180 celebration + Caelar's proclamation (requires 140+150)
 //   185 Entar Silvershield removed          (requires 140+150)
 //   190 Skie's second-night bedroom visit removed (requires 150)
@@ -319,6 +320,22 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 1
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 180 (celebration + proclamation) requires component 150 (palace night + council rework).~
 
 INCLUDE ~chriz-sod-remix/lib/comp180.tpa~
+
+// ============================================================
+// 175 — Prologue: the XP ledger — Liia's reward after the jailbreak
+// ============================================================
+// The skipped dungeon carried ~24,700/char guaranteed XP (garrison kills +
+// Imoen wrap-up + Ammon turn-in); the jailbreak returns ~1,600/char in kills.
+// Liia's return-beat close pays the difference as ONE 24,000/char quest
+// reward (verified numbers: docs/design/chapters/01-prologue.md §7).
+// Declared after 180 because it patches 180's return-beat dialog.
+
+BEGIN @175 DESIGNATED 175 GROUP @1001 LABEL ~csr_prologue_xp_ledger~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~170~ ~Component 175 (the jailbreak XP reward) requires component 170 (the Korlasz jailbreak).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~180~ ~Component 175 (the jailbreak XP reward) requires component 180 (celebration + return beat - the dialog that pays the reward).~
+
+INCLUDE ~chriz-sod-remix/lib/comp175.tpa~
 
 // ============================================================
 // 185 — Prologue: Entar Silvershield removed (stays dead)
