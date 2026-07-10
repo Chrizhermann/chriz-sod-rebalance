@@ -202,6 +202,26 @@ Implemented + installed + verified on the dev install (components 185/190/195):
 - **Chapter 9 early directions** recorded in docs/design/chapters/03-roadnorth.md
   (round 1 pending the user's closer look).
 
+## Additions (2026-07-10, Discord announcement post — user's own wording)
+- **Boareskyr bridge-battle rework** is on the list — "at least the explosive barrels
+  part." (Filed by the user under "later"; the battle itself is ch-9 content — see
+  03-roadnorth.md OPEN #3.)
+- **Scaling encounters generalized:** BG2-style scaling encounters **with better
+  pre-buffs, for higher difficulties only** — broadens the dig-site tiered-miniboss
+  idea (research 17/18) toward item 17's SCS-style-fights lever.
+- **Dialogue-rewrite program:** rewrites for multiple quests/NPCs/companions (Corwin
+  absorbed into this), shipped as **optional component(s)**; community ideas welcome
+  (not full writing help — ideas/plots).
+- **Travel ambushes — user lean:** possibly "just cut ALL scripted ambushes"
+  ("are 100 one-hit goblins fun? honestly not sure") — strengthens the full-cut
+  option in wave1-04's parked design.
+- **Caelar/Belhifet motivation = open writing question (community input invited):**
+  why did Caelar go to the Hells, and what did Belhifet actually want? His involvement
+  "made no sense before and it's hard to justify him now." Feeds item 13 / the arc
+  treatment; collect Discord ideas before that pass.
+- Korlasz fight tone restated: SCS-style but **not too hard** — "we don't need another
+  Sarevok fight right after Sarevok" (matches the shipped Semaj-parity design).
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.

@@ -23,9 +23,11 @@ the user wants a closer look at the census before big decisions.
 - **Ziatar (the half-dragon lady) is cool — keep her.** Census note to resolve in
   round 1: vanilla's actual climax in BD7230 is the Neothelid (20k XP); Ziatar is a
   3k parley-adjacent NPC — item 15 ("one big fight vs Ziatar") implies reshaping that.
-- Wishlist anchors in this arc: **item 15** (temple → one big Ziatar fight + strong
-  companions, strip the filler) and **item 16** (Morentherene much scarier — optional
-  difficulty component; she is BD7210's sleeping dragon, 13k).
+- Wishlist anchors in this arc — both CONFIRMED into this pass by the Discord post
+  (2026-07-10): **item 15** — "one big fight in the temple" (Ziatar; strip the filler)
+  and **item 16** — "the dragon fight should be much more scary on high difficulty"
+  (Morentherene, BD7210's sleeping dragon, 13k; packaging — in-pass difficulty-gate vs
+  separate optional component — still open).
 
 ## OPEN for sparring round 1
 
@@ -35,7 +37,9 @@ the user wants a closer look at the census before big decisions.
    optional as-is, or fold the (relocated) temple into the main road?
 3. Boareskyr Bridge is a SCRIPTED set-piece (only 34 trivial placed mobs; a ~90-actor
    neutral crusader army flips hostile in the bridge battle, Khalid leads the
-   defenders) — treatment?
+   defenders) — treatment? Early user note (2026-07-10 Discord post): rework wanted,
+   "at least the explosive barrels part"; user filed it under "later," so it may
+   split out of round 1.
 4. Temple relocation target + the cave/temple/Ziatar/Neothelid recomposition (item 15
    fight shape).
 5. Morentherene treatment (item 16 optional component; she guards the cave→temple
