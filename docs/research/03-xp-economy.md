@@ -116,7 +116,7 @@ several smaller faction-exclusive/optional side quests trim it further → **~35
 
 | Award | Dialog(s) | Quest / context |
 |---:|---|---|
-| **32,000** | `BDHALAT` (or `BDCORWIJ` if Corwin present) | **Free Halatathlaer the dragon spirit** (Forest of Wyrms). Biggest single dialogue reward. *Hostile ending = 12,000 instead.* |
+| **32,000** | `BDHALAT` (or `BDCORWIJ` if Corwin present) | **Free Halatathlaer the dragon spirit** — placed in BD5100/BD5300, the Underground River arc (Ch.10), NOT the Forest of Wyrms (corrected 2026-07-10; see research/13). Biggest single dialogue reward. *Hostile ending = 12,000 instead.* |
 | **18,000** | `BDDAEROS` | **Free the ghost of Daeros Dragonspear** (Dragonspear Castle basement). |
 | **12,000** | `BDMURS` | Resolve the **ogre-tribe leadership** (Murs becomes chief; 3 exclusive endings, all 12k). |
 | **12,000** | `BDMKHIIJ` | **Stand up for M'Khiin** (goblin companion personal quest). |

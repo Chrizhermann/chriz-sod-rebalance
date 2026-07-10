@@ -16,7 +16,9 @@
 
 | Chapter | Entry XP (proj.) | Quest XP removed | Kill XP removed | Reinjected | Into which carriers | Exit XP (proj.) |
 |---|---|---|---|---|---|---|
-| Prologue | 220–250k | — | — | — | — | — |
+| Prologue | 220–250k | 8,000/char (Imoen 5k + Ammon 3k, verified 2026-07-10) | 19,163/char (garrison 18,747 + Korlasz 417; Normal, guaranteed) | jailbreak kills ~1,600/char (shipped, comp170) + **PROPOSED 23,000/char chunk** (01-prologue §7, awaiting sign-off) | jailbreak clean-kill (BD0116 journal-close block) | entry + ~24.7k |
+| Coast Way: dig site | — | 0 | 21,437/char cut (128,620 party) | 17,100/char (80%, SHIPPED in comp220) | Coldhearth clean-kill `AddExperienceParty` (BD1200.baf) | — |
+| Coast Way: BD7000 removal | — | **not yet ledgered** (area removed by comp210; its kill/quest XP TBD — flag) | | | | |
 | … | | | | | | |
 
 ## Known reinjection carriers (from `research/03`, all guaranteed awards)

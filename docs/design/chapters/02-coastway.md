@@ -128,6 +128,55 @@ are untouched by the garrison cut.
   makes sense (camp area preferred) — picked at implementation from the ARE
   container list ("just do something that somewhat makes sense").
 
+## 3a. Playtest follow-ups — dig site (user report 2026-07-08)
+
+**Root cause VERIFIED (2026-07-10, post-220 dev BD1200.ARE parsed — 131 actors: 94
+cut/sched-0, 11 moved/live, 26 kept/live):** the honor guard IS placed with live
+schedules at (3832,1962)/(3905,1983)/(3978,2003)/(4040,2022) — but those four coords
+were interpolated along the Door08(3670,1904)→Secret02(4124,2044) line, a corridor
+holding ZERO vanilla-placed actors (unverified terrain), and idx96's (4040,2022) sits
+essentially ON Secret02's closed-door footprint (4051,1987–4197,2102). Off-mesh
+placement → the guard never engaged. The 7 horde-room moves that DID work all reused
+vacated cut-actor coords. **Rule learned: place only on vacated coords (walkable by
+construction) or WED-verified tiles — never interpolate.**
+
+Execution plan (data ready 2026-07-10; the two OPEN calls below for sign-off):
+1. **Drop the 6 BDDEAD01** ("Drowned in Blood", 800 XP each) from KEEP_1200 —
+   idx 4/5/6/7/103/104, clustered in the Crimson-Pool room (x3235–3576, the room
+   before the lich).
+2. **Re-place the honor guard** (BDMUMM01 idx78/96 + BDSKGR08 idx108/109). Search-map
+   parse (BD1200SR.BMP, 2026-07-10) PROVED the root cause: the four guards are the ONLY
+   actors in the whole area on impassable void (palette idx0) — the real Door08→Secret02
+   corridor is a bent diagonal staircase the straight-line interpolation cut across.
+   Three verified placements to pick from (all searchmap-walkable, reachable, roomy):
+   - OPTION A — room east-exit line (vacated cut-actor coords, west of Door08):
+     (3495,1820)/(3457,1782)/(3533,1643)/(3576,1614).
+   - OPTION B — literal corridor line, spaced down the real staircase (agent-recommended;
+     reads as guards lining the approach, cleanly separate from the backfill room):
+     (3704,1950) Door08 mouth / (3816,2034) / (3928,2070) / (4040,2118) Secret02 threshold.
+   - OPTION C — 4-wide wall right at Secret02's door (player hits them together):
+     (4056,2118)/(4008,2106)/(3976,2130)/(3944,2082).
+   Facing the approach (orient ~NW) is a cosmetic nicety over the current W.
+   **Reusable walkability recipe (any future placement):** a coord (x,y) is walkable iff
+   `<AREA>SR.BMP` cell `(floor(x/16), floor(y/12))` has palette index ∈ {4,7,8,12}
+   (4-bpp bottom-up BMP, cell = 16×12 px; verify reachability by flood-fill from a
+   known-walkable point — palette idx0 = void).
+3. **Backfill a varied weak mix** on the remaining vacated anchors (all walkable by
+   construction): (3396,1665)/(3339,1688)/(3305,1644)/(3267,1766)/(3291,1733)/
+   (3315,1772)/(3235,1804)/(3471,1632)/(3482,1682). Species menu (kill-XP): ZOMBIE 65 ·
+   BDSHZOM1 65 · GHOUL 175 · BDSKGR04 250 · BDSKGR05/06 300 · BDSKGR02 400 · GHAST 650.
+   (Banned per the no-cheese rule: BDSHSOUL/BDBONBAT/BDUNSLGU; SKELDED is a 0-XP corpse
+   prop, not a combatant.)
+4. **XP coupling (OPEN):** the 6 drowned (4,800 party XP) counted as "kept" when the
+   17,100/char chunk was sized. Either size the backfill to ≈4,800 kill-XP (≈12–15
+   weak bodies) so 17,100 stays exact, or resize: new = (128,620 + 4,800 − W)·0.8/6.
+5. (Optional, separate room: the N-chamber vacated coords, x2950–3396/y894–1200 via
+   Door04, could host a pushover pocket.)
+
+Mechanics: revise KEEP_1200 + MOVES_1200 in `scratchpad/gen220.py`, regenerate
+`lib/comp220_lists.tpa`, reinstall 220, re-verify. (220 sits mid-tail on dev; WeiDU
+auto-redoes the later components 200/900/185/190/195 — all ours, acceptable on dev.)
+
 ## 4. Backtracking without EET — [USER NOTE, global lever]
 
 Parity with EET's backtracking on standalone. Global design (not this tier alone);

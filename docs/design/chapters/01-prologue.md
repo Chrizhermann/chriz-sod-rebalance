@@ -279,15 +279,54 @@ writing"); dropping voice-overs to rewrite is always acceptable.** The v1 scene:
 No fireworks (no VFX asset in SoD; roadmap if ever). Roadmap: staged celebration scene,
 crowd set-piece, street vignettes of crusade tension.
 
-## 7. XP ledger entry (prologue) — numbers after fight lock
-Removed: dungeon kills/quests, 30k wrap-up award, surrender cascade. Added: jailbreak
-fight (six+ real kills incl. leveled boss), jailbreak quest award, celebration/completion
-award. Calibrate after playtest per 05-xp-ledger policy.
+## 7. XP ledger entry (prologue) — NUMBERS VERIFIED 2026-07-10; chunk PROPOSED (OPEN)
+
 **Delivery rule (user, 2026-07-06):** any remix XP compensation is granted as ONE
 collected `AddexperienceParty` award after Korlasz's defeat — never dripped as separate
 grants at arrival. (v0.2.0 grants zero remix XP; the XP messages seen at arrival are
 vanilla/EET catch-up systems — SoD's per-companion XP-floor snap — which stay as-is per
 user.)
+
+**Playtest 5 (2026-07-10, user):** "didn't really get much XP for killing Korlasz or
+reporting to Liia." Confirmed: the jailbreak awards only creature kill-XP and no quest
+award anywhere — the gap below.
+
+Vanilla prologue XP removed by the dungeon skip — parsed 2026-07-10 from the dev
+override (ARE actor tables + CRE 0x14; quest awards from decompiled dialogs).
+Guaranteed content, Normal difficulty, per char at party of 6:
+
+| Removed (vanilla) | Party total | Per char |
+|---|---:|---:|
+| Placed hostile garrison (BD0113 5,600 · BD0114 47,515 · BD0120 4,150 · BD0130 55,215) | 112,480 | 18,747 |
+| Korlasz herself (kill path; surrendering paid 1,000/char more) | 2,500 | 417 |
+| Imoen exit wrap-up (`AddXPObject(Player1..6,5000)`, BDIMOEN.d:303-308) — the old "30k wrap-up" note = 30k *party*, i.e. 5k/char | 30,000 | 5,000 |
+| Ammon Ossa moss turn-in (`AddexperienceParty(3000)`, BDAMMON.d:269) — Ammon + the moss live in BD0120; NOT re-homed, dead in the remix | 18,000 | 3,000 |
+| **Guaranteed total (kill path)** | **147,980** | **24,663** |
+
+Optional extras excluded from the headline: the Sarevok-chest skeleton trap (Normal
++6,050 party ≈ +1,008/char — the chest FLAG is re-homed to the jailbreak, its trap XP is
+not) and Hard/Insane-only scripted spawns (+8,000 party spiders). Research-02a
+correction: BD0130's "~28 scripted waves" do not exist — the only scripted spawn is that
+single optional trap.
+
+Remix currently grants: jailbreak kill-XP only — csrkorl 4,500 + crew 4,750 (+ Grit's
+familiar chassis) ≈ 9,250–9,700 party ≈ **1,600/char** — and closes journal 261627 with
+zero XP. **Gap ≈ 23,000/char.**
+
+**PROPOSED chunk** (pick one; all land as the single locked-rule award):
+- **(a) 23,000/char — strict XP-neutral** (24,663 − 1,600, rounded). *Recommended.*
+- (b) 21,700/char — dig-site convention (80% of kill-XP + 100% of quest XP − remix kills).
+- (c) 24,000/char — (a) + the optional Sarevok-trap XP folded in.
+
+**Delivery hook (verified):** BD0116.baf's one-shot journal-close block —
+`Dead("BDKORLAS") + Global("BD_SPAWN_KORLASZ","BD0116",2) + bd_sdd011b_korlasz_journal_entry=0
+→ AddJournalEntry(261627,QUEST_DONE)` — gets `AddexperienceParty(N)` appended,
+count-guarded. Fires exactly once, at the moment of her defeat. The Liia return-beat
+stays XP-less per the locked rule (alternative, if the turn-in feel is preferred: land
+the same single chunk on her return-beat dialog action instead — still one award).
+
+**Component shape:** a NEW tail component (proposed: 175 "prologue XP ledger",
+REQUIRE 140+170) — comp170 is already installed on dev and must not be reinstalled.
 
 ## 8. Compatibility notes
 - Tail-mod patches on BD0120/BDINTRO/BD0103/BD0116 + new .d/.cre; no engine 2DAs; K#/mod
