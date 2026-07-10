@@ -1,0 +1,38 @@
+// ============================================================
+// Component 190 body — Skie's second-night bedroom visit removed
+// ============================================================
+// Design: user request 2026-07-09 ("remove Skie's visit and cutscene in the
+// night after going to bed for the 2nd time completely, the one where she says
+// 'don't tell daddy about this'"). Part of dropping Skie's SoD plot involvement
+// (docs/01-remix-wishlist.md item 12): she becomes a plain BG1-style recruit.
+//
+// Two edits, both fail loud on a structural mismatch:
+//   190.1  EXTEND_TOP a Skie-free wake above the two vanilla bd0103 night
+//          blocks. It mirrors their exact trigger and sets BD_MDD005=1 first,
+//          so those blocks can never fire -> Skie never spawns; the party
+//          wakes at dawn (plot 54 -> 55) exactly as the vanilla path did.
+//   190.2  Gate BDSKIE night-dialogue root (state 16) with False().
+//
+// Install AFTER 150 (the council/second-sleep flow this rides on).
+
+// ------------------------------------------------------------
+// 190.1 — bd0103.bcs: pre-empt the Skie visit with a silent wake
+// ------------------------------------------------------------
+// Guard: the two vanilla blocks must still be present (2 CreateCreature bdskie).
+// If they are gone (already patched away / different SoD build), abort rather
+// than stack a duplicate wake on top of an unknown flow.
+COPY_EXISTING ~bd0103.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~CreateCreature("bdskie",\[443\.476\],NW)~ csr190_cnt
+    PATCH_IF (csr190_cnt != 2) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #190: expected 2 vanilla Skie night spawns in bd0103.bcs, found %csr190_cnt%. The installed script differs from what this component was verified against - aborting instead of pre-empting an unknown flow.~
+    END
+  END
+BUT_ONLY
+
+EXTEND_TOP ~bd0103.bcs~ ~chriz-sod-remix/baf/csr190wake.baf~
+
+// ------------------------------------------------------------
+// 190.2 — BDSKIE: seal the night "don't tell Daddy" dialogue tree
+// ------------------------------------------------------------
+COMPILE ~chriz-sod-remix/dlg/csr190skie.d~

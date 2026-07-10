@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.3.0~
+VERSION ~v0.4.0~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -20,6 +20,9 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   160 Imoen stays / recruitable          (requires 140+150)
 //   170 the Korlasz jailbreak              (requires 140)
 //   180 celebration + Caelar's proclamation (requires 140+150)
+//   185 Entar Silvershield removed          (requires 140+150)
+//   190 Skie's second-night bedroom visit removed (requires 150)
+//   195 assassination/poison references scrubbed (requires 150)
 // 200-299: Coast Way chapter pass
 //   200 Coast Way Crossing: west spiders cut, no magic wall,
 //       5-round bridge fight
@@ -316,6 +319,50 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 1
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 180 (celebration + proclamation) requires component 150 (palace night + council rework).~
 
 INCLUDE ~chriz-sod-remix/lib/comp180.tpa~
+
+// ============================================================
+// 185 — Prologue: Entar Silvershield removed (stays dead)
+// ============================================================
+// Entar was assassinated in BG1 ch.7; SoD wrongly re-seats him as a Grand
+// Duke. Unspawn his war-council appearances and rebuild the morning
+// departure send-off around Belt (Liia's roll-call drops his name; the
+// "weren't you killed?" resurrection reply is gone). His post-victory trial
+// presence + BDENTAR.CRE/DLG stay until the epilogue removal. Design:
+// docs/design/chapters/01-prologue.md §11.
+
+BEGIN @185 DESIGNATED 185 GROUP @1001 LABEL ~csr_no_entar~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Component 185 (Entar removed) requires component 140 (skip the Korlasz dungeon).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 185 (Entar removed) requires component 150 (the crusade council rework).~
+
+INCLUDE ~chriz-sod-remix/lib/comp185.tpa~
+
+// ============================================================
+// 190 — Prologue: Skie's second-night bedroom visit removed
+// ============================================================
+// The 3 a.m. "don't tell Daddy about this" cutscene (Skie sneaks into the
+// guest room the night before departure). A Skie-free wake pre-empts the two
+// bd0103 night blocks; the night dialogue tree (BDSKIE 16-32) is sealed. Part
+// of dropping Skie's SoD plot (she becomes a plain BG1-style recruit).
+
+BEGIN @190 DESIGNATED 190 GROUP @1001 LABEL ~csr_no_skie_night~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 190 (Skie's night visit removed) requires component 150 (the second-sleep / council rework).~
+
+INCLUDE ~chriz-sod-remix/lib/comp190.tpa~
+
+// ============================================================
+// 195 — Prologue: assassination/poison references scrubbed
+// ============================================================
+// comp150 removed the first-night palace assassination attempt on CHARNAME;
+// NPCs still referenced it (Corwin's "crusader poison" goodnight, Eltan/Edwin/
+// Liia lines). Zero new dialogue: reply/state gates + two re-routes. Details +
+// full verified edit list in csr195.d.
+BEGIN @195 DESIGNATED 195 GROUP @1001 LABEL ~csr_no_assassin_residue~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 195 (assassination residue scrubbed) requires component 150 (which removes the assassination night this cleans up after).~
+
+INCLUDE ~chriz-sod-remix/lib/comp195.tpa~
 
 // ============================================================
 // 200 — Coast Way Crossing: fewer spiders, fairer bridge fight

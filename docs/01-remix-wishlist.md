@@ -31,8 +31,10 @@ here is designed or signed off yet. The list is explicitly incomplete and grows 
 2. Keep Imoen; drop the Duke-Jannath/mage-training + poisoning plot completely. Imoen is
    re-recruitable normally, like every other SoD companion. (Trainer verified: Grand Duke
    Liia Jannath, `bdliia` — not "Janneth".)
-12. Skie playable, with her regular BG1 soundpack. Keep some of her flavor beats that make
-    sense ("don't tell daddy about this" etc.).
+12. Skie playable, with her regular BG1 soundpack. (Second half superseded 2026-07-09 —
+    "keep some flavor beats" is dropped: she becomes a simple BG1-style talk-to-join
+    recruit with no SoD plot beats; the "don't tell daddy" night scene is removed
+    (component 190). See "Decisions locked 2026-07-09" below.)
 
 ### Narrative arc
 9. Caelar is the main antagonist.
@@ -114,10 +116,13 @@ chapter-pass docs only.
   content, the epilogue trial) despite his BG1 Ch.7 assassination; "him being alive
   again is just cringe." Locked direction: **remove him entirely and rewrite whatever
   references him so he remains dead** — the epilogue removal already deletes his trial
-  role, and we may add our own content in his place in phase 2/3. **Implementation
-  deferred** to a later chapter pass. Scope marker: 16 SoD scripts reference
-  Entar/Silvershield (incl. BD0102/BD0104/BDPALACE/BDBALDUR/BDCUT62); the dialog
-  surface is still to be audited.
+  role, and we may add our own content in his place in phase 2/3. **City chapter DONE
+  (component 185, 2026-07-09):** unspawned from the plot-51 war council, the plot-56
+  departure send-off rebuilt around Belt, Liia's roll-call drops his name, the
+  "weren't you killed?" resurrection reply gated. **Still deferred (epilogue-coupled):**
+  his BD0035 trial placement/guards, BDCUT62 trial/exile, and deletion of
+  BDENTAR.CRE/DLG — they die with the post-victory epilogue removal, and the trial
+  still references the CRE/DLG, so deleting them now would spam "creature not found."
 - **Fresh-start/import party grant cut** (prologue §10, component 145): the vanilla
   default-party grant on fresh SoD starts is removed — you wake alone and gather your
   party in the city. Item 1's "keep everyone" applies to the *continuous* BG1→SoD
@@ -142,6 +147,31 @@ chapter-pass docs only.
   guards at the sealed door); of the dig-monsters only umber hulks survive;
   Semahl's fight beat preserved (small); cut XP returns as ONE chunk on the lich
   clean-kill award; lich-fight rework deferred.
+
+## Decisions locked (2026-07-09, city-chapter Entar/Skie/assassination surgery)
+Implemented + installed + verified on the dev install (components 185/190/195):
+- **Entar removed (185):** see the 2026-07-06/07 block above — city chapter DONE.
+- **Skie's second-night bedroom visit removed (190):** the 3 a.m. "don't tell Daddy"
+  cutscene is gone. A Skie-free wake pre-empts both bd0103 night blocks (party sleeps
+  through to dawn, `bd_plot` 54→55 as before); the night dialogue tree (BDSKIE 16-32)
+  is sealed. Part of dropping Skie's SoD plot (item 12).
+- **Assassination/poison residue scrubbed (195):** comp150 removed the first-night
+  palace assassination; NPCs still referenced it. All residue removed with **zero new
+  dialogue** — reply/state `False()` gates plus two re-routes: BDSCHAEL 227 moves the
+  `bd_plot=54` retire-commit onto the "ready to march" reply and EXITs (skipping
+  Corwin's "crusader poison" goodnight), and BDLIIA 13 re-routes "how fares Imoen?" to
+  Liia's existing training-advice line. Covers BDCORWIN/BDELTAN/BDEDWIN/BDLIIA/BDSCHAEL/
+  BDDEBUG/BDFIST05. The de Lancie supply-poison quest is explicitly OUT of scope.
+- **Still deferred (flagged, not built):**
+  - **Skie as a clean talk-to-join BG1-style companion (item 12 core):** research done
+    2026-07-10 (docs/research/15-skie-recruitment.md) — Beamdog left a functional
+    JoinParty scaffold in BDSKIE (states 5→6 first-join / 1→2 re-join, camp-gated) and
+    her SoD CRE already carries the BG1 SKIEE## soundset, so the pass is re-gating that
+    scaffold to a sensible meeting spot + neutralizing her remaining plot surface
+    (palace first-meeting 8-15, Bence intro 33-36, bd_skie_plot 37-62, dig 84-90).
+  - **Full Corwin dialogue rewrite:** user finds SoD-Corwin's writing poor and wants a
+    proper redo later; comp195 only removed her assassination residue, not rewrote her.
+  - **Epilogue-coupled Entar removal** (BD0035 trial, BDCUT62, BDENTAR.CRE/DLG).
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

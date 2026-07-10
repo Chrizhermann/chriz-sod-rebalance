@@ -1,0 +1,20 @@
+// ============================================================
+// Component 195 body — assassination/poison residue scrubbed
+// ============================================================
+// Design: user request 2026-07-09 ("people are still mentioning the crusader
+// poison and the assassination, like corwin, lets remove that"). comp150
+// removed the first-night Ducal Palace assassination attempt on CHARNAME; this
+// component removes every NPC line that still referenced it. The verified edit
+// list (ground-truthed by a 9-dialog sweep + adversarial critic, then re-checked
+// against fresh dev decompiles) lives in csr195.d.
+//
+// ZERO new dialogue text: reply/state False() gates + two ALTER_TRANS re-routes
+// (BDSCHAEL 227 moves the BD_plot=54 retire-commit onto the "ready to march"
+// reply and EXITs, skipping Corwin's goodnight; BDLIIA 13 re-routes "how fares
+// Imoen?" to Liia's existing training-advice state). The de Lancie supply-poison
+// quest is deliberately out of scope (and absent from these dialogs anyway).
+//
+// Install AFTER 150 (which owns the assassination-night removal) — and in
+// practice after 160/180/185, which are already installed and leave these
+// states/indices as the csr195.d comments describe.
+COMPILE ~chriz-sod-remix/dlg/csr195.d~

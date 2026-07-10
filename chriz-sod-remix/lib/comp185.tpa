@@ -1,0 +1,103 @@
+// ============================================================
+// Component 185 body — Entar Silvershield removed (council + send-off)
+// ============================================================
+// Design: docs/01-remix-wishlist.md (Entar stays DEAD, locked 2026-07-06)
+// + the audit docs/design/chapters/01-prologue.md §11. He was assassinated
+// in BG1 ch.7; SoD wrongly re-seats him as a Grand Duke. This unspawns his
+// only city-chapter presence (the plot-51 war council) and rebuilds the
+// plot-56 departure send-off around Belt (the dialog work is csr185ent.d).
+//
+// SCOPE: city chapter only. His post-victory trial placement (BD0035.ARE),
+// the trial/exile cutscenes (BDCUT62), and BDENTAR.CRE/DLG themselves are
+// DEFERRED — they die with the epilogue removal, and the deferred trial still
+// references the CRE/DLG, so deleting them now would spam "creature not found".
+//
+// Install AFTER 150 (council rework) and 180 (celebration) — both patch
+// bd0102.bcs, but neither touches the Entar spawn lines or Belt 61-63, so the
+// count-guards below match the installed text. Every edit fails loud on a
+// count mismatch.
+
+// Guarded textual replace (mirrors comp150's csr150_replace).
+DEFINE_PATCH_MACRO ~csr185_replace~ BEGIN
+  COUNT_REGEXP_INSTANCES ~%csr_pat%~ csr_cnt
+  PATCH_IF (csr_cnt = csr_expect) BEGIN
+    REPLACE_TEXTUALLY ~%csr_pat%~ ~%csr_rep%~
+  END ELSE BEGIN
+    PATCH_FAIL ~chriz-sod-remix #185 [%csr_what%]: expected %csr_expect% occurrence(s), found %csr_cnt%. The installed bd0102.bcs differs from what this component was verified against - aborting instead of mis-patching.~
+  END
+END
+
+// ------------------------------------------------------------
+// 185.1 — bd0102.bcs: unspawn Entar; Belt presides the send-off
+// ------------------------------------------------------------
+COPY_EXISTING ~bd0102.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+
+    // The five plot-51 council variants each spawn + stage Entar. Two spawn
+    // coordinates ([728.366] x3, [895.487] x2) and 14 staging actions across
+    // the variants. Remove exactly those; the other dukes' spawns/staging in
+    // the same blocks are untouched.
+    SET csr_expect = 3
+    SPRINT ~csr_what~ ~entar spawn A~
+    SPRINT ~csr_pat~ ~CreateCreature("BDENTAR",\[728\.366\],SW)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 2
+    SPRINT ~csr_what~ ~entar spawn B~
+    SPRINT ~csr_pat~ ~CreateCreature("BDENTAR",\[895\.487\],S)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 5
+    SPRINT ~csr_what~ ~entar face-player staging~
+    SPRINT ~csr_pat~ ~ActionOverride("BDENTAR",FaceObject(Player1))~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 3
+    SPRINT ~csr_what~ ~entar move-760 staging~
+    SPRINT ~csr_pat~ ~ActionOverride("BDENTAR",MoveToPoint(\[760\.426\]))~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 2
+    SPRINT ~csr_what~ ~entar move-792 staging~
+    SPRINT ~csr_pat~ ~ActionOverride("BDENTAR",MoveToPoint(\[792\.414\]))~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 2
+    SPRINT ~csr_what~ ~entar face-sw staging~
+    SPRINT ~csr_pat~ ~ActionOverride("BDENTAR",Face(SW))~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    // Departure staging (plot 55 -> 56): Entar took the central send-off spot
+    // [759.472], faced by Belt and Eltan. Stand BELT there instead (he now
+    // presides); drop Entar's self-face; Eltan faces Belt.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~depart central spot -> Belt~
+    SPRINT ~csr_pat~ ~ActionOverride("BDENTAR",JumpToPoint(\[759\.472\]))~
+    SPRINT ~csr_rep~ ~ActionOverride("BDBELT",JumpToPoint([759.472]))~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~depart entar-face-belt drop~
+    SPRINT ~csr_pat~ ~ActionOverride("BDENTAR",FaceObject("BDBELT"))~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~depart eltan-face -> Belt~
+    SPRINT ~csr_pat~ ~ActionOverride("BDELTAN",FaceObject("BDENTAR"))~
+    SPRINT ~csr_rep~ ~ActionOverride("BDELTAN",FaceObject("BDBELT"))~
+    LAUNCH_PATCH_MACRO ~csr185_replace~
+
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 185.2 — council roll-call + departure hub + servant (dialog)
+// ------------------------------------------------------------
+COMPILE ~chriz-sod-remix/dlg/csr185ent.d~

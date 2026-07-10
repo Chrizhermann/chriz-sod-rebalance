@@ -1,0 +1,90 @@
+// csr190wake.baf — component 190. Removes Skie's 3 a.m. "don't tell Daddy"
+// bedroom visit (bd0103) by replacing it with a silent sleep-through-to-dawn.
+//
+// EXTEND_TOP'd ABOVE the two gender-mirrored vanilla Skie night blocks
+// (bd0103.baf 880 male / 944 female), which share the trigger below and are
+// gated Global("BD_MDD005","bd0103",0). This block:
+//   * carries the EXACT vanilla trigger (minus Gender) so it fires precisely
+//     when the vanilla visit would have (the user witnessed that visit in
+//     playtest, so plot54 + MDD007=2 is definitely reached in the remix), and
+//   * sets BD_MDD005=1 as its first action -> both vanilla blocks fail their
+//     MDD005=0 gate and can never run, so Skie never spawns here.
+//
+// The body is vanilla's own sleep set-up (bd0103 887-917) followed by bdcut05's
+// own morning wake (the canonical Skie-path dawn: reposition + bdunhide the
+// party, DayNight(DAWN_END), bdrejuve, wake Player1), minus every Skie action
+// and the redundant second restinn. Both halves are shipped code; only Skie is
+// cut. EndCutSceneMode() closes the StartCutSceneMode(); plot advances 54 -> 55
+// exactly as the vanilla path did (bdcut05 set plot 55), so the plot-56 palace
+// departure (comp185) stages normally when the party next enters bd0102.
+IF
+  Global("BD_plot","global",54)
+  Global("BD_MDD007","bd0103",2)
+  Global("BD_MDD005","bd0103",0)
+THEN
+  RESPONSE #100
+    ClearAllActions()
+    StartCutSceneMode()
+    SetGlobal("BD_MDD005","bd0103",1)
+    SmallWait(30)
+    FadeToColor([20.0],0)
+    SmallWait(20)
+    FadeToColor([0.0],0)
+    SmallWait(1)
+    DayNight(3)
+    ActionOverride(Player1,JumpToPoint([220.400]))
+    ActionOverride(Player1,Face(SE))
+    ActionOverride(Player1,SetSequence(SEQ_SLEEP))
+    MoveGlobal("bd0103",Player2,[78.511])
+    MoveGlobal("bd0103",Player3,[102.529])
+    MoveGlobal("bd0103",Player4,[129.552])
+    MoveGlobal("bd0103",Player5,[160.576])
+    MoveGlobal("bd0103",Player6,[195.601])
+    ActionOverride(Player2,Face(NE))
+    ActionOverride(Player3,Face(NE))
+    ActionOverride(Player4,Face(NE))
+    ActionOverride(Player5,Face(NE))
+    ActionOverride(Player6,Face(NE))
+    ApplySpellRES("bdhide",Player2)
+    ApplySpellRES("bdhide",Player3)
+    ApplySpellRES("bdhide",Player4)
+    ApplySpellRES("bdhide",Player5)
+    ApplySpellRES("bdhide",Player6)
+    MoveViewObject(Player1,INSTANT)
+    StartMovie("restinn")
+    SetCutSceneLite(FALSE)
+    Wait(1)
+    // --- Skie-free wake at dawn (bdcut05, minus Skie + second restinn) ---
+    SetGlobal("bd_plot","global",55)
+    FadeToColor([20.0],0)
+    Wait(1)
+    ActionOverride(Player2,JumpToPoint([420.675]))
+    ActionOverride(Player3,JumpToPoint([461.705]))
+    ActionOverride(Player4,JumpToPoint([505.735]))
+    ActionOverride(Player5,JumpToPoint([558.766]))
+    ActionOverride(Player6,JumpToPoint([605.808]))
+    ApplySpellRES("bdunhide",Player2)
+    ApplySpellRES("bdunhide",Player3)
+    ApplySpellRES("bdunhide",Player4)
+    ApplySpellRES("bdunhide",Player5)
+    ApplySpellRES("bdunhide",Player6)
+    ActionOverride(Player1,JumpToPoint([215.396]))
+    ActionOverride(Player1,Face(SE))
+    ActionOverride(Player1,SetSequence(SEQ_SLEEP))
+    DayNight(DAWN_END)
+    ApplySpellRES("bdrejuve",Player1)
+    ApplySpellRES("bdrejuve",Player2)
+    ApplySpellRES("bdrejuve",Player3)
+    ApplySpellRES("bdrejuve",Player4)
+    ApplySpellRES("bdrejuve",Player5)
+    ApplySpellRES("bdrejuve",Player6)
+    FadeFromColor([20.0],0)
+    ActionOverride(Player1,SetSequence(SEQ_AWAKE))
+    SmallWait(4)
+    ActionOverride(Player1,Face(SW))
+    SmallWait(6)
+    ActionOverride(Player1,JumpToPoint([184.428]))
+    BanterBlockTime(300)
+    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FOUR_HOURS)
+    EndCutSceneMode()
+END
