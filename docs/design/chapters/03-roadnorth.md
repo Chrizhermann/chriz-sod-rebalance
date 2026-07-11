@@ -32,7 +32,26 @@ the user wants a closer look at the census before big decisions.
   (Morentherene, BD7210's sleeping dragon, 13k; packaging — in-pass difficulty-gate vs
   separate optional component — still open).
 
-## Quick-win pass (PROPOSED 2026-07-11 — awaiting user confirm)
+## Quick-win pass (CONFIRMED 2026-07-11 — "Gogo"; implementation in progress)
+
+User decisions on the proposal (2026-07-11):
+- **Troll thin-out: ON** ("It's way too much"). Later idea logged: add something MORE
+  dangerous to Troll Claw for higher difficulties (wishlist-adjacent, not this pass).
+- **Hill giant: KEEP.**
+- **Invisible cultist ambush (BD7230AM): CUT now.** It is "an impossible to beat
+  encounter on higher difficulties currently"; whether a rebalanced version returns
+  is DEFERRED to the item-15 round. Check + report whether the six ambushers carry
+  any important items.
+- **Routing requirement (user):** with BD7220 removed, the cult temple must be
+  reachable from the wyrm cave DIRECTLY and back — the vanilla chain routes through
+  the bugbear cave; rewire so BD7210 ↔ BD7230 works both directions with no
+  BD7220 leg. Verify the vanilla transition graph from the .are files first.
+- **NEW in-pass item — Morentherene difficulty scaling (component of its own):**
+  "make the dragon scale harder and more fun on higher difficulties. It's really
+  weak and easy to kill currently, its only dangerous two abilities being the wing
+  buffet and its breath. Otherwise it has laughable HP and laughable attacks and
+  defenses." → difficulty-gated stat/defense buffs (comp170 ApplySpellRES pattern),
+  numbers presented for veto with the install report. Core and below untouched.
 
 Context: the user wants a stable, streamable state on his current playthrough soon —
 "remove a bunch of things from the next maps and already bump up the main quest
