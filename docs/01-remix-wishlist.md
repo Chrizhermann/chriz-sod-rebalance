@@ -222,6 +222,37 @@ Implemented + installed + verified on the dev install (components 185/190/195):
 - Korlasz fight tone restated: SCS-style but **not too hard** — "we don't need another
   Sarevok fight right after Sarevok" (matches the shipped Semaj-parity design).
 
+## Additions (2026-07-11, Discord thread round 2)
+Community thread digested; obvious jokes filtered out (recorded here only if the
+USER took a position). Statuses explicit — none of these are locked decisions yet.
+- **Ashatiel duel → party-vs-party fight (CONSIDERING):** community idea (Archibald),
+  user endorsed the direction — "heckin' W. Or we make it optional." User's sketch:
+  on insane difficulty a genuinely hard set-piece — you are NOT stripped of buffs,
+  you're warned the fight is coming, the enemy side gets real prebuffs + scripted
+  sequencers. "I will think about this." (Ashatiel = Caelar's champion; the single
+  combat offered during the final assault on Dragonspear Castle.)
+- **Caelar arc — first workshop seeds (feeds the item-13 open writing question):**
+  Jester's frame: keep her motive (rescue her uncle from the Hells), but the uncle
+  comes back *wrong* — soul-tortured, turned evil — and the final fight is Caelar +
+  uncle + Hephernaan. User's response ("maybe we can workshop this, I kind of like
+  it") + user's own direction: Caelar as LG shining-paladin-with-good-intentions is
+  the cool part and stays; the current plot is indefensible (sacrificing thousands,
+  the "army" absurdity); what works: her initial goal is genuinely saving her uncle
+  (maybe more souls), and her goals **get twisted as the Crusade goes on**;
+  Hephernaan **plays both sides**; the uncle being broken after Hell is "totally
+  understandable."
+- **Dig-site full-skip component (FLOATED, no decision):** user floated an optional
+  component to skip the dig site entirely (Sauler: "maybe yes"); counterpoint in the
+  same thread (GachiBalor): as a side adventure it's fine once de-trashed — "that
+  state is already done" (user).
+- **Frame-the-hero plot (PARKED, far future):** Sauler — post-BG1 Baldur's Gate is
+  full of Sarevok loyalists / Iron Throne remnants / corrupt Fist officers with
+  motive to frame the hero. User: "I will consider this for the future... this would
+  be a lot more work as well."
+- **Imoen recruitable later in SoD (community ask, NO user position yet):** Sauler
+  wants her back in the party before the end ("after a recovery"). Touches the
+  comp160 design (Imoen stays in BG studying); log only, decide later.
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.
