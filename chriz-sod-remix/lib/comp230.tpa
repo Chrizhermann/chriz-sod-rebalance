@@ -1,0 +1,110 @@
+// ============================================================
+// Component 230 body — the road north: fewer, cleaner camps
+// ============================================================
+// Design: docs/design/chapters/03-roadnorth.md "Quick-win pass"
+// (CONFIRMED 2026-07-11). Main-line cuts only:
+//   BD7100 Troll Claw Woods (63): hobgoblin camp, orc camp,
+//     beetle cluster, displacer pack, the small spiders of both
+//     nests (gargantuan+sword elites stay), troll thin-out 32->21
+//     (thins the two big blobs; the lair posse and SE cluster stay
+//     as real fights). Ogre camp KEPT (a real fight, not chaff —
+//     verified NOT quest-tied: BDMURS lives in BDCUT42, not here).
+//     All ~24 neutral camp NPCs untouched by construction (cuts
+//     are keyed to verified hostile actors only).
+//   BD2000 Boareskyr (8): bombardier beetles, worgs, one stray
+//     wight. Siege pickets (goblin/hobgoblin camps) and the whole
+//     ~90-actor scripted crusader battle untouched.
+//   BD2010 goblin warren (27): chaff goblins; chieftain + shaman +
+//     3 elite warriors + 3 warriors remain as the warren's core.
+//
+// Mechanism: appearance-schedule dword (actor +0x40) = 0 (verified
+// live hour-bits, see comp200/220). Cut lists GENERATED from the
+// shipped AREs (lib/comp230_lists.tpa, research/scripts/gen_ch9.py)
+// and matched by CRE@X@Y — order-independent, any drift from
+// another mod fails loudly.
+//
+// XP ledger: cut kill-XP 29,025 returns as ONE chunk on the
+// Boareskyr resolution — both battle outcomes set bd_plot=293
+// (BD2000.baf:899,918; the existing 6000/3000 awards there are the
+// Dorn-release and missing-patrol SIDE quests, so the chunk gets
+// its own once-block instead of riding them). Chunk value is
+// generator-computed (cut * 0.8 / 6, rounded to 100).
+
+ACTION_CLEAR_ARRAY csr_cut_bd7100
+ACTION_CLEAR_ARRAY csr_cut_bd2000
+ACTION_CLEAR_ARRAY csr_cut_bd2010
+INCLUDE ~chriz-sod-remix/lib/comp230_lists.tpa~
+
+// ------------------------------------------------------------
+// 230.1 — BD7100 Troll Claw Woods
+// ------------------------------------------------------------
+COPY_EXISTING ~bd7100.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd7100(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != csr_cutn_bd7100) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp230: BD7100.are matched %csr_hits% of %csr_cutn_bd7100% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp230_lists.tpa before installing.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 230.2 — BD2000 Boareskyr Bridge (placed chaff only)
+// ------------------------------------------------------------
+COPY_EXISTING ~bd2000.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd2000(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != csr_cutn_bd2000) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp230: BD2000.are matched %csr_hits% of %csr_cutn_bd2000% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp230_lists.tpa before installing.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 230.3 — BD2010 goblin warren trim
+// ------------------------------------------------------------
+COPY_EXISTING ~bd2010.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd2010(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != csr_cutn_bd2010) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp230: BD2010.are matched %csr_hits% of %csr_cutn_bd2010% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp230_lists.tpa before installing.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 230.4 — the XP ledger chunk on the Boareskyr resolution
+// ------------------------------------------------------------
+EXTEND_TOP ~bd2000.bcs~ ~chriz-sod-remix/baf/csr230xp.baf~ EVALUATE_BUFFER

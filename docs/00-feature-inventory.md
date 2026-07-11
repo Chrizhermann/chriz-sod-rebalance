@@ -56,9 +56,17 @@ logged under the v0.3.0 label just before the repo bumped to v0.4.0).
 | 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. **Installed on dev.** | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 | 901 | Treasure from removed content: **remove** | Alternative flavor: loot gone with the content; pure preference marker (`csr_treasure_removed=1`) future passes read via MOD_IS_INSTALLED. **Built but not installed** (900 chosen; the two are exclusive). | SUBCOMPONENT @902 (XOR 900); REQUIRE 210 |
 
+### The road north / Ch. 9 (GROUP @1003) — quick-win pass, shipped 2026-07-11
+
+| # | Feature | What it does | Deps |
+|---|---------|--------------|------|
+| 230 | Road north: fewer, cleaner enemy camps | Main-line trash cut: BD7100 63 cuts (hobgoblin/orc camps, beetles, displacer pack, small spiders of both nests, troll thin-out 32→21 in four kept clusters; ogre camp + gargantuan/sword-spider elites + all ~24 camp NPCs + BD7110 troll lair stay), BD2000 8 (beetles/worgs/wight; siege pickets + scripted battle untouched), BD2010 27 (warren core of 8 stays). 29,025 cut kill-XP → **+3,900/char** once-block on the Boareskyr resolution (`bd_plot > 292`, both branches; the script's 6000/3000 are Dorn/patrol side quests, deliberately not ridden). | pred `bd7100/bd2000/bd2010.are` |
+| 240 | Forest of Wyrms: bugbear cave removed, temple behind the dragon | Retargets the only two BD7220-bound travel regions at each other (BD7210 `TranBD7220` → BD7230 `ExitBD7220`, BD7230 `TranBD7220` → BD7210 `ExitBD7220`; names kept so `EscapeAreaObject` still works — the temple's fleeing cultist now runs into the dragon cave). BD7220 = unreachable, file untouched, reversible; spectacles gimmick survives (bdmisc01 lives on BDZAVIAK/BD0109). Plus BD7200 28 cuts (bugbear door-guards/displacers/wolves/small spiders; wyverns+phase spiders+hill giant stay) and the 6 post-Neothelid invisible ambushers (BD7230AM goes inert; loot mundane). 28,395 ledgered (incl. 14,810 from the cave) → **+3,800/char** once-block on the Neothelid kill. | pred `bd7200/7210/7220/7230.are` |
+| 250 | Morentherene: a real dragon on Hard/Insane | Two CREATE-built stat spells applied asleep via vanilla's own ApplySpellRES delivery (EXTEND_TOP bd7210.bcs, difficulty-gated once-blocks). Hard+: +56 HP (168), AC −6, THAC0 −2, saves +3, MR 35. Insane stacks to: 230 HP, AC −9, THAC0 −4, saves +5 total, MR 50, 4 APR. Breath/wing buffet/AI untouched (SCS-safe); Core and below vanilla. Baseline verified: 112 HP, AC −1, THAC0 2, saves 5–8, MR 15. | pred `bd7210.are` + `bdmorent.cre` |
+
 ### Meta
 
-`chriz-sod-remix` v0.4.0, tail-installable WeiDU mod; 18 component declarations in 3
+`chriz-sod-remix` v0.5.0, tail-installable WeiDU mod; 21 component declarations in 4
 install GROUPs; all in-place patches with loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
 scope.
@@ -68,7 +76,9 @@ keep-party → **110**; item 5 / wave1-01 rest-ambush 5× → **100**; item 10 /
 hooded-man (mid) + dreams → **120/130**; 2026-07-06/07 fresh-start grant cut → **145**;
 2026-07-06 Entar stays dead (city) → **185**; 2026-07-09 Skie second-night visit →
 **190**; assassination night + residue → **150/195**; 2026-07-08 Coast Way tiers →
-**200/210/220**; treasure single-choice → **900/901**.
+**200/210/220**; treasure single-choice → **900/901**; 2026-07-10/11 road-north
+quick-wins (trash cut, bugbear-cave removal + temple rewire, dragon tiers) →
+**230/240/250**.
 
 ---
 

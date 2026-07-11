@@ -1,0 +1,15 @@
+// chriz-sod-remix component 240 - Forest-of-Wyrms XP ledger chunk
+// (EXTEND_TOP bd7230.bcs, EVALUATE_BUFFER). Pays on the Neothelid kill -
+// the optional loop's one guaranteed closure point (vanilla BD7230.baf and
+// the BD7230AM ambush script both key on Dead("bdneothe"), so the death
+// variable is proven). Optional content, optional XP: players who skip the
+// loop skip the chunk, mirroring what they skip in kills.
+IF
+  Dead("bdneothe")
+  Global("CSR_FOW_CHUNK","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_FOW_CHUNK","GLOBAL",1)
+    AddexperienceParty(%csr_xp_chunk_240%)
+    Continue()
+END

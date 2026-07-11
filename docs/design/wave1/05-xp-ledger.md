@@ -16,9 +16,11 @@
 
 | Chapter | Entry XP (proj.) | Quest XP removed | Kill XP removed | Reinjected | Into which carriers | Exit XP (proj.) |
 |---|---|---|---|---|---|---|
-| Prologue | 220–250k | 8,000/char (Imoen 5k + Ammon 3k, verified 2026-07-10) | 19,163/char (garrison 18,747 + Korlasz 417; Normal, guaranteed) | jailbreak kills ~1,600/char (shipped, comp170) + **PROPOSED 23,000/char chunk** (01-prologue §7, awaiting sign-off) | jailbreak clean-kill (BD0116 journal-close block) | entry + ~24.7k |
-| Coast Way: dig site | — | 0 | 21,437/char cut (128,620 party) | 17,100/char (80%, SHIPPED in comp220) | Coldhearth clean-kill `AddExperienceParty` (BD1200.baf) | — |
+| Prologue | 220–250k | 8,000/char (Imoen 5k + Ammon 3k, verified 2026-07-10) | 19,163/char (garrison 18,747 + Korlasz 417; Normal, guaranteed) | jailbreak kills ~1,600/char (shipped, comp170) + **24,000/char SHIPPED (comp175, user option c 2026-07-10)** | Liia's return-beat reward (csrcele state 2, before DestroySelf) | entry + ~25.6k |
+| Coast Way: dig site | — | 0 | 21,437/char cut (128,620 party) + drowned 4,800 party (2026-07-10 polish) | **17,800/char SHIPPED** (80%, comp220 regenerated) | Coldhearth clean-kill `AddExperienceParty` (BD1200.baf) | — |
 | Coast Way: BD7000 removal | — | **not yet ledgered** (area removed by comp210; its kill/quest XP TBD — flag) | | | | |
+| Road north: main line | — | 0 | 29,025 party (BD7100 27,425 + BD2000 1,015 + BD2010 585) ≈ 4,838/char | **3,900/char SHIPPED** (80%, comp230) | own once-block on the Boareskyr resolution (`bd_plot > 292`, both branches) | — |
+| Road north: Forest of Wyrms (optional loop) | — | 0 | 28,395 party (BD7200 10,835 + BD7230 ambush 2,750 + unreachable BD7220 14,810 incl. 3,000 quest shadow) ≈ 4,733/char | **3,800/char SHIPPED** (80%, comp240) | own once-block on the Neothelid kill (optional content → optional XP) | — |
 | … | | | | | | |
 
 ## Known reinjection carriers (from `research/03`, all guaranteed awards)

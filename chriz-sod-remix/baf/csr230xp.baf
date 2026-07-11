@@ -1,0 +1,18 @@
+// chriz-sod-remix component 230 - road-north XP ledger chunk (EXTEND_TOP
+// bd2000.bcs, EVALUATE_BUFFER). Rides the Boareskyr resolution: BOTH battle
+// outcomes set bd_plot=293 (BD2000.baf:899,918) and the party is standing in
+// BD2000 when they do, so the first area-script pass after either branch
+// pays out. GlobalGT covers 293/295 and anything later; the once-flag keeps
+// it single-shot; there is no path past 292 that skips the bridge (the
+// Boareskyr stretch 240-293 is on-rail, research/13 flag 5). The existing
+// 6000/3000 awards in this script are the Dorn-release / missing-patrol
+// SIDE quests - deliberately not ridden.
+IF
+  GlobalGT("bd_plot","global",292)
+  Global("CSR_RN_CHUNK","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_RN_CHUNK","GLOBAL",1)
+    AddexperienceParty(%csr_xp_chunk_230%)
+    Continue()
+END

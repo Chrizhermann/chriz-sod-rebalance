@@ -18,6 +18,10 @@
 @210 = ~SoD remix: Coast Way Forest removed - Rasaad recruits at the camp~
 @220 = ~SoD remix: the dwarven dig site re-garrisoned~
 
+@230 = ~SoD remix: the road north - fewer, cleaner enemy camps~
+@240 = ~SoD remix: Forest of Wyrms - bugbear cave removed, temple behind the dragon~
+@250 = ~SoD remix: Morentherene - a real dragon on Hard and Insane~
+
 @900 = ~Collected in the camp chest at the Coast Way crossing~
 @901 = ~Removed along with the content~
 @902 = ~SoD remix: treasure from removed content~
@@ -25,5 +29,6 @@
 @1000 = ~Wave 1 - global system levers~
 @1001 = ~Chapter pass - prologue~
 @1002 = ~Chapter pass - Coast Way~
+@1003 = ~Chapter pass - the road north~
 
 @9000 = ~Siege of Dragonspear content not found in this game (loose BD* files required - SoD, or EET with SoD imported).~

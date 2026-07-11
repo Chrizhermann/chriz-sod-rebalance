@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.4.0~
+VERSION ~v0.5.0~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -29,6 +29,12 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //       5-round bridge fight
 //   210 Coast Way Forest (BD7000) removed; Rasaad at the camp
 //   220 the dwarven dig site re-garrisoned (+XP chunk on the lich)
+// 230-299: road-north chapter pass (Ch. 9)
+//   230 Troll Claw Woods / Boareskyr trash cut (+XP chunk on the
+//       bridge resolution)
+//   240 Forest of Wyrms: bugbear cave removed, dragon cave opens
+//       into the temple (+XP chunk on the Neothelid)
+//   250 Morentherene stat tiers on Hard / Insane
 // 900-999: mod-wide choice components
 //   900/901 treasure from removed content: collect / remove
 //           (requires 210)
@@ -426,6 +432,55 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1100.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1200.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp220.tpa~
+
+// ============================================================
+// 230 — road north: fewer, cleaner enemy camps
+// ============================================================
+// Main-line trash cut for the chapter-9 march: BD7100 (63 cuts,
+// troll thin-out 32->21, camp cast untouched), BD2000 placed
+// chaff (8), BD2010 warren trim (27). Cut kill-XP returns as one
+// generated chunk on the Boareskyr resolution (bd_plot 293, both
+// battle branches). docs/design/chapters/03-roadnorth.md.
+
+BEGIN @230 DESIGNATED 230 GROUP @1003 LABEL ~csr_roadnorth_field~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7100.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2010.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp230.tpa~
+
+// ============================================================
+// 240 — Forest of Wyrms: cave out, temple behind the dragon
+// ============================================================
+// Removes the bugbear cave (BD7220) by unreachability: the only
+// two travel regions pointing at it (dragon cave + temple, both
+// named TranBD7220) are re-targeted at each other, so the wyrm
+// cave's deep passage opens straight into the temple and back.
+// Region names stay, so every vanilla EscapeAreaObject keeps
+// working — the temple's fleeing cultist now runs into the
+// dragon cave. Plus BD7200 overland cuts (28) and the six
+// post-Neothelid invisible ambushers; XP chunk on the Neothelid.
+
+BEGIN @240 DESIGNATED 240 GROUP @1003 LABEL ~csr_fow_temple_direct~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7200.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7210.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7220.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7230.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp240.tpa~
+
+// ============================================================
+// 250 — Morentherene: a real dragon on Hard and Insane
+// ============================================================
+// Difficulty-gated stat tiers applied while she sleeps (vanilla's
+// own ApplySpellRES delivery); breath, wing buffet and AI are
+// untouched. Core and below play the vanilla dragon.
+
+BEGIN @250 DESIGNATED 250 GROUP @1003 LABEL ~csr_morentherene_tiers~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7210.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdmorent.cre~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp250.tpa~
 
 // ============================================================
 // 900/901 — treasure from removed content (mod-wide choice)

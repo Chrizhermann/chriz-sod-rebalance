@@ -1,0 +1,29 @@
+// chriz-sod-remix component 250 - Morentherene difficulty tiers (EXTEND_TOP
+// bd7210.bcs). Applies the stat packages while she is still asleep and
+// neutral, before any wake block can fire - the same delivery vanilla uses
+// on her (BD7210.baf:32 ApplySpellRES("bdawake","bdmorent")). Pure stat
+// opcodes: no hostility, no wake, no AI interference (SCS-safe). On Insane
+// BOTH blocks pass the same script tick, stacking to the tier-2 totals.
+// If the player first enters on Core and returns on Hard later, the flags
+// are still 0 and the buff lands then.
+IF
+  Global("CSR_MOR_HARD","GLOBAL",0)
+  DifficultyGT(NORMAL)
+  !Dead("bdmorent")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_MOR_HARD","GLOBAL",1)
+    ApplySpellRES("csrmorh","bdmorent")
+    Continue()
+END
+
+IF
+  Global("CSR_MOR_INSANE","GLOBAL",0)
+  Difficulty(HARDEST)
+  !Dead("bdmorent")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_MOR_INSANE","GLOBAL",1)
+    ApplySpellRES("csrmori","bdmorent")
+    Continue()
+END

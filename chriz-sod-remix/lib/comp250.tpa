@@ -1,0 +1,118 @@
+// ============================================================
+// Component 250 body — Morentherene: a real dragon on Hard+
+// ============================================================
+// Design: docs/design/chapters/03-roadnorth.md "Quick-win pass"
+// (user 2026-07-11): "make the dragon scale harder and more fun on
+// higher difficulties. It's really weak and easy to kill currently,
+// its only dangerous two abilities being the wing buffet and its
+// breath. Otherwise it has laughable HP and laughable attacks and
+// defenses."
+//
+// Verified baseline (BDMORENT.cre, 2026-07-11): 112 HP, AC -1,
+// THAC0 2, APR 3, saves 5/7/6/5/8, MR 15, acid resist 50, L14.
+// The buffs only touch the "laughable" side — breath, wing buffet
+// and her AI are untouched (SCS-safe: stat mods are orthogonal to
+// whatever brain any AI mod gives her).
+//
+//   Tier 1 "csrmorh", HARD and up (DifficultyGT(NORMAL)):
+//     +56 HP (168) · AC -5 (-6) · THAC0 +4 (-2) · saves +3
+//     (2/4/3/2/5) · MR +20 (35)
+//   Tier 2 "csrmori", INSANE only, stacks on tier 1:
+//     +62 HP (230) · AC -3 (-9) · THAC0 +2 (-4) · saves +2
+//     (0/2/1/0/3) · MR +15 (50) · +1 APR (4)
+//
+// Delivery: EXTEND_TOP on bd7210.bcs, once-flagged ApplySpellRES
+// while she sleeps — the exact pattern vanilla itself uses on her
+// (BD7210.baf:32 ApplySpellRES("bdawake","bdmorent")). Effects are
+// timing-1 (permanent until death), dispel byte 2 (not dispellable,
+// bypasses her own MR) — they represent her being tougher, not a
+// strippable buff. Applied at the first area-script pass at that
+// difficulty; if the player first enters on Core and returns on
+// Hard, the buff applies then (the flags re-check until they fire).
+// Vanilla's own wake-summon difficulty tiers stack on top untouched.
+//
+// SPL layout note: abilities are 0x28 bytes with nFx at +0x1E and
+// first-effect-index at +0x20 (EMPIRICAL offsets — IESDP documents
+// these two fields 2 bytes early; the bg-modding skill reference
+// has the verification trail).
+
+DEFINE_PATCH_MACRO ~csr_mor_fx~ BEGIN
+  WRITE_SHORT  csr_fxb          csr_op
+  WRITE_BYTE  (csr_fxb + 0x02)  2        // target: preset (whoever the spell hit)
+  WRITE_LONG  (csr_fxb + 0x04)  csr_p1
+  WRITE_LONG  (csr_fxb + 0x08)  0        // param2: cumulative modifier
+  WRITE_BYTE  (csr_fxb + 0x0C)  1        // timing: permanent until death
+  WRITE_BYTE  (csr_fxb + 0x0D)  2        // not dispellable, bypasses MR
+  WRITE_BYTE  (csr_fxb + 0x12)  100      // probability
+  SET csr_fxb += 0x30
+END
+
+// ------------------------------------------------------------
+// 250.1 — csrmorh.spl (tier 1: Hard and up)
+// ------------------------------------------------------------
+CREATE ~spl~ ~csrmorh~
+  PATCH_IF (BUFFER_LENGTH != 0x72) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp250: CREATE spl produced a %BUFFER_LENGTH%-byte skeleton (expected 0x72). WeiDU CREATE layout differs - adjust lib/comp250.tpa.~
+  END
+  WRITE_LONG  0x08 (0 - 1)      // no name
+  WRITE_LONG  0x0C (0 - 1)
+  WRITE_SHORT 0x1C 4            // innate (never in a spellbook; script-applied)
+  WRITE_LONG  0x34 1            // level 1
+  WRITE_LONG  0x64 0x72         // ability table offset
+  WRITE_SHORT 0x68 1            // one ability
+  WRITE_LONG  0x6A 0x9A         // effect table offset
+  INSERT_BYTES 0x72 (0x28 + (9 * 0x30))
+  WRITE_BYTE  (0x72 + 0x00) 1   // ability type
+  WRITE_BYTE  (0x72 + 0x0C) 5   // target: caster
+  WRITE_SHORT (0x72 + 0x10) 1   // min level
+  WRITE_SHORT (0x72 + 0x1E) 9   // nFx (empirical offset)
+  WRITE_SHORT (0x72 + 0x20) 0   // first effect index (empirical offset)
+  WRITE_SHORT (0x72 + 0x26) 1   // projectile: none
+  SET csr_fxb = 0x9A
+  SET csr_op = 18   SET csr_p1 = 56       LAUNCH_PATCH_MACRO ~csr_mor_fx~  // max HP
+  SET csr_op = 0    SET csr_p1 = (0 - 5)  LAUNCH_PATCH_MACRO ~csr_mor_fx~  // AC
+  SET csr_op = 54   SET csr_p1 = 4        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // THAC0
+  SET csr_op = 33   SET csr_p1 = 3        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // save death
+  SET csr_op = 34   SET csr_p1 = 3        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // save wand
+  SET csr_op = 35   SET csr_p1 = 3        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // save poly
+  SET csr_op = 36   SET csr_p1 = 3        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // save breath
+  SET csr_op = 37   SET csr_p1 = 3        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // save spell
+  SET csr_op = 166  SET csr_p1 = 20       LAUNCH_PATCH_MACRO ~csr_mor_fx~  // MR
+
+// ------------------------------------------------------------
+// 250.2 — csrmori.spl (tier 2: Insane, stacks on tier 1)
+// ------------------------------------------------------------
+CREATE ~spl~ ~csrmori~
+  PATCH_IF (BUFFER_LENGTH != 0x72) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp250: CREATE spl produced a %BUFFER_LENGTH%-byte skeleton (expected 0x72). WeiDU CREATE layout differs - adjust lib/comp250.tpa.~
+  END
+  WRITE_LONG  0x08 (0 - 1)
+  WRITE_LONG  0x0C (0 - 1)
+  WRITE_SHORT 0x1C 4
+  WRITE_LONG  0x34 1
+  WRITE_LONG  0x64 0x72
+  WRITE_SHORT 0x68 1
+  WRITE_LONG  0x6A 0x9A
+  INSERT_BYTES 0x72 (0x28 + (10 * 0x30))
+  WRITE_BYTE  (0x72 + 0x00) 1
+  WRITE_BYTE  (0x72 + 0x0C) 5
+  WRITE_SHORT (0x72 + 0x10) 1
+  WRITE_SHORT (0x72 + 0x1E) 10
+  WRITE_SHORT (0x72 + 0x20) 0
+  WRITE_SHORT (0x72 + 0x26) 1
+  SET csr_fxb = 0x9A
+  SET csr_op = 18   SET csr_p1 = 62       LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 0    SET csr_p1 = (0 - 3)  LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 54   SET csr_p1 = 2        LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 33   SET csr_p1 = 2        LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 34   SET csr_p1 = 2        LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 35   SET csr_p1 = 2        LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 36   SET csr_p1 = 2        LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 37   SET csr_p1 = 2        LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 166  SET csr_p1 = 15       LAUNCH_PATCH_MACRO ~csr_mor_fx~
+  SET csr_op = 1    SET csr_p1 = 1        LAUNCH_PATCH_MACRO ~csr_mor_fx~  // +1 APR
+
+// ------------------------------------------------------------
+// 250.3 — apply while she sleeps (difficulty-gated)
+// ------------------------------------------------------------
+EXTEND_TOP ~bd7210.bcs~ ~chriz-sod-remix/baf/csr250mor.baf~
