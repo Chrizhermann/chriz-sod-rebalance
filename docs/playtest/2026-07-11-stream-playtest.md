@@ -131,6 +131,81 @@ five. Priority order: the 9 skip-block sites first (A), then a grep for any othe
 `StartDialog*`/`StartCutScene*` in a city area gated on a kept companion without an
 `InParty`/`BeenInParty` guard (B).
 
+---
+
+## PT-5 — Coast Way Crossing magic wall still appears — **ROOT CAUSE CONFIRMED: CUTSKIP mirror**
+
+**User:** "The magical wall in the top right of the Coast Way Crossing was still there
+when I tested, did we already remove it?"
+
+**Yes we removed it — from the wrong number of places.** Verified chain (2026-07-11):
+- comp200.2's patch IS live: `bdcut14.bcs` on BOTH installs no longer contains
+  `bdwforce`/`force_wall` (string-verified). The `Force_Wall_Door` ARE default is
+  OPEN (flags 0x201) and the `Force_wall` animation (BDFORCEW @3585,1160) defaults
+  HIDDEN (flags 0x1002) — so the normally-played cutscene shows no wall.
+- **BUT `CUTSKIP.bcs` — SoD's cutscene-SKIP rig — carries a mirrored end-state for
+  the bridge scene** (verified in the compiled file: a block with `bdcrus12/13/14`,
+  `minhp1`, `force_wall`, `force_wall_door`) and the file also references
+  `bd1000/bd_caelar_timer`. **Skipping the cutscene replays the vanilla end-state:
+  wall shown, door closed — and likely the 3-round parley timer instead of our
+  FIVE_ROUNDS.** (A second force_wall pair sits next to `bdcaelar`/`bdbence` = the
+  parley-end mirror that hides/opens again — benign.)
+- Note: CUTSKIP was NOT in our decompiled corpus (`research/data/sod_baf/` has no
+  CUTSKIP.baf) — corpus gap, which is why the mirror was missed.
+
+**Fix:** comp200 must patch the mirrored CUTSKIP block the same way (remove the wall
+actions; THREE→FIVE_ROUNDS if present), count-guarded.
+
+**⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
+any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at
+minimum: comp120 (BDCUT10 hooded-man launch, BDCUT28 ending) and every future
+cutscene edit. Add "check CUTSKIP" to the house checklist.
+
+**User-save repair (live):** if the wall is still up on the save, console:
+`C:Eval('OpenDoor("force_wall_door")')` and `C:Eval('AmbientActivate("force_wall",FALSE)')`
+(door + animation state persist in the baked area). Confirm with the user whether he
+skipped the bridge cutscene (validates the diagnosis).
+
+---
+
+## PT-6 — Dig site: missing "essence" vial + the scrying-pool visions — **CONFIRMED comp220 regression + content pass**
+
+**User:** "There seems to be one vial missing in the dwarven dungeon 2nd level.
+Something 'essence', with which you can have a vision in the pool there (which is
+crazy stupid, why is this here). All those visions need to be rewritten, I am pretty
+sure they have Imoen learning magic, which needs to go or be replaced, a vision of
+Caelar, which needs to be rewritten at some point I think, and a vision of the Hooded
+Man/Irenicus, I believe."
+
+**Mechanics (verified, `BDODSCRY.baf` = the pool object, BD1200 @~1325,2095):**
+3× Silver Scepter `BDMISC55` slot into the pedestal (3rd gives +3,000 party XP) →
+pool activates; `BDMISC59` **Essence of Clarity** clears the cloudy pool
+(`BD_SDDD12_CLOUDY` 1→0) → visions. Vision cutscenes: `BDSCRY01` (VFX bed),
+**`BDSCRY02` = the Imoen vision** (IMOEN2 + bdliia casting practice — exactly what
+the user remembers), `BDSCRY03` (+ the Caelar / hooded-man visions in the chain —
+launcher tail still to trace).
+
+**The missing vial — comp220 regression CONFIRMED:** `BDMISC59` has exactly two
+world sources: the `Shelf` container @(1146,1230) in BD1200 (intact — containers
+untouched) and **`BDWIGHDD`, which is in comp220's cut list** (droppable copy).
+Sources went 2→1. Scepters are safe (3 containers, all intact).
+
+**Fix options (user to pick):** (a) re-home the wight's vial into an existing
+container near its coords; (b) restore that single BDWIGHDD (one schedule flip);
+(c) fold into the vision-content pass below and decide there.
+
+**Vision-content pass (new scope, user-directed):**
+- Imoen-learning-magic vision: "needs to go or be replaced." Nuance to flag: with
+  comp160 (Imoen stays in BG studying), the vision is arguably MORE canon than in
+  vanilla — user still wants it gone/replaced; his call on the replacement.
+- Caelar vision: rewrite "at some point" — park with the item-13 arc treatment.
+- Hooded-man/Irenicus vision: must GO — **verify whether comp120's five-appearance
+  removal already covers the pool vision** (its known sites: BD0103, BDCUT10/11,
+  BDCUT28 — the pool vision may or may not be among the five).
+- User verdict on the whole gimmick: "crazy stupid, why is this here" — a full-cut
+  of the pool sequence (scepters/essence/visions) is on the table as the simple
+  option; NOT decided.
+
 **Save impact:** the user's live save already ran the scene. The fix prevents it going
 forward; the already-consumed beat needs no repair beyond what he did (dismiss/
 re-recruit), since the var is now 2 = resolved.
