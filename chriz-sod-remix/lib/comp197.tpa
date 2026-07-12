@@ -1,0 +1,235 @@
+// ============================================================
+// chriz-sod-remix component 197 — Skie: plain talk-to-join
+// recruit at the Ducal Palace; SoD plot surface retired
+// (body; BEGIN block lives in the tp2)
+// ============================================================
+// Design: issue #2 / playtest PT-4 (2026-07-11, user): re-point the palace
+// first meeting away from the vanilla council plot ("talking to Daddy" —
+// Entar is dead via comp185) to a SHORT Entar-death exchange ending in a
+// talk-to-join handshake; suppress the rest of her SoD plot per the locked
+// wishlist. New lines: languages/english/csr197skie.tra — PENDING word-level
+// sign-off. Research: docs/research/15-skie-recruitment.md; full edit
+// rationale in dlg/csr197skie.d.
+//
+// Verified engine/data facts this component stands on (2026-07-12):
+//  - BDSKIE states 5-7/1-4 are Beamdog cut content: the file's only
+//    JoinParty() calls, area-gated to BD0120/BD0130 which she never reaches —
+//    vanilla SoD Skie is not recruitable at all. We reuse that machinery.
+//  - bd_plot 293->294 (the Skie/Bence banter) has no readers anywhere; the
+//    BDBOARB bridge trigger fires at bd_plot<295. The Boareskyr bridge DOOR
+//    however only opens in BDBENCE state 32 — kept reachable Skie-free
+//    (csr197bnc.baf auto-starter + BDBENCE 25 re-route in csr197skie.d).
+//  - bd_skie_plot stays 0 forever: BDBENCE 33/39 (the only 0->1 setters) are
+//    gated, so BDNEDERL/BDWILCH/BDCRUM30/BDCORWIJ/BD4000/BD4100 consumers all
+//    stay dormant; the BDNEDERL greeting is re-pointed so it cannot dead-end.
+//  - The BD7000 beast vignette / BD7100 Bence-dig chain is already dead via
+//    comp210 (bd_sddskie("BD7100") is parked at 1; the Switch blocks need >=3)
+//    — hence REQUIRE_COMPONENT 210 in the tp2.
+//  - BDSKIE.CRE: DV/dlg/override all BDSKIE, EA=NEUTRAL, CLASS slot empty
+//    (BDSKIEC attached on join by the dialog, BDPARTY idiom). Distinct
+//    creature from BG1-import SKIE/SKIE6 (DV "SKIE", kept by comp110) — the
+//    join replies hide while that Skie is in the party.
+//
+// In-party safety sweep (she could never BE in the party before, so vanilla
+// scripts target "bdskie" unguarded):
+//  - bd0102 plot-55 departure: bddest("bdskie") -> stripped, replaced by a
+//    !InParty-guarded EXTEND_TOP block (csr197pal.baf).
+//  - bd7100 bd_bridgefort cleanup: InMyArea("bdskie") DestroySelf -> !InParty
+//    guard added.
+//  - BDSKIE.bcs BD2000/BD4000/BD4100 blocks (auto-dialog, chapter-11 destroy,
+//    EscapeAreaObject at plot 10/15): all False()-gated — each would yank or
+//    eject a party member.
+//  - BDBENCE 32's EscapeAreaObject("bdskie") -> scrubbed (csr197skie.d).
+//  - BDSKIE dlg states 8/34/37/39/53 False()-gated (in-party click hazards).
+//
+// Deliberately NOT touched: the 5 council spawns in bd0102.bcs (she must be
+// at the palace to be met/recruited; the BG1-Skie-in-party cameo there is
+// PT-3b audit scope), BDCUT04/BDCUT04A (04 stages her after the council; 04A
+// is orphaned), state 0 + bdcut60y/bdskiedr (dream/epilogue pass), BDSKIED
+// (trial — epilogue pass), BDENTAR.dlg's bd_skie_entar_caelar reader (dead
+// with comp185), Skie's estate/gear grant (user: deferred, log only).
+//
+// Save caveat: BD4000.ARE actor schedule + area-script edits apply on first
+// visit; the palace/BDSKIE.dlg edits apply on next load. The user's live
+// save (prologue) predates all affected content.
+
+LOAD_TRA ~chriz-sod-remix/languages/english/csr197skie.tra~
+
+// WeiDU's decompiler emits CRLF on Windows; repo strings are LF.
+OUTER_SPRINT ~csr_nl~ ~%MNL%?%LNL%~
+
+// Guarded textual replace: refuses to install if the pattern does not occur
+// exactly %csr_expect% times in the decompiled buffer.
+DEFINE_PATCH_MACRO ~csr197_replace~ BEGIN
+  COUNT_REGEXP_INSTANCES ~%csr_pat%~ csr_cnt
+  PATCH_IF (csr_cnt = csr_expect) BEGIN
+    REPLACE_TEXTUALLY ~%csr_pat%~ ~%csr_rep%~
+  END ELSE BEGIN
+    PATCH_FAIL ~chriz-sod-remix #197 [%csr_what%]: expected %csr_expect% occurrence(s), found %csr_cnt%. The installed script text differs from what this component was verified against - aborting instead of mis-patching.~
+  END
+END
+
+// ------------------------------------------------------------
+// bd0102 (palace great hall) — departure cleanup made party-safe
+// ------------------------------------------------------------
+// ORDER MATTERS: the strip runs BEFORE the EXTEND_TOP — the replacement
+// block contains the same ApplySpellRES text and would break the count.
+COPY_EXISTING ~bd0102.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // No %csr_nl% anchor: the decompiler appends a strref comment to the
+    // line; the leftover comment-only line is stripped on recompile.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bd0102 plot-55 Skie bddest strip~
+    SPRINT ~csr_pat~ ~ApplySpellRES("bddest","bdskie")~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+  END
+BUT_ONLY
+
+EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/csr197pal.baf~
+
+// ------------------------------------------------------------
+// BDSKIE.bcs (her override script) — plot launchers + in-party
+// hazards False()-gated. Blocks cited by docs/research/15 §4.
+// ------------------------------------------------------------
+COPY_EXISTING ~bdskie.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+
+    // (1) BD2000 auto-banter at bd_plot=293 (would fire ON a party member).
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~BDSKIE bd2000 banter launcher~
+    SPRINT ~csr_pat~ ~Global("bd_plot","global",293)~
+    SPRINT ~csr_rep~ ~False()
+  Global("bd_plot","global",293)~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+
+    // (2) BD4000 subquest auto-dialog, bd_skie_plot<5.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~BDSKIE bd4000 dialog launcher (LT5)~
+    SPRINT ~csr_pat~ ~GlobalLT("bd_skie_plot","global",5)~
+    SPRINT ~csr_rep~ ~False()
+  GlobalLT("bd_skie_plot","global",5)~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+
+    // (3) BD4000 subquest auto-dialog, 5<bd_skie_plot<10.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~BDSKIE bd4000 dialog launcher (GT5)~
+    SPRINT ~csr_pat~ ~GlobalGT("bd_skie_plot","global",5)~
+    SPRINT ~csr_rep~ ~False()
+  GlobalGT("bd_skie_plot","global",5)~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+
+    // (4) BD4000 chapter-11 auto-resolve (DestroySelf — party-lethal).
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~BDSKIE bd4000 chapter-11 destroy~
+    SPRINT ~csr_pat~ ~GlobalLT("bd_skie_plot","global",10)%csr_nl%  AreaCheck("bd4000")%csr_nl%  Global("chapter","global",11)~
+    SPRINT ~csr_rep~ ~False()
+  GlobalLT("bd_skie_plot","global",10)
+  AreaCheck("bd4000")
+  Global("chapter","global",11)~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+
+    // (5) BD4000 walk-out at bd_skie_plot 10/15 (EscapeAreaObject — would
+    // eject a party member from the area).
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~BDSKIE bd4000 escape block~
+    SPRINT ~csr_pat~ ~OR(2)%csr_nl%    Global("bd_skie_plot","global",10)%csr_nl%    Global("bd_skie_plot","global",15)~
+    SPRINT ~csr_rep~ ~False()
+  OR(2)
+    Global("bd_skie_plot","global",10)
+    Global("bd_skie_plot","global",15)~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+
+    // (6) BD4100 "captured Skie" auto-dialog.
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~BDSKIE bd4100 dialog launcher~
+    SPRINT ~csr_pat~ ~Global("bd_skie_plot","global",10)%csr_nl%  AreaCheck("BD4100")~
+    SPRINT ~csr_rep~ ~False()
+  Global("bd_skie_plot","global",10)
+  AreaCheck("BD4100")~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// bd2000 (Boareskyr) — the two battle-resolution blocks keep
+// Bence, the journal and the Khalid staging; only Skie's spawn
+// goes. bd_plot=293 still set here; Bence wrap via csr197bnc.
+// ------------------------------------------------------------
+COPY_EXISTING ~bd2000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // No %csr_nl% anchor (decompiler comment on the line, see above).
+    SET csr_expect = 2
+    SPRINT ~csr_what~ ~bd2000 Skie battle-resolution spawns~
+    SPRINT ~csr_pat~ ~CreateCreature("bdskie",\[2485\.2655\],NW)~
+    SPRINT ~csr_rep~ ~~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// bdbence.bcs — the BD3000 missing-Skie auto-starter dies; the
+// BD2000 wrap-up auto-starter arrives (strip before extend: the
+// new block re-uses no patched text, but keep the order anyway).
+// ------------------------------------------------------------
+COPY_EXISTING ~bdbence.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bdbence bd3000 missing-Skie starter~
+    SPRINT ~csr_pat~ ~Global("bd_plot","global",310)%csr_nl%  Global("bd_skie_plot","global",0)~
+    SPRINT ~csr_rep~ ~False()
+  Global("bd_plot","global",310)
+  Global("bd_skie_plot","global",0)~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+  END
+BUT_ONLY
+
+EXTEND_TOP ~bdbence.bcs~ ~chriz-sod-remix/baf/csr197bnc.baf~
+
+// ------------------------------------------------------------
+// bd7100 (Boareskyr overland) — post-bridgefort sweep would
+// DestroySelf an in-party Skie crossing the map.
+// ------------------------------------------------------------
+COPY_EXISTING ~bd7100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    SET csr_expect = 1
+    SPRINT ~csr_what~ ~bd7100 bridgefort Skie sweep in-party guard~
+    SPRINT ~csr_pat~ ~GlobalGT("bd_bridgefort_plot","global",0)%csr_nl%  InMyArea("bdskie")~
+    SPRINT ~csr_rep~ ~GlobalGT("bd_bridgefort_plot","global",0)
+  !InParty("bdskie")
+  InMyArea("bdskie")~
+    LAUNCH_PATCH_MACRO ~csr197_replace~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// bd4000.are — the placed subquest Skie never appears (appearance
+// schedule 0 = present at no hour; engine-verified removal without
+// structural surgery). Matched by CRE resref + x-coordinate.
+// ------------------------------------------------------------
+COPY_EXISTING ~bd4000.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    READ_ASCII (csr_ao + csr_i * 0x110 + 0x80) csr_cre (8) NULL
+    PATCH_IF (~%csr_cre%~ STRING_EQUAL_CASE ~BDSKIE~) BEGIN
+      READ_SHORT (csr_ao + csr_i * 0x110 + 0x20) csr_x
+      PATCH_IF (csr_x = 1605) BEGIN
+        WRITE_LONG (csr_ao + csr_i * 0x110 + 0x40) 0
+        SET csr_hits += 1
+      END
+    END
+  END
+  PATCH_IF (csr_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #197 [bd4000 placed Skie]: expected exactly 1 BDSKIE actor at x=1605, found %csr_hits%. The installed area differs from what this component was verified against - aborting.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// Dialog surgery: BDSKIE (new palace meeting + join machinery),
+// BDBENCE (bridge wrap Skie-free, missing-Skie quest gated),
+// BDNEDERL (the Marshal never asks after her).
+// ------------------------------------------------------------
+COMPILE ~chriz-sod-remix/dlg/csr197skie.d~

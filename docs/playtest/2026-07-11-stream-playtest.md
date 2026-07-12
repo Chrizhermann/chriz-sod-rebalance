@@ -212,7 +212,17 @@ re-recruit), since the var is now 2 = resolved.
 
 ---
 
-## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **OPEN (Skie pass not built)**
+## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **FIXING (comp197 built + dev-installed 2026-07-12; new lines pending word-level sign-off)**
+
+> **Build note (2026-07-12, issue #2, branch `fix/issue-2-skie-minimal-join`):**
+> shipped as **component 197** — new short palace exchange (Entar's death → talk-to-
+> join), Beamdog's cut-content `JoinParty()` machinery resurrected, full SoD plot
+> surface retired (Boareskyr banter Skie-free with the bridge wrap preserved, BD3000
+> missing-Skie quest gated, BD4000 placed actor unscheduled), in-party guards on every
+> script targeting `"bdskie"`. Design record: `docs/design/chapters/01-prologue.md`
+> §12 (incl. the in-game verify checklist + a console re-arm for the current live
+> save). The 11 new lines await sign-off: `chriz-sod-remix/languages/english/
+> csr197skie.tra`.
 
 **User:** "Skie is still there talking about me talking to her daddy and everything. I
 thought we wanted to skip all that and just have her there joinable? Maybe talk about

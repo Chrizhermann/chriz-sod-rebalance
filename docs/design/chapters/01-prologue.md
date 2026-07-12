@@ -396,6 +396,51 @@ Also locked in playtest 3 (2026-07-07):
   should just *start the conversation* herself — and generally, **the more Beamdog
   cutscenes removed, the better**.
 
+## 12. Skie: minimal talk-to-join at the palace — BUILT (component 197), lines PENDING SIGN-OFF
+
+Issue #2 / PT-4 (2026-07-11). User direction: *"skip all that and just have her there
+joinable? Maybe talk about her father's dead for a moment and keep it short for now."*
+Estate/gear grant on recruit deferred (user: "nothing special or huge impact").
+
+**Shape (built 2026-07-12, dev-installed as comp197):**
+- The vanilla palace meeting (BDSKIE 8–15, the "talking to Daddy" contradiction) is
+  gated off; a new SHORT exchange takes its place at the same entry point (post-council
+  click): opener acknowledging Entar's death → the ask → join / decline. Decline keeps
+  her in the hall (re-offer state) until the plot-55 departure cleans her up.
+- **Key finding:** her `JoinParty()` states (BDSKIE 5–7/1–4) are Beamdog **cut
+  content** — gated to BD0120/BD0130, which she never reaches; vanilla SoD Skie was
+  never recruitable. comp197 resurrects that machinery (join sets `bd_joined=1`,
+  attaches BDSKIEC, the camp dismiss/re-recruit cluster works as shipped; a new
+  catch-all state covers field re-recruit outside the two camp areas).
+- **Plot surface retired:** BD2000 Boareskyr banter (spawn cut; Bence auto-starts the
+  battle wrap himself — the bridge door `Bridge_Barrels` only opens in BDBENCE 32,
+  re-routed Skie-free; `bd_plot` 293→294 kept, verified reader-less), the BD3000
+  missing-Skie quest (BDBENCE 33/39 + script starter gated; BDNEDERL greeting
+  re-pointed so the Marshal never asks), BD4000 placed actor (appearance schedule 0),
+  BD4100 rescue (unreachable, `bd_skie_plot` parked at 0), BD7000/BD7100 vignette
+  chain (already dead via comp210 — comp197 requires it).
+- **In-party safety sweep** (she could never be a party member before, so vanilla
+  targets `"bdskie"` unguarded): BD0102 plot-55 `bddest` → `!InParty` guard; BD7100
+  bridgefort sweep `DestroySelf` → `!InParty` guard; BDSKIE.bcs auto-dialog /
+  chapter-11 destroy / EscapeArea blocks → False()-gated; BDBENCE 32's
+  `EscapeAreaObject("bdskie")` → scrubbed; dialog states 8/34/37/39/53 → False()-gated
+  (in-party click hazards).
+- BG1-carried Skie (comp110): the join replies hide while a DV `SKIE` is in the party
+  — no second Skie can be recruited. The council-spawn *cameo* itself stays (PT-3b
+  audit scope).
+
+**PENDING SIGN-OFF:** the 11 new lines in
+`chriz-sod-remix/languages/english/csr197skie.tra` (word-level, BG1/BG2 register).
+
+**In-game verify checklist (next playtest):** palace click after the council reaches
+the new state 91 (not the dream state 0 — trigger-less-state model, research 15 §3);
+join works + she persists across the plot-56 departure; decline → re-offer → cleanup
+at departure; Boareskyr wrap: Bence auto-talks after the battle, bridge opens, no
+Skie; BD3000: Nederlok/Bence never mention her; dismiss in the field → re-recruit
+catch-all. Live-save note: the user's current save already consumed the vanilla
+meeting (`EscapeBD0102=1`, she despawned) — re-arm via console:
+`C:CreateCreature("bdskie")` + `C:SetGlobal("EscapeBD0102","BD0102",0)`.
+
 ## OPEN — next sparring round
 1. Sign-off on the §4 cut surface (strangle-by-flag + council re-points + cheap-now
    removal list).
