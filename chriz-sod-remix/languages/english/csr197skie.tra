@@ -1,0 +1,27 @@
+// csr197skie.tra — component 197 new dialogue (Ducal Palace, Skie talk-to-join)
+// ALL LINES PENDING WORD-LEVEL SIGN-OFF (BG1/BG2 register, issue #2 / PT-4).
+// Context: post-council great hall. Entar died in BG1 ch.7 and stays dead
+// (comp185) — Skie may not blame Caelar for his death.
+
+// Skie — opener (replaces the vanilla "talking to Daddy" meeting)
+@0 = ~You remember me, <CHARNAME>? Skie Silvershield. They buried my father while the whole city argued about this crusade. Everyone says I should sit in his empty house and mourn. I won't.~
+
+// Player replies to the opener
+@1 = ~I am sorry for your loss, Skie. Duke Silvershield was a pillar of this city.~
+@2 = ~The dukes' council is no place for mourning, Skie. Why are you here?~
+
+// Skie — the ask
+@3 = ~Because you're here. You're going after Caelar—everyone says so. Take me with you. I can open a lock and walk without a sound, and anything is better than sitting alone in Daddy's empty house.~
+
+// Player — accept / decline
+@4 = ~Very well, Skie. Gather your gear—we march north soon.~
+@5 = ~No. A war camp is no place for you. Stay in Baldur's Gate.~
+
+// Skie — join / stay behind
+@6 = ~You mean it? You won't regret this, <CHARNAME>. Let's be off before the dukes think better of it.~
+@7 = ~Fine. FINE. Everyone decides what's best for Skie... I'll be here. Should you change your mind.~
+
+// Skie — re-offer if the player comes back to her in the hall
+@8 = ~Changed your mind, <CHARNAME>? Good. Take me with you—the offer stands.~
+@9 = ~All right, Skie. Come along.~
+@10 = ~Not yet, Skie.~

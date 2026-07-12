@@ -1,0 +1,14 @@
+// csr197pal.baf — EXTEND_TOP for bd0102.bcs (component 197).
+// The vanilla BD_plot 55->56 departure block bddest'ed Skie unconditionally —
+// lethal to a party member now that she can join at the palace. comp197.tpa
+// strips that line from the vanilla block; this replacement runs in the same
+// script pass (top of file, plot still 55) and only removes a Skie who was
+// never recruited (or was declined and left standing in the hall).
+IF
+  Global("BD_plot","global",55)
+  !InParty("bdskie")
+THEN
+  RESPONSE #100
+    ApplySpellRES("bddest","bdskie")
+    Continue()
+END

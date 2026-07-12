@@ -24,6 +24,8 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   185 Entar Silvershield removed          (requires 140+150)
 //   190 Skie's second-night bedroom visit removed (requires 150)
 //   195 assassination/poison references scrubbed (requires 150)
+//   197 Skie: talk-to-join recruit at the palace, SoD plot
+//       removed                        (requires 150+185+210)
 // 200-229: Coast Way chapter pass
 //   200 Coast Way Crossing: west spiders cut, no magic wall,
 //       5-round bridge fight
@@ -398,6 +400,29 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 195 (assassination residue scrubbed) requires component 150 (which removes the assassination night this cleans up after).~
 
 INCLUDE ~chriz-sod-remix/lib/comp195.tpa~
+
+// ============================================================
+// 197 — Prologue: Skie becomes a plain talk-to-join recruit
+// ============================================================
+// The vanilla palace meeting ran her full SoD plot opener ("I heard you
+// talking to Daddy..." — a lore contradiction once comp185 killed Entar) and
+// she was never actually recruitable: her JoinParty() states are Beamdog cut
+// content gated to areas she never reaches. This re-points the palace first
+// meeting to a SHORT Entar-death exchange ending in talk-to-join (new lines
+// PENDING word-level sign-off), resurrects the cut join machinery, and
+// retires her whole SoD plot surface (Boareskyr banter, the BD3000/BD4000/
+// BD4100 missing-Skie subquest, the BD4000 placed actor) with in-party
+// safety guards on every script that targets "bdskie". Issue #2 / PT-4;
+// research docs/research/15; full rationale in lib/comp197.tpa +
+// dlg/csr197skie.d. Estate/gear grant deferred per user.
+
+BEGIN @197 DESIGNATED 197 GROUP @1001 LABEL ~csr_skie_talk_to_join~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 197 (Skie talk-to-join) requires component 150 (the crusade council rework the palace meeting rides on).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 197 (Skie talk-to-join) requires component 185 (Entar removed - the new dialogue is written around his death).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~Component 197 (Skie talk-to-join) requires component 210 (Coast Way Forest removed - it retires the BD7000 Skie vignette this component leaves dormant).~
+
+INCLUDE ~chriz-sod-remix/lib/comp197.tpa~
 
 // ============================================================
 // 200 — Coast Way Crossing: fewer spiders, fairer bridge fight

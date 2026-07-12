@@ -1,0 +1,22 @@
+// csr197bnc.baf — EXTEND_TOP for bdbence.bcs (component 197).
+// Vanilla opened the Boareskyr bridge (BDBENCE 32, Bridge_Barrels) through
+// Skie's auto-fired post-battle banter (BDSKIE.bcs bd_plot=293 block). With
+// her BD2000 spawn cut, Bence himself starts the wrap-up: dialog-start scan
+// at bd_plot=293 selects his state 25 (re-routed to the 30/31 wrap by
+// csr197skie.d). Shape mirrors the vanilla BDSKIE launcher (once-LOCAL,
+// SetInterrupt bracket).
+IF
+  Global("bd_plot","global",293)
+  Global("csr_bence_ot","locals",0)
+  AreaCheck("bd2000")
+  Range([PC],25)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("csr_bence_ot","locals",1)
+    MoveViewObject(Myself,INSTANT)
+    FaceObject([PC])
+    Wait(1)
+    StartDialogNoSet(Player1)
+    SetInterrupt(TRUE)
+END
