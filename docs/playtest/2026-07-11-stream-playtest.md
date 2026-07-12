@@ -184,12 +184,17 @@ carries NO bdwforce cast and NO VFX — structurally different from BDCUT14, cau
 the count-guards on the first attempt) and bumps the mirror's parley timer to
 FIVE_ROUNDS (it DID set the vanilla THREE_ROUNDS — the suspicion above confirmed).
 The wall-down restore pair stays as harmless no-ops. Systemic audit of the other
-CUTSKIP mirrors vs our patched cutscenes = still open (issue #5 follow-up).
+CUTSKIP mirrors vs our patched cutscenes = **DONE 2026-07-13**, see
+`docs/research/19-cutskip-mirror-map.md`: no new actionable mirrors (BDCUT10/BDCUT28
+are not skippable — no mirror exists); three watch items for the ending rework
+(#51 trial, #52 Belhifet, #67 BD6100 transition). Corpus extended (CUTSKIP + CUTMOVE*),
+house rule added as methods-cookbook §16.
 
 **⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
 any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at
 minimum: comp120 (BDCUT10 hooded-man launch, BDCUT28 ending) and every future
-cutscene edit. Add "check CUTSKIP" to the house checklist.
+cutscene edit. Add "check CUTSKIP" to the house checklist. *(Resolved as above;
+rule lives in cookbook §16 + the bg-modding skill gotchas.)*
 
 **User-save repair (live):** if the wall is still up on the save, console:
 `C:Eval('OpenDoor("force_wall_door")')` and `C:Eval('AmbientActivate("force_wall",FALSE)')`
