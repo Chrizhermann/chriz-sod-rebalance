@@ -1,0 +1,69 @@
+// ============================================================
+// chriz-sod-remix component 187 — prologue: the assassination
+// night-set never spawns (render-proof; body — BEGIN in the tp2)
+// ============================================================
+// Playtest PT-2 / issue #3 (2026-07-11, user): "going down one floor from
+// the bedroom for the first time... we see some people, that despawn. Why
+// are they spawned in the first place? I would prefer they not spawn at all."
+//
+// Root cause (verified 2026-07-13): bd0100.are (the upper hall on the
+// bedroom->great-hall route) pre-places the assassination-night fight set —
+// Corwin (BDSCHAEL), Assassin1-3 (BDGASS5, hostile), FF Guard 1/2 (BDFISTCC)
+// and three BDFFDEAD corpses — with always-on appearance schedules
+// (0xFFFFFFFF / 0x00FFFFFF). comp150 cut the assassination night and sweeps
+// all nine via bddest (baf/csrswp.baf) on the area's FIRST script pass — but
+// the engine renders placed actors BEFORE the first script pass runs (same
+// verified behavior that forces blk0120.baf's first-action fade), so the set
+// is visible for a beat and pops in view, exactly once per game (CSR_SWEEP
+// once-flag). bddest itself is clean (opcode 20 invisibility + opcode 168
+// remove-creature, both timing mode 1 = instant/permanent — SPL-verified);
+// only the pre-script render window shows them.
+//
+// Fix at the SOURCE per the issue: zero the nine actors' appearance
+// schedules (+0x40; 0 = present at no hour = never spawns — the engine-
+// verified comp197/bd4000 pattern). They never exist, so nothing can render.
+//
+// csrswp stays untouched and is load-bearing twice over: (1) belt-and-braces
+// for saves whose baked bd0100 area state still carries the set (visited
+// areas ignore ARE edits), and (2) its deliberate no-Continue still eats the
+// OnCreation pass that would otherwise run the "To arms!" rally blocks
+// (BD0100.baf:1-31; with no actors those are near-no-ops, but Corwin's rally
+// bark is a DisplayStringHead on a now-nonexistent object — dead either way,
+// and eating the pass keeps the runtime state byte-identical to v0.6.x).
+//
+// Downstream consumers, all verified inert without the set (research 11a):
+// Dead("Assassin1-3") is FALSE for never-created creatures — same value the
+// sweep produced (bddest never sets death variables) — so the
+// BD_HELPED_KILL_ASSASSINS setter (BD0100.baf:68-76) stays dormant and
+// csrarr.baf's pre-set (=1, council variants V3/V4) keeps selecting; the
+// vanilla plot>51 cleanup block bddest's the same names as harmless no-ops
+// (the comp150 BDGASS6 precedent) and its day-dressing spawns are untouched.
+//
+// Save caveat: bd0100 is baked into any save that already visited it — there
+// the one-time pop has already happened and CSR_SWEEP=1; nothing to repair.
+// Fresh games load the patched ARE and never show the set.
+
+COPY_EXISTING ~bd0100.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    READ_ASCII (csr_ao + csr_i * 0x110)        csr_name (32) NULL
+    READ_ASCII (csr_ao + csr_i * 0x110 + 0x80) csr_cre  (8)  NULL
+    PATCH_IF (((~%csr_name%~ STRING_EQUAL_CASE ~Corwin~)     AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDSCHAEL~)) OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~Assassin1~)  AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDGASS5~))  OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~Assassin2~)  AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDGASS5~))  OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~Assassin3~)  AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDGASS5~))  OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~FF Guard 1~) AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDFISTCC~)) OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~FF Guard 2~) AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDFISTCC~)) OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~FF Dead 1~)  AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDFFDEAD~)) OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~FF Dead 2~)  AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDFFDEAD~)) OR
+              ((~%csr_name%~ STRING_EQUAL_CASE ~FF Dead 3~)  AND (~%csr_cre%~ STRING_EQUAL_CASE ~BDFFDEAD~))) BEGIN
+      WRITE_LONG (csr_ao + csr_i * 0x110 + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != 9) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #187 [bd0100 night set]: expected exactly 9 placed night-set actors (Corwin, Assassin1-3, FF Guard 1/2, FF Dead 1-3), found %csr_hits%. The installed area differs from what this component was verified against - aborting instead of mis-patching.~
+  END
+BUT_ONLY

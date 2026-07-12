@@ -170,6 +170,13 @@ assassination block has its own once-flag, so a single new arrival block pre-set
 - **BD0100 sweep (once, <52):** despawn the ARE-placed night set (3 hostile assassins,
   Corwin, 2 guards, 3 corpses sit there whenever bd_plot<52 — vanilla just never lets
   you in early). Vanilla's own >51 cleanup then dresses the hall normally.
+  **PT-2 amendment (comp187, 2026-07-13):** the sweep alone is not render-proof — the
+  engine draws placed actors BEFORE the first script pass runs (the same behavior that
+  forces blk0120's first-action fade), so the set visibly popped once, on the first
+  descent from the bedroom (issue #3). comp187 zeroes the nine actors' appearance
+  schedules in bd0100.are (the comp197/bd4000 pattern) so they never exist; the sweep
+  stays as belt-and-braces for saves with a baked bd0100 and to keep eating the
+  OnCreation rally pass.
 - **Night block:** AND-gate the `TextScreen("DPALACE")` block behind a new
   `C#SODR_BEDTIME` global (set by a "retire for the night" choice); keep TextScreen /
   `bd_plot=51` / 14-day advance / beds; replace only the Imoen-wake tail with the

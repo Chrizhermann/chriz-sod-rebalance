@@ -36,31 +36,52 @@ whether the exit block can fire on pass 1 instead of waiting for the grant block
 
 ---
 
-## PT-2 — NPCs spawn then despawn on the first trip down from the bedroom — OPEN (bug?)
+## PT-2 — NPCs spawn then despawn on the first trip down from the bedroom — **ROOT CAUSE CONFIRMED + SHIPPED (comp187)**
 
 **User:** "When going down one floor from the bedroom for the first time in SoD, why
 do we see some people, that despawn? Why are they spawned in the first place? I would
 prefer they not spawn at all."
 
 Bedroom = BD0103 (palace guest room). One floor down = BD0102 (great hall).
+**Correction (2026-07-13): the sighting is BD0100, the upper hall the descent route
+passes through** (BD0103 → BD0100 → BD0102) — the original BD0102 mapping was an
+inference, and BD0102's staging turned out to be a red herring.
 
-**Research (partial — needs finishing):**
-`BD0102.baf` re-stages the SAME council cast at MANY plot values — each block does a
-fresh `CreateCreature` set of BDGASS6 (Assassin), BDELTAN, BDBELT, BDSKIE, BDENTAR,
-4× bdfistcc, bdjospil, BDSCHAEL/BDLIIA at different coordinates (lines 30-44, 79-92,
-130-145, 181-196, 231-245, 261...). Our prologue rework (140/150/180/185/190) moves
-the party through plot 50 → 55 on a compressed timeline, so a stale-plot staging
-block plausibly fires, creates the cast, and a later block or an override script
-destroys them again in view of the player.
-Our own celebration guests (`csrnobm`/`csrnobf`/`csrffgd`, comp180) DO self-destroy —
-`baf/csrnobx.baf`: `!Global("BD_PLOT","GLOBAL",50) -> DestroySelf()` — but that should
-fire before the player ever sees them (they only exist during the plot-50 evening).
+**Root cause — CONFIRMED (issue #3, 2026-07-13):** `bd0100.are` pre-places the
+assassination-night fight set — Corwin (BDSCHAEL), Assassin1-3 (BDGASS5, EA=255
+hostile), FF Guard 1/2 (BDFISTCC) and three BDFFDEAD corpses — with always-on
+appearance schedules (dev ARE parse: 9 actors, 0xFFFFFFFF/0x00FFFFFF; they are the
+area's ONLY placed actors). comp150 cut the assassination night and sweeps all nine
+via `baf/csrswp.baf` (bddest ×9) on the area's FIRST script pass — but the engine
+renders placed actors BEFORE the first script pass runs (the same verified behavior
+that forces `blk0120.baf`'s first-action fade, cf. PT-1), so the set is visible for
+a beat and pops in view. `CSR_SWEEP` is once-flagged → happens exactly once, on the
+first descent — matching "for the first time" exactly. BDDEST.SPL itself is clean
+(opcode 20 invisibility + opcode 168 remove-creature, both instant — SPL-verified);
+only the pre-script render window shows them.
 
-**To pin down (agent task):** which exact creatures the player sees; whether it is
-(a) our comp180 guests despawning in view, (b) a vanilla BD0102 staging block firing
-at a plot value our rework no longer intends, or (c) Entar/Skie remnants racing
-comp185/190's removal. Then suppress at the SOURCE (never create) rather than letting
-them spawn and pop.
+The issue's three candidates all cleared: (a) comp180 celebration guests self-despawn
+overnight — BD0100/BD0102/BD0103 are all MASTAREA.2DA master areas, so their creature
+scripts keep running while the party sleeps upstairs (and no second-descent pop was
+ever reported); (b) the five BD0102 council variants are correctly re-gated to
+`BD_plot==51` by comp150 (installed-bcs verified); (c) comp185 unspawns Entar and the
+plot-55 Skie/Corwin housekeeping is comp197-guarded — neither races anything on the
+first descent.
+
+**✅ SHIPPED (2026-07-13, comp187, installed + verified on dev):** "the assassination
+night-set never spawns" — zeroes the nine actors' appearance schedules in bd0100.are
+(the engine-verified comp197/bd4000 pattern; +0x40 = 0 → present at no hour), matched
+by actor name + CRE resref, count-guarded 9-or-FAIL. Suppressed at the SOURCE: they
+never exist, nothing renders, nothing pops. `csrswp` stays untouched as belt-and-braces
+(saves with a baked bd0100 still get swept; its no-Continue still eats the OnCreation
+"To arms!" rally pass). Requires comp150 (without it the set is a live scene).
+Downstream verified inert: `Dead("Assassin1-3")` is false for never-created creatures —
+the same value the bddest sweep produced — so `BD_HELPED_KILL_ASSASSINS` stays at
+csrarr's pre-set 1, and vanilla's >51 cleanup bddest lines no-op harmlessly.
+
+**User-save note (live):** the pop is a one-time visual and already happened on the
+stream save (bd0100 is baked with CSR_SWEEP=1 there); nothing to repair. Fresh games
+load the patched ARE and never show the set.
 
 ---
 
