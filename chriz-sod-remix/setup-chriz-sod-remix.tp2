@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.5.0~
+VERSION ~v0.6.0~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -24,17 +24,25 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   185 Entar Silvershield removed          (requires 140+150)
 //   190 Skie's second-night bedroom visit removed (requires 150)
 //   195 assassination/poison references scrubbed (requires 150)
-// 200-299: Coast Way chapter pass
+// 200-229: Coast Way chapter pass
 //   200 Coast Way Crossing: west spiders cut, no magic wall,
 //       5-round bridge fight
 //   210 Coast Way Forest (BD7000) removed; Rasaad at the camp
 //   220 the dwarven dig site re-garrisoned (+XP chunk on the lich)
-// 230-299: road-north chapter pass (Ch. 9)
+//   245 comp200's wall removal made skip-proof (CUTSKIP mirror;
+//       requires 200)
+// 230-259: road-north chapter pass (Ch. 9)
 //   230 Troll Claw Woods / Boareskyr trash cut (+XP chunk on the
 //       bridge resolution)
 //   240 Forest of Wyrms: bugbear cave removed, dragon cave opens
 //       into the temple (+XP chunk on the Neothelid)
 //   250 Morentherene stat tiers on Hard / Insane
+//   255 Boareskyr battle: durable explosive barrels
+// 260-299: coalition-camp chapter pass (Ch. 10-12)
+//   260 scouting maps + shadow vault trash cut (+XP chunk on the
+//       chapter-11 transition)
+//   270 Kanaglym: fewer undead (+XP chunk on the Kherriun award)
+//   280 no party dispel at the basement reveal
 // 900-999: mod-wide choice components
 //   900/901 treasure from removed content: collect / remove
 //           (requires 210)
@@ -434,6 +442,21 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1200.are~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp220.tpa~
 
 // ============================================================
+// 245 — comp200's wall removal, skip-proof
+// ============================================================
+// CUTSKIP.bcs (SoD's cutscene-skip rig) carries a mirrored
+// end-state of the BDCUT14 bridge cutscene; skipping the cutscene
+// re-raised the wall comp200 removes and reset the 3-round parley
+// timer (playtest issue #5). This patches the mirror the same way.
+
+BEGIN @245 DESIGNATED 245 GROUP @1002 LABEL ~csr_coastway_skipproof~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~200~ ~Component 245 (skip-proof wall removal) mirrors component 200's bridge-cutscene changes into the cutscene-skip rig - install 200 first.~
+
+INCLUDE ~chriz-sod-remix/lib/comp245.tpa~
+
+// ============================================================
 // 230 — road north: fewer, cleaner enemy camps
 // ============================================================
 // Main-line trash cut for the chapter-9 march: BD7100 (63 cuts,
@@ -481,6 +504,68 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7210.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdmorent.cre~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp250.tpa~
+
+// ============================================================
+// 255 — Boareskyr battle: durable explosive barrels
+// ============================================================
+// The battle's loss condition rides 25-hp, zero-fire-resist
+// barrels that random mephit splash pops "with no counter" on
+// higher difficulties. Fast fix (120 hp, 75% fire resist) while
+// the elemental/portal sequence awaits its full rework.
+
+BEGIN @255 DESIGNATED 255 GROUP @1003 LABEL ~csr_durable_barrels~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdkegx.cre~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp255.tpa~
+
+// ============================================================
+// 260 — coalition camp arc: fewer, cleaner enemies
+// ============================================================
+// The four chapter-10 scouting maps (Dead Man's Pass, Bloodbark
+// Grove, Underground River, the river caves) + the shadow vault,
+// trimmed the established way; camp/castle/Avernus and every
+// scripted battle stay vanilla. Cut kill-XP returns as one chunk
+// on the guaranteed chapter-11 transition award.
+// docs/design/chapters/04-coalition.md.
+
+BEGIN @260 DESIGNATED 260 GROUP @1004 LABEL ~csr_coalition_field~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7300.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7400.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7310.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5100.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4000.bcs~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp260.tpa~
+
+// ============================================================
+// 270 — Kanaglym: fewer undead
+// ============================================================
+// The NE skeleton graveyard 19->8 (shadowed souls hard-banned);
+// the south quest cluster is neutral-until-quest and untouched.
+// Cut kill-XP returns on the Kherriun/Dark-Magicians award.
+
+BEGIN @270 DESIGNATED 270 GROUP @1004 LABEL ~csr_kanaglym_trim~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5300.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5300.bcs~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp270.tpa~
+
+// ============================================================
+// 280 — no party dispel at the basement reveal
+// ============================================================
+// Both variants of the Hephernaan/Caelar reveal cutscene strip
+// the whole party's buffs (six bddispel casts each in 45A/45B,
+// mirrored twice more in the cutscene-skip rig). Removed; the
+// ward visuals and the enemy-side parley dispels stay.
+
+BEGIN @280 DESIGNATED 280 GROUP @1004 LABEL ~csr_no_reveal_dispel~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcut45a.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcut45b.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp280.tpa~
 
 // ============================================================
 // 900/901 — treasure from removed content (mod-wide choice)

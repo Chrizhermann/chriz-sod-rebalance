@@ -1,0 +1,25 @@
+// ============================================================
+// Component 255 body — Boareskyr battle: durable barrels
+// ============================================================
+// User decision (2026-07-12): the bridge-battle loss condition
+// rides the BDKEGX explosive barrels, which ship with 25 hp and
+// ZERO fire resistance — on higher difficulties random fire-mephit
+// splash pops them "with no counter". Fast fix while the whole
+// elemental/portal sequence awaits its later rework: 120 hp
+// (~5x) + 75% fire resistance (cold stays at its vanilla 50).
+// The CRE patch covers the four placed barrels and any scripted
+// spawns alike; nothing scripts BDKEGX by name (verified corpus
+// sweep 2026-07-11), and story detonations use Kill(), which
+// bypasses hit points.
+
+COPY_EXISTING ~bdkegx.cre~ ~override~
+  READ_SHORT 0x24 csr_hp
+  READ_SHORT 0x26 csr_maxhp
+  READ_BYTE  0x59 csr_rfire
+  PATCH_IF NOT ((csr_hp = 25) AND (csr_maxhp = 25) AND (csr_rfire = 0)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp255: BDKEGX.cre is not the verified vanilla barrel (hp %csr_hp%/%csr_maxhp%, fire resist %csr_rfire%; expected 25/25/0). Another mod already changed it - resolve manually.~
+  END
+  WRITE_SHORT 0x24 120
+  WRITE_SHORT 0x26 120
+  WRITE_BYTE  0x59 75
+BUT_ONLY

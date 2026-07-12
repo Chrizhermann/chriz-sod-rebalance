@@ -156,6 +156,15 @@ when I tested, did we already remove it?"
 **Fix:** comp200 must patch the mirrored CUTSKIP block the same way (remove the wall
 actions; THREE→FIVE_ROUNDS if present), count-guarded.
 
+**✅ SHIPPED (2026-07-12, comp245 v0.6.0, verified on dev):** new component (not a
+comp200 edit — avoids mid-stack churn) removes the mirror's wall
+(`AmbientActivate("force_wall",TRUE)` + `CloseDoor("force_wall_door")`; the mirror
+carries NO bdwforce cast and NO VFX — structurally different from BDCUT14, caught by
+the count-guards on the first attempt) and bumps the mirror's parley timer to
+FIVE_ROUNDS (it DID set the vanilla THREE_ROUNDS — the suspicion above confirmed).
+The wall-down restore pair stays as harmless no-ops. Systemic audit of the other
+CUTSKIP mirrors vs our patched cutscenes = still open (issue #5 follow-up).
+
 **⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
 any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at
 minimum: comp120 (BDCUT10 hooded-man launch, BDCUT28 ending) and every future

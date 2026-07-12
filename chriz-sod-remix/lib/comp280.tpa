@@ -1,0 +1,48 @@
+// ============================================================
+// Component 280 body — no party dispel at the basement reveal
+// ============================================================
+// User decision (2026-07-12): "Why does your party get dispelled?
+// It's 1000% anti fun. We have to remove it." The Hephernaan/
+// Caelar basement reveal exists in TWO cutscene variants, and
+// BOTH strip the party:
+//   BDCUT45A.bcs — six ReallyForceSpellRES("bddispel",Player1..6)
+//     after the ward flare (bdwardgr VFX + EFF_M08 kept: the room
+//     still flares, it just no longer strips your buffs);
+//   BDCUT45B.bcs — six more after its EFF_E06 beat;
+//   CUTSKIP.bcs — the skip rig mirrors both variants (12 player-
+//     targeted casts total; verified by compiled action-block
+//     decode 2026-07-12: one run after the 45A mirror's crusader
+//     spawns, one after the 45B mirror's door03 open).
+// Only Player1-6 targets are touched — every enemy-side parley
+// dispel (Caelar, lieutenants) decompiles with a creature target
+// and stays.
+
+COPY_EXISTING ~bdcut45a.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~ReallyForceSpellRES("bddispel",Player[123456])~ csr_cnt_disp
+    PATCH_IF NOT (csr_cnt_disp = 6) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp280: expected exactly six player-targeted bddispel casts in BDCUT45A.bcs, found %csr_cnt_disp%. The reveal cutscene differs from the verified layout - resolve manually.~
+    END
+    REPLACE_TEXTUALLY ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bdcut45b.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~ReallyForceSpellRES("bddispel",Player[123456])~ csr_cnt_disp
+    PATCH_IF NOT (csr_cnt_disp = 6) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp280: expected exactly six player-targeted bddispel casts in BDCUT45B.bcs, found %csr_cnt_disp%. The reveal cutscene differs from the verified layout - resolve manually.~
+    END
+    REPLACE_TEXTUALLY ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
+  END
+BUT_ONLY
+
+COPY_EXISTING ~cutskip.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~ReallyForceSpellRES("bddispel",Player[123456])~ csr_cnt_disp
+    PATCH_IF NOT (csr_cnt_disp = 12) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp280: expected exactly twelve player-targeted bddispel casts in CUTSKIP.bcs (the 45A+45B skip mirrors), found %csr_cnt_disp%. The skip rig differs from the verified layout - resolve manually.~
+    END
+    REPLACE_TEXTUALLY ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
+  END
+BUT_ONLY

@@ -1,0 +1,62 @@
+// ============================================================
+// Component 270 body — Kanaglym: fewer undead
+// ============================================================
+// Design: docs/design/chapters/04-coalition.md "Quick-win pass"
+// (user-approved 2026-07-12: "Kanaglym has 100000 undead again
+// apart from the quest in the south, way too much"). The NE
+// skeleton graveyard 19->8 (three shadowed souls — banned list —
+// plus archer/armored/bladed trim; the 4,000-XP skeleton-warrior
+// mini-boss anchors what remains). The ENTIRE south quest cluster
+// (dark magicians + Kherriun, sacrifices, Zhadro, the Endless
+// ghost cast) is neutral-until-quest and untouched by
+// construction; C0MNEV01 is another mod's creature and is not in
+// the list. Quest-enemy volume itself is a recorded later-flesh
+// item, not this pass.
+//
+// Mechanism + lists: as comp260 (lib/comp270_lists.tpa, generated).
+//
+// XP ledger: cut kill-XP 6,550 returns as ONE chunk riding the
+// area's own guaranteed closure — the Kherriun/Dark-Magicians
+// 12,000 quest award (both RESPONSE branches patched; exactly one
+// fires, both set bd_sdd350_ihj=2).
+
+ACTION_CLEAR_ARRAY csr_cut_bd5300
+INCLUDE ~chriz-sod-remix/lib/comp270_lists.tpa~
+
+// ------------------------------------------------------------
+// 270.1 — BD5300 Kanaglym
+// ------------------------------------------------------------
+COPY_EXISTING ~bd5300.are~ ~override~
+  READ_LONG  0x54 csr_ao
+  READ_SHORT 0x58 csr_ac
+  SET csr_hits = 0
+  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
+    SET csr_b = csr_ao + csr_i * 0x110
+    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
+    TO_UPPER csr_cre
+    READ_SSHORT (csr_b + 0x20) csr_x
+    READ_SSHORT (csr_b + 0x22) csr_y
+    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd5300(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
+      WRITE_LONG (csr_b + 0x40) 0
+      SET csr_hits += 1
+    END
+  END
+  PATCH_IF (csr_hits != csr_cutn_bd5300) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp270: BD5300.are matched %csr_hits% of %csr_cutn_bd5300% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp270_lists.tpa before installing.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
+// 270.2 — the XP ledger chunk on the Kherriun quest award
+// ------------------------------------------------------------
+COPY_EXISTING ~bd5300.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~AddexperienceParty(12000)~ csr_cnt_xp
+    PATCH_IF NOT (csr_cnt_xp = 2) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp270: expected exactly two AddexperienceParty(12000) in BD5300.bcs (the award block's two RESPONSE branches), found %csr_cnt_xp%. The quest award differs from the verified layout.~
+    END
+    REPLACE_TEXTUALLY ~AddexperienceParty(12000)~
+~AddexperienceParty(12000)
+    AddexperienceParty(%csr_xp_chunk_270%)~
+  END
+BUT_ONLY

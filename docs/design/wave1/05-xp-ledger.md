@@ -21,6 +21,8 @@
 | Coast Way: BD7000 removal | — | **not yet ledgered** (area removed by comp210; its kill/quest XP TBD — flag) | | | | |
 | Road north: main line | — | 0 | 29,025 party (BD7100 27,425 + BD2000 1,015 + BD2010 585) ≈ 4,838/char | **3,900/char SHIPPED** (80%, comp230) | own once-block on the Boareskyr resolution (`bd_plot > 292`, both branches) | — |
 | Road north: Forest of Wyrms (optional loop) | — | 0 | 28,395 party (BD7200 10,835 + BD7230 ambush 2,750 + unreachable BD7220 14,810 incl. 3,000 quest shadow) ≈ 4,733/char | **3,800/char SHIPPED** (80%, comp240) | own once-block on the Neothelid kill (optional content → optional XP) | — |
+| Coalition camp: scouting maps | — | 0 | 129,495 party (BD7300 62,270 + BD7400 6,330 + BD7310 4,000 + BD5000 15,895 + BD5100 41,000) ≈ 21,583/char | **17,300/char SHIPPED** (80%, comp260) | rides the guaranteed ch-11 transition 20k in BD4000.bcs (fires once; pays even if the optional maps were skipped — flagged, calibration is completionist-based) | — |
+| Coalition camp: Kanaglym | — | 0 | 6,550 party ≈ 1,092/char | **900/char SHIPPED** (80%, comp270) | rides the Kherriun/Dark-Magicians 12,000 award (both RESPONSE branches, one fires) | — |
 | … | | | | | | |
 
 ## Known reinjection carriers (from `research/03`, all guaranteed awards)

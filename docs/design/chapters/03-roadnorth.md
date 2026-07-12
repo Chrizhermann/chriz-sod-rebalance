@@ -117,7 +117,11 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
    neutral crusader army flips hostile in the bridge battle, Khalid leads the
    defenders) — treatment? Early user note (2026-07-10 Discord post): rework wanted,
    "at least the explosive barrels part"; user filed it under "later," so it may
-   split out of round 1.
+   split out of round 1. **PARTIALLY EXECUTED 2026-07-12: the battle itself is
+   KEPT ("the expansion is called SIEGE of Dragonspear"), and comp255 shipped the
+   barrel fast-fix (BDKEGX 25 hp/0% fire → 120 hp/75% fire — random mephit splash
+   no longer a no-counter loss).** The elemental/portal sequence rework ("why not
+   just throw a fireball?") stays open — see 04-coalition.md later-flesh list.
 4. Temple relocation target + the cave/temple/Ziatar/Neothelid recomposition (item 15
    fight shape).
 5. Morentherene treatment (item 16 optional component; she guards the cave→temple
