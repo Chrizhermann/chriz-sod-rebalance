@@ -240,6 +240,15 @@ container near its coords; (b) restore that single BDWIGHDD (one schedule flip);
 forward; the already-consumed beat needs no repair beyond what he did (dismiss/
 re-recruit), since the var is now 2 = resolved.
 
+**Research complete (2026-07-13, issue #6):** full trace + decision options in
+`docs/research/19-scrying-pool.md`. Headlines: the hooded-man vision is ALREADY
+removed (comp120's csrhood.d gates BDSCRY states 0/4 — the "known sites" list
+above was incomplete); CUTSKIP is clean (visions never register with the skip
+rig); each vision CONSUMES a vial (dialog re-sets CLOUDY per pick), so 1
+remaining vial = only one of the two remaining visions watchable — the
+regression gates content, not just flavor. Vial options a/b/c plus (d)
+one-vial-unlocks-permanently await the user's pick, as does the full-cut call.
+
 ---
 
 ## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **FIXING (comp197 built + dev-installed 2026-07-12; new lines pending word-level sign-off)**
