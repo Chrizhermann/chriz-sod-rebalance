@@ -55,17 +55,22 @@ numbers below await user veto** (approved in direction, not yet in detail):
     Corrupted nymphs/hamadryads all stay (they ARE the druid story). KEPT: the whole
     myconid colony + shriekers, the ettin ghost, the ankheg, and every neutral (the
     drow war party, crusader patrols, Strunk/water spirits, the poisoned crusaders).
-  - **XP chunk: +17,300/char** riding the guaranteed 20,000 chapter-11 transition
-    award in BD4000.bcs (fires once, after all five maps were available). Note: a
-    player who skips the optional maps still gets the chunk — same stance as the
+  - **XP chunk: +103,600 party-total** riding the guaranteed 20,000 chapter-11
+    transition award in BD4000.bcs (fires once, after all five maps were available).
+    Unit-corrected 2026-07-12: AddexperienceParty DIVIDES among the party
+    (user-verified in-game), so the chunk is the party-total 80% of the cut and the
+    engine splits it exactly like the kill XP it replaces (≈17,270/char at 6). Note:
+    a player who skips the optional maps still gets the chunk — same stance as the
     ledger's completionist calibration; flagged, not fixed.
 - **comp270 (Kanaglym): 11 cuts / 6,550** — shadowed souls (3, banned), skeleton
   archers 9→3, armored 3→2, bladed 2→1. The 4,000-XP skeleton-warrior mini-boss
   anchors the remaining 8-skeleton graveyard fight. The south quest cluster (dark
   magicians + Kherriun + sacrifices + Zhadro + the Endless cast) is neutral-until-
   quest and untouched by construction; C0MNEV01 is another mod's creature (never
-  touched). **XP chunk: +900/char** riding the Kherriun/Dark-Magicians 12,000 award
-  (both RESPONSE branches patched; exactly one fires).
+  touched). **XP chunk: +5,200 party-total** (≈870/char at 6; unit-corrected
+  2026-07-12) riding the Kherriun/Dark-Magicians 12,000 award (both RESPONSE
+  branches patched; exactly one fires — note the 12,000 itself is a party total
+  under the corrected engine rule, i.e. ~2,000/char).
 - **comp280 (no party dispel at the basement reveal):** BOTH cutscene variants strip
   the party — BDCUT45A and BDCUT45B each cast bddispel on Player1–6, and CUTSKIP.bcs
   mirrors both (12 more). All 24 player-targeted casts removed; the ward flare

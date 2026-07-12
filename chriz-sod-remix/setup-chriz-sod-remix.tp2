@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.0~
+VERSION ~v0.6.1~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~

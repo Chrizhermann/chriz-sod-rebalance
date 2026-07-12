@@ -206,6 +206,6 @@ OUTER_SET csr_cutn_bd5100 = 10
 // bd5100 cut kill-XP: 41000
 
 // XP ledger: cut kill-XP 129495.
-// Compensation = cut * 0.8 / 6 (party-of-6 ledger baseline,
-// AddexperienceParty grants per member) rounded to 100 -> 17300/char.
-OUTER_SET csr_xp_chunk_260 = 17300
+// Compensation = cut * 0.8 as ONE party-total AddexperienceParty (the
+// engine divides it; ~17267/char at a party of 6) -> 103600.
+OUTER_SET csr_xp_chunk_260 = 103600

@@ -165,8 +165,9 @@ BUT_ONLY
 // Rides the guaranteed 20,000/char chapter award in BD4000.bcs
 // (IncrementChapter("chptxt11") block) — fires exactly once, after
 // every one of the five maps was available. AddexperienceParty
-// grants the amount to EACH member (established engine behavior,
-// see comp220).
+// DIVIDES among living party members (user-verified in-game
+// 2026-07-12), so the chunk is the party-total cut * 0.8 and the
+// engine splits it like the kill XP it replaces.
 COPY_EXISTING ~bd4000.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     COUNT_REGEXP_INSTANCES ~AddXPObject(Player1,20000)~ csr_cnt_xp
