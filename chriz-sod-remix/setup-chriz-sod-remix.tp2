@@ -22,6 +22,8 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   175 XP ledger: Liia's reward after the jailbreak (requires 170+180)
 //   180 celebration + Caelar's proclamation (requires 140+150)
 //   185 Entar Silvershield removed          (requires 140+150)
+//   187 the assassination night-set never spawns (render-proof;
+//       requires 150)
 //   190 Skie's second-night bedroom visit removed (requires 150)
 //   195 assassination/poison references scrubbed (requires 150)
 //   197 Skie: talk-to-join recruit at the palace, SoD plot
@@ -423,6 +425,24 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 1
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~Component 197 (Skie talk-to-join) requires component 210 (Coast Way Forest removed - it retires the BD7000 Skie vignette this component leaves dormant).~
 
 INCLUDE ~chriz-sod-remix/lib/comp197.tpa~
+
+// ============================================================
+// 187 — Prologue: the assassination night-set never spawns
+// ============================================================
+// PT-2 / issue #3: bd0100.are pre-places the night-fight set (Corwin,
+// Assassin1-3, FF Guard 1/2, three corpses) always-on; comp150's first-pass
+// sweep (csrswp.baf) destroys them AFTER the engine has already rendered
+// them, so they visibly pop exactly once, on the first descent from the
+// bedroom. Zero their appearance schedules so they never exist (the
+// comp197/bd4000 engine-verified pattern). The sweep stays as belt-and-
+// braces for saves with a baked bd0100. Declared after 197 in ship order
+// (the 245 precedent); numbered with its parent pass.
+
+BEGIN @187 DESIGNATED 187 GROUP @1001 LABEL ~csr_night_set_never_spawns~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 187 (night-set never spawns) requires component 150 (no assassination night - without it the set is a live scene).~
+
+INCLUDE ~chriz-sod-remix/lib/comp187.tpa~
 
 // ============================================================
 // 200 — Coast Way Crossing: fewer spiders, fairer bridge fight
