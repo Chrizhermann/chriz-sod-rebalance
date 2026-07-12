@@ -121,6 +121,10 @@ END
 // member (and confiscate Dorn's gear) — each affected area script
 // gets an EXTEND_TOP skip-block that pre-sets the vanilla
 // spawn-guard variable when the NPC is in the party.
+// The value written must be the guard's vanilla TERMINAL value:
+// 8 of the 9 area scripts only ever test ==0, so 1 is terminal
+// there — but BD0110 fires the Safana/Coran breakup scene on ==1
+// and only rests at 2, so skip0110 must write 2 (PT-3, issue #1).
 // If a companion is dismissed BEFORE visiting a recruiter site,
 // the vanilla block still fires and correctly rescues the
 // world-copy into the SoD camp system.

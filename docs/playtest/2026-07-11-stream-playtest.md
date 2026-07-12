@@ -64,7 +64,28 @@ them spawn and pop.
 
 ---
 
-## PT-3 — Safana/Coran tavern cutscene fires with Safana already in the party — **OPEN (CONFIRMED BUG, shipped comp110)**
+## PT-3 — Safana/Coran tavern cutscene fires with Safana already in the party — **FIXED 2026-07-12 (source in v0.6.0, issue #1)**
+
+**Fix applied 2026-07-12:** `skip0110.baf` now writes **2** (BD0110's vanilla terminal
+value) instead of 1. The source fix shipped with the v0.6.0 pass; the dev install got
+it recompiled via the v0.6.1 re-stack (verified: first block of the installed
+`BD0110.bcs` writes 2). The LIVE install was fixed the same day via a direct override
+byte-patch of `BD0110.bcs` (single byte `1`→`2` at offset 265, inside our EXTEND_TOP
+block only; the two vanilla spawn blocks that legitimately write 1 are untouched;
+byte-verified; pre-fix backup in `<game>/chriz-sod-remix-hotfix-backups/`). Inert for
+the user's current save (the scene already fired there and set the global to 2
+itself), correct for all future visits.
+
+**Skip-block family audit (the ⚠ below) — COMPLETE, only skip0110 was affected.**
+Verified two ways: (1) all `Global(...)` trigger conditions on the 12 spawn-guard
+globals across the 9 vanilla area scripts — every script except BD0110 tests its
+guard exclusively at `==0`, so `1` IS the vanilla terminal value there and the other
+8 skip blocks are correct as shipped; (2) a full sweep of the dev install's override
+(all 417 mods' `.bcs` + 4500 `.dlg`, using the compiled concatenated form
+`<AREA><NAME>` for BCS and the source form `"<NAME>","<AREA>"` for DLG) — none of the
+12 globals is referenced anywhere outside its own area script, so no dialogue reacts
+to the values we write. BD0110 is unique in the whole family in having a `==1`-gated
+block.
 
 **User:** "In my real playthrough the Safana/Coran cutscene in the city in the tavern
 triggered, even though I had Safana in my party, and I had to dismiss Safana and get

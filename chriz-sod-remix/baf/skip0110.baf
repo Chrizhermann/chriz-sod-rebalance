@@ -1,3 +1,7 @@
+// Must write 2, not 1: BD_SPAWN_SAFANA is a 3-state machine.
+// 1 = "Safana in tavern, Coran breakup scene pending" — BD0110.baf
+// fires the scene on ==1 and puppets the party's own Safana (PT-3).
+// 2 = scene resolved, the only value nothing in BD0110 reacts to.
 IF
   Global("BD_SPAWN_SAFANA","BD0110",0)
   InPartyAllowDead("safana")
