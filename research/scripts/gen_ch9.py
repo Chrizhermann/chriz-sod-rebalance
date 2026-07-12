@@ -121,10 +121,13 @@ def emit(outpath, comp, areas, extra_field=0, extra_note=""):
         total_cut += cutxp
         print(f"  {area}: {len(idxs)} cuts, {cutxp} xp")
     total_cut += extra_field
-    chunk = int(round(total_cut * 0.8 / 6.0 / 100.0)) * 100
+    # AddexperienceParty DIVIDES among living party members (user-verified
+    # in-game 2026-07-12). Chunk = party-total 80% of the cut; the engine
+    # splits it exactly like the kill XP it replaces.
+    chunk = int(round(total_cut * 0.8 / 100.0)) * 100
     lines.append(f"// XP ledger: cut kill-XP {total_cut}{extra_note}.")
-    lines.append("// Compensation = cut * 0.8 / 6 (party-of-6 ledger baseline,")
-    lines.append(f"// AddexperienceParty grants per member) rounded to 100 -> {chunk}/char.")
+    lines.append("// Compensation = cut * 0.8 as ONE party-total AddexperienceParty (the")
+    lines.append(f"// engine divides it; ~{int(round(chunk/6.0))}/char at a party of 6) -> {chunk}.")
     lines.append(f"OUTER_SET csr_xp_chunk_{comp} = {chunk}")
     lines.append("")
     open(outpath, 'w', newline='\n').write('\n'.join(lines))

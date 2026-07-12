@@ -45,6 +45,6 @@ OUTER_SET csr_cutn_bd7230 = 6
 // bd7230 cut kill-XP: 2750
 
 // XP ledger: cut kill-XP 28395 (incl. 14810 from the unreachable BD7220: hostiles + quest shadow).
-// Compensation = cut * 0.8 / 6 (party-of-6 ledger baseline,
-// AddexperienceParty grants per member) rounded to 100 -> 3800/char.
-OUTER_SET csr_xp_chunk_240 = 3800
+// Compensation = cut * 0.8 as ONE party-total AddexperienceParty (the
+// engine divides it; ~3783/char at a party of 6) -> 22700.
+OUTER_SET csr_xp_chunk_240 = 22700

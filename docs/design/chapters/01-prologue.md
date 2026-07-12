@@ -298,10 +298,17 @@ Guaranteed content, Normal difficulty, per char at party of 6:
 | Removed (vanilla) | Party total | Per char |
 |---|---:|---:|
 | Placed hostile garrison (BD0113 5,600 · BD0114 47,515 · BD0120 4,150 · BD0130 55,215) | 112,480 | 18,747 |
-| Korlasz herself (kill path; surrendering paid 1,000/char more) | 2,500 | 417 |
+| Korlasz herself (kill path; surrendering paid ~167/char more — unit-corrected 2026-07-12) | 2,500 | 417 |
 | Imoen exit wrap-up (`AddXPObject(Player1..6,5000)`, BDIMOEN.d:303-308) — the old "30k wrap-up" note = 30k *party*, i.e. 5k/char | 30,000 | 5,000 |
-| Ammon Ossa moss turn-in (`AddexperienceParty(3000)`, BDAMMON.d:269) — Ammon + the moss live in BD0120; NOT re-homed, dead in the remix | 18,000 | 3,000 |
+| Ammon Ossa moss turn-in (`AddexperienceParty(3000)`, BDAMMON.d:269) — Ammon + the moss live in BD0120; NOT re-homed, dead in the remix. **Unit-corrected 2026-07-12: AddexperienceParty divides → 3,000 party ≈ 500/char, not 3,000/char** | 3,000 | 500 |
 | **Guaranteed total (kill path)** | **147,980** | **24,663** |
+
+*(Unit note 2026-07-12 — user verified in-game that `AddexperienceParty` DIVIDES among
+the party. The per-char total above was computed as party÷6 and therefore survives the
+correction: 18,747 + 417 + 5,000 + 500 ≈ 24,663 ✓. The option-(c) 24,000/char reward
+stays correctly sized; its DELIVERY was re-encoded the same day to
+`AddXPObject(Player1..6,24000)` because the original single `AddexperienceParty(24000)`
+paid only ~4,000/char.)*
 
 Optional extras excluded from the headline: the Sarevok-chest skeleton trap (Normal
 +6,050 party ≈ +1,008/char — the chest FLAG is re-homed to the jailbreak, its trap XP is

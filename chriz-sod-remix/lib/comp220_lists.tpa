@@ -214,6 +214,7 @@ OUTER_SPRINT $csr_mvo_bd1200(~BDSKGR08@3365@1636~) ~4~
 OUTER_SET csr_movn_bd1200 = 11
 
 // XP ledger: garrison total 175495, kept 42075, cut 133420.
-// Compensation = cut * 0.8 (party of 6, AddexperienceParty grants per member)
-// = 133420 * 0.8 / 6 rounded to 100 -> 17800 per character, on the lich clean-kill.
-OUTER_SET csr_xp_chunk = 17800
+// Compensation = cut * 0.8 as ONE party-total AddexperienceParty (the engine
+// divides it, matching kill-XP economics; ~17783/char at a party of 6)
+// = 133420 * 0.8 rounded to 100 -> 106700, on the lich clean-kill.
+OUTER_SET csr_xp_chunk = 106700

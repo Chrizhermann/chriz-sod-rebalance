@@ -64,15 +64,17 @@ them spawn and pop.
 
 ---
 
-## PT-3 — Safana/Coran tavern cutscene fires with Safana already in the party — **FIXED 2026-07-12 (v0.5.1, issue #1)**
+## PT-3 — Safana/Coran tavern cutscene fires with Safana already in the party — **FIXED 2026-07-12 (source in v0.6.0, issue #1)**
 
 **Fix applied 2026-07-12:** `skip0110.baf` now writes **2** (BD0110's vanilla terminal
-value) instead of 1. Deployed as a direct override byte-patch to the installed
-`BD0110.bcs` on BOTH dev and live (single byte `1`→`2` at offset 265, inside our
-EXTEND_TOP block only; the two vanilla spawn blocks that legitimately write 1 are
-untouched; byte-verified; pre-fix backups in `<game>/chriz-sod-remix-hotfix-backups/`).
-Inert for the user's current save (the scene already fired there and set the global
-to 2 itself), correct for all future visits.
+value) instead of 1. The source fix shipped with the v0.6.0 pass; the dev install got
+it recompiled via the v0.6.1 re-stack (verified: first block of the installed
+`BD0110.bcs` writes 2). The LIVE install was fixed the same day via a direct override
+byte-patch of `BD0110.bcs` (single byte `1`→`2` at offset 265, inside our EXTEND_TOP
+block only; the two vanilla spawn blocks that legitimately write 1 are untouched;
+byte-verified; pre-fix backup in `<game>/chriz-sod-remix-hotfix-backups/`). Inert for
+the user's current save (the scene already fired there and set the global to 2
+itself), correct for all future visits.
 
 **Skip-block family audit (the ⚠ below) — COMPLETE, only skip0110 was affected.**
 Verified two ways: (1) all `Global(...)` trigger conditions on the 12 spawn-guard
@@ -174,6 +176,15 @@ when I tested, did we already remove it?"
 
 **Fix:** comp200 must patch the mirrored CUTSKIP block the same way (remove the wall
 actions; THREE→FIVE_ROUNDS if present), count-guarded.
+
+**✅ SHIPPED (2026-07-12, comp245 v0.6.0, verified on dev):** new component (not a
+comp200 edit — avoids mid-stack churn) removes the mirror's wall
+(`AmbientActivate("force_wall",TRUE)` + `CloseDoor("force_wall_door")`; the mirror
+carries NO bdwforce cast and NO VFX — structurally different from BDCUT14, caught by
+the count-guards on the first attempt) and bumps the mirror's parley timer to
+FIVE_ROUNDS (it DID set the vanilla THREE_ROUNDS — the suspicion above confirmed).
+The wall-down restore pair stays as harmless no-ops. Systemic audit of the other
+CUTSKIP mirrors vs our patched cutscenes = still open (issue #5 follow-up).
 
 **⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
 any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at

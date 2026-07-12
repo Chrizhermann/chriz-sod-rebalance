@@ -4,11 +4,14 @@
 // Playtest 5 (2026-07-10): "didn't really get much XP for killing Korlasz or
 // reporting to Liia." Verified ledger (docs/design/chapters/01-prologue.md §7):
 // the skipped dungeon carried ~24,663/char guaranteed (garrison 18,747 +
-// Korlasz 417 + Imoen wrap-up 5,000 + Ammon moss 3,000); the remix jailbreak
-// returns ~1,600/char in kills and no quest award. User decision 2026-07-10:
-// option (c) 24,000/char, delivered as Liia's quest reward on the return beat
-// (locked delivery rule 2026-07-06: ONE collected AddexperienceParty after
-// Korlasz's defeat, never dripped).
+// Korlasz 417 + Imoen wrap-up 5,000 + Ammon moss ~500 — the per-char TOTAL
+// holds under corrected engine units); the remix jailbreak returns
+// ~1,600/char in kills and no quest award. User decision 2026-07-10:
+// option (c) 24,000/char, delivered as Liia's quest reward on the return
+// beat (locked delivery rule 2026-07-06: ONE collected award after Korlasz's
+// defeat, never dripped). Delivery is AddXPObject(Player1..6,24000) —
+// AddexperienceParty DIVIDES among the party (user-verified in-game
+// 2026-07-12), so the original single-action form paid only ~4,000/char.
 //
 // The award rides csrcele state 2 ("korlret2") — comp180's return-beat closer,
 // reached only while CSR_KORL_RET=1 and flipping it to 2, so it cannot repeat.

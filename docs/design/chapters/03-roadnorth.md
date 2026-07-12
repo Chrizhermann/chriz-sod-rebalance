@@ -43,7 +43,8 @@ compiled, both SPLs byte-verified). Final numbers from the generator
   beetles 8, displacers 6, small spiders 8, troll thin-out 11 → 21 trolls stay in
   four real clusters) · BD2000 8 cuts / 1,015 (beetles, worgs, stray wight — siege
   pickets + scripted battle untouched) · BD2010 27 cuts / 585 (warren core of 8
-  stays). Total 29,025 → **+3,900/char** once-block on `bd_plot > 292` (both battle
+  stays). Total 29,025 → **+23,200 party-total** once-block (≈3,870/char at 6;
+  unit-corrected 2026-07-12 — AddexperienceParty divides) on `bd_plot > 292` (both battle
   branches set 293; the existing 6000/3000 in BD2000.baf turned out to be the
   Dorn-release / missing-patrol SIDE quests — census correction — so the chunk
   rides its own block).
@@ -51,7 +52,8 @@ compiled, both SPLs byte-verified). Final numbers from the generator
   displacers 7, dire wolves 5, small spiders 5 — wyverns/phase-spiders/hill giant
   stay) · BD7230 6 ambusher cuts / 2,750 · BD7220 removed by unreachability,
   ledgered 14,810 (11,810 hostiles + 3,000 quest shadow). Total 28,395 →
-  **+3,800/char** once-block on the Neothelid kill.
+  **+22,700 party-total** once-block (≈3,780/char at 6; unit-corrected 2026-07-12)
+  on the Neothelid kill.
 - **comp250 (Morentherene tiers):** Hard+ = +56 HP (168) / AC −5 (−6) / THAC0 +4
   (−2) / saves +3 / MR +20 (35); Insane stacks +62 HP (230) / AC −3 (−9) / THAC0
   +2 (−4) / saves +2 / MR +15 (50) / +1 APR (4). Applied asleep via the vanilla
@@ -117,7 +119,11 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
    neutral crusader army flips hostile in the bridge battle, Khalid leads the
    defenders) — treatment? Early user note (2026-07-10 Discord post): rework wanted,
    "at least the explosive barrels part"; user filed it under "later," so it may
-   split out of round 1.
+   split out of round 1. **PARTIALLY EXECUTED 2026-07-12: the battle itself is
+   KEPT ("the expansion is called SIEGE of Dragonspear"), and comp255 shipped the
+   barrel fast-fix (BDKEGX 25 hp/0% fire → 120 hp/75% fire — random mephit splash
+   no longer a no-counter loss).** The elemental/portal sequence rework ("why not
+   just throw a fireball?") stays open — see 04-coalition.md later-flesh list.
 4. Temple relocation target + the cave/temple/Ziatar/Neothelid recomposition (item 15
    fight shape).
 5. Morentherene treatment (item 16 optional component; she guards the cave→temple

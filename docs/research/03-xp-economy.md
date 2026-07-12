@@ -11,26 +11,43 @@ Spawn context cross-referenced with `sod_areas_dataset.csv`.
 
 ---
 
-## 0. Two XP mechanics (verified) — the unit problem
+## 0. Two XP mechanics — the unit problem — **CORRECTED 2026-07-12**
 
-The economy mixes two distribution rules. **Getting the unit right is essential** or quest XP
-looks 6× bigger than it is.
+> **⚠ CORRECTION (2026-07-12, user-verified IN-GAME on this install):**
+> `C:Eval('AddexperienceParty(1000)')` adds 1,000 to the **whole party** —
+> the action **DIVIDES** its amount among living party members, it does NOT
+> grant the full amount to each. The original table below (struck) followed a
+> forum/wiki reading that was wrong; IESDP's wording ("distributed among all
+> current living party members") was right. Consequence: **every
+> `AddexperienceParty(X)` figure in this doc labeled "X per char" is really
+> `X / partysize` per char** — the per-script/per-dialog rankings and relative
+> shapes below remain valid (same ordering), but the quest-vs-kill split and
+> any absolute per-char total derived from AddexperienceParty rows are 6×
+> overstated for those rows. `AddXPObject(PlayerN,X)` rows are unaffected
+> (truly X per char — this is why SoD's chapter awards loop Player1–6).
+> The mod's shipped compensations were re-encoded the same day
+> (kill-XP chunks = party-total `cut × 0.8` via one AddexperienceParty, which
+> the engine divides exactly like the kill XP it replaces; the comp175 quest
+> reward = `AddXPObject(Player1..6, 24000)`).
 
-| Mechanic | Engine rule | Per-character value |
+| Mechanic | Engine rule (corrected) | Per-character value |
 |---|---|---|
 | **Kill XP** (CRE field `0x14`) | **Divided** among living party members ("as equally as possible, remainder to first members") | `K / partysize` (≈ `K/6` full party; **solo gets full `K`**) |
-| **`AddexperienceParty(X)`** | Full `X` to **each** member (quest XP "remains the same" regardless of party size) | `X` per char |
+| **`AddexperienceParty(X)`** | **Divided** among living party members (user-verified in-game 2026-07-12) | `X / partysize` (≈ `X/6` full party) |
 | **`AddXPObject(PlayerN,X)`** | Full `X` to that one object | `X` per char (SoD always loops Player1–6 with same `X`) |
 
-Sources: [Fandom Experience Tables](https://baldursgate.fandom.com/wiki/Experience_Tables),
-[Beamdog forums — XP distribution](https://forums.beamdog.com/discussion/32466/experience-points-how-does-the-game-distribute-them).
+Sources: user in-game console test 2026-07-12 (authoritative for this install);
+[IESDP AddexperienceParty](https://gibberlings3.github.io/iesdp/scripting/actions/bg2actions.htm).
+(The originally cited Fandom/Beamdog-forum per-member reading was wrong.)
 
-**All XP numbers below are per-character.** This is the right unit for progression (it drives
-level). To convert a kill to party-total, multiply by ~6; to convert a quest award to
-party-total, also multiply by ~6 (each of 6 gets the full amount). Net: in per-character terms,
-**a quest `AddexperienceParty(X)` is worth `~6×` a kill whose CRE field reads `X`.** A troll
-(CRE field 1400) is worth only ~233/char; the Coldhearth Lich quest (22000) is worth 22000/char
-— roughly **95 trolls**.
+**Unit warning for the rest of this doc:** sections below were written under the old
+per-member assumption. Kill-XP figures and `AddXPObject` figures are correct;
+**`AddexperienceParty` figures labeled "/char" must be read as party totals.** In
+corrected per-character terms a quest `AddexperienceParty(X)` is worth exactly a kill
+whose CRE field reads `X` — the two currencies are the same. The Coldhearth Lich quest
+(22000) is worth ~3,667/char at a full party — roughly 16 trolls, not 95. The planned
+per-chapter ledger recount (wave1-05 prep task) re-attributes every award under these
+units.
 
 **Verified CRE offsets (IESDP, not guessed):** kill-XP `0x14` (dword) · creature's own XP/power
 `0x18` (dword) · current HP `0x24` (word) · max HP `0x26` (word). All SoD CREs are `V1.0`.
