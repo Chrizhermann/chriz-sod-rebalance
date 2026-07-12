@@ -104,3 +104,48 @@ BD1000) · `skip2000` (Khalid+Dorn/BD2000) · `skip2100` (Neera/BD2100) · `skip
 **Save impact:** the user's live save already ran the scene. The fix prevents it going
 forward; the already-consumed beat needs no repair beyond what he did (dismiss/
 re-recruit), since the var is now 2 = resolved.
+
+---
+
+## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **OPEN (Skie pass not built)**
+
+**User:** "Skie is still there talking about me talking to her daddy and everything. I
+thought we wanted to skip all that and just have her there joinable? Maybe talk about
+her father's dead for a moment and keep it short for now." + (side note) "She will
+have inherited all her father's stuff. But we can plan more for that later (nothing
+special or huge impact)."
+
+Screenshot: palace Skie, *"I heard you talking to Daddy and the other dukes about
+Caelar. Are you going to Dragonspear?"* → 3 vanilla replies.
+
+**Not a regression — nothing built yet.** The Skie recruitment rework is **researched
+only** (`docs/research/15-skie-recruitment.md`); no component ships it. So palace Skie
+is 100% vanilla. Two problems visible at once:
+1. The intended "strip her SoD plot, make her a plain talk-to-join recruit" (wishlist,
+   locked 2026-07-10) simply isn't implemented.
+2. Now that comp185 killed Entar, her "talking to Daddy" line is an active **lore
+   contradiction** — she references a living father who is dead in our timeline.
+
+**Surface (research/15, verified):** palace Skie = `BDSKIE.dlg` **state 8** (first
+meeting), opened by `BDCUT04A.baf:12 StartDialogNoSet(Player1)`; ×5 council spawn
+variants `BD0102.baf:33,82,133,184,235`; she leaves via `BDSKIE.baf:63-79`
+(`EscapeBD0102`→`DestroySelf`). The **only two `JoinParty()` calls** in the whole
+file are **state 6** (first recruit) and **state 2** (re-recruit), gated to camp
+areas BD0120/BD0130. Her BG1 soundset is already on `BDSKIE.CRE`. comp190 already
+killed the night-visit subtree (states 16-32); comp185 removed Entar.
+
+**Minimal-viable shape (user: "keep it short for now"):** re-point the palace
+first-meeting away from the vanilla council plot to a SHORT exchange — one or two
+lines acknowledging Entar's death — ending in the talk-to-join handshake (route to
+the state-6 `JoinParty()` path, or a trimmed equivalent that works in the palace, not
+just camp). Suppress the rest of her SoD plot surface (Bence intro 33-36,
+`bd_skie_plot` subquest 37-62, BD4000 static actor) per the locked scope. New dialogue
+lines will be presented for word-level sign-off (BG1/BG2 register).
+
+**Deferred side note (log only):** Skie inherits Entar's estate/possessions — flavor,
+possibly a gear grant on recruit. "Plan more for that later, nothing huge." Do NOT
+scope into the minimal pass.
+
+**Dependency flag for parallel work:** PT-2 (despawning hall NPCs) and PT-4 both touch
+the BD0102 palace staging and possibly Skie's spawn/despawn — coordinate or serialize
+these two; they are the likeliest worktree collision.
