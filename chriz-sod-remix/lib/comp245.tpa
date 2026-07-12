@@ -1,0 +1,31 @@
+// ============================================================
+// Component 245 body — comp200's wall removal, skip-proof
+// ============================================================
+// Playtest finding (issue #5, 2026-07-11): CUTSKIP.bcs is SoD's
+// cutscene-skip rig and carries a mirrored end-state for the
+// BDCUT14 bridge cutscene. Skipping the cutscene bypassed
+// comp200's patch: the mirror re-raised the wall of force and set
+// the vanilla THREE_ROUNDS parley timer. This applies comp200's
+// two decisions to the mirror.
+//
+// Verified against the compiled CUTSKIP (2026-07-12, action-block
+// decode): the mirror's wall is ONLY the force_wall ambient
+// ANIMATION toggle + the hidden force_wall_door close — the skip
+// rig carries no bdwforce cast and no SPFLESHS VFX (the [3780.1110]
+// hit in the file is a camera pan, kept). The wall-DOWN restore
+// pair later in CUTSKIP (AmbientActivate FALSE + OpenDoor) stays —
+// with the wall never up, both are harmless no-ops.
+
+COPY_EXISTING ~cutskip.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~AmbientActivate("force_wall",TRUE)~ csr_cnt_amb
+    COUNT_REGEXP_INSTANCES ~CloseDoor("force_wall_door")~ csr_cnt_door
+    COUNT_REGEXP_INSTANCES ~SetGlobalTimer("bd_caelar_timer","bd1000",THREE_ROUNDS)~ csr_cnt_timer
+    PATCH_IF NOT ((csr_cnt_amb = 1) AND (csr_cnt_door = 1) AND (csr_cnt_timer = 1)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp245: CUTSKIP.bcs does not match the verified BDCUT14 mirror (ambient x%csr_cnt_amb%, door x%csr_cnt_door%, timer x%csr_cnt_timer%; expected 1 each). Another mod rewrote the skip rig - resolve manually.~
+    END
+    REPLACE_TEXTUALLY ~AmbientActivate("force_wall",TRUE)~ ~~
+    REPLACE_TEXTUALLY ~CloseDoor("force_wall_door")~ ~~
+    REPLACE_TEXTUALLY ~SetGlobalTimer("bd_caelar_timer","bd1000",THREE_ROUNDS)~ ~SetGlobalTimer("bd_caelar_timer","bd1000",FIVE_ROUNDS)~
+  END
+BUT_ONLY

@@ -96,11 +96,12 @@ BUT_ONLY
 // ------------------------------------------------------------
 // User rule: the cut garrison's kill-XP comes back as ONE chunk,
 // all at once, on the lich (docs/design/chapters/02-coastway.md
-// §3). AddexperienceParty grants the amount to EACH party member;
-// kill XP is split — so the chunk is cut-XP * 0.8 / 6 (party-of-6
-// ledger baseline), computed by the list generator. It rides the
-// existing clean-kill award block (phylactery destroyed ->
-// Dead("BDCOLDH") -> 22000), the dungeon's single closure point.
+// §3). AddexperienceParty DIVIDES among living party members
+// (user-verified in-game 2026-07-12) — exactly like the kill XP
+// it replaces — so the chunk is the PARTY-TOTAL cut * 0.8,
+// computed by the list generator. It rides the existing clean-kill
+// award block (phylactery destroyed -> Dead("BDCOLDH") -> 22000),
+// the dungeon's single closure point.
 COPY_EXISTING ~bd1200.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     COUNT_REGEXP_INSTANCES ~AddexperienceParty(22000)~ csr_cnt_xp

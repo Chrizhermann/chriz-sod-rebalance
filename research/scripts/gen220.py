@@ -115,10 +115,15 @@ for area, keeps, moves in (('bd1100',KEEP_1100,{}), ('bd1200',KEEP_1200,MOVES_12
         lines.append("")
 
 gt = sum(t[0] for t in totals.values()); gk = sum(t[1] for t in totals.values()); gc = sum(t[2] for t in totals.values())
-chunk = int(round(gc*0.8/6.0/100.0))*100
+# AddexperienceParty DIVIDES among living party members (user-verified in-game
+# 2026-07-12; IESDP was right, the earlier per-member assumption was wrong).
+# So the chunk is the PARTY-TOTAL 80% of the cut — the engine then splits it
+# exactly like the kill XP it replaces (party-size-faithful, solo included).
+chunk = int(round(gc*0.8/100.0))*100
 lines.append(f"// XP ledger: garrison total {gt}, kept {gk}, cut {gc}.")
-lines.append(f"// Compensation = cut * 0.8 (party of 6, AddexperienceParty grants per member)")
-lines.append(f"// = {gc} * 0.8 / 6 rounded to 100 -> {chunk} per character, on the lich clean-kill.")
+lines.append(f"// Compensation = cut * 0.8 as ONE party-total AddexperienceParty (the engine")
+lines.append(f"// divides it, matching kill-XP economics; ~{int(round(chunk/6.0))}/char at a party of 6)")
+lines.append(f"// = {gc} * 0.8 rounded to 100 -> {chunk}, on the lich clean-kill.")
 lines.append(f"OUTER_SET csr_xp_chunk = {chunk}")
 lines.append("")
 open(OUT,'w',newline='\n').write('\n'.join(lines))

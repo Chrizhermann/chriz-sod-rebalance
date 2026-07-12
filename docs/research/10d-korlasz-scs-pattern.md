@@ -26,7 +26,7 @@
 ### Dialog — `BDKORLAS.dlg` (decompiled; scratchpad `BDKORLAS.d`)
 - **State 4** (first talk, BD0130): three replies, each sets `bd_plot=25` → **state 5** → `SetGlobal("BD_Korlasz_Fight","BD0130",1)` + `Enemy()` → fight on.
 - **State 7** (condition `Global("bd_plot","global",25)` — reached via the HP<71% re-talk): “I… am defeated” → **state 8** “I and my followers surrender”, with player choice:
-  - **Accept** (2 flavors) → `bd_plot=26` → states 10/11: `bd_plot=27`, **`BD_KORLASZ_SURRENDER=1`**, **`AddexperienceParty(1000)`** (per IESDP: 1,000 XP to *each* party member), journal 259573 QUEST_DONE.
+  - **Accept** (2 flavors) → `bd_plot=26` → states 10/11: `bd_plot=27`, **`BD_KORLASZ_SURRENDER=1`**, **`AddexperienceParty(1000)`** (1,000 XP **divided among the party** — ~167/char at 6; corrected 2026-07-12, user-verified in-game), journal 259573 QUEST_DONE.
   - **Refuse** (“only one way you leave this place”) → state 9 → `Enemy()` → fight to the death.
 - State 0: post-surrender idle line. States 12–16: BD0120 “Imoen at the door” renege variant (`bd_child_plot`,`bdimoedo`). States 17–23: post-surrender chatter. States 24–27: BD0116 endgame → `BD_SPAWN_KORLASZ=2` + `Enemy()`.
 
@@ -108,7 +108,8 @@ Installed AI components (WeiDU.log:296–344): #5900 init, **#6000 Smarter gener
 - DW#RND03 was meant to become potions/loot via SCS's random-treasure machinery; on creatures it appears to be an unconverted leftover token (inert), so on this install killing Korlasz drops effectively nothing.
 - BDSPY.spl applies opcode 268 (removed by BDUNSPY op321); its exact function was not identified - inferred to be a pre-dialog protection/marker used by SoD talk-first bosses.
 - dw#mgNNN/dw#prNNN numbering is deterministic per install but not stable across SCS versions/component selections (SSL-generated), so hardcoding dw#mg13 is safe only for a tail-mod on this specific install; distributable mods must detect at install time.
-- AddexperienceParty(1000) grants 1000 XP to each party member (per IESDP action semantics).
+- AddexperienceParty(1000) grants 1000 XP divided among the party (~167/char at 6) —
+  unit-corrected 2026-07-12 (user-verified in-game; the per-member reading was wrong).
 - The C0PR#* op326 effects on many CREs come from Artisan's Kitpack / AK_MULTICLASS_PROFS_FIX global patches (C0 prefix matches, and ArtisansKitpack backups contain BDKORLAS.CRE); they are class-conditional apply-lists with no impact on her as a mage boss.
 - SCS deliberately excludes BD* (SoD) content from its AI components - inferred from consistent evidence (all BD mages keep BD scripts, non-BD CREs in the same areas are patched), not from reading SCS source (the stratagems mod folder was deleted from the game dir).
 

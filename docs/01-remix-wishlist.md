@@ -253,6 +253,23 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   wants her back in the party before the end ("after a recovery"). Touches the
   comp160 design (Imoen stays in BG studying); log only, decide later.
 
+## Additions (2026-07-12, coalition-camp quick-win approval — user's own wording)
+- **Basement-reveal party dispel: REMOVED (decided + shipped, comp280).** "Why does
+  your party get dispelled? It's 1000% anti fun. We have to remove it."
+- **Boareskyr barrels: durable now (decided + shipped, comp255)** as the fast fix;
+  the **elemental/portal sequence still needs its big rework**: "They want to blow up
+  the bridge with ready-made barrels and they for some reason need a portal to the
+  fire plane...? Why not just throw a fireball?" The fight until then is fine.
+- **Set-piece battles are KEEPS:** coalition camp, castle assault, Avernus, and the
+  Boareskyr scripted battle stay mostly vanilla — "The expansion is called SIEGE of
+  dragonspear, so battles like that actually make some sense"; "hell seems fun for
+  most people."
+- **Later flesh-out list opened** (details in design/chapters/04-coalition.md):
+  does Bloodbark Grove need to exist at all; the Underground River is "SO LOADED on
+  such a small space" (why drow?); "the whole druid situation"; albino wyverns "WAY
+  WAY WAY too strong" via ABILITIES not stats; Kanaglym quest-enemy counts also
+  bloated (quest-staged, needs script surgery).
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.

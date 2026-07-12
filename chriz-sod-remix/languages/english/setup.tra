@@ -18,10 +18,16 @@
 @200 = ~SoD remix: Coast Way Crossing - fewer spiders, fairer bridge fight~
 @210 = ~SoD remix: Coast Way Forest removed - Rasaad recruits at the camp~
 @220 = ~SoD remix: the dwarven dig site re-garrisoned~
+@245 = ~SoD remix: Coast Way bridge - the wall stays gone when the cutscene is skipped~
 
 @230 = ~SoD remix: the road north - fewer, cleaner enemy camps~
 @240 = ~SoD remix: Forest of Wyrms - bugbear cave removed, temple behind the dragon~
 @250 = ~SoD remix: Morentherene - a real dragon on Hard and Insane~
+@255 = ~SoD remix: Boareskyr battle - durable explosive barrels~
+
+@260 = ~SoD remix: coalition camp arc - fewer, cleaner enemies on the scouting maps~
+@270 = ~SoD remix: Kanaglym - fewer undead~
+@280 = ~SoD remix: no party dispel at the basement reveal~
 
 @900 = ~Collected in the camp chest at the Coast Way crossing~
 @901 = ~Removed along with the content~
@@ -31,5 +37,6 @@
 @1001 = ~Chapter pass - prologue~
 @1002 = ~Chapter pass - Coast Way~
 @1003 = ~Chapter pass - the road north~
+@1004 = ~Chapter pass - the coalition camp~
 
 @9000 = ~Siege of Dragonspear content not found in this game (loose BD* files required - SoD, or EET with SoD imported).~
