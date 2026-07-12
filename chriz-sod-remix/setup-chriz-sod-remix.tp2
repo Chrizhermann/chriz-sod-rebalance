@@ -238,11 +238,13 @@ EXTEND_TOP ~bdbaldur.bcs~ ~chriz-sod-remix/baf/skipdrm.baf~
 // productionized per docs/research/10b: land in BD0120 invisibly so
 // all bootstrap (EET K#, gear/gold, BDKEYR, Imoen strip, companion
 // wiring incl. mod hooks) still runs, patch only BDINTRO's staging +
-// walk-in blocks. The exit is an EXTEND_BOTTOM block on bd0120.bcs
-// (bd_plot=50 -> bdcut00z) rather than a direct cutscene chain: the
-// EET fresh-start Bhaalspawn-ability grants only fire on a BD0120
-// area pass with bd_plot!=0, which a direct chain never yields.
-// Details: lib/comp140.tpa.
+// walk-in blocks. The exit is an EXTEND_BOTTOM arm+launch pair on
+// bd0120.bcs (bd_plot=50 -> bdcut00z) rather than a direct cutscene
+// chain: the EET fresh-start Bhaalspawn-ability grants only fire on
+// a BD0120 area pass with bd_plot!=0, which a direct chain never
+// yields. Two vanilla non-Continue() blocks (BD_Init_CAI, BD_Restin)
+// get a Continue() so the post-skip passes reach the exit without
+// eating ~1s each on black (PT-1, issue #4). Details: lib/comp140.tpa.
 
 BEGIN @140 DESIGNATED 140 GROUP @1001 LABEL ~csr_skip_dungeon~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
