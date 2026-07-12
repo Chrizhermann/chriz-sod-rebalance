@@ -101,6 +101,36 @@ value we write:
 BD1000) · `skip2000` (Khalid+Dorn/BD2000) · `skip2100` (Neera/BD2100) · `skip7000`
 (Rasaad/BD7000) · `skip7100` (Jaheira/BD7100).
 
+### PT-3b — generalization (user, 2026-07-11): NO kept companion may trigger their city scene
+
+User: "we also have to make sure Rasaad, Garrick, Coran, Dyna, Minsc (anyone else?) do
+not trigger their scenes/conversations in the city, if you already have them in the
+party." This is broader than the skip blocks, because **comp110 keeps ALL 28 BG1
+companions in the party** (removes the palace strip) — so any SoD scene that assumes a
+companion is NOT in the party can now misfire. Two mechanisms:
+
+- **(A) SoD-joinable recruitment sites — the 9 skip blocks.** Safana proved the guard
+  value can arm the recruit/breakup scene. Covers Viconia, Minsc, Dynaheir, Safana,
+  Rasaad, Edwin, Baeloth, Khalid, Dorn, Neera, Jaheira.
+- **(B) BG1-cameo scenes co-starring a kept companion.** e.g. the BD0110 tavern scene
+  is Safana **and Coran** (BDCORAN) — Coran is not a SoD recruit, he's the co-star, so
+  fixing (A) for Safana fixes his appearance too.
+
+Named-NPC → site map (verified from the .baf corpus, 2026-07-11):
+| NPC | Site(s) | Mechanism | Note |
+|---|---|---|---|
+| Safana | BD0110 `safana7` | A (skip0110) | **CONFIRMED broken** — writes 1 = arms scene |
+| Coran | BD0110 (BDCORAN, with Safana) | B | co-star of the Safana scene; fixed by the Safana fix |
+| Rasaad | BD0111 `rasaad7`:43 + BD7000 | A (skip0111, skip7000) | two sites |
+| Minsc | BD0108 `MINSC7_`:66 (+ appears BD0101:238) | A (skip0108) | check the BD0101 appearance too |
+| Dynaheir | BD0108 (with Minsc) | A (skip0108) | shares the Minsc site |
+| **Garrick** | **none found** | — | BG1-only, no recruitment site in the corpus — **verify he has ANY SoD scene**; if a party-banter cameo exists, confirm it tolerates in-party |
+
+"anyone else?" — the audit must sweep the full kept-companion list, not just the named
+five. Priority order: the 9 skip-block sites first (A), then a grep for any other
+`StartDialog*`/`StartCutScene*` in a city area gated on a kept companion without an
+`InParty`/`BeenInParty` guard (B).
+
 **Save impact:** the user's live save already ran the scene. The fix prevents it going
 forward; the already-consumed beat needs no repair beyond what he did (dismiss/
 re-recruit), since the var is now 2 = resolved.
