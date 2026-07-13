@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.1~
+VERSION ~v0.6.2~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -32,6 +32,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   200 Coast Way Crossing: west spiders cut, no magic wall,
 //       5-round bridge fight
 //   210 Coast Way Forest (BD7000) removed; Rasaad at the camp
+//   215 XP ledger: BD7000 removal compensated (requires 210)
 //   220 the dwarven dig site re-garrisoned (+XP chunk on the lich)
 //   245 comp200's wall removal made skip-proof (CUTSKIP mirror;
 //       requires 200)
@@ -472,6 +473,20 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7000.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp210.tpa~
+
+// ============================================================
+// 215 — XP ledger: Coast Way Forest removal compensated
+// ============================================================
+// Closes the ledger hole left by comp210: BD7000 carried 20,665
+// party XP (placed orc warband 3,165 + Tsolak kill 8,500 + the
+// 9,000 stake/resolution quest). 80% returns as one party-total
+// chunk (16,500) on the guaranteed chapter-9 transition award.
+
+BEGIN @215 DESIGNATED 215 GROUP @1002 LABEL ~csr_bd7000_xp_ledger~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7100.bcs~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~Component 215 (the BD7000 XP ledger) compensates content removed by component 210 (Coast Way Forest removed) - install 210 first.~
+
+INCLUDE ~chriz-sod-remix/lib/comp215.tpa~
 
 // ============================================================
 // 220 — the dwarven dig site re-garrisoned

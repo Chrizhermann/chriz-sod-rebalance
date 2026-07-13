@@ -204,8 +204,18 @@ comp200 edit — avoids mid-stack churn) removes the mirror's wall
 carries NO bdwforce cast and NO VFX — structurally different from BDCUT14, caught by
 the count-guards on the first attempt) and bumps the mirror's parley timer to
 FIVE_ROUNDS (it DID set the vanilla THREE_ROUNDS — the suspicion above confirmed).
-The wall-down restore pair stays as harmless no-ops. Systemic audit of the other
-CUTSKIP mirrors vs our patched cutscenes = still open (issue #5 follow-up).
+The wall-down restore pair stays as harmless no-ops.
+
+**✅ SYSTEMIC AUDIT COMPLETE (2026-07-13, from CUTSKIP.baf source — now in the
+corpus):** the rig is one big `Switch("BD_CUTSCENE_BREAKABLE","GLOBAL")` whose
+RESPONSE #N mirrors the cutscene that set BREAKABLE=N. Findings: BDCUT10 and
+BDCUT28 (comp120's hooded-man scenes) NEVER set BD_CUTSCENE_BREAKABLE → not
+skippable → no mirror, no bypass; the only BDIRENI reference in the rig is a
+`DestroySelf()` cleanup (no-op when he doesn't exist). BDCUT14 → mirror #14
+(fixed, comp245); BDCUT45A/B → mirrors #61/#62 (fixed, comp280). Our own custom
+cutscenes never opt into breakability → unskippable by construction. **Zero
+remaining CUTSKIP exposures.** House rule stands for FUTURE cutscene edits: check
+whether the scene sets BD_CUTSCENE_BREAKABLE, and if so patch its mirror response.
 
 **⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
 any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at

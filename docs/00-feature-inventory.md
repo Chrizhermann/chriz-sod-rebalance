@@ -52,6 +52,7 @@ logged under the v0.3.0 label just before the repo bumped to v0.4.0).
 |---|---------|--------------|------|
 | 200 | Coast Way Crossing: fewer spiders, fairer bridge | Cuts the 8-spider west installation (appearance dword zeroed) + the Spiders02 re-arm point + the two west web traps (east group stays); drops the bridge wall-of-force from BDCUT14; interrupt timer THREE_ROUNDS → FIVE_ROUNDS. | pred `bd1000.are` |
 | 210 | Coast Way Forest removed; Rasaad recruits at camp | Zeroes BD7000's static WMP visibility flag (the only reveal) → area permanently unreachable; Rasaad's spawn state machine cloned to the BD1000 Fist camp `[640.3690]`; the Skie sub-quest dies with the area. Save-baked worldmaps keep BD7000 visible on in-flight saves (harmless). **Prereq for 900/901.** | pred `bd1000.are` + `bd7000.are` |
+| 215 | XP ledger: BD7000 removal compensated | Closes comp210's ledger hole: BD7000 carried 20,665 party XP (orc warband 3,165 + Tsolak kill 8,500 + the 9,000 stake quest — one award; the ×12 in BDISABEL.dlg is reply-branch duplication). **16,500 party-total** (80%; ≈2,750/char at 6) riding the guaranteed chapter-9 transition award in BD7100.bcs. Shipped 2026-07-13. | REQUIRE 210; pred `bd7100.bcs` |
 | 220 | Dwarven dig site re-garrisoned | Cuts ~169 pre-placed undead (BD1100 69 / BD1200 100 + 11 moves) to a designed shape: 1 horde room, an honor guard (2 mummies + 2 elite skeleton warriors) standing on the vacated "Drowned in Blood" coords before the lich (2026-07-10 polish — literal replacement per the locked placement rule), pushover groups, umber-hulks-only dig monsters; no-save cheese hard-banned; 80% of cut kill-XP returns as one **106,700 party-total** chunk on the lich clean-kill (engine-divided like the kill XP it replaces; ≈17,800/char at 6 — unit-corrected 2026-07-12). Quest wiring (Semahl, Deepvein, Coldhearth) preserved. | pred `bd1100.are` + `bd1200.are` |
 | 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. **Installed on dev.** | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 | 901 | Treasure from removed content: **remove** | Alternative flavor: loot gone with the content; pure preference marker (`csr_treasure_removed=1`) future passes read via MOD_IS_INSTALLED. **Built but not installed** (900 chosen; the two are exclusive). | SUBCOMPONENT @902 (XOR 900); REQUIRE 210 |
@@ -77,7 +78,7 @@ Late addition to the Coast Way group (playtest issue #5): | 245 | Coast Way brid
 
 ### Meta
 
-`chriz-sod-remix` v0.6.0, tail-installable WeiDU mod; 26 component declarations in 5
+`chriz-sod-remix` v0.6.2, tail-installable WeiDU mod; 30 component declarations in 5
 install GROUPs; all in-place patches with loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
 scope.
