@@ -410,7 +410,7 @@ Also locked in playtest 3 (2026-07-07):
   should just *start the conversation* herself — and generally, **the more Beamdog
   cutscenes removed, the better**.
 
-## 12. Skie: minimal talk-to-join at the palace — BUILT (component 197), lines PENDING SIGN-OFF
+## 12. Skie: minimal talk-to-join at the palace — BUILT + MERGED (component 197), lines SIGNED OFF 2026-07-13
 
 Issue #2 / PT-4 (2026-07-11). User direction: *"skip all that and just have her there
 joinable? Maybe talk about her father's dead for a moment and keep it short for now."*
@@ -443,8 +443,9 @@ Estate/gear grant on recruit deferred (user: "nothing special or huge impact").
   — no second Skie can be recruited. The council-spawn *cameo* itself stays (PT-3b
   audit scope).
 
-**PENDING SIGN-OFF:** the 11 new lines in
-`chriz-sod-remix/languages/english/csr197skie.tra` (word-level, BG1/BG2 register).
+**Lines SIGNED OFF as-is (user, 2026-07-13)** — the 11 lines in
+`chriz-sod-remix/languages/english/csr197skie.tra` are final; the installed strings
+already match, no reinstall needed. Remaining: the in-game verify checklist below.
 
 **In-game verify checklist (next playtest):** palace click after the council reaches
 the new state 91 (not the dream state 0 — trigger-less-state model, research 15 §3);

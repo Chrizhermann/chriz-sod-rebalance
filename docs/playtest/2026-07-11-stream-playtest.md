@@ -263,7 +263,7 @@ re-recruit), since the var is now 2 = resolved.
 
 ---
 
-## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **FIXING (comp197 built + dev-installed 2026-07-12; new lines pending word-level sign-off)**
+## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **FIXED (comp197 merged, PR #8; lines signed off 2026-07-13; in-game verify next playtest)**
 
 > **Build note (2026-07-12, issue #2, branch `fix/issue-2-skie-minimal-join`):**
 > shipped as **component 197** — new short palace exchange (Entar's death → talk-to-

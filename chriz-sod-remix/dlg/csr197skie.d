@@ -3,8 +3,8 @@
 //
 // Design (user, playtest 2026-07-11): "skip all that and just have her there
 // joinable? Maybe talk about her father's dead for a moment and keep it short."
-// All @-strings are NEW dialogue and remain PENDING word-level sign-off
-// (BG1/BG2 register). Everything else reuses vanilla strrefs.
+// All @-strings are NEW dialogue, signed off word-for-word by the user
+// 2026-07-13 (BG1/BG2 register). Everything else reuses vanilla strrefs.
 //
 // Surface map: docs/research/15-skie-recruitment.md + issue #2. Key facts the
 // edits below rely on (all verified against the dev decompile 2026-07-12):

@@ -410,8 +410,8 @@ INCLUDE ~chriz-sod-remix/lib/comp195.tpa~
 // talking to Daddy..." — a lore contradiction once comp185 killed Entar) and
 // she was never actually recruitable: her JoinParty() states are Beamdog cut
 // content gated to areas she never reaches. This re-points the palace first
-// meeting to a SHORT Entar-death exchange ending in talk-to-join (new lines
-// PENDING word-level sign-off), resurrects the cut join machinery, and
+// meeting to a SHORT Entar-death exchange ending in talk-to-join (lines
+// signed off 2026-07-13), resurrects the cut join machinery, and
 // retires her whole SoD plot surface (Boareskyr banter, the BD3000/BD4000/
 // BD4100 missing-Skie subquest, the BD4000 placed actor) with in-party
 // safety guards on every script that targets "bdskie". Issue #2 / PT-4;
