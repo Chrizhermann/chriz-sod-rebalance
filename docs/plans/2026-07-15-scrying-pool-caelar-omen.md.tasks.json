@@ -17,7 +17,7 @@
     {
       "id": "docs",
       "title": "Integrate research and update decision documentation",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["component-225"]
     },
     {
@@ -33,5 +33,5 @@
       "depends_on": ["docs", "dev-install"]
     }
   ],
-  "lastUpdated": "2026-07-15T21:37:39+09:00"
+  "lastUpdated": "2026-07-15T22:16:27+09:00"
 }
