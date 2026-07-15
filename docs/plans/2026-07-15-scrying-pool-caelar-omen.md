@@ -252,4 +252,3 @@ Use narrow commits and never stage `AGENTS.md`.
 
 Report that PR #9 should be closed as incorporated and issue #6 should be closed by the future
 publication PR. Do not merge/close/push external state unless the user asks for publication.
-
