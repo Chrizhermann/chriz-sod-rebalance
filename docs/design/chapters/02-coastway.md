@@ -187,9 +187,11 @@ The gathered data (kept for the record):
 5. (Optional, separate room: the N-chamber vacated coords, x2950–3396/y894–1200 via
    Door04, could host a pushover pocket.)
 
-Mechanics: revise KEEP_1200 + MOVES_1200 in `scratchpad/gen220.py`, regenerate
-`lib/comp220_lists.tpa`, reinstall 220, re-verify. (220 sits mid-tail on dev; WeiDU
-auto-redoes the later components 200/900/185/190/195 — all ours, acceptable on dev.)
+**Historical implementation note (non-operational):** the original 2026-07-10 working
+note called for revising `gen220.py`, regenerating `comp220_lists.tpa`, and reinstalling
+220. The project is now strictly append-only: never uninstall or reinstall component 220
+or any other WeiDU.log entry. Any future dig-site correction must ship as a new tail
+component that patches the current installed state, followed by fresh verification.
 
 ## 3b. Dig-site scrying pool — LOCKED + SHIPPED (component 225, 2026-07-15)
 

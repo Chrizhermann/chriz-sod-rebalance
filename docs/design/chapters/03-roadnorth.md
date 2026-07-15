@@ -78,7 +78,8 @@ Implementation findings (ground truth, 2026-07-11):
   so with the actors never spawning it is permanently inert — zero script edits.
 - **Ogre-camp correction:** the BD7100 ogres are NOT the 12k BDMURS dialogue quest
   (BDMURS lives in BDCUT42) — kept anyway as a real coherent fight, one word flips
-  it (regenerate + reinstall).
+  it. If that correction is ever wanted, ship it as a new tail component; do not
+  regenerate and reinstall the existing component.
 - Spawn points in BD7100/7200 (deactivate-on-load, re-arm post-clear) left as-is —
   ambient respawn is not part of this pass.
 

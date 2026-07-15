@@ -203,9 +203,10 @@ From the dev game directory:
   --language 0 --use-lang en_US --no-exit-pause
 ```
 
-Do not uninstall or reinstall any existing WeiDU.log entry. If 225 itself needs iteration in
-this development session, use its reversible uninstall+install pair in one invocation only;
-never touch components 120 or 220.
+**Execution record:** the command above was used once to append component 225 at the tail.
+Do not uninstall or reinstall components 120, 220, 225, or any other existing WeiDU.log
+entry. Any future correction to this feature must ship as a new tail component and verify
+against the current installed state.
 
 **Step 4: Run semantic verification**
 

@@ -75,7 +75,9 @@ COPY_EXISTING ~BD1000.are~ ~override~
   BUT_ONLY
 ```
 Driven by a small table of (area → class). Leave the `BDNOREST` day=100 town areas and the
-empty-table areas untouched (they never random-spawn). Fully reversible via `--uninstall`.
+empty-table areas untouched (they never random-spawn). WeiDU backups preserve the original
+bytes, but `--uninstall` is not an operational recovery path for this append-only stack:
+any correction ships as a new tail component without uninstalling or reinstalling old entries.
 Applies to a live save on next area load.
 ```
 ```

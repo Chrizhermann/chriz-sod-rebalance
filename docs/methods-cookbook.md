@@ -119,9 +119,10 @@ their vanilla AI already references — often shipped itemless.
   END — a locked TLK makes that flush die with `Sys_error("...dialog.tlk: Permission
   denied")` AFTER every component already printed "Installed". Result: dialogs point at
   strrefs the TLK never got → in-game "Invalid: NNNNNN". Symptom to recognize instantly:
-  `dialog.tlk` mtime older than the install; entry count unchanged. Fix = close game,
-  `--force-install-list` the affected components again (re-flushes the TLK). Verify by
-  re-decompiling one patched `.dlg` and confirming the SAY strref resolves to real text.
+  `dialog.tlk` mtime older than the install; entry count unchanged. Fix = close the game,
+  then add a new tail recovery component that safely reapplies the affected dialog/string
+  patches; never force-install or reinstall an existing WeiDU.log entry. Verify by
+  decompiling one repaired `.dlg` and confirming the SAY strref resolves to real text.
 
 ## 15. Live-save semantics (recurring caveat)
 `.are` rest-header/actor changes: only areas NOT yet visited on that save. `.bcs`/`.dlg`:

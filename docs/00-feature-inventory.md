@@ -158,7 +158,7 @@ no reveal dispel, durable barrels, skip-proof wall) → **260/270/280/255/245**.
 | Feature | Waiting on / unblocked by |
 |---------|---------------------------|
 | Prologue XP ledger chunk (Korlasz jailbreak compensation) | Numbers + sign-off — proposal in 01-prologue.md §7 (queued next session) |
-| Dig-site polish: 6× BDDEAD01 cluster + honor-guard walkability (Coast Way §3a) | Execution data prepped 2026-07-10; regen `comp220_lists.tpa`, reinstall 220 |
+| Dig-site polish: 6× BDDEAD01 cluster + honor-guard walkability (Coast Way §3a) | Historical prep from 2026-07-10; any further correction ships as a new tail component — never reinstall 220 |
 | Place non-party companions as SoD pickups (item 1 step 2) | A later companion pass (optional placement + a little dialogue) |
 | Scripted travel-ambush rework / URE degut (item 8, wave1-04) | Its own pass; gut BD0060/0063/0064/0066 arenas (story vignettes URE6-10 stay) |
 | Per-area zero-ambush designations (wave1-01) | Each chapter's trash/zero-list decision |
