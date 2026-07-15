@@ -41,11 +41,23 @@ class Container:
     trap_removal: int
     trapped: int
     key_resref: str
+    script_resref: str
 
     @property
     def usable(self) -> bool:
         """Known quest-item sources must be ordinary, unlocked containers."""
         return self.lock_difficulty == 0 and self.flags == 0 and not self.key_resref
+
+    @property
+    def unguarded_baseline(self) -> bool:
+        """The rehome target must not gain an item behind a lock, trap, or script."""
+        return (
+            self.lock_difficulty == 0
+            and self.flags == 0
+            and self.trapped == 0
+            and not self.key_resref
+            and not self.script_resref
+        )
 
 
 @dataclass(frozen=True)
@@ -99,6 +111,7 @@ def parse_area(path: Path) -> tuple[list[Container], list[Actor], set[str]]:
                 struct.unpack_from("<H", data, base + 0x2E)[0],
                 struct.unpack_from("<H", data, base + 0x30)[0],
                 cstring(data[base + 0x78 : base + 0x80]).upper(),
+                cstring(data[base + 0x48 : base + 0x50]).upper(),
             )
         )
 
@@ -169,6 +182,29 @@ def decompile(game_dir: Path) -> tuple[str, str]:
             baf_path.read_text(encoding="utf-8", errors="replace"),
             d_path.read_text(encoding="utf-8", errors="replace"),
         )
+
+
+def unique_container_offset(data: bytes, name: str, x: int, y: int) -> int:
+    """Locate one container record in an ARE image or fail the binary audit."""
+    if len(data) < 0x9C or data[:4] != b"AREA":
+        raise VerificationError("component 225 backup is not a valid ARE resource")
+    offset = struct.unpack_from("<I", data, 0x70)[0]
+    count = struct.unpack_from("<H", data, 0x74)[0]
+    section(data, offset, count, 0xC0, "backup container")
+    matches = []
+    for i in range(count):
+        base = offset + i * 0xC0
+        if (
+            cstring(data[base : base + 32]).casefold() == name.casefold()
+            and struct.unpack_from("<H", data, base + 0x20)[0] == x
+            and struct.unpack_from("<H", data, base + 0x22)[0] == y
+        ):
+            matches.append(base)
+    if len(matches) != 1:
+        raise VerificationError(
+            f"expected one {name}@{x},{y} in component 225 backup, found {len(matches)}"
+        )
+    return matches[0]
 
 
 def baf_blocks(text: str) -> list[tuple[str, str]]:
@@ -264,7 +300,8 @@ class Reporter:
 
 def verify(game_dir: Path) -> int:
     report = Reporter()
-    containers, actors, live_scripts = parse_area(game_dir / "override" / "BD1200.ARE")
+    area_path = game_dir / "override" / "BD1200.ARE"
+    containers, actors, live_scripts = parse_area(area_path)
     baf, dialog = decompile(game_dir)
 
     held = [
@@ -315,6 +352,163 @@ def verify(game_dir: Path) -> int:
     target_items = targets[0].items if len(targets) == 1 else ()
     report.check("Sarcophagus01 retains BDMISC55", target_items.count("BDMISC55") == 1)
     report.check("Sarcophagus01 gains one BDMISC59", target_items.count("BDMISC59") == 1)
+    target_baseline_ok = len(targets) == 1 and targets[0].unguarded_baseline
+    target_baseline_detail = "target unavailable"
+    if len(targets) == 1:
+        target = targets[0]
+        target_baseline_detail = (
+            f"lock {target.lock_difficulty}, flags {target.flags:#x}, "
+            f"trapped {target.trapped}, key {target.key_resref or '<blank>'}, "
+            f"script {target.script_resref or '<blank>'}"
+        )
+    report.check(
+        "Sarcophagus01 rehome target keeps its unlocked, untrapped, unscripted baseline",
+        target_baseline_ok,
+        target_baseline_detail,
+    )
+
+    backup_path = (
+        game_dir
+        / "weidu_external"
+        / "backup"
+        / "chriz-sod-remix"
+        / "225"
+        / "bd1200.are"
+    )
+    backup_available = backup_path.is_file()
+    report.check(
+        "component 225 BD1200 backup is available for byte-level audit",
+        backup_available,
+        str(backup_path),
+    )
+    if backup_available:
+        installed_area = area_path.read_bytes()
+        original_area = backup_path.read_bytes()
+        original_target = unique_container_offset(
+            original_area, "Sarcophagus01", 2414, 1736
+        )
+        installed_target = unique_container_offset(
+            installed_area, "Sarcophagus01", 2414, 1736
+        )
+        report.check(
+            "Sarcophagus01 container record stays at its original offset",
+            installed_target == original_target,
+            f"backup {original_target:#x}, installed {installed_target:#x}",
+        )
+
+        original_item_count = struct.unpack_from("<H", original_area, 0x76)[0]
+        original_item_offset = struct.unpack_from("<I", original_area, 0x78)[0]
+        installed_item_count = struct.unpack_from("<H", installed_area, 0x76)[0]
+        installed_item_offset = struct.unpack_from("<I", installed_area, 0x78)[0]
+        section(
+            original_area,
+            original_item_offset,
+            original_item_count,
+            0x14,
+            "backup item",
+        )
+        section(
+            installed_area,
+            installed_item_offset,
+            installed_item_count,
+            0x14,
+            "installed relocated item",
+        )
+        original_target_first = struct.unpack_from(
+            "<I", original_area, original_target + 0x40
+        )[0]
+        original_target_count = struct.unpack_from(
+            "<I", original_area, original_target + 0x44
+        )[0]
+        installed_target_first = struct.unpack_from(
+            "<I", installed_area, installed_target + 0x40
+        )[0]
+        installed_target_count = struct.unpack_from(
+            "<I", installed_area, installed_target + 0x44
+        )[0]
+
+        masked_original = bytearray(original_area)
+        masked_installed = bytearray(installed_area[: len(original_area)])
+        original_prefix_available = len(installed_area) >= len(original_area)
+        if original_prefix_available and installed_target == original_target:
+            for start, end in (
+                (0x76, 0x7C),
+                (original_target + 0x40, original_target + 0x48),
+            ):
+                masked_original[start:end] = b"\0" * (end - start)
+                masked_installed[start:end] = b"\0" * (end - start)
+        original_prefix_ok = (
+            original_prefix_available
+            and installed_target == original_target
+            and masked_installed == masked_original
+        )
+        report.check(
+            "original-length BD1200 bytes change only in the item header and target run",
+            original_prefix_ok,
+        )
+
+        item_shape_ok = (
+            installed_item_count == original_item_count + 2
+            and installed_item_offset == len(original_area)
+            and installed_target_first == original_item_count
+            and installed_target_count == 2
+            and len(installed_area)
+            == len(original_area) + installed_item_count * 0x14
+        )
+        report.check(
+            "relocated item table grows by two at EOF and only the target owns the new run",
+            item_shape_ok,
+            (
+                f"count {original_item_count}->{installed_item_count}, "
+                f"offset {installed_item_offset:#x}/{len(original_area):#x}, "
+                f"target {installed_target_first}+{installed_target_count}"
+            ),
+        )
+
+        original_items = original_area[
+            original_item_offset : original_item_offset + original_item_count * 0x14
+        ]
+        relocated_original_items = installed_area[
+            installed_item_offset : installed_item_offset + original_item_count * 0x14
+        ]
+        report.check(
+            "original item array is copied byte-exact at the relocated offset",
+            relocated_original_items == original_items,
+        )
+
+        original_scepter_start = (
+            original_item_offset + original_target_first * 0x14
+        )
+        installed_scepter_start = (
+            installed_item_offset + installed_target_first * 0x14
+        )
+        original_scepter = original_area[
+            original_scepter_start : original_scepter_start + 0x14
+        ]
+        installed_scepter = installed_area[
+            installed_scepter_start : installed_scepter_start + 0x14
+        ]
+        scepter_ok = (
+            original_target_count == 1
+            and len(original_scepter) == 0x14
+            and installed_scepter == original_scepter
+        )
+        report.check(
+            "target Silver Scepter record is copied byte-exact into the new run",
+            scepter_ok,
+        )
+
+        essence_start = installed_scepter_start + 0x14
+        essence = installed_area[essence_start : essence_start + 0x14]
+        essence_ok = (
+            len(essence) == 0x14
+            and cstring(essence[:8]).upper() == "BDMISC59"
+            and essence[8:] == b"\0" * 12
+        )
+        report.check(
+            "new Essence record has BDMISC59 and zero expiration, charges, and flags",
+            essence_ok,
+        )
 
     wights = [actor for actor in actors if actor.resref == "BDWIGHDD" and (actor.x, actor.y) == (2474, 1951)]
     report.check(
@@ -469,6 +663,36 @@ def verify(game_dir: Path) -> int:
     xp_matches = re.findall(r'AddXPObject\s*\(\s*(Player[1-6])\s*,\s*(\d+)\s*\)', baf, re.IGNORECASE)
     xp_ok = len(xp_matches) == 6 and {name.upper() for name, amount in xp_matches if amount == "1000"} == {f"PLAYER{i}" for i in range(1, 7)}
     report.check("Player1..6 each receive exactly 1,000 XP", xp_ok, f"found {xp_matches}")
+    ordered_xp = list(
+        re.finditer(
+            r'AddXPObject\s*\(\s*Player[1-6]\s*,\s*1000\s*\)',
+            success_actions,
+            re.IGNORECASE,
+        )
+    )
+    take_before_xp = re.search(
+        r'TakePartyItemNum\s*\(\s*"BDMISC59"\s*,\s*2\s*\)',
+        success_actions,
+        re.IGNORECASE,
+    )
+    first_cosmetic = re.search(
+        r'\b(?:CreateVisualEffect|SmallWait|AmbientActivate|DisplayString\w*)\s*\(',
+        success_actions,
+        re.IGNORECASE,
+    )
+    xp_order_ok = (
+        len(ordered_xp) == 6
+        and take_before_xp is not None
+        and first_cosmetic is not None
+        and all(
+            take_before_xp.end() < award.start() < first_cosmetic.start()
+            for award in ordered_xp
+        )
+    )
+    report.check(
+        "all six XP awards follow Essence consumption before any cosmetic or wait",
+        xp_order_ok,
+    )
 
     launcher = re.search(r'ActionOverride\s*\(\s*"BDSCRY"\s*,\s*StartDialog', baf, re.IGNORECASE)
     report.check("no BDSCRY dialog launcher", launcher is None)

@@ -9,6 +9,51 @@
 // live launcher or picker reply.
 
 // ------------------------------------------------------------
+// 225.0 — read-only ARE preflight before any text-bearing operation
+// ------------------------------------------------------------
+// WeiDU can leave newly allocated TLK strings behind when a later patch fails,
+// even though resource files roll back. Reject the two unsafe ARE shapes before
+// csr225om.tra is loaded; the full mutation pass repeats these guards below.
+COPY_EXISTING ~bd1200.are~ ~override~
+  READ_SHORT 0x76 csr225_pre_item_count
+  PATCH_IF (csr225_pre_item_count > 65533) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #225: BD1200.are item count %csr225_pre_item_count% cannot grow by two without overflowing the 16-bit item-count field; aborting before any ARE bytes are changed.~
+  END
+
+  READ_LONG  0x70 csr225_pre_container_off
+  READ_SHORT 0x74 csr225_pre_container_count
+  SET csr225_pre_target = 0 - 1
+  SET csr225_pre_target_hits = 0
+  FOR (csr225_pre_i = 0; csr225_pre_i < csr225_pre_container_count; csr225_pre_i += 1) BEGIN
+    SET csr225_pre_base = csr225_pre_container_off + csr225_pre_i * 0xc0
+    READ_ASCII csr225_pre_base csr225_pre_name (32) NULL
+    READ_SHORT (csr225_pre_base + 0x20) csr225_pre_x
+    READ_SHORT (csr225_pre_base + 0x22) csr225_pre_y
+    PATCH_IF ((~%csr225_pre_name%~ STRING_EQUAL_CASE ~Sarcophagus01~) AND
+              (csr225_pre_x = 2414) AND (csr225_pre_y = 1736)) BEGIN
+      SET csr225_pre_target = csr225_pre_base
+      SET csr225_pre_target_hits += 1
+    END
+  END
+  PATCH_IF (csr225_pre_target_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #225: expected exactly one Sarcophagus01 at (2414,1736) in BD1200.are, found %csr225_pre_target_hits%; aborting before any text or ARE bytes are changed.~
+  END
+
+  READ_SHORT (csr225_pre_target + 0x26) csr225_pre_lock
+  READ_LONG  (csr225_pre_target + 0x28) csr225_pre_flags
+  READ_SHORT (csr225_pre_target + 0x30) csr225_pre_trapped
+  READ_ASCII (csr225_pre_target + 0x48) csr225_pre_script (8) NULL
+  READ_ASCII (csr225_pre_target + 0x78) csr225_pre_key (8) NULL
+  PATCH_IF NOT ((csr225_pre_lock = 0) AND
+                (csr225_pre_flags = 0) AND
+                (csr225_pre_trapped = 0) AND
+                (~%csr225_pre_script%~ STRING_EQUAL_CASE ~~) AND
+                (~%csr225_pre_key%~ STRING_EQUAL_CASE ~~)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #225: the Sarcophagus01 rehome target at (2414,1736) is not the verified accessible baseline (lock %csr225_pre_lock%, flags %csr225_pre_flags%, trapped %csr225_pre_trapped%, script "%csr225_pre_script%", key "%csr225_pre_key%"); aborting before any text or ARE bytes are changed.~
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
 // 225.1 — neutralize the vanilla one-vial and dialog-launch routes
 // ------------------------------------------------------------
 // Every edit is count-guarded against the component-120-patched script.
@@ -60,6 +105,12 @@ COPY_EXISTING ~bd1200.are~ ~override~
   READ_SHORT 0x76 csr225_item_count
   READ_LONG  0x78 csr225_item_off
 
+  // The header count is a 16-bit word. Refuse to wrap it when this component
+  // appends the target scepter copy plus the rehomed Essence.
+  PATCH_IF (csr225_item_count > 65533) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #225: BD1200.are item count %csr225_item_count% cannot grow by two without overflowing the 16-bit item-count field; aborting before any ARE bytes are changed.~
+  END
+
   SET csr225_target = 0 - 1
   SET csr225_target_hits = 0
   SET csr225_scepters = 0
@@ -103,6 +154,18 @@ COPY_EXISTING ~bd1200.are~ ~override~
   END
   PATCH_IF (csr225_target_count != 1) BEGIN
     PATCH_FAIL ~chriz-sod-remix #225: Sarcophagus01 at (2414,1736) has %csr225_target_count% items; expected its single Silver Scepter before rebuilding the run.~
+  END
+  READ_SHORT (csr225_target + 0x26) csr225_target_lock
+  READ_LONG  (csr225_target + 0x28) csr225_target_flags
+  READ_SHORT (csr225_target + 0x30) csr225_target_trapped
+  READ_ASCII (csr225_target + 0x48) csr225_target_script (8) NULL
+  READ_ASCII (csr225_target + 0x78) csr225_target_key (8) NULL
+  PATCH_IF NOT ((csr225_target_lock = 0) AND
+                (csr225_target_flags = 0) AND
+                (csr225_target_trapped = 0) AND
+                (~%csr225_target_script%~ STRING_EQUAL_CASE ~~) AND
+                (~%csr225_target_key%~ STRING_EQUAL_CASE ~~)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #225: the Sarcophagus01 rehome target at (2414,1736) is not the verified accessible baseline (lock %csr225_target_lock%, flags %csr225_target_flags%, trapped %csr225_target_trapped%, script "%csr225_target_script%", key "%csr225_target_key%"); aborting before any ARE bytes are changed.~
   END
   READ_ASCII (csr225_item_off + csr225_target_first * 0x14) csr225_target_item (8) NULL
   PATCH_IF NOT (~%csr225_target_item%~ STRING_EQUAL_CASE ~BDMISC55~) BEGIN
