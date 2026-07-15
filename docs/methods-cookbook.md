@@ -129,3 +129,17 @@ their vanilla AI already references — often shipped itemless.
 next area (re)load; scenes whose gate global already advanced never re-fire (usually the
 desired behavior). `.cre`: newly spawned instances only; joined companions are baked into
 the save.
+
+## 16. Check CUTSKIP on every cutscene edit (proved the hard way: PT-5 → comp245)
+SoD's skip rig (`CUTSKIP.bcs`, corpus'd as `research/data/sod_baf/CUTSKIP.baf`) carries a
+hand-mirrored END-STATE REPLAY for every skippable cutscene, selected by
+`Switch("BD_CUTSCENE_BREAKABLE")` → `RESPONSE #N`. Patching the cutscene does NOT patch
+the mirror — a skipped scene replays vanilla (PT-5: the comp200 wall came back). Rule:
+whenever a `BDCUT*`/`BDDDD*` scene is patched, find its N (the scene's own
+`SetGlobal("BD_CUTSCENE_BREAKABLE",...,N)`; N ≠ scene number in general — BDCUT45A→61,
+BDCUT02→68; no setter = not skippable = no mirror) and give `RESPONSE #N` the same
+count-guarded edits (reference: comp245). If the component kills the LAUNCH instead, the
+mirror is dead code — leave it. If it kills the scene from inside, strip the arming
+actions too or the area script strands on "cutskip" (comp140 seam 1). Full mirror map +
+verdicts for every shipped component: research/21. BG1:EE/BG2:EE have sibling rigs
+(`CUTSKIP1`/`CUTSKIP2`) — same rule applies in `chriz-bg-rebalance`.

@@ -216,11 +216,17 @@ skippable → no mirror, no bypass; the only BDIRENI reference in the rig is a
 cutscenes never opt into breakability → unskippable by construction. **Zero
 remaining CUTSKIP exposures.** House rule stands for FUTURE cutscene edits: check
 whether the scene sets BD_CUTSCENE_BREAKABLE, and if so patch its mirror response.
+Full mapping and per-component verdicts are in
+`docs/research/21-cutskip-mirror-map.md`. The ending rework must explicitly audit
+response #51 (trial entry), #52 (Belhifet staging), and #67 (BDCUT65 → BD6100).
+The corpus now includes CUTSKIP + CUTMOVE*, and the reusable rule lives in
+methods-cookbook §16.
 
 **⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
 any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at
 minimum: comp120 (BDCUT10 hooded-man launch, BDCUT28 ending) and every future
-cutscene edit. Add "check CUTSKIP" to the house checklist.
+cutscene edit. Add "check CUTSKIP" to the house checklist. *(Resolved as above;
+rule lives in cookbook §16 + the bg-modding skill gotchas.)*
 
 **User-save repair (live):** if the wall is still up on the save, console:
 `C:Eval('OpenDoor("force_wall_door")')` and `C:Eval('AmbientActivate("force_wall",FALSE)')`
