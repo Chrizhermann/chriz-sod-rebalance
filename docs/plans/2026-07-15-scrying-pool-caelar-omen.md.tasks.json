@@ -5,7 +5,7 @@
     {
       "id": "verify-red",
       "title": "Add and run the failing semantic verifier",
-      "status": "pending",
+      "status": "completed",
       "depends_on": []
     },
     {
@@ -32,5 +32,6 @@
       "status": "pending",
       "depends_on": ["docs", "dev-install"]
     }
-  ]
+  ],
+  "lastUpdated": "2026-07-15T20:40:14+09:00"
 }
