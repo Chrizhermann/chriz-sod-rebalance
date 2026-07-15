@@ -229,7 +229,7 @@ skipped the bridge cutscene (validates the diagnosis).
 
 ---
 
-## PT-6 — Dig site: missing "essence" vial + the scrying-pool visions — **CONFIRMED comp220 regression + content pass**
+## PT-6 — Dig site: missing "essence" vial + the scrying-pool visions — **FIXED (comp225 built + dev-installed; runtime next SoD playthrough)**
 
 **User:** "There seems to be one vial missing in the dwarven dungeon 2nd level.
 Something 'essence', with which you can have a vision in the pool there (which is
@@ -238,38 +238,25 @@ sure they have Imoen learning magic, which needs to go or be replaced, a vision 
 Caelar, which needs to be rewritten at some point I think, and a vision of the Hooded
 Man/Irenicus, I believe."
 
-**Mechanics (verified, `BDODSCRY.baf` = the pool object, BD1200 @~1325,2095):**
-3× Silver Scepter `BDMISC55` slot into the pedestal (3rd gives +3,000 party XP) →
-pool activates; `BDMISC59` **Essence of Clarity** clears the cloudy pool
-(`BD_SDDD12_CLOUDY` 1→0) → visions. Vision cutscenes: `BDSCRY01` (VFX bed),
-**`BDSCRY02` = the Imoen vision** (IMOEN2 + bdliia casting practice — exactly what
-the user remembers), `BDSCRY03` (+ the Caelar / hooded-man visions in the chain —
-launcher tail still to trace).
+**Corrected old mechanics:** the third scepter grants 3,000 party-total XP and,
+because `BD_SDDD12_CLOUDY` defaults to 0, the first old vision was free. Each
+choice then set the pool cloudy; the two vanilla Essences paid for visions two
+and three. Component 220 cut the wight carrying one vial, but after component 120
+removed the Hooded-Man option the free activation plus the Shelf vial still reached
+both surviving visions. The missing source was real; it did not gate either one.
 
-**The missing vial — comp220 regression CONFIRMED:** `BDMISC59` has exactly two
-world sources: the `Shelf` container @(1146,1230) in BD1200 (intact — containers
-untouched) and **`BDWIGHDD`, which is in comp220's cut list** (droppable copy).
-Sources went 2→1. Scepters are safe (3 containers, all intact).
+**Locked replacement + fix (component 225):** no Imoen vision (she may be in the
+party), picker, Hooded-Man vision, or original Caelar cinematic. All three scepters
+plus both Essences now produce one exact abstract text-only Caelar omen. `BDWIGHDD`
+stays cut; its vial is re-homed to `Sarcophagus01`. The pool preserves the 3,000
+party-total reward, grants Player1–6 1,000 XP once, and becomes permanently dormant.
+`BDSCRY01`–`07` remain only as unreachable resources; `BDSCRY.DLG` stays structurally
+intact for Aura compatibility.
 
-**Fix options (user to pick):** (a) re-home the wight's vial into an existing
-container near its coords; (b) restore that single BDWIGHDD (one schedule flip);
-(c) fold into the vision-content pass below and decide there.
-
-**Vision-content pass (new scope, user-directed):**
-- Imoen-learning-magic vision: "needs to go or be replaced." Nuance to flag: with
-  comp160 (Imoen stays in BG studying), the vision is arguably MORE canon than in
-  vanilla — user still wants it gone/replaced; his call on the replacement.
-- Caelar vision: rewrite "at some point" — park with the item-13 arc treatment.
-- Hooded-man/Irenicus vision: must GO — **verify whether comp120's five-appearance
-  removal already covers the pool vision** (its known sites: BD0103, BDCUT10/11,
-  BDCUT28 — the pool vision may or may not be among the five).
-- User verdict on the whole gimmick: "crazy stupid, why is this here" — a full-cut
-  of the pool sequence (scepters/essence/visions) is on the table as the simple
-  option; NOT decided.
-
-**Save impact:** the user's live save already ran the scene. The fix prevents it going
-forward; the already-consumed beat needs no repair beyond what he did (dismiss/
-re-recruit), since the var is now 2 = resolved.
+**Verification:** v0.6.3 sandbox green, tail-installed on dev EET, semantic verifier
+`SUMMARY: 0 failure(s)`. Natural pickup, activation, save/reload, and dormant re-click
+remain for the next SoD playthrough. The user is already past SoD, so live v0.5.0 was
+not changed. Full trace: `docs/research/20-scrying-pool.md`.
 
 ---
 

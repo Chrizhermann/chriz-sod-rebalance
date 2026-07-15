@@ -1,11 +1,12 @@
 # Chapter Pass — Coast Way tier (BD1000 / BD1100 / BD1200 / BD7000)
 
-**Status: IMPLEMENTED v0.3.0 (2026-07-08) — installed + verified on dev,
-user playtest pending.** Components: 200 (Crossing field pass), 210 (BD7000
-removal + Rasaad at camp), 220 (dig-site re-garrison + XP chunk), 900/901
-(treasure choice). Inputs: the user's parked notes (`02-coastway-notes.md`) +
-the verified census (`docs/research/12-coastway-census.md`) + two sparring
-rounds (all decisions user-made).
+**Status: IMPLEMENTED through v0.6.3 (2026-07-15) — all selected components
+installed + semantically verified on dev; runtime playtest pending for the latest
+follow-up.** Components: 200 (Crossing field pass), 210 (BD7000 removal + Rasaad
+at camp), 215 (BD7000 XP), 220 (dig-site re-garrison + XP chunk), 225 (single
+Caelar omen), 245 (skip-proof bridge), and 900/901 (treasure choice; 900 selected).
+Inputs: the user's parked notes (`02-coastway-notes.md`) + the verified census
+(`docs/research/12-coastway-census.md`) + user sparring rounds.
 
 Implemented specifics (final numbers): removal mechanism = actor appearance-
 schedule 0 (verified live hour-bits; matched by CRE@x@y, count-guarded);
@@ -189,6 +190,36 @@ The gathered data (kept for the record):
 Mechanics: revise KEEP_1200 + MOVES_1200 in `scratchpad/gen220.py`, regenerate
 `lib/comp220_lists.tpa`, reinstall 220, re-verify. (220 sits mid-tail on dev; WeiDU
 auto-redoes the later components 200/900/185/190/195 — all ours, acceptable on dev.)
+
+## 3b. Dig-site scrying pool — LOCKED + SHIPPED (component 225, 2026-07-15)
+
+The old flow was initially misread. `BD_SDDD12_CLOUDY` defaults to 0, so completing
+the three-scepter pedestal made the **first** old vision free. Each picker choice then
+set the pool cloudy; the two vanilla Essences paid for old visions two and three.
+Component 220's cut of `BDWIGHDD` therefore removed a vial source but did not block
+either post-component-120 vision: Imoen and Caelar needed only the free activation plus
+the surviving Shelf vial. Full corrected trace: `docs/research/20-scrying-pool.md`.
+
+**User decision:** retire the gimmick cleanly. The Imoen vision is incoherent when
+component 160 can put her in the party, the Hooded-Man option was already gone, and the
+original Caelar army cinematic is overbuilt. All picker choices and every route through
+`BDSCRY01`–`BDSCRY07` are now unreachable. In their place, completing the pedestal and
+bringing **both** Essences produces one exact, abstract, text-only Caelar omen—no dialog
+menu, cutscene mode, area travel, actor creation, or repeat loop.
+
+Component 225 keeps the three scepters and their 3,000 party-total completion reward,
+requires and consumes both Essences atomically, grants 1,000 XP once to each of
+Player1–6, restores the murky ambient state, and makes the pool permanently dormant.
+`BDWIGHDD` stays schedule-zero; its vial is re-homed into the existing unlocked,
+untrapped `Sarcophagus01` at `(2414,1736)` beside that container's scepter. The original
+`BDSCRY.DLG` structure remains installed for third-party compatibility (including Aura's
+state-0 interjection), but it has no live launcher and all six vanilla picker routes are
+False-gated.
+
+**Verification:** sandbox green; v0.6.3 tail-installed on the dev EET copy; installed-
+resource verifier `SUMMARY: 0 failure(s)`. Natural item pickup, activation, save/reload,
+and dormant re-click remain for the next SoD playthrough. The live v0.5.0 install was
+not changed.
 
 ## 4. Backtracking without EET — [USER NOTE, global lever]
 

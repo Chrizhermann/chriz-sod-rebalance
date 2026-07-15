@@ -1,6 +1,8 @@
 # Dig-site scrying pool: single Caelar omen
 
-**Status:** approved by the user on 2026-07-15.
+**Status:** approved and implemented as component 225 in v0.6.3 on 2026-07-15;
+tail-installed and semantically verified on the dev EET copy (`SUMMARY: 0 failure(s)`).
+Runtime verification remains for the next SoD playthrough; live v0.5.0 is unchanged.
 
 ## Purpose
 

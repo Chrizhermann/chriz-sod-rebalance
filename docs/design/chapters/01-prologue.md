@@ -233,9 +233,10 @@ assassination block has its own once-flag, so a single new arrival block pre-set
   `bd_001_plot=10` parks ALL her vanilla dialog states — her new join states key on our
   own global, so no vanilla state can hijack. If she is NOT taken along, later content
   already works ("she stayed with the Fist" is all it assumes — the poisoning is never
-  required). **Parked for the ch12 pass:** the scrying vision (BDSCRY01 stages Imoen +
-  Liia in BD0118) assumes she's in Baldur's Gate — needs an in-party gate when we get
-  there. (Also corrects 10c: BD0118 is not unused; that vision is its one tenant.)
+  required). **Resolved 2026-07-15 by component 225:** no in-party gate is needed;
+  the Imoen vision, picker, and every old cinematic route are unreachable. `BDSCRY01`
+  remains on disk, so its use of BD0118 is still historically true for vanilla, but
+  BD0118 is no longer a live scrying tenant in the current remix.
 
 ## 6. Celebration — DECIDED; REWRITTEN 2026-07-07 (playtest 3, user direction)
 

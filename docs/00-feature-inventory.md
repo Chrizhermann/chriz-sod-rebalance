@@ -6,21 +6,22 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.4.0, 18
-components), `docs/01-remix-wishlist.md` (scope anchor), `docs/design/wave1/`,
-`docs/design/chapters/01-prologue.md`, `docs/design/chapters/02-coastway.md`.
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.3, 31
+component declarations), `docs/01-remix-wishlist.md` (scope anchor),
+`docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
 ## 1. Implemented (built + installed on the dev install)
 
-Three install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
-Prologue-city pass, **@1002** Coast Way pass. All are in-place patches (COPY_EXISTING /
-EXTEND_TOP / EXTEND_BOTTOM / DECOMPILE_AND_PATCH); nothing is uninstalled. Every
+Five install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
+Prologue-city, **@1002** Coast Way, **@1003** road north, and **@1004** coalition camp.
+All are in-place patches (COPY_EXISTING / EXTEND_TOP / EXTEND_BOTTOM /
+DECOMPILE_AND_PATCH); nothing is uninstalled. Every
 component carries a REQUIRE_PREDICATE that the SoD loose `BD*` content exists, so the
-whole mod no-ops cleanly on a BG2:EE-only install. Dev target has **all 17 selectable
-components installed** (the unchosen XOR-subcomponent 901 excepted; 185/190/195 were
-logged under the v0.3.0 label just before the repo bumped to v0.4.0).
+whole mod no-ops cleanly on a BG2:EE-only install. The dev target has **30 selected
+components installed**; 901 is the unchosen half of the exclusive 900/901 pair. The
+live install remains on v0.5.0 and is not the implementation target.
 
 ### Global levers (Wave 1 — GROUP @1000)
 
@@ -54,6 +55,7 @@ logged under the v0.3.0 label just before the repo bumped to v0.4.0).
 | 210 | Coast Way Forest removed; Rasaad recruits at camp | Zeroes BD7000's static WMP visibility flag (the only reveal) → area permanently unreachable; Rasaad's spawn state machine cloned to the BD1000 Fist camp `[640.3690]`; the Skie sub-quest dies with the area. Save-baked worldmaps keep BD7000 visible on in-flight saves (harmless). **Prereq for 900/901.** | pred `bd1000.are` + `bd7000.are` |
 | 215 | XP ledger: BD7000 removal compensated | Closes comp210's ledger hole: BD7000 carried 20,665 party XP (orc warband 3,165 + Tsolak kill 8,500 + the 9,000 stake quest — one award; the ×12 in BDISABEL.dlg is reply-branch duplication). **16,500 party-total** (80%; ≈2,750/char at 6) riding the guaranteed chapter-9 transition award in BD7100.bcs. Shipped 2026-07-13. | REQUIRE 210; pred `bd7100.bcs` |
 | 220 | Dwarven dig site re-garrisoned | Cuts ~169 pre-placed undead (BD1100 69 / BD1200 100 + 11 moves) to a designed shape: 1 horde room, an honor guard (2 mummies + 2 elite skeleton warriors) standing on the vacated "Drowned in Blood" coords before the lich (2026-07-10 polish — literal replacement per the locked placement rule), pushover groups, umber-hulks-only dig monsters; no-save cheese hard-banned; 80% of cut kill-XP returns as one **106,700 party-total** chunk on the lich clean-kill (engine-divided like the kill XP it replaces; ≈17,800/char at 6 — unit-corrected 2026-07-12). Quest wiring (Semahl, Deepvein, Coldhearth) preserved. | pred `bd1100.are` + `bd1200.are` |
+| 225 | Scrying pool: one text-only Caelar omen | Requires all three Silver Scepters and both Essences; keeps the 3,000 party-total scepter reward, then consumes both Essences atomically, shows the approved abstract Caelar text, grants 1,000 XP once to Player1–6, and leaves the pool permanently dormant. The cut wight stays cut and its vial moves to `Sarcophagus01`; all Imoen/Caelar/Hooded picker routes and cinematics are unreachable while `BDSCRY.DLG` remains structurally intact for Aura compatibility. **Dev-installed and semantically verified; runtime pending.** | REQUIRE 120+220; pred `bd1200.are` + `bdodscry.bcs` + `bdscry.dlg` |
 | 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. **Installed on dev.** | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 | 901 | Treasure from removed content: **remove** | Alternative flavor: loot gone with the content; pure preference marker (`csr_treasure_removed=1`) future passes read via MOD_IS_INSTALLED. **Built but not installed** (900 chosen; the two are exclusive). | SUBCOMPONENT @902 (XOR 900); REQUIRE 210 |
 
@@ -78,8 +80,9 @@ Late addition to the Coast Way group (playtest issue #5): | 245 | Coast Way brid
 
 ### Meta
 
-`chriz-sod-remix` v0.6.2, tail-installable WeiDU mod; 30 component declarations in 5
-install GROUPs; all in-place patches with loud count-guards (PATCH_FAIL on mismatch);
+`chriz-sod-remix` v0.6.3, tail-installable WeiDU mod; 31 component declarations in 5
+install GROUPs; 30 selected components are installed on dev (901 is the exclusive
+unchosen alternative); all in-place patches with loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
 scope.
 
@@ -88,7 +91,8 @@ keep-party → **110**; item 5 / wave1-01 rest-ambush 5× → **100**; item 10 /
 hooded-man (mid) + dreams → **120/130**; 2026-07-06/07 fresh-start grant cut → **145**;
 2026-07-06 Entar stays dead (city) → **185**; 2026-07-09 Skie second-night visit →
 **190**; assassination night + residue → **150/195**; 2026-07-08 Coast Way tiers →
-**200/210/220**; treasure single-choice → **900/901**; 2026-07-10/11 road-north
+**200/210/220**; 2026-07-15 single Caelar omen / all old scrying visions retired →
+**225**; treasure single-choice → **900/901**; 2026-07-10/11 road-north
 quick-wins (trash cut, bugbear-cave removal + temple rewire, dragon tiers) →
 **230/240/250**; 2026-07-12 coalition-camp quick-wins (scouting-map + Kanaglym cuts,
 no reveal dispel, durable barrels, skip-proof wall) → **260/270/280/255/245**.
@@ -128,7 +132,8 @@ no reveal dispel, durable barrels, skip-proof wall) → **260/270/280/255/245**.
   involvement dropped (2026-07-09 direction; supersedes the wishlist's earlier
   "keep some flavor beats" phrasing). Partial: 190 (night visit) + 210 (BD7000 sub-quest)
   shipped; the talk-to-join core is deferred pending recruitment research.
-- **Keep Imoen / drop the poisoning + mage-training plot** — mostly shipped (150/195/160).
+- **Keep Imoen / drop the poisoning + mage-training plot** — shipped across 150/195/160;
+  component 225 removes the remaining remote-training scrying vision.
 - **BG1-only dismissed companions stay where dismissed** (no camp catch-up) — accepted
   step-1 limitation; SoD-native kept companions retain vanilla camp catch-up.
 

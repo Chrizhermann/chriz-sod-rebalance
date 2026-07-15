@@ -270,6 +270,27 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   WAY WAY too strong" via ABILITIES not stats; Kanaglym quest-enemy counts also
   bloated (quest-staged, needs script surgery).
 
+## Decisions locked (2026-07-15, dig-site scrying pool)
+- **One abstract Caelar omen; every old vision removed.** No Imoen vision (she can
+  literally be in the party under component 160), no Hooded-Man vision, no original
+  Caelar cinematic, no picker, teleports, staged army, forced dialogue, or shared
+  cutscene teardown. The sole payoff is this exact non-modal text:
+
+  > The water clears. A woman in argent armor stands before a door beneath the world.
+  > Something waits beyond it—something she knows, or believes she knows. She reaches out.
+  > For an instant, you cannot tell whether she is opening the way or being drawn through.
+  > Then the water clouds.
+
+- **Every quest item is required:** all three Silver Scepters (`BDMISC55`) and both
+  Essences of Clarity (`BDMISC59`). The cut `BDWIGHDD` stays cut; its Essence is
+  re-homed into the existing BD1200 `Sarcophagus01` beside that container's scepter.
+- **The pool is one-use and then permanently dormant.** Its third-scepter reward stays
+  3,000 party-total XP; the removed Imoen and Caelar vision rewards are consolidated
+  into one 1,000-XP award to each of Player1–6.
+- **Implemented as component 225 in v0.6.3** and tail-installed plus semantically
+  verified on the dev EET copy. Runtime verification waits for the next SoD playthrough;
+  the live v0.5.0 install remains unchanged. Full trace: `docs/research/20-scrying-pool.md`.
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.
