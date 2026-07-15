@@ -1,11 +1,17 @@
-# Design 01 — Rest-Ambush Rebalance (PROPOSAL, for sign-off)
+# Design 01 — Rest-Ambush Rebalance (SUPERSEDED HISTORICAL PROPOSAL)
+
+> **Current status:** component 100 shipped the signed-off, chance-only 5× frequency
+> reduction. It remaps day/night percentages and does **not** change maximum creatures,
+> difficulty values, or spawn-table contents. The pack-size, difficulty-sanitizing, and
+> table-curation ideas below were never built; they remain historical design material,
+> not current component behavior or operational instructions.
 
 Depends on verified mechanic `docs/research/01`. Goal: make resting **reliable** (user: even
 50%/rest is "0% fun"), especially in the first dungeon, while keeping rare ambushes as flavor.
 Because the engine rolls **per in-game hour**, we set the listed field to hit a target *felt*
 rate per 8h rest: `c = 100·(1−(1−F)^(1/8))`.
 
-## Three independent levers
+## Historical proposal: three independent levers
 1. **Chance** (`day%`/`night%`) → controls *how often* a rest is interrupted.
 2. **Max creatures** (`+0xA4`) → the hard cap on *how many* spawn. This is the reliable count
    control; `difficulty` (`+0x9A`) feeds `partyLevel×difficulty` but is then capped by max, so
@@ -23,7 +29,7 @@ rate per 8h rest: `c = 100·(1−(1−F)^(1/8))`.
    (missile 90→0, slash/pierce 50→0) — this overlaps the Part-1c creature remix and also helps
    the placed catacomb fights. Recommend (a) for the rest mod + (b) tracked under creature remix.
 
-## Difficulty interaction — user plays Difficulty Level 5 (Insane)
+## Historical difficulty context — Difficulty Level 5 (Insane)
 
 Verified from `baldur.lua`: `Difficulty Level = 5` (top tier), `Suppress Extra Difficulty
 Damage = 0` (enemies also deal bonus damage). On the top difficulties the **Beamdog engine
@@ -34,7 +40,7 @@ sees roughly double. We therefore set baseline `max` LOW so the doubled result i
 skirmish, and lean harder on table curation + resistance softening (the doubled count ALSO hits
 harder via the difficulty damage bonus). Final counts should be eyeballed in-game on Insane.
 
-## Proposed policy by area class
+## Historical proposed policy by area class
 
 | Class | Areas | felt/rest | set `c` (day,night) | baseline `max` | ≈Insane (×2) | set `difficulty` |
 |---|---|---|---|---|---|---|
@@ -43,7 +49,8 @@ harder via the difficulty damage bonus). Final counts should be eyeballed in-gam
 | **Dangerous dungeon** | BD5000/5100/5110 (Underground River) | ~22% | 3, 3 | 2 | ~4 | 2 |
 | **Avernus** | BD4400/4500 | ~15% | 2, 2 | 1 | ~2 | 2 |
 
-Result vs current (felt per 8h rest; counts shown at the player's Insane setting):
+Projected result versus the then-current baseline (felt per 8h rest; counts shown at
+the player's Insane setting):
 
 | Area | now (felt, Insane count) | proposed (felt, Insane count) |
 |---|---|---|
@@ -52,10 +59,10 @@ Result vs current (felt per 8h rest; counts shown at the player's Insane setting
 | BD7100 Troll Claw | 49% / 57%, ~6 | **15% / 15%, ~2** |
 | BD5110 (worst) | 64% / **80%**, ~6 | **22% / 22%, ~4** |
 
-Net: resting becomes reliable; an ambush that *does* fire is ~2 creatures even on Insane,
+Projected result: resting becomes reliable; an ambush that *does* fire is ~2 creatures even on Insane,
 not ~12 — and the rigged resistant skeletons/trolls are curated out of the rest tables.
 
-## Open decision for you
+## Historical open questions (not current component-100 scope)
 - **Prologue leniency:** `c=1/max=1` (≈8%/rest, occasional single straggler) **or fully disable**
   rest-spawns in the catacombs (`max=0`)? You said the first dungeon especially should let you
   rest — I lean to the rare-straggler version for flavor, but 0 is one tweak away.
@@ -63,8 +70,8 @@ not ~12 — and the rigged resistant skeletons/trolls are curated out of the res
 - These numbers assume per-hour (verified). If Beamdog were per-rest, they'd be *even more*
   lenient — which still matches your "reliable resting" goal, so this errs safe either way.
 
-## Implementation sketch (after sign-off; not yet built)
-One WeiDU tail-mod. Per affected `BD*.are`:
+## Historical implementation sketch (not shipped)
+The unbuilt broader proposal would have patched each affected `BD*.are` as follows:
 ```
 COPY_EXISTING ~BD1000.are~ ~override~
   READ_LONG 0xC0 rest
@@ -78,6 +85,5 @@ Driven by a small table of (area → class). Leave the `BDNOREST` day=100 town a
 empty-table areas untouched (they never random-spawn). WeiDU backups preserve the original
 bytes, but `--uninstall` is not an operational recovery path for this append-only stack:
 any correction ships as a new tail component without uninstalling or reinstalling old entries.
-Applies to a live save on next area load.
-```
-```
+Such an ARE patch would apply to an unvisited area on the next load; component 100 itself
+ships only the chance remap described in the banner.

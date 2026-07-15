@@ -4,7 +4,8 @@
 
 **Goal:** Replace the dig-site scrying pool's Imoen/Caelar/Hooded-Man picker and all vision
 cutscenes with one non-modal, abstract Caelar omen that requires and consumes all three Silver
-Scepters and both Essences of Clarity, pays the combined surviving-vision XP once, and then
+Scepters and both Essences of Clarity, pays the combined XP of the two visions that formerly
+survived after component 120 and before component 225, and then
 leaves the pool permanently dormant.
 
 **Architecture:** Add tail component 225 in the Coast Way group, requiring components 120 and

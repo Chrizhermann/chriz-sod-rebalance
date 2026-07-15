@@ -162,13 +162,12 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   Corwin's "crusader poison" goodnight), and BDLIIA 13 re-routes "how fares Imoen?" to
   Liia's existing training-advice line. Covers BDCORWIN/BDELTAN/BDEDWIN/BDLIIA/BDSCHAEL/
   BDDEBUG/BDFIST05. The de Lancie supply-poison quest is explicitly OUT of scope.
-- **Still deferred (flagged, not built):**
-  - **Skie as a clean talk-to-join BG1-style companion (item 12 core):** research done
-    2026-07-10 (docs/research/15-skie-recruitment.md) — Beamdog left a functional
-    JoinParty scaffold in BDSKIE (states 5→6 first-join / 1→2 re-join, camp-gated) and
-    her SoD CRE already carries the BG1 SKIEE## soundset, so the pass is re-gating that
-    scaffold to a sensible meeting spot + neutralizing her remaining plot surface
-    (palace first-meeting 8-15, Bence intro 33-36, bd_skie_plot 37-62, dig 84-90).
+- **Follow-up status:**
+  - **Skie talk-to-join core SHIPPED (component 197):** the signed-off short palace
+    exchange restores Beamdog's `JoinParty()` scaffold, retires her remaining SoD plot
+    surface, and uses the BG1 soundset already on her CRE. It is installed on dev;
+    runtime verification remains pending. Only the optional estate/gear inheritance is
+    deferred.
   - **Full Corwin dialogue rewrite:** user finds SoD-Corwin's writing poor and wants a
     proper redo later; comp195 only removed her assassination residue, not rewrote her.
   - **Epilogue-coupled Entar removal** (BD0035 trial, BDCUT62, BDENTAR.CRE/DLG).
@@ -178,7 +177,7 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   the jailbreak return beat (component 175, installed). Numbers: 01-prologue.md §7.
 - **Dig-site polish executed:** the six "Drowned in Blood" are cut; the honor guard
   **literally replaces them** on their vacated coords; no backfill bodies; the XP
-  returns via the regenerated lich chunk (17,100 → **17,800/char**).
+  returns via the **106,700 party-total** lich chunk (≈17,783/char at six).
 - **Placement principle (locked):** never place creatures where no enemy was placed
   before — vacated original-actor coordinates (walkable by construction) or
   searchmap-verified tiles only. (Born from the honor-guard void-placement bug.)
@@ -192,15 +191,16 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   itself is item 13, a separate later pass.
 - **Skie scope sharpened:** remove EVERYTHING else of her SoD plot involvement; she
   becomes the BG1-style talk-to-join recruit (research/15 has the surface: Beamdog's
-  own JoinParty scaffold + her CRE already carries the BG1 soundset).
+  own JoinParty scaffold + her CRE already carries the BG1 soundset). **Fulfilled by
+  component 197;** only estate/gear remains a possible follow-up.
 - **Later component (backlog): BG1 soundsets for returning BG1 companions in SoD**
   (Khalid, Jaheira, Safana, ...) — one component; per-NPC coverage to research.
 - **Dig-site tiered encounter (later):** BG2-style XP-gated miniboss ("lich-lite") to
   keep the dungeon from boring high-XP parties — mechanism + candidates research
   running (docs/research/17 + 18). Guiding reminder (user): *shorter AND more fun* —
   fun is a co-equal goal of the remix.
-- **Chapter 9 early directions** recorded in docs/design/chapters/03-roadnorth.md
-  (round 1 pending the user's closer look).
+- **Historical Chapter-9 note:** early directions were recorded here before the later
+  quick-win pass shipped as components 230/240/250/255. Broader reworks remain separate.
 
 ## Additions (2026-07-10, Discord announcement post — user's own wording)
 - **Boareskyr bridge-battle rework** is on the list — "at least the explosive barrels

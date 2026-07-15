@@ -38,14 +38,16 @@ arc rewrite, and must leave no reachable path into the retired cinematics.
    > For an instant, you cannot tell whether she is opening the way or being drawn through.
    > Then the water clouds.
 
-5. The pool records completion before awarding anything, pays the combined surviving vision
-   reward once, settles into a dormant state, and cannot be activated again.
+5. The pool records completion before awarding anything, pays once the combined rewards of
+   the two visions that formerly survived after component 120 and before component 225,
+   settles into a dormant state, and cannot be activated again.
 
 ## XP policy
 
 - Preserve the existing +3,000 party-total reward for completing the three-scepter pedestal.
-- The post-component-120 pool has two intended surviving visions, each worth +500 to every
-  player slot. The single omen therefore grants **+1,000 to each of Player1–6** once.
+- Before component 225, component 120 left two vision choices reachable (Imoen and Caelar),
+  each worth +500 to every player slot. The single omen therefore grants **+1,000 to each
+  of Player1–6** once.
 - This combines the removed Imoen and old Caelar vision rewards instead of creating an XP loss
   or an additional ledger entry.
 

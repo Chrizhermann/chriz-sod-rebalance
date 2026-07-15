@@ -1,8 +1,8 @@
 # Chapter Pass — Coast Way tier (BD1000 / BD1100 / BD1200 / BD7000)
 
-**Status: IMPLEMENTED through v0.6.3 (2026-07-15) — all selected components
-installed + semantically verified on dev; runtime playtest pending for the latest
-follow-up.** Components: 200 (Crossing field pass), 210 (BD7000 removal + Rasaad
+**Status: IMPLEMENTED through v0.6.3 (2026-07-15) — all selected components are
+installed on dev; component 225's installed-resource verifier is green, with its runtime
+playtest pending.** Components: 200 (Crossing field pass), 210 (BD7000 removal + Rasaad
 at camp), 215 (BD7000 XP), 220 (dig-site re-garrison + XP chunk), 225 (single
 Caelar omen), 245 (skip-proof bridge), and 900/901 (treasure choice; 900 selected).
 Inputs: the user's parked notes (`02-coastway-notes.md`) + the verified census
@@ -10,8 +10,9 @@ Inputs: the user's parked notes (`02-coastway-notes.md`) + the verified census
 
 Implemented specifics (final numbers): removal mechanism = actor appearance-
 schedule 0 (verified live hour-bits; matched by CRE@x@y, count-guarded);
-garrison 175,495 kill-XP → kept 46,875, cut 128,620 → **chunk 17,100/char**
-on the lich clean-kill (`AddexperienceParty(22000)` + `(17100)`); Rasaad camp
+garrison 175,495 kill-XP → kept 42,075, cut 133,420 → one
+**`AddexperienceParty(106700)` party-total chunk** on the lich clean-kill
+(≈17,783/char at six; the vanilla 22,000 party-total award remains separate); Rasaad camp
 spot [640.3690] (companion row, no Chapter gate — recruitable all campaign,
 guarded by vanilla's own `bd_rasaad_spawn`); BD7000 removal = its static WMP
 visibility flag zeroed (the only reveal mechanism; save-baked worldmaps keep
@@ -19,8 +20,8 @@ it — applies to runs that haven't generated the SoD map yet); treasure chest =
 Container009 (509,3220): SW1H01 + Gemblade + Suncatcher +2 + Boot and a Half
 of Speed + Wand of Paralyzation (5) + Ring of Free Action + SODTRE08 ×2 +
 SODTRE09 (skipped: mundane hunter gear, BDSTAKE, Crusader Tract, DW#*
-randomiser items); honor guard placed on the Door08→Secret02 corridor at
-(3832,1962)/(3905,1983)/(3978,2003)/(4040,2022) facing west; horde-ins landed
+randomiser items); honor guard placed on four vacated Drowned-in-Blood coordinates
+(3533,1643)/(3315,1772)/(3482,1682)/(3471,1632); horde-ins landed
 on vacated cluster-A coordinates (known-walkable); dwarf-barricade beat = the
 quest wight BD_DOD_WIGHT1 + 4 zombies (Deepvein's `Dead("BD_DOD_WIGHT1")`
 dialog trigger verified); Semahl's five BDATKSEM untouched
@@ -122,9 +123,8 @@ are untouched by the garrison cut.
   block (`BD1200.baf:10-18`) gets the chunk added. Caveat (surfaced): that path
   requires the phylactery destroyed first — vanilla's only closure, coherent
   with "finish the dungeon, collect the dungeon's XP"; the deferred lich rework
-  keeps clean-kill as the standard path. Chunk sized at implementation from the
-  summed CRE kill-XP (0x14) of every cut actor — "most" ≈ 80%, exact number when
-  the sums are in.
+  keeps clean-kill as the standard path. Final ledger: 175,495 total, 42,075 kept,
+  133,420 cut; 80% returns as one `AddexperienceParty(106700)` chunk.
 - **Treasure container ("keep" flavor)**: an EXISTING BD1000 container that
   makes sense (camp area preferred) — picked at implementation from the ARE
   container list ("just do something that somewhat makes sense").
@@ -146,11 +146,12 @@ stands ON four of their vacated coords — mummies on the flanks (3533,1643)/(33
 skeleton warriors centre (3482,1682)/(3471,1632) — literal replacement, per the new
 locked rule: **never place creatures where no enemy was placed before** (vacated
 original-actor coords or searchmap-verified tiles only). NO backfill bodies: the
-drowned's 4,800 party XP returns through the ledger chunk instead, regenerated
-**17,100 → 17,800/char** (generator = research/scripts/gen220.py, which now reads the
-pre-220 pristine AREs from the WeiDU backup — regenerating from the post-install
-override would bake in wrong keys). Reinstalled + verified on dev (ARE parse: guard
-live on the four coords, all 10 BDDEAD01 schedule-0; bd1200.bcs carries 22,000+17,800).
+drowned's 4,800 party XP returns through the final 106,700 party-total ledger chunk
+(≈17,783/char at six). The historical generator read the pre-220 AREs from WeiDU's
+backup rather than the already-patched override. The resulting dev resources were
+verified: the guard is live on the four vacated coordinates, all 10 BDDEAD01 actors are
+schedule-zero, and BD1200.BCS contains the vanilla 22,000 plus the 106,700 party-total
+award. Runtime encounter verification remains separate.
 Placement options B/C below are kept for the record only. The BG2-style XP-tiered
 miniboss idea ("lich-lite") is noted for LATER — research docs 17/18 in flight.
 
@@ -181,9 +182,8 @@ The gathered data (kept for the record):
    BDSHZOM1 65 · GHOUL 175 · BDSKGR04 250 · BDSKGR05/06 300 · BDSKGR02 400 · GHAST 650.
    (Banned per the no-cheese rule: BDSHSOUL/BDBONBAT/BDUNSLGU; SKELDED is a 0-XP corpse
    prop, not a combatant.)
-4. **XP coupling (OPEN):** the 6 drowned (4,800 party XP) counted as "kept" when the
-   17,100/char chunk was sized. Either size the backfill to ≈4,800 kill-XP (≈12–15
-   weak bodies) so 17,100 stays exact, or resize: new = (128,620 + 4,800 − W)·0.8/6.
+4. **XP coupling (RESOLVED):** no backfill was added. The six drowned moved into the
+   cut pool, producing the final 133,420 cut XP and 106,700 party-total (80%) chunk.
 5. (Optional, separate room: the N-chamber vacated coords, x2950–3396/y894–1200 via
    Door04, could host a pushover pocket.)
 

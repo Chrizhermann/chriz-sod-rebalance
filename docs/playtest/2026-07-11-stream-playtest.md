@@ -243,7 +243,8 @@ because `BD_SDDD12_CLOUDY` defaults to 0, the first old vision was free. Each
 choice then set the pool cloudy; the two vanilla Essences paid for visions two
 and three. Component 220 cut the wight carrying one vial, but after component 120
 removed the Hooded-Man option the free activation plus the Shelf vial still reached
-both surviving visions. The missing source was real; it did not gate either one.
+both visions then left reachable by component 120. The missing source was real; it did
+not gate either one.
 
 **Locked replacement + fix (component 225):** no Imoen vision (she may be in the
 party), picker, Hooded-Man vision, or original Caelar cinematic. All three scepters
@@ -269,8 +270,8 @@ not changed. Full trace: `docs/research/20-scrying-pool.md`.
 > missing-Skie quest gated, BD4000 placed actor unscheduled), in-party guards on every
 > script targeting `"bdskie"`. Design record: `docs/design/chapters/01-prologue.md`
 > §12 (incl. the in-game verify checklist + a console re-arm for the current live
-> save). The 11 new lines await sign-off: `chriz-sod-remix/languages/english/
-> csr197skie.tra`.
+> save). The 11 new lines were signed off on 2026-07-13 and are installed from
+> `chriz-sod-remix/languages/english/csr197skie.tra`; runtime verification remains.
 
 **User:** "Skie is still there talking about me talking to her daddy and everything. I
 thought we wanted to skip all that and just have her there joinable? Maybe talk about
@@ -281,11 +282,12 @@ special or huge impact)."
 Screenshot: palace Skie, *"I heard you talking to Daddy and the other dukes about
 Caelar. Are you going to Dragonspear?"* → 3 vanilla replies.
 
-**Not a regression — nothing built yet.** The Skie recruitment rework is **researched
-only** (`docs/research/15-skie-recruitment.md`); no component ships it. So palace Skie
-is 100% vanilla. Two problems visible at once:
+**Historical diagnosis at report time (before component 197):** this was not a
+regression; the Skie recruitment rework was then research-only
+(`docs/research/15-skie-recruitment.md`), so palace Skie was still vanilla. Two problems
+were visible at once:
 1. The intended "strip her SoD plot, make her a plain talk-to-join recruit" (wishlist,
-   locked 2026-07-10) simply isn't implemented.
+   locked 2026-07-10) had not yet been implemented.
 2. Now that comp185 killed Entar, her "talking to Daddy" line is an active **lore
    contradiction** — she references a living father who is dead in our timeline.
 
@@ -297,18 +299,17 @@ file are **state 6** (first recruit) and **state 2** (re-recruit), gated to camp
 areas BD0120/BD0130. Her BG1 soundset is already on `BDSKIE.CRE`. comp190 already
 killed the night-visit subtree (states 16-32); comp185 removed Entar.
 
-**Minimal-viable shape (user: "keep it short for now"):** re-point the palace
+**Historical minimal-viable proposal (now implemented by 197):** re-point the palace
 first-meeting away from the vanilla council plot to a SHORT exchange — one or two
 lines acknowledging Entar's death — ending in the talk-to-join handshake (route to
 the state-6 `JoinParty()` path, or a trimmed equivalent that works in the palace, not
 just camp). Suppress the rest of her SoD plot surface (Bence intro 33-36,
 `bd_skie_plot` subquest 37-62, BD4000 static actor) per the locked scope. New dialogue
-lines will be presented for word-level sign-off (BG1/BG2 register).
+lines were subsequently signed off in BG1/BG2 register.
 
 **Deferred side note (log only):** Skie inherits Entar's estate/possessions — flavor,
 possibly a gear grant on recruit. "Plan more for that later, nothing huge." Do NOT
 scope into the minimal pass.
 
-**Dependency flag for parallel work:** PT-2 (despawning hall NPCs) and PT-4 both touch
-the BD0102 palace staging and possibly Skie's spawn/despawn — coordinate or serialize
-these two; they are the likeliest worktree collision.
+**Historical dependency flag (resolved during implementation):** PT-2 and PT-4 both
+touched palace staging; components 187 and 197 now carry the resulting fixes.

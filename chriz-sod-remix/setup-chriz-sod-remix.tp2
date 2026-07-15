@@ -512,8 +512,9 @@ INCLUDE ~chriz-sod-remix/lib/comp220.tpa~
 // ============================================================
 // Keep the three-Scepter pedestal puzzle, but replace its Imoen/Caelar/Hooded
 // picker and all vision cinematics with one abstract, non-modal Caelar omen.
-// It requires both Essences of Clarity, pays the two surviving visions' XP
-// once, and then leaves the pool permanently dormant. The Essence carried by
+// It requires both Essences of Clarity, pays once the combined XP of the two
+// visions formerly left reachable by component 120 before component 225, and
+// then leaves the pool permanently dormant. The Essence carried by
 // comp220's removed wight is rehomed in an existing sarcophagus.
 
 BEGIN @225 DESIGNATED 225 GROUP @1002 LABEL ~csr_scrying_pool_omen~

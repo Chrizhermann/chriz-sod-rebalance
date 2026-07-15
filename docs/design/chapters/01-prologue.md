@@ -1,13 +1,13 @@
 # Chapter Pass — Prologue (Korlasz dungeon + Baldur's Gate city opening)
 
-**Status: IMPLEMENTED as components 140-180 + 145 (v0.2.x), installed on the dev EET
-copy, file-level verification green. THREE IMPORT PLAYTESTS DONE (2026-07-06/07):**
-playtest 1-2 soft-locks fixed (bdcut00z ender + one-shot exit launch), playtest 3
-"looked pretty good" — fixes locked from it: no auto-granted party on fresh/import
-(comp 145, §10), Imoen join ungated, Korlasz opener rewritten, undead filler cut +
-Insane defensive layer (§2a scaling), crew repositioned, Vhast human + full plate,
-Sillune Short Sword +1, sequencer targets nearest PC (§2a). **Continuous BG1→SoD path
-(SOD_fromimport=1) not yet playtested.** All design decisions below are user-locked
+**Status: IMPLEMENTED through v0.6.3 and installed on the dev EET copy.** Installed
+prologue components: 140/145/150/160/170/175/180/185/187/190/195/197. Three historical
+import playtests (2026-07-06/07) covered the early v0.2.x spine: playtests 1–2 found the
+soft-locks fixed by the bdcut00z ender and one-shot exit launch; playtest 3 "looked
+pretty good" and locked the follow-up changes recorded below. Components 175/187/197
+are installed, but their explicit runtime checklists remain pending; installation is not
+being presented as playthrough proof. **The continuous BG1→SoD path
+(`SOD_fromimport=1`) has not yet been playtested.** All design decisions below are user-locked
 through sparring rounds 1-4 (2026-07-05/06) + playtest lock-ins (2026-07-06/07).
 Research basis: `docs/research/10a-11b`.
 Implementation deviations approved during build: (a) comp 140 exits via an
@@ -404,12 +404,10 @@ Also locked in playtest 3 (2026-07-07):
   vanilla "you delivered me to this hell" assumed the player caught her in the removed
   dungeon; the new line blames the PC as **Sarevok's killer**. All four replies
   unchanged.
-- **Skie double-appearance guard DEFERRED to the Skie pass:** her 3 a.m. scene
-  (`CreateCreature("bdskie")`, bd0103.baf) has no in-party guard — with Skie carried
-  from BG1 it would spawn a second Skie. Guarding it needs a replacement for the
-  `bd_plot` 54→55 advance the scene owns. User direction: if she's in the party she
-  should just *start the conversation* herself — and generally, **the more Beamdog
-  cutscenes removed, the better**.
+- **Historical Skie double-appearance concern — RESOLVED:** component 190 removes the
+  3 a.m. bedroom visit and owns its `bd_plot` 54→55 wake-up, so that cutscene cannot
+  spawn a second Skie. Component 197 then guards the remaining `"bdskie"` script targets
+  for an in-party Skie and hides its join replies when a DV `SKIE` is already present.
 
 ## 12. Skie: minimal talk-to-join at the palace — BUILT + MERGED (component 197), lines SIGNED OFF 2026-07-13
 
@@ -446,7 +444,8 @@ Estate/gear grant on recruit deferred (user: "nothing special or huge impact").
 
 **Lines SIGNED OFF as-is (user, 2026-07-13)** — the 11 lines in
 `chriz-sod-remix/languages/english/csr197skie.tra` are final; the installed strings
-already match, no reinstall needed. Remaining: the in-game verify checklist below.
+already match, so no installation action is needed. Remaining: the in-game verify
+checklist below.
 
 **In-game verify checklist (next playtest):** palace click after the council reaches
 the new state 91 (not the dream state 0 — trigger-less-state model, research 15 §3);
