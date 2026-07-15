@@ -337,6 +337,15 @@ def verify(game_dir: Path) -> int:
     take_matches = list(re.finditer(r'TakePartyItemNum\s*\(\s*"BDMISC59"\s*,\s*2\s*\)', baf, re.IGNORECASE))
     report.check("consume exactly two Essences once", len(take_matches) == 1, f"found {len(take_matches)}")
 
+    legacy_one_vial = re.findall(
+        r'TakePartyItem\s*\(\s*"BDMISC59"\s*\)', baf, re.IGNORECASE
+    )
+    report.check(
+        "no active legacy one-Essence consumption path",
+        not legacy_one_vial,
+        f"found {len(legacy_one_vial)}",
+    )
+
     blocks = baf_blocks(baf)
     no_consume_or_xp = re.compile(
         r"\b(?:TakePartyItem\w*|DestroyItem\w*|RemoveItem\w*|"

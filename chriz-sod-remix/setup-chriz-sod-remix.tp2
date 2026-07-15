@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.2~
+VERSION ~v0.6.3~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -34,6 +34,8 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   210 Coast Way Forest (BD7000) removed; Rasaad at the camp
 //   215 XP ledger: BD7000 removal compensated (requires 210)
 //   220 the dwarven dig site re-garrisoned (+XP chunk on the lich)
+//   225 one text-only Caelar omen at the dig-site scrying pool
+//       (requires 120+220)
 //   245 comp200's wall removal made skip-proof (CUTSKIP mirror;
 //       requires 200)
 // 230-259: road-north chapter pass (Ch. 9)
@@ -504,6 +506,24 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1100.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1200.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp220.tpa~
+
+// ============================================================
+// 225 — one text-only Caelar omen at the scrying pool
+// ============================================================
+// Keep the three-Scepter pedestal puzzle, but replace its Imoen/Caelar/Hooded
+// picker and all vision cinematics with one abstract, non-modal Caelar omen.
+// It requires both Essences of Clarity, pays the two surviving visions' XP
+// once, and then leaves the pool permanently dormant. The Essence carried by
+// comp220's removed wight is rehomed in an existing sarcophagus.
+
+BEGIN @225 DESIGNATED 225 GROUP @1002 LABEL ~csr_scrying_pool_omen~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1200.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdodscry.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdscry.dlg~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~120~ ~Component 225 (the single Caelar omen) retires the final scrying choices after component 120 removes the Hooded Man - install 120 first.~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~220~ ~Component 225 rehomes an Essence from content removed by component 220 (the dig-site re-garrisoning) - install 220 first.~
+
+INCLUDE ~chriz-sod-remix/lib/comp225.tpa~
 
 // ============================================================
 // 245 — comp200's wall removal, skip-proof
