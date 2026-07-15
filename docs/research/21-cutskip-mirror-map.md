@@ -1,4 +1,4 @@
-# 19 — CUTSKIP mirror map: the SoD cutscene-skip rig, fully audited
+# 21 — CUTSKIP mirror map: the SoD cutscene-skip rig, fully audited
 
 Status: **verified** against the live install's `override/CUTSKIP.bcs` (decompiled
 2026-07-13, now in the corpus as `research/data/sod_baf/CUTSKIP.baf`) and the dev

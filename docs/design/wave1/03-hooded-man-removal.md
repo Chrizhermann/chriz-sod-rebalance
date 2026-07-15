@@ -18,12 +18,17 @@ Verified safety: none of the five mid-campaign scenes sets any variable the endg
 | 1 | **BD0103** palace night visit (bdireni at Imoen's bedside, `bd_plot 54`) | Remove the single `CreateCreature("bdireni")` action from the block | The scene itself: Imoen's recovery + farewell chain is gated on `!See("bdireni")` → fires normally without him; Skie's morning wake-up unaffected |
 | 2 | **BDCUT11** Caelar-interrogation vision (during BG departure) | Skip the whole cutscene: in `BDCUT10.bcs` replace `StartCutSceneEx("bdcut11")` with `FadeFromColor + EndCutSceneMode` | Party placement, +7500 XP award, chapter increment — all happen in BDCUT10 *before* the vision. The scene is structurally an interrogation *by* the hooded man; nothing meaningful remains without him |
 | 3 | **BDCUT28** Boareskyr Bhaal-vision (bridge collapse scene) | Keep the scene; remove the `CreateCreature` + his dialog tail; append `EndCutSceneMode` (required — the dialog normally terminates cutscene mode) | The `sodcin02` movie, journals, `bd_plot=295`, Flaming Fist wake-up |
-| 4 | **BDSCRY05/06** scrying-pool vision (opt-in) | Delete the player option: False()-gate reply "~The Hooded Man...~" in `BDSCRY.dlg` states 0 and 4 | The Imoen and Caelar visions and the shared continuation cutscene |
+| 4 | **BDSCRY05/06** scrying-pool vision (opt-in) | Delete the player option: False()-gate reply "~The Hooded Man...~" in `BDSCRY.dlg` states 0 and 4 | At component 120's release, the Imoen/Caelar choices and shared continuation survived; component 225 now supersedes that preservation and retires every old vision route |
 | 5 | **BD5100** Underground River silent cameo | Excise both twin blocks wholesale (avoids a stranded `SetCutSceneLite`) | Nothing else lives in those blocks |
 
 Optional string hygiene (recommended): False()-gate the Imoen reply "~What was that man in
 the hood doing here?~" (`BDIMOEN.dlg` state 67, transition 1) — states 68/69 become
 unreachable automatically. No `dialog.tlk` edits needed anywhere.
+
+**Current follow-on (v0.6.3):** component 225 keeps the dialog resource and Aura's
+state-0 interjection structure, but False-gates the Imoen and Caelar replies and removes
+the pool object's dialog launcher. `BDSCRY01`–`BDSCRY07` remain on disk only as
+unreachable historical resources; the sole live payoff is the text-only Caelar omen.
 
 ## The chapter dreams — DECIDED (user, 2026-07-03): document, then SKIP
 `BDCCIRE.CRE` (same display name, different creature) appears **and speaks** in all four

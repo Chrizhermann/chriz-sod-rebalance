@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "plan": "docs/plans/2026-07-15-scrying-pool-caelar-omen.md",
+  "tasks": [
+    {
+      "id": "verify-red",
+      "title": "Add and run the failing semantic verifier",
+      "status": "completed",
+      "depends_on": []
+    },
+    {
+      "id": "component-225",
+      "title": "Implement the single-omen component",
+      "status": "completed",
+      "depends_on": ["verify-red"]
+    },
+    {
+      "id": "docs",
+      "title": "Integrate research and update decision documentation",
+      "status": "completed",
+      "depends_on": ["component-225"]
+    },
+    {
+      "id": "dev-install",
+      "title": "Tail-install and verify component 225 on dev EET",
+      "status": "completed",
+      "depends_on": ["component-225"]
+    },
+    {
+      "id": "review",
+      "title": "Run independent review and final verification",
+      "status": "completed",
+      "depends_on": ["docs", "dev-install"]
+    }
+  ],
+  "lastUpdated": "2026-07-15T22:30:24+09:00"
+}

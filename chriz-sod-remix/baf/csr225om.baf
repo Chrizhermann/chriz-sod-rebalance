@@ -1,0 +1,57 @@
+// chriz-sod-remix component 225 — the dig-site scrying pool has one
+// non-modal Caelar omen. These mutually exclusive EXTEND_TOP blocks own every
+// in-range click after all three Silver Scepters have been inserted, before
+// the retired vanilla cloudy/dialog machinery can be considered.
+
+IF
+  Clicked([ANYONE])
+  Range(LastTrigger,12)
+  Global("BD_SDDD12_COUNTER","MYAREA",3)
+  Global("CSR_SCRY_DONE","MYAREA",1)
+THEN
+  RESPONSE #100
+    DisplayStringNoNameHead(Player1,@2)
+END
+
+IF
+  Clicked([ANYONE])
+  Range(LastTrigger,12)
+  Global("BD_SDDD12_COUNTER","MYAREA",3)
+  Global("CSR_SCRY_DONE","MYAREA",0)
+  NumItemsPartyLT("BDMISC59",2)
+THEN
+  RESPONSE #100
+    DisplayStringNoNameHead(Player1,@1)
+END
+
+IF
+  Clicked([ANYONE])
+  Range(LastTrigger,12)
+  Global("BD_SDDD12_COUNTER","MYAREA",3)
+  Global("CSR_SCRY_DONE","MYAREA",0)
+  NumItemsPartyGT("BDMISC59",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SCRY_DONE","MYAREA",1)
+    SetGlobal("BD_SDDD12_CLOUDY","MYAREA",2)
+    TakePartyItemNum("BDMISC59",2)
+    AddXPObject(Player1,1000)
+    AddXPObject(Player2,1000)
+    AddXPObject(Player3,1000)
+    AddXPObject(Player4,1000)
+    AddXPObject(Player5,1000)
+    AddXPObject(Player6,1000)
+    CreateVisualEffect("bdsplash",[1318.2070])
+    SmallWait(5)
+    AmbientActivate("Scrying_pool",TRUE)
+    AmbientActivate("Scrying_pool_murky1",FALSE)
+    SmallWait(5)
+    AmbientActivate("Scrying_pool_murky2",FALSE)
+    SmallWait(5)
+    AmbientActivate("Scrying_pool_murky3",FALSE)
+    DisplayStringNoNameHead(Player1,@0)
+    AmbientActivate("Scrying_pool",FALSE)
+    AmbientActivate("Scrying_pool_murky1",TRUE)
+    AmbientActivate("Scrying_pool_murky2",TRUE)
+    AmbientActivate("Scrying_pool_murky3",TRUE)
+END

@@ -36,31 +36,52 @@ whether the exit block can fire on pass 1 instead of waiting for the grant block
 
 ---
 
-## PT-2 — NPCs spawn then despawn on the first trip down from the bedroom — OPEN (bug?)
+## PT-2 — NPCs spawn then despawn on the first trip down from the bedroom — **ROOT CAUSE CONFIRMED + SHIPPED (comp187)**
 
 **User:** "When going down one floor from the bedroom for the first time in SoD, why
 do we see some people, that despawn? Why are they spawned in the first place? I would
 prefer they not spawn at all."
 
 Bedroom = BD0103 (palace guest room). One floor down = BD0102 (great hall).
+**Correction (2026-07-13): the sighting is BD0100, the upper hall the descent route
+passes through** (BD0103 → BD0100 → BD0102) — the original BD0102 mapping was an
+inference, and BD0102's staging turned out to be a red herring.
 
-**Research (partial — needs finishing):**
-`BD0102.baf` re-stages the SAME council cast at MANY plot values — each block does a
-fresh `CreateCreature` set of BDGASS6 (Assassin), BDELTAN, BDBELT, BDSKIE, BDENTAR,
-4× bdfistcc, bdjospil, BDSCHAEL/BDLIIA at different coordinates (lines 30-44, 79-92,
-130-145, 181-196, 231-245, 261...). Our prologue rework (140/150/180/185/190) moves
-the party through plot 50 → 55 on a compressed timeline, so a stale-plot staging
-block plausibly fires, creates the cast, and a later block or an override script
-destroys them again in view of the player.
-Our own celebration guests (`csrnobm`/`csrnobf`/`csrffgd`, comp180) DO self-destroy —
-`baf/csrnobx.baf`: `!Global("BD_PLOT","GLOBAL",50) -> DestroySelf()` — but that should
-fire before the player ever sees them (they only exist during the plot-50 evening).
+**Root cause — CONFIRMED (issue #3, 2026-07-13):** `bd0100.are` pre-places the
+assassination-night fight set — Corwin (BDSCHAEL), Assassin1-3 (BDGASS5, EA=255
+hostile), FF Guard 1/2 (BDFISTCC) and three BDFFDEAD corpses — with always-on
+appearance schedules (dev ARE parse: 9 actors, 0xFFFFFFFF/0x00FFFFFF; they are the
+area's ONLY placed actors). comp150 cut the assassination night and sweeps all nine
+via `baf/csrswp.baf` (bddest ×9) on the area's FIRST script pass — but the engine
+renders placed actors BEFORE the first script pass runs (the same verified behavior
+that forces `blk0120.baf`'s first-action fade, cf. PT-1), so the set is visible for
+a beat and pops in view. `CSR_SWEEP` is once-flagged → happens exactly once, on the
+first descent — matching "for the first time" exactly. BDDEST.SPL itself is clean
+(opcode 20 invisibility + opcode 168 remove-creature, both instant — SPL-verified);
+only the pre-script render window shows them.
 
-**To pin down (agent task):** which exact creatures the player sees; whether it is
-(a) our comp180 guests despawning in view, (b) a vanilla BD0102 staging block firing
-at a plot value our rework no longer intends, or (c) Entar/Skie remnants racing
-comp185/190's removal. Then suppress at the SOURCE (never create) rather than letting
-them spawn and pop.
+The issue's three candidates all cleared: (a) comp180 celebration guests self-despawn
+overnight — BD0100/BD0102/BD0103 are all MASTAREA.2DA master areas, so their creature
+scripts keep running while the party sleeps upstairs (and no second-descent pop was
+ever reported); (b) the five BD0102 council variants are correctly re-gated to
+`BD_plot==51` by comp150 (installed-bcs verified); (c) comp185 unspawns Entar and the
+plot-55 Skie/Corwin housekeeping is comp197-guarded — neither races anything on the
+first descent.
+
+**✅ SHIPPED (2026-07-13, comp187, installed + verified on dev):** "the assassination
+night-set never spawns" — zeroes the nine actors' appearance schedules in bd0100.are
+(the engine-verified comp197/bd4000 pattern; +0x40 = 0 → present at no hour), matched
+by actor name + CRE resref, count-guarded 9-or-FAIL. Suppressed at the SOURCE: they
+never exist, nothing renders, nothing pops. `csrswp` stays untouched as belt-and-braces
+(saves with a baked bd0100 still get swept; its no-Continue still eats the OnCreation
+"To arms!" rally pass). Requires comp150 (without it the set is a live scene).
+Downstream verified inert: `Dead("Assassin1-3")` is false for never-created creatures —
+the same value the bddest sweep produced — so `BD_HELPED_KILL_ASSASSINS` stays at
+csrarr's pre-set 1, and vanilla's >51 cleanup bddest lines no-op harmlessly.
+
+**User-save note (live):** the pop is a one-time visual and already happened on the
+stream save (bd0100 is baked with CSR_SWEEP=1 there); nothing to repair. Fresh games
+load the patched ARE and never show the set.
 
 ---
 
@@ -183,12 +204,23 @@ comp200 edit — avoids mid-stack churn) removes the mirror's wall
 carries NO bdwforce cast and NO VFX — structurally different from BDCUT14, caught by
 the count-guards on the first attempt) and bumps the mirror's parley timer to
 FIVE_ROUNDS (it DID set the vanilla THREE_ROUNDS — the suspicion above confirmed).
-The wall-down restore pair stays as harmless no-ops. Systemic audit of the other
-CUTSKIP mirrors vs our patched cutscenes = **DONE 2026-07-13**, see
-`docs/research/19-cutskip-mirror-map.md`: no new actionable mirrors (BDCUT10/BDCUT28
-are not skippable — no mirror exists); three watch items for the ending rework
-(#51 trial, #52 Belhifet, #67 BD6100 transition). Corpus extended (CUTSKIP + CUTMOVE*),
-house rule added as methods-cookbook §16.
+The wall-down restore pair stays as harmless no-ops.
+
+**✅ SYSTEMIC AUDIT COMPLETE (2026-07-13, from CUTSKIP.baf source — now in the
+corpus):** the rig is one big `Switch("BD_CUTSCENE_BREAKABLE","GLOBAL")` whose
+RESPONSE #N mirrors the cutscene that set BREAKABLE=N. Findings: BDCUT10 and
+BDCUT28 (comp120's hooded-man scenes) NEVER set BD_CUTSCENE_BREAKABLE → not
+skippable → no mirror, no bypass; the only BDIRENI reference in the rig is a
+`DestroySelf()` cleanup (no-op when he doesn't exist). BDCUT14 → mirror #14
+(fixed, comp245); BDCUT45A/B → mirrors #61/#62 (fixed, comp280). Our own custom
+cutscenes never opt into breakability → unskippable by construction. **Zero
+remaining CUTSKIP exposures.** House rule stands for FUTURE cutscene edits: check
+whether the scene sets BD_CUTSCENE_BREAKABLE, and if so patch its mirror response.
+Full mapping and per-component verdicts are in
+`docs/research/21-cutskip-mirror-map.md`. The ending rework must explicitly audit
+response #51 (trial entry), #52 (Belhifet staging), and #67 (BDCUT65 → BD6100).
+The corpus now includes CUTSKIP + CUTMOVE*, and the reusable rule lives in
+methods-cookbook §16.
 
 **⚠ SYSTEMIC: audit CUTSKIP mirrors for EVERY cutscene we patch.** Confirmed pattern:
 any component that edits a BDCUT* scene can be bypassed by the skip rig. Check at
@@ -203,7 +235,7 @@ skipped the bridge cutscene (validates the diagnosis).
 
 ---
 
-## PT-6 — Dig site: missing "essence" vial + the scrying-pool visions — **CONFIRMED comp220 regression + content pass**
+## PT-6 — Dig site: missing "essence" vial + the scrying-pool visions — **FIXED (comp225 built + dev-installed; runtime next SoD playthrough)**
 
 **User:** "There seems to be one vial missing in the dwarven dungeon 2nd level.
 Something 'essence', with which you can have a vision in the pool there (which is
@@ -212,42 +244,30 @@ sure they have Imoen learning magic, which needs to go or be replaced, a vision 
 Caelar, which needs to be rewritten at some point I think, and a vision of the Hooded
 Man/Irenicus, I believe."
 
-**Mechanics (verified, `BDODSCRY.baf` = the pool object, BD1200 @~1325,2095):**
-3× Silver Scepter `BDMISC55` slot into the pedestal (3rd gives +3,000 party XP) →
-pool activates; `BDMISC59` **Essence of Clarity** clears the cloudy pool
-(`BD_SDDD12_CLOUDY` 1→0) → visions. Vision cutscenes: `BDSCRY01` (VFX bed),
-**`BDSCRY02` = the Imoen vision** (IMOEN2 + bdliia casting practice — exactly what
-the user remembers), `BDSCRY03` (+ the Caelar / hooded-man visions in the chain —
-launcher tail still to trace).
+**Corrected old mechanics:** the third scepter grants 3,000 party-total XP and,
+because `BD_SDDD12_CLOUDY` defaults to 0, the first old vision was free. Each
+choice then set the pool cloudy; the two vanilla Essences paid for visions two
+and three. Component 220 cut the wight carrying one vial, but after component 120
+removed the Hooded-Man option the free activation plus the Shelf vial still reached
+both visions then left reachable by component 120. The missing source was real; it did
+not gate either one.
 
-**The missing vial — comp220 regression CONFIRMED:** `BDMISC59` has exactly two
-world sources: the `Shelf` container @(1146,1230) in BD1200 (intact — containers
-untouched) and **`BDWIGHDD`, which is in comp220's cut list** (droppable copy).
-Sources went 2→1. Scepters are safe (3 containers, all intact).
+**Locked replacement + fix (component 225):** no Imoen vision (she may be in the
+party), picker, Hooded-Man vision, or original Caelar cinematic. All three scepters
+plus both Essences now produce one exact abstract text-only Caelar omen. `BDWIGHDD`
+stays cut; its vial is re-homed to `Sarcophagus01`. The pool preserves the 3,000
+party-total reward, grants Player1–6 1,000 XP once, and becomes permanently dormant.
+`BDSCRY01`–`07` remain only as unreachable resources; `BDSCRY.DLG` stays structurally
+intact for Aura compatibility.
 
-**Fix options (user to pick):** (a) re-home the wight's vial into an existing
-container near its coords; (b) restore that single BDWIGHDD (one schedule flip);
-(c) fold into the vision-content pass below and decide there.
-
-**Vision-content pass (new scope, user-directed):**
-- Imoen-learning-magic vision: "needs to go or be replaced." Nuance to flag: with
-  comp160 (Imoen stays in BG studying), the vision is arguably MORE canon than in
-  vanilla — user still wants it gone/replaced; his call on the replacement.
-- Caelar vision: rewrite "at some point" — park with the item-13 arc treatment.
-- Hooded-man/Irenicus vision: must GO — **verify whether comp120's five-appearance
-  removal already covers the pool vision** (its known sites: BD0103, BDCUT10/11,
-  BDCUT28 — the pool vision may or may not be among the five).
-- User verdict on the whole gimmick: "crazy stupid, why is this here" — a full-cut
-  of the pool sequence (scepters/essence/visions) is on the table as the simple
-  option; NOT decided.
-
-**Save impact:** the user's live save already ran the scene. The fix prevents it going
-forward; the already-consumed beat needs no repair beyond what he did (dismiss/
-re-recruit), since the var is now 2 = resolved.
+**Verification:** v0.6.3 sandbox green, tail-installed on dev EET, semantic verifier
+`SUMMARY: 0 failure(s)`. Natural pickup, activation, save/reload, and dormant re-click
+remain for the next SoD playthrough. The user is already past SoD, so live v0.5.0 was
+not changed. Full trace: `docs/research/20-scrying-pool.md`.
 
 ---
 
-## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **FIXING (comp197 built + dev-installed 2026-07-12; new lines pending word-level sign-off)**
+## PT-4 — Skie still runs her full vanilla palace plot ("talking to Daddy") — **FIXED (comp197 merged, PR #8; lines signed off 2026-07-13; in-game verify next playtest)**
 
 > **Build note (2026-07-12, issue #2, branch `fix/issue-2-skie-minimal-join`):**
 > shipped as **component 197** — new short palace exchange (Entar's death → talk-to-
@@ -256,8 +276,8 @@ re-recruit), since the var is now 2 = resolved.
 > missing-Skie quest gated, BD4000 placed actor unscheduled), in-party guards on every
 > script targeting `"bdskie"`. Design record: `docs/design/chapters/01-prologue.md`
 > §12 (incl. the in-game verify checklist + a console re-arm for the current live
-> save). The 11 new lines await sign-off: `chriz-sod-remix/languages/english/
-> csr197skie.tra`.
+> save). The 11 new lines were signed off on 2026-07-13 and are installed from
+> `chriz-sod-remix/languages/english/csr197skie.tra`; runtime verification remains.
 
 **User:** "Skie is still there talking about me talking to her daddy and everything. I
 thought we wanted to skip all that and just have her there joinable? Maybe talk about
@@ -268,11 +288,12 @@ special or huge impact)."
 Screenshot: palace Skie, *"I heard you talking to Daddy and the other dukes about
 Caelar. Are you going to Dragonspear?"* → 3 vanilla replies.
 
-**Not a regression — nothing built yet.** The Skie recruitment rework is **researched
-only** (`docs/research/15-skie-recruitment.md`); no component ships it. So palace Skie
-is 100% vanilla. Two problems visible at once:
+**Historical diagnosis at report time (before component 197):** this was not a
+regression; the Skie recruitment rework was then research-only
+(`docs/research/15-skie-recruitment.md`), so palace Skie was still vanilla. Two problems
+were visible at once:
 1. The intended "strip her SoD plot, make her a plain talk-to-join recruit" (wishlist,
-   locked 2026-07-10) simply isn't implemented.
+   locked 2026-07-10) had not yet been implemented.
 2. Now that comp185 killed Entar, her "talking to Daddy" line is an active **lore
    contradiction** — she references a living father who is dead in our timeline.
 
@@ -284,18 +305,17 @@ file are **state 6** (first recruit) and **state 2** (re-recruit), gated to camp
 areas BD0120/BD0130. Her BG1 soundset is already on `BDSKIE.CRE`. comp190 already
 killed the night-visit subtree (states 16-32); comp185 removed Entar.
 
-**Minimal-viable shape (user: "keep it short for now"):** re-point the palace
+**Historical minimal-viable proposal (now implemented by 197):** re-point the palace
 first-meeting away from the vanilla council plot to a SHORT exchange — one or two
 lines acknowledging Entar's death — ending in the talk-to-join handshake (route to
 the state-6 `JoinParty()` path, or a trimmed equivalent that works in the palace, not
 just camp). Suppress the rest of her SoD plot surface (Bence intro 33-36,
 `bd_skie_plot` subquest 37-62, BD4000 static actor) per the locked scope. New dialogue
-lines will be presented for word-level sign-off (BG1/BG2 register).
+lines were subsequently signed off in BG1/BG2 register.
 
 **Deferred side note (log only):** Skie inherits Entar's estate/possessions — flavor,
 possibly a gear grant on recruit. "Plan more for that later, nothing huge." Do NOT
 scope into the minimal pass.
 
-**Dependency flag for parallel work:** PT-2 (despawning hall NPCs) and PT-4 both touch
-the BD0102 palace staging and possibly Skie's spawn/despawn — coordinate or serialize
-these two; they are the likeliest worktree collision.
+**Historical dependency flag (resolved during implementation):** PT-2 and PT-4 both
+touched palace staging; components 187 and 197 now carry the resulting fixes.

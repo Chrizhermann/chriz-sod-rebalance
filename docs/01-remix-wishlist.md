@@ -162,13 +162,12 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   Corwin's "crusader poison" goodnight), and BDLIIA 13 re-routes "how fares Imoen?" to
   Liia's existing training-advice line. Covers BDCORWIN/BDELTAN/BDEDWIN/BDLIIA/BDSCHAEL/
   BDDEBUG/BDFIST05. The de Lancie supply-poison quest is explicitly OUT of scope.
-- **Still deferred (flagged, not built):**
-  - **Skie as a clean talk-to-join BG1-style companion (item 12 core):** research done
-    2026-07-10 (docs/research/15-skie-recruitment.md) — Beamdog left a functional
-    JoinParty scaffold in BDSKIE (states 5→6 first-join / 1→2 re-join, camp-gated) and
-    her SoD CRE already carries the BG1 SKIEE## soundset, so the pass is re-gating that
-    scaffold to a sensible meeting spot + neutralizing her remaining plot surface
-    (palace first-meeting 8-15, Bence intro 33-36, bd_skie_plot 37-62, dig 84-90).
+- **Follow-up status:**
+  - **Skie talk-to-join core SHIPPED (component 197):** the signed-off short palace
+    exchange restores Beamdog's `JoinParty()` scaffold, retires her remaining SoD plot
+    surface, and uses the BG1 soundset already on her CRE. It is installed on dev;
+    runtime verification remains pending. Only the optional estate/gear inheritance is
+    deferred.
   - **Full Corwin dialogue rewrite:** user finds SoD-Corwin's writing poor and wants a
     proper redo later; comp195 only removed her assassination residue, not rewrote her.
   - **Epilogue-coupled Entar removal** (BD0035 trial, BDCUT62, BDENTAR.CRE/DLG).
@@ -178,7 +177,7 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   the jailbreak return beat (component 175, installed). Numbers: 01-prologue.md §7.
 - **Dig-site polish executed:** the six "Drowned in Blood" are cut; the honor guard
   **literally replaces them** on their vacated coords; no backfill bodies; the XP
-  returns via the regenerated lich chunk (17,100 → **17,800/char**).
+  returns via the **106,700 party-total** lich chunk (≈17,783/char at six).
 - **Placement principle (locked):** never place creatures where no enemy was placed
   before — vacated original-actor coordinates (walkable by construction) or
   searchmap-verified tiles only. (Born from the honor-guard void-placement bug.)
@@ -192,15 +191,16 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   itself is item 13, a separate later pass.
 - **Skie scope sharpened:** remove EVERYTHING else of her SoD plot involvement; she
   becomes the BG1-style talk-to-join recruit (research/15 has the surface: Beamdog's
-  own JoinParty scaffold + her CRE already carries the BG1 soundset).
+  own JoinParty scaffold + her CRE already carries the BG1 soundset). **Fulfilled by
+  component 197;** only estate/gear remains a possible follow-up.
 - **Later component (backlog): BG1 soundsets for returning BG1 companions in SoD**
   (Khalid, Jaheira, Safana, ...) — one component; per-NPC coverage to research.
 - **Dig-site tiered encounter (later):** BG2-style XP-gated miniboss ("lich-lite") to
   keep the dungeon from boring high-XP parties — mechanism + candidates research
   running (docs/research/17 + 18). Guiding reminder (user): *shorter AND more fun* —
   fun is a co-equal goal of the remix.
-- **Chapter 9 early directions** recorded in docs/design/chapters/03-roadnorth.md
-  (round 1 pending the user's closer look).
+- **Historical Chapter-9 note:** early directions were recorded here before the later
+  quick-win pass shipped as components 230/240/250/255. Broader reworks remain separate.
 
 ## Additions (2026-07-10, Discord announcement post — user's own wording)
 - **Boareskyr bridge-battle rework** is on the list — "at least the explosive barrels
@@ -269,6 +269,27 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   such a small space" (why drow?); "the whole druid situation"; albino wyverns "WAY
   WAY WAY too strong" via ABILITIES not stats; Kanaglym quest-enemy counts also
   bloated (quest-staged, needs script surgery).
+
+## Decisions locked (2026-07-15, dig-site scrying pool)
+- **One abstract Caelar omen; every old vision removed.** No Imoen vision (she can
+  literally be in the party under component 160), no Hooded-Man vision, no original
+  Caelar cinematic, no picker, teleports, staged army, forced dialogue, or shared
+  cutscene teardown. The sole payoff is this exact non-modal text:
+
+  > The water clears. A woman in argent armor stands before a door beneath the world.
+  > Something waits beyond it—something she knows, or believes she knows. She reaches out.
+  > For an instant, you cannot tell whether she is opening the way or being drawn through.
+  > Then the water clouds.
+
+- **Every quest item is required:** all three Silver Scepters (`BDMISC55`) and both
+  Essences of Clarity (`BDMISC59`). The cut `BDWIGHDD` stays cut; its Essence is
+  re-homed into the existing BD1200 `Sarcophagus01` beside that container's scepter.
+- **The pool is one-use and then permanently dormant.** Its third-scepter reward stays
+  3,000 party-total XP; the removed Imoen and Caelar vision rewards are consolidated
+  into one 1,000-XP award to each of Player1–6.
+- **Implemented as component 225 in v0.6.3** and tail-installed plus semantically
+  verified on the dev EET copy. Runtime verification waits for the next SoD playthrough;
+  the live v0.5.0 install remains unchanged. Full trace: `docs/research/20-scrying-pool.md`.
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

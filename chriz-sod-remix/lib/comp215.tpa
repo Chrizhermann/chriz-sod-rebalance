@@ -1,0 +1,35 @@
+// ============================================================
+// Component 215 body — XP ledger: Coast Way Forest removal
+// ============================================================
+// comp210 removes BD7000 (Coast Way Forest) from the worldmap;
+// its XP was flagged "not yet ledgered" until 2026-07-13. What a
+// completionist loses (party currency, ground-truthed):
+//   - placed hostiles: 3,165 (the orc warband + worgs; computed
+//     from the shipped ARE + CREs)
+//   - Tsolak the vampire kill: 8,500
+//   - the Tsolak stake/resolution quest: 9,000 — one award paid
+//     once whichever path resolves it (BDCOF01.baf x2 exclusive
+//     branches; BDISABEL.dlg x12 + BDTSMESS.dlg x1 are the usual
+//     reply-branch duplication of the same award)
+//   Total 20,665 party.
+// Compensation = 20,665 * 0.8 rounded to 100 -> 16,500 as ONE
+// party-total AddexperienceParty (the engine DIVIDES it among the
+// party — user-verified 2026-07-12 — matching how the removed XP
+// would have paid; ~2,750/char at a party of 6).
+//
+// Carrier: the guaranteed chapter-9 transition award in
+// BD7100.bcs (IncrementChapter("SODTXT9") + AddXPObject
+// Player1..6 x 10,000, BD7100.baf:369-376) — fires exactly once,
+// after BD7000 would have been reachable in vanilla.
+
+COPY_EXISTING ~bd7100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~AddXPObject(Player1,10000)~ csr_cnt_xp
+    PATCH_IF NOT (csr_cnt_xp = 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp215: expected exactly one AddXPObject(Player1,10000) in BD7100.bcs (the chapter-9 transition award), found %csr_cnt_xp%. The transition block differs from the verified layout.~
+    END
+    REPLACE_TEXTUALLY ~AddXPObject(Player1,10000)~
+~AddXPObject(Player1,10000)
+    AddexperienceParty(16500)~
+  END
+BUT_ONLY

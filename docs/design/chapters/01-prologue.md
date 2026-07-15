@@ -1,13 +1,13 @@
 # Chapter Pass — Prologue (Korlasz dungeon + Baldur's Gate city opening)
 
-**Status: IMPLEMENTED as components 140-180 + 145 (v0.2.x), installed on the dev EET
-copy, file-level verification green. THREE IMPORT PLAYTESTS DONE (2026-07-06/07):**
-playtest 1-2 soft-locks fixed (bdcut00z ender + one-shot exit launch), playtest 3
-"looked pretty good" — fixes locked from it: no auto-granted party on fresh/import
-(comp 145, §10), Imoen join ungated, Korlasz opener rewritten, undead filler cut +
-Insane defensive layer (§2a scaling), crew repositioned, Vhast human + full plate,
-Sillune Short Sword +1, sequencer targets nearest PC (§2a). **Continuous BG1→SoD path
-(SOD_fromimport=1) not yet playtested.** All design decisions below are user-locked
+**Status: IMPLEMENTED through v0.6.3 and installed on the dev EET copy.** Installed
+prologue components: 140/145/150/160/170/175/180/185/187/190/195/197. Three historical
+import playtests (2026-07-06/07) covered the early v0.2.x spine: playtests 1–2 found the
+soft-locks fixed by the bdcut00z ender and one-shot exit launch; playtest 3 "looked
+pretty good" and locked the follow-up changes recorded below. Components 175/187/197
+are installed, but their explicit runtime checklists remain pending; installation is not
+being presented as playthrough proof. **The continuous BG1→SoD path
+(`SOD_fromimport=1`) has not yet been playtested.** All design decisions below are user-locked
 through sparring rounds 1-4 (2026-07-05/06) + playtest lock-ins (2026-07-06/07).
 Research basis: `docs/research/10a-11b`.
 Implementation deviations approved during build: (a) comp 140 exits via an
@@ -170,6 +170,13 @@ assassination block has its own once-flag, so a single new arrival block pre-set
 - **BD0100 sweep (once, <52):** despawn the ARE-placed night set (3 hostile assassins,
   Corwin, 2 guards, 3 corpses sit there whenever bd_plot<52 — vanilla just never lets
   you in early). Vanilla's own >51 cleanup then dresses the hall normally.
+  **PT-2 amendment (comp187, 2026-07-13):** the sweep alone is not render-proof — the
+  engine draws placed actors BEFORE the first script pass runs (the same behavior that
+  forces blk0120's first-action fade), so the set visibly popped once, on the first
+  descent from the bedroom (issue #3). comp187 zeroes the nine actors' appearance
+  schedules in bd0100.are (the comp197/bd4000 pattern) so they never exist; the sweep
+  stays as belt-and-braces for saves with a baked bd0100 and to keep eating the
+  OnCreation rally pass.
 - **Night block:** AND-gate the `TextScreen("DPALACE")` block behind a new
   `C#SODR_BEDTIME` global (set by a "retire for the night" choice); keep TextScreen /
   `bd_plot=51` / 14-day advance / beds; replace only the Imoen-wake tail with the
@@ -226,9 +233,10 @@ assassination block has its own once-flag, so a single new arrival block pre-set
   `bd_001_plot=10` parks ALL her vanilla dialog states — her new join states key on our
   own global, so no vanilla state can hijack. If she is NOT taken along, later content
   already works ("she stayed with the Fist" is all it assumes — the poisoning is never
-  required). **Parked for the ch12 pass:** the scrying vision (BDSCRY01 stages Imoen +
-  Liia in BD0118) assumes she's in Baldur's Gate — needs an in-party gate when we get
-  there. (Also corrects 10c: BD0118 is not unused; that vision is its one tenant.)
+  required). **Resolved 2026-07-15 by component 225:** no in-party gate is needed;
+  the Imoen vision, picker, and every old cinematic route are unreachable. `BDSCRY01`
+  remains on disk, so its use of BD0118 is still historically true for vanilla, but
+  BD0118 is no longer a live scrying tenant in the current remix.
 
 ## 6. Celebration — DECIDED; REWRITTEN 2026-07-07 (playtest 3, user direction)
 
@@ -396,14 +404,12 @@ Also locked in playtest 3 (2026-07-07):
   vanilla "you delivered me to this hell" assumed the player caught her in the removed
   dungeon; the new line blames the PC as **Sarevok's killer**. All four replies
   unchanged.
-- **Skie double-appearance guard DEFERRED to the Skie pass:** her 3 a.m. scene
-  (`CreateCreature("bdskie")`, bd0103.baf) has no in-party guard — with Skie carried
-  from BG1 it would spawn a second Skie. Guarding it needs a replacement for the
-  `bd_plot` 54→55 advance the scene owns. User direction: if she's in the party she
-  should just *start the conversation* herself — and generally, **the more Beamdog
-  cutscenes removed, the better**.
+- **Historical Skie double-appearance concern — RESOLVED:** component 190 removes the
+  3 a.m. bedroom visit and owns its `bd_plot` 54→55 wake-up, so that cutscene cannot
+  spawn a second Skie. Component 197 then guards the remaining `"bdskie"` script targets
+  for an in-party Skie and hides its join replies when a DV `SKIE` is already present.
 
-## 12. Skie: minimal talk-to-join at the palace — BUILT (component 197), lines PENDING SIGN-OFF
+## 12. Skie: minimal talk-to-join at the palace — BUILT + MERGED (component 197), lines SIGNED OFF 2026-07-13
 
 Issue #2 / PT-4 (2026-07-11). User direction: *"skip all that and just have her there
 joinable? Maybe talk about her father's dead for a moment and keep it short for now."*
@@ -436,8 +442,10 @@ Estate/gear grant on recruit deferred (user: "nothing special or huge impact").
   — no second Skie can be recruited. The council-spawn *cameo* itself stays (PT-3b
   audit scope).
 
-**PENDING SIGN-OFF:** the 11 new lines in
-`chriz-sod-remix/languages/english/csr197skie.tra` (word-level, BG1/BG2 register).
+**Lines SIGNED OFF as-is (user, 2026-07-13)** — the 11 lines in
+`chriz-sod-remix/languages/english/csr197skie.tra` are final; the installed strings
+already match, so no installation action is needed. Remaining: the in-game verify
+checklist below.
 
 **In-game verify checklist (next playtest):** palace click after the council reaches
 the new state 91 (not the dream state 0 — trigger-less-state model, research 15 §3);
