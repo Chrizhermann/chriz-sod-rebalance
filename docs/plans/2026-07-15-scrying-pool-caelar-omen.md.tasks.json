@@ -11,7 +11,7 @@
     {
       "id": "component-225",
       "title": "Implement the single-omen component",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["verify-red"]
     },
     {
@@ -33,5 +33,5 @@
       "depends_on": ["docs", "dev-install"]
     }
   ],
-  "lastUpdated": "2026-07-15T20:40:14+09:00"
+  "lastUpdated": "2026-07-15T21:28:36+09:00"
 }
