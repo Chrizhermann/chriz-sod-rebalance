@@ -23,7 +23,7 @@
     {
       "id": "dev-install",
       "title": "Tail-install and verify component 225 on dev EET",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["component-225"]
     },
     {
@@ -33,5 +33,5 @@
       "depends_on": ["docs", "dev-install"]
     }
   ],
-  "lastUpdated": "2026-07-15T21:28:36+09:00"
+  "lastUpdated": "2026-07-15T21:37:39+09:00"
 }
