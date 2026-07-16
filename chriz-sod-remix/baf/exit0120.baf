@@ -1,19 +1,45 @@
 // chriz-sod-remix component 140 — the deterministic dungeon exit.
-// ONE-SHOT and minimal, mirroring how vanilla itself launches this cutscene
+// TWO blocks, mirroring how vanilla itself launches this cutscene
 // (BDIMOEN farewell action list = a bare StartCutSceneEx("bdcut00z",FALSE)).
 // The earlier launcher-recipe version (ClearAllActions + StartCutSceneMode +
 // StartCutSceneEx, un-flagged) re-fired on every BD0120 pass during
 // bdcut00z's internal waits: each re-fire killed the running cutscene's
 // action queue and stacked another StartCutSceneMode — un-endable by the
 // single EndCutSceneMode at the palace (playtest soft-lock #2).
+//
+// Why an ARM block instead of exiting on the same pass (PT-1 / issue #4):
+// the fresh-start Bhaalspawn grants (BD0120.baf:481-573) fire on the SAME
+// pass that reaches this tail — they QUEUE six AddSpecialAbility instants
+// on Player1 via ActionOverride. Whether a same-tick bdcut00z takeover
+// (CutSceneId(Player1)) preserves a pending creature queue is undocumented
+// engine behavior, and losing the grants is the exact silent failure this
+// component exists to prevent. So the fresh flow spends exactly ONE
+// interposed pass: the arm block ends the grant pass (Player1 drains his
+// queue that frame), the exit fires on the next pass. The import flow
+// queues nothing on that pass (grants/CAI are fresh-only, NEWGAME_SOD=0)
+// and exits on the first pass with no stagger. Deterministic in both
+// flows — down from the 1-3 variable passes the vanilla non-Continue()
+// blocks (BD_Init_CAI, BD_Restin; patched in comp140 seam 4) used to eat.
 // bdcut00z itself owns the gold impound, BD_SAFEHOUSE_DONE and the party
 // move to BD0103 — never reimplemented here.
 IF
   Global("bd_plot","global",50)
+  Global("NEWGAME_SOD","GLOBAL",1)
   Global("CSR_EXIT0120","GLOBAL",0)
 THEN
   RESPONSE #100
     SetGlobal("CSR_EXIT0120","GLOBAL",1)
+END
+
+IF
+  Global("bd_plot","global",50)
+  GlobalLT("CSR_EXIT0120","GLOBAL",2)
+  OR(2)
+    Global("CSR_EXIT0120","GLOBAL",1)
+    !Global("NEWGAME_SOD","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_EXIT0120","GLOBAL",2)
     FadeToColor([1.0],0)
     StartCutSceneEx("bdcut00z",FALSE)
 END
