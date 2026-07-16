@@ -18,7 +18,7 @@
 //
 // ORDER MATTERS: the DECOMPILE_AND_PATCH passes run BEFORE the
 // EXTEND_TOP calls on the same scripts — the arrival block also
-// contains GiveItemCreate("bdscrl04")/AddJournalEntry(267494),
+// contains the moved GiveItemCreate/AddJournalEntry pair,
 // and the uniqueness guards below would miscount after extension.
 //
 // Every surgical edit is guarded: an install-time text mismatch
@@ -27,6 +27,41 @@
 // must match the comp-110/120-patched text, not vanilla).
 
 LOAD_TRA ~chriz-sod-remix/languages/english/comp150.tra~
+
+// Native SoD keeps its original TLK references and calls the placed Imoen
+// object IMOEN/imoen. EET shifts imported SoD references by 200000 and maps
+// the object to IMOEN2. Classify EET by the same all-or-nothing handoff
+// signature used by component 290 so a damaged partial install cannot fall
+// through to the standalone branch.
+OUTER_SET csr150_eet_anchors = 0
+ACTION_IF FILE_EXISTS_IN_GAME ~K#TELBGT.BCS~ BEGIN
+  OUTER_SET csr150_eet_anchors += 1
+END
+ACTION_IF FILE_EXISTS_IN_GAME ~K#TELBGT.CRE~ BEGIN
+  OUTER_SET csr150_eet_anchors += 1
+END
+ACTION_IF FILE_EXISTS_IN_GAME ~AR0602.BCS~ BEGIN
+  OUTER_SET csr150_eet_anchors += 1
+END
+
+ACTION_IF ((csr150_eet_anchors = 1) OR (csr150_eet_anchors = 2)) BEGIN
+  FAIL ~chriz-sod-remix #150: partial EET handoff signature (%csr150_eet_anchors% of K#TELBGT.BCS, K#TELBGT.CRE, AR0602.BCS). Refusing to select native SoD values for a damaged or unexpected EET install.~
+END
+
+OUTER_SET csr150_tlk_shift = 0
+OUTER_SPRINT csr150_imoen_outer ~IMOEN~
+OUTER_SPRINT csr150_imoen_inner ~imoen~
+ACTION_IF (csr150_eet_anchors = 3) BEGIN
+  OUTER_SET csr150_tlk_shift = 200000
+  OUTER_SPRINT csr150_imoen_outer ~IMOEN2~
+  OUTER_SPRINT csr150_imoen_inner ~IMOEN2~
+END
+
+OUTER_SET csr150_treasury_journal = 67494 + csr150_tlk_shift
+OUTER_SET csr150_council_info = 56387 + csr150_tlk_shift
+OUTER_SET csr150_campaign_quest = 59617 + csr150_tlk_shift
+OUTER_SET csr150_quest_root = 66700 + csr150_tlk_shift
+OUTER_SET csr150_old_quest_done = 66701 + csr150_tlk_shift
 
 // WeiDU's decompiler emits CRLF on Windows; repo strings are LF.
 // %csr_nl% is a line-break regex that matches either.
@@ -79,12 +114,12 @@ THEN
     LAUNCH_PATCH_MACRO ~csr150_replace~
 
     SET csr_expect = 1
-    SPRINT ~csr_what~ ~bd0103 journal 267494 move~
-    SPRINT ~csr_pat~ ~AddJournalEntry(267494,QUEST)~
+    SPRINT ~csr_what~ ~bd0103 treasury-journal move~
+    SPRINT ~csr_pat~ ~AddJournalEntry(%csr150_treasury_journal%,QUEST)~
     SPRINT ~csr_rep~ ~~
     LAUNCH_PATCH_MACRO ~csr150_replace~
 
-    // (4) Replace the block's Imoen-wake tail (IMOEN2 SEQ_CAST wake +
+    // (4) Replace the block's platform-specific Imoen-wake tail (SEQ_CAST +
     // StartDialogNoSet, 11a §3C) with the wake-for-council beat:
     //  - BD_LEFT_THE_PALACE=0 reset here, because BD0010.baf:10-16
     //    unconditionally sets it to 2 during the pre-council roam and
@@ -94,11 +129,11 @@ THEN
     //    spawn/approach points come from the Skie 3 a.m. staging
     //    template in this same script (11a §3D);
     //  - her StartDialogNoSet is what ends the block's cutscene mode
-    //    (vanilla relied on IMOEN2's dialog for this — cookbook #6).
+    //    (vanilla relied on Imoen's dialog for this — cookbook #6).
     // TextScreen / bd_plot=51 / AdvanceTime / bed staging all stay.
     SET csr_expect = 1
     SPRINT ~csr_what~ ~bd0103 night-block wake tail~
-    SPRINT ~csr_pat~ ~    ActionOverride("IMOEN2",SetSequence(SEQ_CAST))%csr_nl%    SmallWait(16)%csr_nl%    ActionOverride(Player1,SetSequence(SEQ_AWAKE))%csr_nl%    SmallWait(4)%csr_nl%    ActionOverride(Player1,Face(SW))%csr_nl%    SmallWait(1)%csr_nl%    ActionOverride(Player1,JumpToPoint(\[184\.428\]))%csr_nl%    ActionOverride(Player1,SetSequence(SEQ_READY))%csr_nl%    ActionOverride(Player1,FaceObject("IMOEN2"))%csr_nl%    SmallWait(3)%csr_nl%    ActionOverride("IMOEN2",FaceObject(Player1))%csr_nl%    SmallWait(6)%csr_nl%    ActionOverride("IMOEN2",StartDialogNoSet(Player1))~
+    SPRINT ~csr_pat~ ~    ActionOverride("%csr150_imoen_outer%",SetSequence(SEQ_CAST))%csr_nl%    SmallWait(16)%csr_nl%    ActionOverride(Player1,SetSequence(SEQ_AWAKE))%csr_nl%    SmallWait(4)%csr_nl%    ActionOverride(Player1,Face(SW))%csr_nl%    SmallWait(1)%csr_nl%    ActionOverride(Player1,JumpToPoint(\[184\.428\]))%csr_nl%    ActionOverride(Player1,SetSequence(SEQ_READY))%csr_nl%    ActionOverride(Player1,FaceObject("%csr150_imoen_inner%"))%csr_nl%    SmallWait(3)%csr_nl%    ActionOverride("%csr150_imoen_inner%",FaceObject(Player1))%csr_nl%    SmallWait(6)%csr_nl%    ActionOverride("%csr150_imoen_outer%",StartDialogNoSet(Player1))~
     SPRINT ~csr_rep~ ~    ApplySpellRES("bddest","csrserv")
     SetGlobal("BD_LEFT_THE_PALACE","GLOBAL",0)
     CreateCreature("csrserv",[443.476],NW)
@@ -122,7 +157,7 @@ BUT_ONLY
 
 // Arrival flag pre-set + bedtime servant spawn + murder-proofing
 // (must come AFTER the patch above — see ordering note in header).
-EXTEND_TOP ~bd0103.bcs~ ~chriz-sod-remix/baf/csrarr.baf~
+EXTEND_TOP ~bd0103.bcs~ ~chriz-sod-remix/baf/csrarr.baf~ EVALUATE_BUFFER
 
 // ------------------------------------------------------------
 // BD0100 (upper hall) — placed night-set sweep
@@ -193,14 +228,14 @@ COMPILE ~chriz-sod-remix/dlg/csrserv.d~
 // ------------------------------------------------------------
 // Council re-points + assassination text gates
 // ------------------------------------------------------------
-COMPILE ~chriz-sod-remix/dlg/csrcncl.d~
+COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csrcncl.d~
 
 // ------------------------------------------------------------
 // EE quest bookkeeping for the swapped council QUEST_DONE entry
 // ------------------------------------------------------------
-// Journal 266701 ("...The assassins appear to have been sent by
-// Caelar...") is replaced by @15010 in BDBELT state 41 (csrcncl.d).
-// bgee.lua groups 266701 under quest 266700 ("Important Events");
+// The old "assassins appear to have been sent by Caelar" completion is
+// replaced by @15010 in BDBELT state 41 (csrcncl.d). bgee.lua groups that
+// platform-specific completion under the platform-specific Important Events;
 // registering the replacement strref under the same quest keeps the
 // quest-UI closure identical to vanilla. Cosmetic-only, so a text
 // mismatch here WARNs instead of failing the whole component (the
@@ -208,11 +243,11 @@ COMPILE ~chriz-sod-remix/dlg/csrcncl.d~
 ACTION_IF (FILE_EXISTS_IN_GAME ~bgee.lua~) BEGIN
   OUTER_SET csr_jdone = RESOLVE_STR_REF(@15010)
   COPY_EXISTING ~bgee.lua~ ~override~
-    COUNT_REGEXP_INSTANCES ~createEntry    ( 266700, -1, 266701, {}, 277 )~ csr_cnt
+    COUNT_REGEXP_INSTANCES ~createEntry    ( %csr150_quest_root%, -1, %csr150_old_quest_done%, {}, 277 )~ csr_cnt
     PATCH_IF (csr_cnt = 1) BEGIN
-      REPLACE_TEXTUALLY ~createEntry    ( 266700, -1, 266701, {}, 277 )~ ~createEntry    ( 266700, -1, 266701, {}, 277 )%LNL%%TAB%createEntry    ( 266700, -1, %csr_jdone%, {}, 277 )~
+      REPLACE_TEXTUALLY ~createEntry    ( %csr150_quest_root%, -1, %csr150_old_quest_done%, {}, 277 )~ ~createEntry    ( %csr150_quest_root%, -1, %csr150_old_quest_done%, {}, 277 )%LNL%%TAB%createEntry    ( %csr150_quest_root%, -1, %csr_jdone%, {}, 277 )~
     END ELSE BEGIN
-      PATCH_WARN ~chriz-sod-remix #150: bgee.lua quest row for 266701 not found (%csr_cnt% matches) - the replacement council journal entry will display ungrouped. Everything else installed normally.~
+      PATCH_WARN ~chriz-sod-remix #150: bgee.lua quest row for %csr150_old_quest_done% not found (%csr_cnt% matches) - the replacement council journal entry will display ungrouped. Everything else installed normally.~
     END
   BUT_ONLY
 END ELSE BEGIN

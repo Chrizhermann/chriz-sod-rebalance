@@ -45,15 +45,15 @@ END
 // attempts to a minimum"), its only consumer.
 ADD_TRANS_TRIGGER BDBELT 40 ~False()~ DO 2
 
-// BDBELT 41 closes the council with journal 266701, whose QUEST_DONE text
-// says the assassins were sent by Caelar. Swap for the crusade-only line
-// @15010 (same "The Siege of Dragonspear" title, same quest 266700 — the
-// tpa registers the new strref in bgee.lua). Rest of the action is the
-// verbatim dev text: bd_plot_003=2, journals 256387/259617, bdcut04.
+// BDBELT 41 closes the council with the platform-specific QUEST_DONE whose
+// text says the assassins were sent by Caelar. Swap for the crusade-only line
+// @15010 (same "The Siege of Dragonspear" title; the tpa registers the new
+// strref in bgee.lua). The two preserved journal IDs are injected for native
+// SoD or EET while the rest of the action remains verbatim.
 ALTER_TRANS BDBELT BEGIN 41 END BEGIN 0 END BEGIN
   ACTION ~SetGlobal("bd_plot_003","bd0102",2)
-AddJournalEntry(256387,INFO)
-AddJournalEntry(259617,QUEST)
+AddJournalEntry(%csr150_council_info%,INFO)
+AddJournalEntry(%csr150_campaign_quest%,QUEST)
 AddJournalEntry(@15010,QUEST_DONE)
 ClearAllActions()
 StartCutSceneMode()

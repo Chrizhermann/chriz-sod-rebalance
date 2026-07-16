@@ -33,7 +33,7 @@ THEN
     // block — the only pointer to the confiscated gold, and the basement
     // errand it creates walks the player toward the jailbreak (11b (d)7)
     GiveItemCreate("bdscrl04",Player1,0,0,0)
-    AddJournalEntry(267494,QUEST)
+    AddJournalEntry(%csr150_treasury_journal%,QUEST)
     // the bedtime servant (role a: "retire for the night?" — dlg/csrserv.d)
     CreateCreature("csrserv",[666.587],S)
     // Close the dungeon-exit cutscene. BDCUT00Z never calls EndCutSceneMode —

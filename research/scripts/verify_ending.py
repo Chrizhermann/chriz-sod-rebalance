@@ -770,12 +770,22 @@ def root_fingerprints(texts: dict[str, str]) -> dict[str, dict[str, int]]:
     return result
 
 
-def root_inventory_problems(texts: dict[str, str]) -> list[str]:
+def expected_root_counts(platform: str) -> dict[str, dict[str, int]]:
+    """Return the frozen root inventory using each platform's resource names."""
+
+    expected = dict(KNOWN_ROOT_COUNTS)
+    if platform == "standalone":
+        expected["BDNEERAJ.DLG"] = expected.pop("NEERAJ.DLG")
+    return expected
+
+
+def root_inventory_problems(texts: dict[str, str], platform: str) -> list[str]:
     """Compare classified roots both ways; only C0Aura may be absent."""
 
     actual = root_fingerprints(texts)
+    expected_counts = expected_root_counts(platform)
     problems = []
-    for resource, expected in sorted(KNOWN_ROOT_COUNTS.items()):
+    for resource, expected in sorted(expected_counts.items()):
         if resource in OPTIONAL_ROOT_RESOURCES and resource not in texts:
             continue
         found = actual.get(resource)
@@ -784,7 +794,7 @@ def root_inventory_problems(texts: dict[str, str]) -> list[str]:
         elif found != expected:
             problems.append(f"{resource}: expected {expected}, found {found}")
     for resource, counts in sorted(actual.items()):
-        if resource not in KNOWN_ROOT_COUNTS:
+        if resource not in expected_counts:
             problems.append(f"unclassified {resource}={counts}")
     return problems
 
@@ -900,8 +910,10 @@ def check_hashes(
         )
 
 
-def check_root_classification(report: Reporter, texts: dict[str, str]) -> None:
-    problems = root_inventory_problems(texts) + goto_inbound_problems(texts)
+def check_root_classification(
+    report: Reporter, texts: dict[str, str], platform: str
+) -> None:
+    problems = root_inventory_problems(texts, platform) + goto_inbound_problems(texts)
     report.check(
         "installed coda-root and same-dialog GOTO inventories match the frozen classification",
         not problems,
@@ -1383,13 +1395,13 @@ def verify(
         candidates = store.loose_scan_candidates()
         candidates.update(store.biff_scan_candidates())
         candidates.update(COMMON_TEXT_RESOURCES)
-        candidates.update(KNOWN_ROOT_COUNTS)
+        candidates.update(expected_root_counts(platform))
         candidates.update(source for source, _, _ in EXPECTED_EXTERNAL_INBOUND)
         candidates.update(EET_TEXT_RESOURCES if platform == "eet" else STANDALONE_TEXT_RESOURCES)
         texts = DecompiledResources(store, Path(temporary)).decompile(candidates)
 
         check_hashes(report, store, platform, manifest_path)
-        check_root_classification(report, texts)
+        check_root_classification(report, texts, platform)
         check_bd4300(report, texts.get("BD4300.BCS", ""), platform)
         check_dialog_cleanup(report, texts, platform)
         check_debug_and_palace(report, texts)
@@ -1449,20 +1461,23 @@ BDDAZZO.DLG in [SOD-DLC/DIALOG.BIF] matches
             for resource, counts in KNOWN_ROOT_COUNTS.items()
             if resource != "C0AURA2J.DLG"
         }
-        problems = root_inventory_problems(fixture)
+        problems = root_inventory_problems(fixture, "eet")
         self.assertEqual(problems, [])
+        standalone_fixture = dict(fixture)
+        standalone_fixture["BDNEERAJ.DLG"] = standalone_fixture.pop("NEERAJ.DLG")
+        self.assertEqual(root_inventory_problems(standalone_fixture, "standalone"), [])
         fixture.pop("BDCUT60.BCS")
         self.assertTrue(
             any(
                 "missing classified BDCUT60.BCS" in problem
-                for problem in root_inventory_problems(fixture)
+                for problem in root_inventory_problems(fixture, "eet")
             )
         )
         fixture["SURPRISE.BCS"] = snippets["cut61"]
         self.assertTrue(
             any(
                 "unclassified SURPRISE.BCS" in problem
-                for problem in root_inventory_problems(fixture)
+                for problem in root_inventory_problems(fixture, "eet")
             )
         )
 

@@ -217,6 +217,16 @@ COPY_EXISTING ~bd5100.bcs~ ~override~
   END
 BUT_ONLY
 
+// Require at least one installed Hood picker before the semantic dialog edit.
+// Aura may copy it, so the exact count is intentionally not fixed.
+COPY_EXISTING - ~BDSCRY.DLG~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~Global("bd_sddd12_hood","LOCALS",0)~ csr120_hood_count
+    PATCH_IF (csr120_hood_count < 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #120: BDSCRY has no Hooded Man picker trigger; refusing to guess at a changed dialog graph.~
+    END
+  END
+
 COMPILE ~chriz-sod-remix/dlg/csrhood.d~
 
 // ============================================================
