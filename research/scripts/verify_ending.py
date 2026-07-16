@@ -520,7 +520,9 @@ class DialogState:
 
 def dialog_states(text: str, label: str) -> dict[int, DialogState]:
     header = re.compile(
-        r"(?ms)^IF(?:\s+WEIGHT\s+#\d+)?\s+~(?P<trigger>.*?)~\s+THEN\s+BEGIN\s+"
+        r"(?ms)^IF(?:\s+WEIGHT\s+#\d+"
+        r"(?:[^\S\r\n]+/\*[^\r\n]*\*/)?"
+        r")?\s+~(?P<trigger>.*?)~\s+THEN\s+BEGIN\s+"
         r"(?P<number>\d+)\b[^\n]*\n"
     )
     states: dict[int, DialogState] = {}
@@ -676,7 +678,7 @@ def guard_actions_are_fail_closed(actions: str) -> bool:
     )
     lines = response_action_lines(actions)
     patterns = (
-        re.compile(r"DisplayString\s*\([^\r\n]*\)", re.IGNORECASE),
+        re.compile(r"DisplayStringNoName\s*\([^\r\n]*\)", re.IGNORECASE),
         re.compile(r"FadeFromColor\s*\([^\r\n]*\)", re.IGNORECASE),
         re.compile(r"EndCutSceneMode\s*\(\s*\)", re.IGNORECASE),
         re.compile(
@@ -1502,13 +1504,18 @@ END
 
     def test_guard_actions_are_exact_unique_and_fail_closed(self) -> None:
         good = """RESPONSE #100
-DisplayString(Player1,123)
+DisplayStringNoName(Player1,123)
 FadeFromColor([1.0],0)
 EndCutSceneMode()
 SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)
 DestroySelf()
 """
         self.assertTrue(guard_actions_are_fail_closed(good))
+        self.assertFalse(
+            guard_actions_are_fail_closed(
+                good.replace("DisplayStringNoName", "DisplayString")
+            )
+        )
         self.assertFalse(
             guard_actions_are_fail_closed(
                 good.replace("FadeFromColor([1.0],0)\n", "")
@@ -1647,7 +1654,8 @@ FadeToColor([1.0],0)
     def test_dialog_parser_keeps_state_trigger_and_transitions(self) -> None:
         fixture = """BEGIN ~TEST~
 
-IF ~Global(\"X\",\"GLOBAL\",1) False()~ THEN BEGIN 7
+IF WEIGHT #17 /* Triggers after states #: 15 19 25 */
+~Global(\"X\",\"GLOBAL\",1) False()~ THEN BEGIN 7
   SAY #1
   IF ~~ THEN DO ~SetGlobal(\"Y\",\"GLOBAL\",1)~ EXIT
 END

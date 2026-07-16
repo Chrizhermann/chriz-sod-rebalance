@@ -275,30 +275,30 @@ ACTION_IF (csr290_is_eet = 1) BEGIN
   COPY_EXISTING - ~K#TELBGT.BCS~ ~override~
     DECOMPILE_AND_PATCH BEGIN
       SPRINT csr290_what ~K# carrier INTRO15F anchor~
-      SPRINT csr290_pat ~StartMovie\("INTRO15F"\)~
+      SPRINT csr290_pat ~StartMovie("INTRO15F")~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
       SPRINT csr290_what ~K# carrier SoA campaign move~
-      SPRINT csr290_pat ~MoveToCampaign\("SoA"\)~
+      SPRINT csr290_pat ~MoveToCampaign("SoA")~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
       SPRINT csr290_what ~K# carrier pre-existing container move~
-      SPRINT csr290_pat ~MoveContainerContents\(~
+      SPRINT csr290_pat ~MoveContainerContents(~
       SET csr290_expect = 0
       LAUNCH_PATCH_MACRO csr290_assert_count
       FOR (csr290_player = 1; csr290_player <= 6; csr290_player += 1) BEGIN
         SPRINT csr290_what ~K# carrier local bank for Player%csr290_player%~
-        SPRINT csr290_pat ~ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player%csr290_player%,ALL\)\)~
+        SPRINT csr290_pat ~ActionOverride("K#ImportContainer",TakeCreatureItems(Player%csr290_player%,ALL))~
         SET csr290_expect = 1
         LAUNCH_PATCH_MACRO csr290_assert_count
       END
       SPRINT csr290_what ~K# carrier contiguous Player1-through-Player6 bank sequence~
-      SPRINT csr290_pat ~ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player1,ALL\)\)%csr290_nl%    ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player2,ALL\)\)%csr290_nl%    ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player3,ALL\)\)%csr290_nl%    ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player4,ALL\)\)%csr290_nl%    ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player5,ALL\)\)%csr290_nl%    ActionOverride\("K#ImportContainer",TakeCreatureItems\(Player6,ALL\)\)~
+      SPRINT csr290_pat ~ActionOverride("K#ImportContainer",TakeCreatureItems(Player1,ALL))%csr290_nl%    ActionOverride("K#ImportContainer",TakeCreatureItems(Player2,ALL))%csr290_nl%    ActionOverride("K#ImportContainer",TakeCreatureItems(Player3,ALL))%csr290_nl%    ActionOverride("K#ImportContainer",TakeCreatureItems(Player4,ALL))%csr290_nl%    ActionOverride("K#ImportContainer",TakeCreatureItems(Player5,ALL))%csr290_nl%    ActionOverride("K#ImportContainer",TakeCreatureItems(Player6,ALL))~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
       SET csr290_bank_sequence_pos = INDEX_BUFFER (~%csr290_pat%~)
       SPRINT csr290_what ~K# carrier immediate movie-to-campaign sequence~
-      SPRINT csr290_pat ~StartMovie\("INTRO15F"\)%csr290_nl%    MoveToCampaign\("SoA"\)~
+      SPRINT csr290_pat ~StartMovie("INTRO15F")%csr290_nl%    MoveToCampaign("SoA")~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
       SET csr290_movie_sequence_pos = INDEX_BUFFER (~%csr290_pat%~)
@@ -326,7 +326,7 @@ END ELSE BEGIN
   COPY_EXISTING - ~BD6100.BCS~ ~override~
     DECOMPILE_AND_PATCH BEGIN
       SPRINT csr290_what ~standalone BD6100 terminal triples~
-      SPRINT csr290_pat ~EndCutSceneMode\(\)%csr290_nl%    ContinueGame\(FALSE\)%csr290_nl%    EndCredits\(\)~
+      SPRINT csr290_pat ~EndCutSceneMode()%csr290_nl%    ContinueGame(FALSE)%csr290_nl%    EndCredits()~
       SET csr290_expect = 2
       LAUNCH_PATCH_MACRO csr290_assert_count
       SPRINT csr290_what ~standalone BD6100 EET resrefs~
@@ -334,7 +334,7 @@ END ELSE BEGIN
       SET csr290_expect = 0
       LAUNCH_PATCH_MACRO csr290_assert_count
       SPRINT csr290_what ~standalone BD6100 campaign moves~
-      SPRINT csr290_pat ~MoveToCampaign\(~
+      SPRINT csr290_pat ~MoveToCampaign(~
       SET csr290_expect = 0
       LAUNCH_PATCH_MACRO csr290_assert_count
     END
@@ -348,15 +348,15 @@ END
 
 COPY_EXISTING - ~BDBENCE.DLG~ ~override~
   SPRINT csr290_what ~BDBENCE plot-590 root~
-  SPRINT csr290_pat ~Global\("bd_plot","global",590\)~
+  SPRINT csr290_pat ~Global("bd_plot","global",590)~
   SET csr290_expect = 1
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDBENCE murder cutscene roots~
-  SPRINT csr290_pat ~StartCutSceneEx\("bdcut60b",TRUE\)~
+  SPRINT csr290_pat ~StartCutSceneEx("bdcut60b",TRUE)~
   SET csr290_expect = 2
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDBENCE arrest cutscene roots~
-  SPRINT csr290_pat ~StartCutSceneEx\("bdcut61",TRUE\)~
+  SPRINT csr290_pat ~StartCutSceneEx("bdcut61",TRUE)~
   SET csr290_expect = 3
   LAUNCH_PATCH_MACRO csr290_assert_count
   PATCH_FOR_EACH csr290_state IN 6 9 10 64 65 67 68 70 71 73 BEGIN
@@ -374,12 +374,12 @@ COPY_EXISTING - ~BDBENCE.DLG~ ~override~
     LAUNCH_PATCH_MACRO csr290_assert_dlg_state
     PATCH_IF (csr290_state = 6) BEGIN
       LAUNCH_PATCH_MACRO csr290_read_dlg_state_trigger
-      SPRINT csr290_pat ~Global\("bd_plot","global",590\)~
+      SPRINT csr290_pat ~Global("bd_plot","global",590)~
       LAUNCH_PATCH_MACRO csr290_assert_dlg_state_token
     END
     PATCH_IF ((csr290_state = 67) OR (csr290_state = 68)) BEGIN
       LAUNCH_PATCH_MACRO csr290_read_dlg_state_trigger
-      SPRINT csr290_pat ~Global\("bd_plot","global",591\)~
+      SPRINT csr290_pat ~Global("bd_plot","global",591)~
       LAUNCH_PATCH_MACRO csr290_assert_dlg_state_token
     END
     PATCH_IF (csr290_state = 65) BEGIN
@@ -392,13 +392,13 @@ COPY_EXISTING - ~BDBENCE.DLG~ ~override~
     PATCH_IF ((csr290_state = 9) OR (csr290_state = 10)) BEGIN
       SET csr290_transition = 0
       LAUNCH_PATCH_MACRO csr290_read_dlg_transition
-      SPRINT csr290_pat ~StartCutSceneEx\("bdcut60b",TRUE\)~
+      SPRINT csr290_pat ~StartCutSceneEx("bdcut60b",TRUE)~
       LAUNCH_PATCH_MACRO csr290_assert_dlg_action_token
     END
     PATCH_IF ((csr290_state = 70) OR (csr290_state = 71) OR (csr290_state = 73)) BEGIN
       SET csr290_transition = 0
       LAUNCH_PATCH_MACRO csr290_read_dlg_transition
-      SPRINT csr290_pat ~StartCutSceneEx\("bdcut61",TRUE\)~
+      SPRINT csr290_pat ~StartCutSceneEx("bdcut61",TRUE)~
       LAUNCH_PATCH_MACRO csr290_assert_dlg_action_token
       SET csr290_transition = 1
       LAUNCH_PATCH_MACRO csr290_read_dlg_transition
@@ -409,19 +409,19 @@ COPY_EXISTING - ~BDBENCE.DLG~ ~override~
   END
 COPY_EXISTING - ~BDDELANC.DLG~ ~override~
   SPRINT csr290_what ~BDDELANC private first-talk trigger~
-  SPRINT csr290_pat ~Global\("bd_delancie_talk","locals",0\)~
+  SPRINT csr290_pat ~Global("bd_delancie_talk","locals",0)~
   SET csr290_expect = 1
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDDELANC private repeat trigger plus setters~
-  SPRINT csr290_pat ~Global\("bd_delancie_talk","locals",1\)~
+  SPRINT csr290_pat ~Global("bd_delancie_talk","locals",1)~
   SET csr290_expect = 4
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDDELANC private completion setters~
-  SPRINT csr290_pat ~SetGlobal\("bd_delancie_talk","locals",1\)~
+  SPRINT csr290_pat ~SetGlobal("bd_delancie_talk","locals",1)~
   SET csr290_expect = 3
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDDELANC public victory journal~
-  SPRINT csr290_pat ~AddJournalEntry\(%csr290_victory_journal%,QUEST\)~
+  SPRINT csr290_pat ~AddJournalEntry(%csr290_victory_journal%,QUEST)~
   SET csr290_expect = 2
   LAUNCH_PATCH_MACRO csr290_assert_count
   PATCH_FOR_EACH csr290_state IN 77 78 79 80 81 82 83 95 104 BEGIN
@@ -443,13 +443,13 @@ COPY_EXISTING - ~BDDELANC.DLG~ ~override~
       PATCH_IF (csr290_state = 104) BEGIN
         SET csr290_private_stage = 1
       END
-      SPRINT csr290_pat ~Global\("bd_delancie_talk","locals",%csr290_private_stage%\)~
+      SPRINT csr290_pat ~Global("bd_delancie_talk","locals",%csr290_private_stage%)~
       LAUNCH_PATCH_MACRO csr290_assert_dlg_state_token
     END
   END
 COPY_EXISTING - ~BDDAZZO.DLG~ ~override~
   SPRINT csr290_what ~BDDAZZO two native bdcut60 endings~
-  SPRINT csr290_pat ~StartCutSceneEx\("bdcut60",FALSE\)~
+  SPRINT csr290_pat ~StartCutSceneEx("bdcut60",FALSE)~
   SET csr290_expect = 2
   LAUNCH_PATCH_MACRO csr290_assert_count
   PATCH_FOR_EACH csr290_state IN 0 2 3 BEGIN
@@ -470,7 +470,7 @@ COPY_EXISTING - ~BDDAZZO.DLG~ ~override~
     END ELSE BEGIN
       SET csr290_transition = 0
       LAUNCH_PATCH_MACRO csr290_read_dlg_transition
-      SPRINT csr290_pat ~StartCutSceneEx\("bdcut60",FALSE\)~
+      SPRINT csr290_pat ~StartCutSceneEx("bdcut60",FALSE)~
       LAUNCH_PATCH_MACRO csr290_assert_dlg_action_token
     END
   END
@@ -478,7 +478,7 @@ COPY_EXISTING - ~BDRUMOR3.DLG~ ~override~
   PATCH_FOR_EACH csr290_native_journal IN 67031 67057 67091 BEGIN
     SET csr290_platform_journal = csr290_native_journal + csr290_tlk_shift
     SPRINT csr290_what ~BDRUMOR3 Hooded-Man journal %csr290_platform_journal%~
-    SPRINT csr290_pat ~AddJournalEntry\(%csr290_platform_journal%,QUEST\)~
+    SPRINT csr290_pat ~AddJournalEntry(%csr290_platform_journal%,QUEST)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
   END
@@ -496,16 +496,16 @@ COPY_EXISTING - ~BDRUMOR3.DLG~ ~override~
     SET csr290_platform_journal = csr290_native_journal + csr290_tlk_shift
     SET csr290_transition = 0
     LAUNCH_PATCH_MACRO csr290_read_dlg_transition
-    SPRINT csr290_pat ~AddJournalEntry\(%csr290_platform_journal%,QUEST\)~
+    SPRINT csr290_pat ~AddJournalEntry(%csr290_platform_journal%,QUEST)~
     LAUNCH_PATCH_MACRO csr290_assert_dlg_action_token
   END
 COPY_EXISTING - ~BDDEBUG.DLG~ ~override~
   SPRINT csr290_what ~BDDEBUG dialogue dream setters~
-  SPRINT csr290_pat ~SetGlobal\("bd_debug_move_to_dream","global",1\)~
+  SPRINT csr290_pat ~SetGlobal("bd_debug_move_to_dream","global",1)~
   SET csr290_expect = 4
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDDEBUG dialogue cell setters~
-  SPRINT csr290_pat ~SetGlobal\("bd_debug_move_to_cell","global",1\)~
+  SPRINT csr290_pat ~SetGlobal("bd_debug_move_to_cell","global",1)~
   SET csr290_expect = 4
   LAUNCH_PATCH_MACRO csr290_assert_count
   SET csr290_state = 10
@@ -519,16 +519,16 @@ COPY_EXISTING - ~BDDEBUG.DLG~ ~override~
     END
     SPRINT csr290_what ~BDDEBUG state 10 transition %csr290_transition% %csr290_debug_kind% setter~
     LAUNCH_PATCH_MACRO csr290_read_dlg_transition
-    SPRINT csr290_pat ~SetGlobal\("bd_debug_move_to_%csr290_debug_kind%","global",1\)~
+    SPRINT csr290_pat ~SetGlobal("bd_debug_move_to_%csr290_debug_kind%","global",1)~
     LAUNCH_PATCH_MACRO csr290_assert_dlg_action_token
   END
 COPY_EXISTING - ~BDCORWIJ.DLG~ ~override~
   SPRINT csr290_what ~BDCORWIJ direct arrest cutscene~
-  SPRINT csr290_pat ~StartCutSceneEx\("bdcut61",TRUE\)~
+  SPRINT csr290_pat ~StartCutSceneEx("bdcut61",TRUE)~
   SET csr290_expect = 1
   LAUNCH_PATCH_MACRO csr290_assert_count
   SPRINT csr290_what ~BDCORWIJ arrest journal info~
-  SPRINT csr290_pat ~AddJournalEntry\(%csr290_corwin_arrest_info%,INFO\)~
+  SPRINT csr290_pat ~AddJournalEntry(%csr290_corwin_arrest_info%,INFO)~
   SET csr290_expect = 1
   LAUNCH_PATCH_MACRO csr290_assert_count
   SET csr290_state = 203
@@ -537,7 +537,7 @@ COPY_EXISTING - ~BDCORWIJ.DLG~ ~override~
   LAUNCH_PATCH_MACRO csr290_assert_dlg_state
   SET csr290_transition = 0
   LAUNCH_PATCH_MACRO csr290_read_dlg_transition
-  SPRINT csr290_pat ~StartCutSceneEx\("bdcut61",TRUE\)~
+  SPRINT csr290_pat ~StartCutSceneEx("bdcut61",TRUE)~
   LAUNCH_PATCH_MACRO csr290_assert_dlg_action_token
 // ------------------------------------------------------------
 // 290.3 — common BCS preflight, still before any mutation
@@ -545,30 +545,30 @@ COPY_EXISTING - ~BDCORWIJ.DLG~ ~override~
 COPY_EXISTING - ~BD4300.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     SPRINT csr290_what ~BD4300 victory timers~
-    SPRINT csr290_pat ~SetGlobalTimer\("bd_mdd1341a_ot_timer","bd4300",[^)]*\)~
+    SPRINT csr290_pat ~SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",[^)]*)~
     COUNT_REGEXP_INSTANCES ~%csr290_pat%~ csr290_timer_count
-    COUNT_REGEXP_INSTANCES ~Global\("bd_ot2_C0Aura","bd4300",0\)~ csr290_aura_count
-    COUNT_REGEXP_INSTANCES ~DisplayStringHead\("C0Aura",309305\)~ csr290_aura_bark_count
+    COUNT_REGEXP_INSTANCES ~Global("bd_ot2_C0Aura","bd4300",0)~ csr290_aura_count
+    COUNT_REGEXP_INSTANCES ~DisplayStringHead("C0Aura",309305)~ csr290_aura_bark_count
     PATCH_IF NOT (((csr290_aura_count = 0) OR (csr290_aura_count = 1)) AND
                   (csr290_aura_bark_count = csr290_aura_count) AND
                   (csr290_timer_count = 17 + csr290_aura_count)) BEGIN
       PATCH_FAIL ~chriz-sod-remix #290 [BD4300 victory timers]: expected 17 vanilla timer setters plus zero/one exact C0Aura block; found %csr290_timer_count% setters, %csr290_aura_count% Aura trigger(s), %csr290_aura_bark_count% Aura bark(s).~
     END
     SPRINT csr290_what ~BD4300 586-to-587 timer convergence~
-    SPRINT csr290_pat ~GlobalTimerExpired\("bd_mdd1341a_ot_timer","bd4300"\)%csr290_nl%THEN%csr290_nl%  RESPONSE #100%csr290_nl%    SetGlobal\("bd_plot","global",587\)~
+    SPRINT csr290_pat ~GlobalTimerExpired("bd_mdd1341a_ot_timer","bd4300")%csr290_nl%THEN%csr290_nl%  RESPONSE #100%csr290_nl%    SetGlobal("bd_plot","global",587)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
     PATCH_FOR_EACH csr290_rom IN Corwin Neera BEGIN
       SPRINT csr290_what ~BD4300 %csr290_rom% Romance6 zero trigger~
-      SPRINT csr290_pat ~%csr290_nl%  Global\("bd_%csr290_rom%Romance6","GLOBAL",0\)~
+      SPRINT csr290_pat ~%csr290_nl%  Global("bd_%csr290_rom%Romance6","GLOBAL",0)~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
       SPRINT csr290_what ~BD4300 %csr290_rom% Romance6 one trigger~
-      SPRINT csr290_pat ~%csr290_nl%  Global\("bd_%csr290_rom%Romance6","GLOBAL",1\)~
+      SPRINT csr290_pat ~%csr290_nl%  Global("bd_%csr290_rom%Romance6","GLOBAL",1)~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
       SPRINT csr290_what ~BD4300 %csr290_rom% Romance6 setter~
-      SPRINT csr290_pat ~SetGlobal\("bd_%csr290_rom%Romance6","GLOBAL",1\)~
+      SPRINT csr290_pat ~SetGlobal("bd_%csr290_rom%Romance6","GLOBAL",1)~
       SET csr290_expect = 1
       LAUNCH_PATCH_MACRO csr290_assert_count
     END
@@ -576,30 +576,30 @@ COPY_EXISTING - ~BD4300.BCS~ ~override~
 COPY_EXISTING - ~BDDEBUG.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     SPRINT csr290_what ~BDDEBUG dream launcher trigger~
-    SPRINT csr290_pat ~%csr290_nl%  Global\("bd_debug_move_to_dream","global",1\)~
+    SPRINT csr290_pat ~%csr290_nl%  Global("bd_debug_move_to_dream","global",1)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
     SPRINT csr290_what ~BDDEBUG dream launcher action~
-    SPRINT csr290_pat ~StartCutSceneEx\("bdcut60",FALSE\)~
+    SPRINT csr290_pat ~StartCutSceneEx("bdcut60",FALSE)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
     SPRINT csr290_what ~BDDEBUG cell launcher trigger~
-    SPRINT csr290_pat ~%csr290_nl%  Global\("bd_debug_move_to_cell","global",1\)~
+    SPRINT csr290_pat ~%csr290_nl%  Global("bd_debug_move_to_cell","global",1)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
     SPRINT csr290_what ~BDDEBUG cell launcher action~
-    SPRINT csr290_pat ~StartCutSceneEx\("bdcut61",TRUE\)~
+    SPRINT csr290_pat ~StartCutSceneEx("bdcut61",TRUE)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
   END
 COPY_EXISTING - ~BDPALACE.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     SPRINT csr290_what ~BDPALACE final Entar Range block~
-    SPRINT csr290_pat ~%csr290_nl%  Range\("BDENTAR",5\)~
+    SPRINT csr290_pat ~%csr290_nl%  Range("BDENTAR",5)~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
     SPRINT csr290_what ~BDPALACE final Entar face action~
-    SPRINT csr290_pat ~ActionOverride\("BDENTAR",Face\(NNE\)\)~
+    SPRINT csr290_pat ~ActionOverride("BDENTAR",Face(NNE))~
     SET csr290_expect = 1
     LAUNCH_PATCH_MACRO csr290_assert_count
   END
@@ -609,21 +609,21 @@ COPY_EXISTING - ~BDPALACE.BCS~ ~override~
 COPY_EXISTING ~BD4300.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     SPRINT csr290_what ~BD4300 victory timer normalization~
-    SPRINT csr290_pat ~SetGlobalTimer\("bd_mdd1341a_ot_timer","bd4300",[^)]*\)~
-    COUNT_REGEXP_INSTANCES ~Global\("bd_ot2_C0Aura","bd4300",0\)~ csr290_aura_count
+    SPRINT csr290_pat ~SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",[^)]*)~
+    COUNT_REGEXP_INSTANCES ~Global("bd_ot2_C0Aura","bd4300",0)~ csr290_aura_count
     SET csr290_expect = 17 + csr290_aura_count
     SPRINT csr290_rep ~SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",2)~
     LAUNCH_PATCH_MACRO csr290_replace
     PATCH_FOR_EACH csr290_rom IN Corwin Neera BEGIN
       SPRINT csr290_what ~BD4300 %csr290_rom% Romance6 zero block~
-      SPRINT csr290_pat ~%csr290_nl%  Global\("bd_%csr290_rom%Romance6","GLOBAL",0\)~
+      SPRINT csr290_pat ~%csr290_nl%  Global("bd_%csr290_rom%Romance6","GLOBAL",0)~
       SET csr290_expect = 1
       SPRINT csr290_rep ~
   False()
   Global("bd_%csr290_rom%Romance6","GLOBAL",0)~
       LAUNCH_PATCH_MACRO csr290_replace
       SPRINT csr290_what ~BD4300 %csr290_rom% Romance6 one block~
-      SPRINT csr290_pat ~%csr290_nl%  Global\("bd_%csr290_rom%Romance6","GLOBAL",1\)~
+      SPRINT csr290_pat ~%csr290_nl%  Global("bd_%csr290_rom%Romance6","GLOBAL",1)~
       SET csr290_expect = 1
       SPRINT csr290_rep ~
   False()
@@ -637,7 +637,7 @@ COPY_EXISTING ~BDDEBUG.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     PATCH_FOR_EACH csr290_kind IN dream cell BEGIN
       SPRINT csr290_what ~BDDEBUG %csr290_kind% launcher~
-      SPRINT csr290_pat ~%csr290_nl%  Global\("bd_debug_move_to_%csr290_kind%","global",1\)~
+      SPRINT csr290_pat ~%csr290_nl%  Global("bd_debug_move_to_%csr290_kind%","global",1)~
       SET csr290_expect = 1
       SPRINT csr290_rep ~
   False()
@@ -650,7 +650,7 @@ BUT_ONLY
 COPY_EXISTING ~BDPALACE.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     SPRINT csr290_what ~BDPALACE final Entar exit block~
-    SPRINT csr290_pat ~%csr290_nl%  Range\("BDENTAR",5\)~
+    SPRINT csr290_pat ~%csr290_nl%  Range("BDENTAR",5)~
     SET csr290_expect = 1
     SPRINT csr290_rep ~
   False()
@@ -740,7 +740,7 @@ ACTION_IF (csr290_is_eet = 1) BEGIN
   COPY_EXISTING ~K#TELBGT.BCS~ ~override/CSRETBGT.BCS~
     DECOMPILE_AND_PATCH BEGIN
       SPRINT csr290_what ~CSRETBGT INTRO15F insertion point~
-      SPRINT csr290_pat ~StartMovie\("INTRO15F"\)~
+      SPRINT csr290_pat ~StartMovie("INTRO15F")~
       SET csr290_expect = 1
       SPRINT csr290_rep ~MoveContainerContents("BD4300*K#ImportContainer","BD6100*K#ImportContainer")
     StartMovie("INTRO15F")~
