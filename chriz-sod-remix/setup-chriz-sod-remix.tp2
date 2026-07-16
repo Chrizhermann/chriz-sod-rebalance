@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.3~
+VERSION ~v0.6.4~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -45,11 +45,13 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //       into the temple (+XP chunk on the Neothelid)
 //   250 Morentherene stat tiers on Hard / Insane
 //   255 Boareskyr battle: durable explosive barrels
-// 260-299: coalition-camp chapter pass (Ch. 10-12)
+// 260-289: coalition-camp chapter pass (Ch. 10-12)
 //   260 scouting maps + shadow vault trash cut (+XP chunk on the
 //       chapter-11 transition)
 //   270 Kanaglym: fewer undead (+XP chunk on the Kherriun award)
 //   280 no party dispel at the basement reveal
+// 290-299: ending and campaign handoff
+//   290 end at the Dragonspear victory celebration
 // 900-999: mod-wide choice components
 //   900/901 treasure from removed content: collect / remove
 //           (requires 210)
@@ -651,6 +653,31 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcut45b.bcs~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp280.tpa~
+
+// ============================================================
+// 290 — end at the Dragonspear victory celebration
+// ============================================================
+// Keep the playable victory and its public de Lancie/Bence exchange, then
+// let Dazzo end the campaign directly. The EET branch clones the installed
+// transition carrier and banks gear locally in BD4300; standalone uses SoD's
+// native credits endpoint. The murder, arrest, jail, and private codas never
+// launch. Original K#/AR0602/BD6100 resources remain untouched.
+
+BEGIN @290 DESIGNATED 290 GROUP @1005 LABEL ~csr_victory_ending~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4300.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdpalace.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddebug.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddebug.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddazzo.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbence.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddelanc.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdrumor3.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcorwij.dlg~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~120~ ~Component 290 (the direct victory ending) requires component 120 (the Hooded Man removed from the mid-campaign).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~130~ ~Component 290 (the direct victory ending) requires component 130 (the chapter rest-dreams removed).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 290 (the direct victory ending) requires component 185 (Entar Silvershield removed).~
+
+INCLUDE ~chriz-sod-remix/lib/comp290.tpa~
 
 // ============================================================
 // 900/901 — treasure from removed content (mod-wide choice)
