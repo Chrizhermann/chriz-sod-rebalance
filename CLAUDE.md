@@ -63,7 +63,7 @@ See `docs/research/01-rest-ambush-mechanic.md`.
 ## Verified EET-transition hard requirement (for the ending rework)
 On EET, SoD→BG2 requires the banked inventory to reach
 **`BD6100*K#ImportContainer`** because `ar0602.bcs` hardcodes that area-qualified source; the
-party does **not** need to load BD6100. The approved ending clones the currently installed
+party does **not** need to enter or display BD6100. The approved ending clones the currently installed
 `K#TELBGT.BCS`/`.CRE`, runs the clone from BD4300, and adds one cross-area container move before
 the clone's normal campaign transition. **Never modify the original** `K#TELBGT.BCS`/`.CRE`,
 `ar0602.bcs`, BD6100 resources, `CAMPAIGN.2DA`/`STARTARE.2DA`, or `ENDOFBG1` (third-party mods

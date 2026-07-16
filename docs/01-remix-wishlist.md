@@ -186,7 +186,7 @@ Implemented + installed + verified on the dev install (components 185/190/195):
 - **Ending pass scope CONFIRMED = pure removal, no rewrites:** the campaign ends at
   the post-Avernus victory celebration; the whole dream → Skie murder → arrest → trial
   → jail → breakout → endgame-hooded-man band is removed. EET banks the party from
-  BD4300 into `BD6100*K#ImportContainer` and enters BG2 without loading BD6100;
+  BD4300 into `BD6100*K#ImportContainer` and enters BG2 without the party entering BD6100;
   standalone ends natively from BD4300. Caelar as final boss reaffirmed — the
   Avernus/end-fight rework itself is item 13, a separate later pass. The precise
   celebration and handoff were approved on 2026-07-16 below.
@@ -308,7 +308,7 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   `bd_NeeraRomance6` are separate from BG2's `NeeraRomanceActive`, `NeeraLovetalks`,
   and `NEERA_ROMANCE`. Do not fake SoD-finale completion or synthesize a bridge.
 - **Direct platform endings:** on EET, clone the installed K# handoff, bank locally in
-  BD4300, move the bank to `BD6100*K#ImportContainer`, and enter SoA without visiting
+  BD4300, move the bank to `BD6100*K#ImportContainer`, and enter SoA without the party visiting
   BD6100; originals stay untouched. Standalone runs `EndCutSceneMode()`,
   `ContinueGame(FALSE)`, and `EndCredits()` directly from Dazzo.
 - **First-party tests on both platforms:** thorough EET static/runtime coverage plus

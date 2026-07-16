@@ -91,7 +91,9 @@ The EET branch therefore:
    `MoveContainerContents("BD4300*K#ImportContainer","BD6100*K#ImportContainer")`
 
 5. Dazzo creates the cloned carrier in `BD4300`; the clone performs the installed EET handoff
-   without ever loading the party into `BD6100`.
+   without ever moving the party into `BD6100` or displaying that area. The engine may
+   materialize/serialize BD6100's destination container while performing the cross-area move;
+   that storage operation is expected and is not the removed ambush sequence.
 
 The original `K#TELBGT.BCS`, `K#TELBGT.CRE`, `AR0602.BCS`, `BD6100` resources,
 `CAMPAIGN.2DA`, `STARTARE.2DA`, and `ENDOFBG1` remain byte-for-byte untouched. The ambush and
@@ -133,8 +135,9 @@ First-party verification covers both supported platforms, asymmetrically:
 - **EET:** static semantic verification plus a thorough runtime matrix: full party, solo,
   Imoen+Skie, a mod NPC, a dead in-party companion, empty/equipped/full/bagged inventories,
   save/reload during the playable celebration, repeat-use protection, and multiplayer smoke.
-  Marker items must arrive in AR0602 with exact eligible-item multiset equality, and BD6100 must
-  not be loaded as part of the new route.
+  Marker items must arrive in AR0602 with exact eligible-item multiset equality. BD6100 must
+  never become the party/current area or display its ambush; save serialization of its destination
+  container is allowed.
 - **Guard case:** a save with BD4300 already baked must stop visibly before banking, retain all
   gear, preserve control, and remain save/reload-safe.
 - **Standalone:** one first-party staged `BD4300 -> Dazzo -> credits -> menu` runtime smoke on a

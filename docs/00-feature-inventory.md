@@ -131,7 +131,7 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
   whole dream → Skie murder → arrest → trial → jail → escape → ambush chain. EET clones
   the installed K# handoff, banks in BD4300, transfers the bank to
   `BD6100*K#ImportContainer`, and
-  enters SoA without loading BD6100; standalone ends directly via native credits.
+  enters SoA without the party entering BD6100; standalone ends directly via native credits.
   Originals remain untouched. This pass completes Skie's survival, the endgame
   hooded-man removal, and Entar's final live-reference cleanup.
 

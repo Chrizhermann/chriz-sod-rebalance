@@ -244,7 +244,8 @@ EET invariant is the **destination** `BD6100*K#ImportContainer`, not physical en
 **Approved resolution:** add a local `K#ImportContainer` to BD4300; clone the currently installed
 `K#TELBGT.BCS/.CRE` at tail-install time; run the clone from BD4300; and patch only the clone to
 move `BD4300*K#ImportContainer` into `BD6100*K#ImportContainer` before its normal campaign move.
-This preserves every installed item sweep and stat-capture addition while never loading BD6100.
+This preserves every installed item sweep and stat-capture addition while never moving the party
+into or displaying BD6100; the cross-area action may still serialize its destination container.
 Original K# resources, AR0602, BD6100, campaign tables, and `ENDOFBG1` remain untouched. A missing
 local container must fail closed before banking so an already-baked BD4300 save cannot lose gear.
 
