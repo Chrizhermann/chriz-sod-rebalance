@@ -7,7 +7,8 @@ install's post-v0.6.1 copy. Closes the systemic audit left open by issue #5 (PT-
 **Verdict up front: no new actionable mirrors.** Every shipped component is either
 already skip-proof (comp245/280), defuses its mirror at the launch site
 (comp120/130/140/150+160), or is untouched by the mirror's vanilla replay
-(comp197/260/270). Three mirrors are watch items for the not-yet-built ending rework.
+(comp197/260/270). The approved ending design resolves its former watch items by preserving
+response 59's live scene and making the trial/transition launchers unreachable.
 
 ## 1. How the rig works (mechanism, verified from the decompile)
 
@@ -43,12 +44,12 @@ already skip-proof (comp245/280), defuses its mirror at the launch site
 | 44/45 | BDCUT203/204 | M'Khiin/Baeloth goblin scenes (#45 sets `BD_Baeloth_run_away`) | comp260 actor cuts nearby | **CLEAR** — mirrors only reposition/destroy/face; they spawn nothing we removed |
 | 46–49 | BDDDD1–4 A/B/C | The four chapter rest-dreams (BD0072) | comp130 | **CLEAR** — skipdrm.baf parks `bd_ddd=4`; dreams never launch, mirrors dead |
 | 50 | BDCUT08 | (chains bdcut09) | none | not ours |
-| 51 | BDCUT61A | **Trial entry** (chains bdcut61t) | ending rework (planned) | **WATCH** — the trial/jail removal must handle or defuse this mirror |
-| 52 | BDCUT57 | Belhifet staging (bdbelhif heal + dialog) | ending rework (planned) | **WATCH** |
-| 59 | BDCUT59 | (chains bdcut59a) | none | not ours |
+| 51 | BDCUT61A | **Trial entry** (chains bdcut61t) | ending cleanup (approved) | **RESOLVED INERT** — murder/arrest/trial launchers are removed; leave the unreachable mirror unchanged |
+| 52 | BDCUT57 | Belhifet staging (bdbelhif heal + dialog) | later Caelar/Avernus pass | **WATCH LATER** — outside the post-victory cleanup |
+| 59 | BDCUT59 | (chains bdcut59a) | ending cleanup (approved) | **PRESERVE** — this is the live return into the short BD4300 celebration; response and scene stay unchanged |
 | 60/61/62 | BDCUT45/45A/45B | Basement reveal + portal variants | comp280 | **FIXED by comp280** (v0.6.0) — both `bddispel`×6 mirrors (#61, #62) removed, verified; #60 carries no dispel |
-| 65/66 | BDCUT50/51 | Avernus scenes (bdpremat/bdcaelar) | ending rework (planned) | **WATCH** (only if those scenes are touched) |
-| 67 | BDCUT65 | **SoD→BG2 transition into BD6100** (party LeaveAreaLUA, then IMOEN2 dialog; launched by BDCUT64X, which is NOT itself skippable) | ending rework (planned) | **WATCH** — interacts with the EET hard requirement (party must end in BD6100); mirror #67 jumps the party in bd6100 and starts the IMOEN2 dialog |
+| 65/66 | BDCUT50/51 | Avernus scenes (bdpremat/bdcaelar) | later Caelar/Avernus pass | **WATCH LATER** — outside the post-victory cleanup |
+| 67 | BDCUT65 | **Vanilla SoD→BG2 transition into BD6100** (party LeaveAreaLUA, then IMOEN2 dialog; launched by BDCUT64X, which is NOT itself skippable) | ending cleanup (approved) | **RESOLVED INERT** — BDCUT64X/65 never launch; EET instead banks from BD4300 into `BD6100*K#ImportContainer` without loading the area |
 | 68 | BDCUT02 | Palace-intro assassins vs Imoen (sets `bd_001_plot=2`) | comp150/160 rework the palace flow | **CLEAR** — comp150's arrival rig (`baf/csrarr.baf`) pre-sets `BD_INTRO_IMOEN_CUT=1`, the exact gate on BD0103's launcher; scene never fires |
 
 Not skippable at all (no `BD_CUTSCENE_BREAKABLE` setter → **no mirror exists**):

@@ -119,10 +119,9 @@ chapter-pass docs only.
   role, and we may add our own content in his place in phase 2/3. **City chapter DONE
   (component 185, 2026-07-09):** unspawned from the plot-51 war council, the plot-56
   departure send-off rebuilt around Belt, Liia's roll-call drops his name, the
-  "weren't you killed?" resurrection reply gated. **Still deferred (epilogue-coupled):**
-  his BD0035 trial placement/guards, BDCUT62 trial/exile, and deletion of
-  BDENTAR.CRE/DLG — they die with the post-victory epilogue removal, and the trial
-  still references the CRE/DLG, so deleting them now would spam "creature not found."
+  "weren't you killed?" resurrection reply gated. **Superseded/resolved 2026-07-16:**
+  the approved ending makes BD0035/BDCUT62 unreachable, gates the last BDPALACE reference,
+  and leaves BDENTAR.CRE/DLG inert rather than deleting files that other mods may expect.
 - **Fresh-start/import party grant cut** (prologue §10, component 145): the vanilla
   default-party grant on fresh SoD starts is removed — you wake alone and gather your
   party in the city. Item 1's "keep everyone" applies to the *continuous* BG1→SoD
@@ -170,7 +169,8 @@ Implemented + installed + verified on the dev install (components 185/190/195):
     deferred.
   - **Full Corwin dialogue rewrite:** user finds SoD-Corwin's writing poor and wants a
     proper redo later; comp195 only removed her assassination residue, not rewrote her.
-  - **Epilogue-coupled Entar removal** (BD0035 trial, BDCUT62, BDENTAR.CRE/DLG).
+  - **Entar's final inert reference:** assigned to the approved 2026-07-16 ending cleanup;
+    BD0035/BDCUT62 become unreachable and BDENTAR.CRE/DLG remain harmless files.
 
 ## Decisions locked (2026-07-10, triage round)
 - **Prologue XP:** option (c) **24,000/char**, delivered as **Liia's quest reward** on
@@ -185,10 +185,11 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   as replacement bodies.
 - **Ending pass scope CONFIRMED = pure removal, no rewrites:** the campaign ends at
   the post-Avernus victory celebration; the whole dream → Skie murder → arrest → trial
-  → jail → breakout → endgame-hooded-man band (bd_plot 590–671, research/14) is
-  removed; straight to the BG2 handoff (EET: the preserved BD6100 seam; standalone:
-  native campaign end). Caelar as final boss reaffirmed — the Avernus/end-fight rework
-  itself is item 13, a separate later pass.
+  → jail → breakout → endgame-hooded-man band is removed. EET banks the party from
+  BD4300 into `BD6100*K#ImportContainer` and enters BG2 without loading BD6100;
+  standalone ends natively from BD4300. Caelar as final boss reaffirmed — the
+  Avernus/end-fight rework itself is item 13, a separate later pass. The precise
+  celebration and handoff were approved on 2026-07-16 below.
 - **Skie scope sharpened:** remove EVERYTHING else of her SoD plot involvement; she
   becomes the BG1-style talk-to-join recruit (research/15 has the surface: Beamdog's
   own JoinParty scaffold + her CRE already carries the BG1 soundset). **Fulfilled by
@@ -290,6 +291,30 @@ USER took a position). Statuses explicit — none of these are locked decisions 
 - **Implemented as component 225 in v0.6.3** and tail-installed plus semantically
   verified on the dev EET copy. Runtime verification waits for the next SoD playthrough;
   the live v0.5.0 install remains unchanged. Full trace: `docs/research/20-scrying-pool.md`.
+
+## Decisions locked (2026-07-16, post-victory ending)
+- **Short playable celebration in BD4300:** preserve BDCUT59/59A/59B, compress the
+  party's one-line victory-bark delays to about two seconds, keep de Lancie's public
+  acknowledgment and Bence's cheer/acknowledgment, then restore free control. Dazzo's
+  existing rest conversation is gated to `bd_plot=590` and is the deliberate endpoint.
+- **Everything after the celebration is removed:** no Bence "check on Skie," private
+  Waterdeep pitch, Corwin/Neera forced romance finales, other optional plot-590 coda,
+  sleep/dream, Skie corpse, Irenicus, arrest, trial, jail, escape, sewers, reunion,
+  Shadow-Thief ambush, or ambush movie. Skie and Imoen may both be in the party.
+- **Entar remains fully scrapped:** remove his final live SoD reference with the ending
+  cleanup while preserving unrelated chapter-7/8 BD0104 Coalition/refugee/Tiax content.
+  Retired resource files may remain inert for compatibility and reversibility.
+- **Neera's BG2 romance is unaffected:** SoD's `bd_neera_romanceactive` and
+  `bd_NeeraRomance6` are separate from BG2's `NeeraRomanceActive`, `NeeraLovetalks`,
+  and `NEERA_ROMANCE`. Do not fake SoD-finale completion or synthesize a bridge.
+- **Direct platform endings:** on EET, clone the installed K# handoff, bank locally in
+  BD4300, move the bank to `BD6100*K#ImportContainer`, and enter SoA without visiting
+  BD6100; originals stay untouched. Standalone runs `EndCutSceneMode()`,
+  `ContinueGame(FALSE)`, and `EndCredits()` directly from Dazzo.
+- **First-party tests on both platforms:** thorough EET static/runtime coverage plus
+  one staged standalone Dazzo-to-credits smoke. Stream/Discord testing supplements,
+  but does not replace, those checks. Full design:
+  `docs/plans/2026-07-16-post-victory-ending-design.md`.
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

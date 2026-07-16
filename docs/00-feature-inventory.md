@@ -43,7 +43,7 @@ live install remains on v0.5.0 and is not the implementation target.
 | 170 | The Korlasz jailbreak | Re-timed BD0116 fight on vanilla rematch scaffolding: rebuilt `csrkorl` (Mage 12, Slow+Confusion+Glitterdust sequencer) + named 6-member crew (Hasska/Vhast/Sillune/Porios/Grit/dying Fist) carrying the re-homed dungeon loot; difficulty-branched roster; HARDEST buff layer resolved by spell NAME; SCS detect-and-adapt. Stairs-top BD0102 hint beat re-times the trigger. | REQUIRE 140 |
 | 175 | XP ledger: Liia's reward after the jailbreak | The skipped dungeon carried ~24,700/char guaranteed XP; the jailbreak returns ~1,600/char in kills. Liia's return-beat close pays **24,000/char** as one quest reward (user option c, 2026-07-10; anchor-checked patch of csrcele state 2, award before DestroySelf). **Unit-corrected 2026-07-12: delivery is now `AddXPObject(Player1..6,24000)` — the original single `AddexperienceParty(24000)` divides among the party and paid only ~4,000/char (user-verified in-game).** | REQUIRE 170+180 |
 | 180 | Celebration + Caelar's proclamation | Victory beat on first walk into BD0102 (nobles + Fist dressing w/ click-dialogs, Liia toast / Belt seconds, BG1 register, palace locked for the night); opens the jailbreak-quest journal and hands over Caelar's proclamation naming the Bhaalspawn (`csrpam`); Liia return beat + Fist march after the jailbreak. | REQUIRE 140+150 |
-| 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. **City chapter only** (trial/BDCUT62/CRE-DLG deferred to the epilogue pass). | REQUIRE 140+150 |
+| 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. The approved ending pass owns the last inert BDPALACE reference; the unreachable trial files stay on disk. | REQUIRE 140+150 |
 | 187 | Assassination night set never spawns | Schedule-zeroes the nine always-placed BD0100 night actors (Corwin, three assassins, two guards, three corpses), preventing the one-frame render/pop that comp150's script sweep could not stop. The sweep remains as protection for saves with BD0100 already baked. | REQUIRE 150; pred `bd0100.are` |
 | 190 | Skie's second-night bedroom visit removed | A Skie-free dawn wake mirrors the two BD0103 night blocks and pre-sets `BD_MDD005=1` so they can never fire (party sleeps to dawn, `bd_plot` 54→55 as before); BDSKIE night root (state 16) sealed with False(). | REQUIRE 150 |
 | 195 | Assassination/poison references scrubbed | Zero-new-text cleanup after 150: reply/state False() gates + 2 ALTER_TRANS re-routes (BDSCHAEL 227 retire-commit moves onto the "ready to march" reply + EXIT; BDLIIA 13 "how fares Imoen?" → training advice) across Corwin/Eltan/Edwin/Liia/Fist/debug. de Lancie supply-poison quest explicitly out of scope. | REQUIRE 150 |
@@ -116,7 +116,7 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
   rewrite is always acceptable.
 - **Test on the dev copy**; live install read-only.
 - **Standalone BG:EE+SoD in scope** alongside EET — the ending replacement branches per
-  platform (EET handoff vs native campaign end).
+  platform (direct EET handoff from BD4300 vs native campaign end).
 - **No global locks** for zero-ambush areas or creature softening — decided per-chapter.
 - **No no-save/no-roll cheese anywhere** — shadowed souls (BDSHSOUL) banned in every SoD
   area; bone bats + the Unsleeping Guardian on the not-fun list. First realized in Coast
@@ -125,12 +125,15 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
 ### Narrative arc (locked, not yet built)
 - **Caelar Argent = main antagonist & final boss** (lore verified: crusade to free her
   uncle Aun Argent from Avernus).
-- **Remove the ENTIRE post-victory epilogue, no replacement** — dream, Skie murder,
-  arrest, trial, jail, breakout, endgame hooded-man; BG2 begins unexplained (original
-  BG1→BG2 feel). Bounded by the EET seams (trial/jail self-contained; the transition
-  must still end in BD6100 with the gear bank + K#TELBGT). This pass **unblocks**: Skie's
-  death removal, the endgame hooded-man, and the epilogue-coupled Entar cleanup (BD0035
-  trial placement, BDCUT62, BDENTAR.CRE/DLG deletion).
+- **End at a short playable BD4300 victory celebration** — keep the return, compact
+  party barks, de Lancie's public acknowledgment, Bence's cheer, and Dazzo's rest
+  conversation (gated to plot 590) as the endpoint. Remove every optional coda and the
+  whole dream → Skie murder → arrest → trial → jail → escape → ambush chain. EET clones
+  the installed K# handoff, banks in BD4300, transfers the bank to
+  `BD6100*K#ImportContainer`, and
+  enters SoA without loading BD6100; standalone ends directly via native credits.
+  Originals remain untouched. This pass completes Skie's survival, the endgame
+  hooded-man removal, and Entar's final live-reference cleanup.
 
 ### Companions (locked, partially shipped)
 - **Skie playable as a simple BG1-style talk-to-join recruit** — shipped by component
@@ -169,7 +172,7 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
 | Coldhearth Lich fight rework (Coast Way §3) | A dedicated lich pass (phylactery telegraph / power-down / SCS brain) |
 | Skie estate/gear inheritance | Optional follow-up only; the talk-to-join core and BG1 soundset are already shipped by 197 |
 | Full Corwin dialogue rewrite | Surface census prepped (docs/research/16); a later rewrite pass |
-| Epilogue-coupled Entar removal (BD0035 trial, BDCUT62, CRE/DLG) | The epilogue pass (deleting now spams "creature not found") |
+| Final live Entar-reference cleanup | Approved ending pass; false-gate the remaining BDPALACE reference and leave retired CRE/DLG inert |
 | Per-playthrough sequencer randomization (Korlasz) | Cheap roadmap note |
 | Rioters-instead-of-assassins street vignettes (prologue §4) | Roadmap |
 | Imoen BG1-death detection | Intentionally skipped — unconditionally present by design |
@@ -204,7 +207,7 @@ predates it.)*
 - **XP baseline trust**: calibrate against a real save near the BG2 transition.
 - **Per-area rest treatment:** component 100 already shipped the frequency-only 5×
   remap; pack-size and zero-ambush-area decisions remain per-chapter questions.
-- **Hooded-man tavern rumors (BDRUMOR3, ch 8/9/10)**: remove now or with the ending pass.
+- **Hooded-man tavern rumors (BDRUMOR3 states 7/20/37):** resolved — remove with the approved ending pass.
 - **Travel-ambush frequency + per-arena treatment** (BD0066 goblin horde first cut candidate).
 - **Prologue OPEN sign-offs**: §4 cut surface (OPEN#1), proclamation tone/delivery (§9/OPEN#3), comp150 beyond-spec gates (OPEN#4).
 

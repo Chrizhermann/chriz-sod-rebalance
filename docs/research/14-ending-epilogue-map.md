@@ -1,18 +1,22 @@
 # 14 — SoD Ending / Epilogue Chain (verified state-machine map)
 
-> Research data gathered by subagent 2026-07-10; verified against repo decompiles + dev install.
-> DATA ONLY — decisions live in `docs/design/` and `docs/01-remix-wishlist.md`.
+> Research data gathered 2026-07-10 and extended 2026-07-16; verified against repo
+> decompiles, the dev EET install, and native standalone SoD resources.
+> DATA ONLY — the approved disposition lives in
+> `docs/plans/2026-07-16-post-victory-ending-design.md` and `docs/01-remix-wishlist.md`.
 
 **Purpose:** the verified, link-by-link map of SoD's entire post-victory ending — Belhifet
 victory → celebration → Skie's murder → arrest → imprisonment → trial → verdict → escape →
-canon-party reunion → the Shadow-Thief ambush → the EET/BG2 handoff. Prep for the locked-but-
-undesigned "remove the whole epilogue" pass. Every claim carries `file:line` evidence.
+canon-party reunion → the Shadow-Thief ambush → the EET/BG2 handoff. The vanilla map remains
+source evidence for the approved removal; it is not a statement that those beats currently ship
+as removed. Every claim carries `file:line` evidence.
 
 **Sources:** `research/data/sod_baf/*.baf` (repo's 1232 decompiled SoD scripts); EET glue
 decompiled read-only from the dev install (`K#TELBGT.BCS`, `K#IMPORT.2DA`) into scratch;
 `BDRUMOR3.dlg` decompiled from the dev install. Dev install = `…dev eet install\` (read-only).
 The SoD scripts here are the **EET-imported** copies (K#-prefixed EET injections are baked into
-`BD6100.baf` etc.), so this is the **EET path**; the standalone path is inferred (§5).
+`BD6100.baf` etc.). Native `BD6100.BCS` was also extracted/decompiled read-only from standalone
+SoD on 2026-07-16, so §5 is now verified rather than inferred.
 
 ---
 
@@ -47,10 +51,11 @@ the Avernus descent (500) to the BG2 jump (700). Chapter is a parallel axis (`ch
 | 690 | 13 | BD6100 | Ambush resolves; **`CreateCreatureObject("K#TELBGT",Player1,…)`** | `BD6100.baf:31-127` |
 | **700** | →SoA | — | `K#TELBGT`: bank gear → `K#ImportContainer`/`K#IMPORT`; `INTRO15F`; **`MoveToCampaign("SoA")`** | `K#TELBGT.BCS` (dev install) |
 
-**Removable block = bd_plot 590 → 671** (celebration + murder + arrest + jail + trial + verdict +
-escape + reunion). **Preserved handoff = BD6100 (680–700)** + `K#TELBGT` (§4). The design must
-re-time: after Belhifet's death (570) / Dragonspear return (586), deliver the party into BD6100
-with a full inventory, skipping everything in between.
+In vanilla, `bd_plot 590→671` carries the sleep/murder/arrest/jail/trial/escape/reunion band and
+BD6100 carries 680→700. The approved remix instead retains the public BD4300 celebration at
+plot 590, ends through Dazzo, and makes `BDCUT60` onward plus BD6100 unreachable. The preserved
+EET invariant is the **destination** `BD6100*K#ImportContainer`, not physical entry into BD6100
+(§4).
 
 ---
 
@@ -78,9 +83,10 @@ with a full inventory, skipping everything in between.
   night… you climb into your own bedroll, falling instantly into a deep sleep."* It seats the
   party as `SEQ_SLEEP`, flags the area `DREAMAREA`, creates the cutscene director `bdcutid`, and
   chains `bdcut60x` (`BDCUT60.baf:1-49`).
-- **The launch of `bd_plot 590` + `bdcut60` is dialogue-driven** — no `.baf` sets it except the
-  debug script (`BDDEBUG.baf:307-309`: `SetGlobal bd_plot 590` + `StartCutSceneEx("bdcut60")`).
-  Tracing the exact production dialog is an OPEN item (§7), but the mechanism is unambiguous.
+- **The launch of `bd_plot 590` + `bdcut60` is dialogue-driven.** `BDDELANC` state 77 sets
+  `bd_plot=590`; its public victory chain runs through state 83 into `BDBENCE` 64–66. Sergeant
+  Dazzo's two terminal routes (`BDDAZZO` states 2 and 3) both run `StartCutSceneMode()` and
+  `StartCutSceneEx("bdcut60",FALSE)`. `BDDEBUG.baf:307-309` mirrors the same launch for QA.
 
 ### 1.3 The Skie murder ("dream") — `bdcut60x` → `bdcut60a`
 - `BDCUT60X.baf` stages the dream: creates **`bdskie`** (Skie) and **`bdireni` (the Hooded Man =
@@ -200,9 +206,10 @@ with a full inventory, skipping everything in between.
 
 ---
 
-## 4. The EET hard requirement — VERIFIED with evidence
+## 4. The actual EET invariant — VERIFIED with evidence
 
-**The party must reach `BD6100` and `K#TELBGT` must fire.** Verified chain:
+**Vanilla sends the party through BD6100, but BG2 only hard-requires the gear in
+`BD6100*K#ImportContainer`.** Verified chain:
 1. `BD6100.baf:126` `CreateCreatureObject("K#TELBGT",Player1,0,0,0)` (after the party is knocked
    out, `bd_finale`=5).
 2. **`K#TELBGT.BCS`** (decompiled from dev install) does, in order:
@@ -218,78 +225,83 @@ with a full inventory, skipping everything in between.
      ("INTRO15F")`, then **`MoveToCampaign("SoA")`** + `DestroySelf`.
    - Reads **`ENDOFBG1`** to gate the BG1-NPC (C#Ajantis…) blocks — confirming that global is
      load-bearing.
-3. `K#IMPORT.2DA/.ITM/.STO` are the gear vault the BG2 side restores from. Per CLAUDE.md
-   `ar0602.bcs` (BG2 side; not re-decompiled here) **hardcodes BD6100 as the gear source** and
-   reads this vault in Irenicus's dungeon.
+3. `K#IMPORT.2DA/.ITM/.STO` are the named-item vaults the BG2 side restores from. The installed
+   `AR0602.BCS` independently moves the ordinary inventory from the exact source
+   `BD6100*K#ImportContainer` into its local import container. It does not test that the party
+   ever visited BD6100.
 
 **NEVER-modify (restated, with why):**
 | File / global | Role | Evidence |
 |---|---|---|
 | `K#TELBGT.BCS` | Runs the banking + `MoveToCampaign("SoA")` | decompiled (dev install) |
 | `K#TELBGT.CRE` | Carrier created in BD6100 to run that script | `BD6100.baf:126` |
-| `K#ImportContainer`, `K#IMPORT.STO/.ITM/.2DA` | The cross-campaign gear vault | `K#TELBGT.BCS` |
+| Existing `BD6100*K#ImportContainer`, `K#IMPORT.STO/.ITM/.2DA` | The cross-campaign gear vaults | `K#TELBGT.BCS`; installed `AR0602.BCS` |
 | `K#REST.SPL` / `K#UNREST.SPL` | Sleep/wake used by the handoff | `BD6100.baf:84-89`; `K#TELBGT.BCS` |
-| `ar0602.bcs` | BG2-side reader; hardcodes BD6100 gear source | CLAUDE.md (inherited) |
+| `AR0602.BCS` | BG2-side reader; hardcodes BD6100 gear source | decompiled dev install |
 | `CAMPAIGN.2DA` / `STARTARE.2DA` | Campaign routing | CLAUDE.md (inherited); third-party mods patch |
 | `ENDOFBG1` (global) | Gates BG1-NPC import logic | `K#TELBGT.BCS` |
 
-Implication for removal: whatever re-timing feeds the party into BD6100, the party must arrive
-**with a full inventory** so `K#TELBGT` banks it. In vanilla flow the gear is confiscated at the
-trial (`Equipment_p1`/`Equipment_party`) and returned before BG2; if the trial is cut, gear
-handling must be re-plumbed so nothing is missing at the BD6100 handoff.
+**Approved resolution:** add a local `K#ImportContainer` to BD4300; clone the currently installed
+`K#TELBGT.BCS/.CRE` at tail-install time; run the clone from BD4300; and patch only the clone to
+move `BD4300*K#ImportContainer` into `BD6100*K#ImportContainer` before its normal campaign move.
+This preserves every installed item sweep and stat-capture addition while never loading BD6100.
+Original K# resources, AR0602, BD6100, campaign tables, and `ENDOFBG1` remain untouched. A missing
+local container must fail closed before banking so an already-baked BD4300 save cannot lose gear.
 
 ---
 
-## 5. Standalone (non-EET) SoD end path — how it differs
+## 5. Standalone (non-EET) SoD end path — verified
 
 - This decompile is the **EET** copy: the `K#*` actions are EET injections baked into
   `BD6100.baf`. The base-game beats (fog → Shadow-Thief ambush → knockout → movie `sodcin05`)
   are the shared SoD content; the EET-only tail is `CreateCreatureObject("K#TELBGT",…)` →
   `MoveToCampaign("SoA")`.
-- On **standalone** BG:EE+SoD (no BG2), the ambush cutscene + `sodcin05` end the SoD campaign
-  (returns to menu / "your story continues"); there is no `K#TELBGT`, no `MoveToCampaign`.
-- **Not diffable locally:** the clean BG:EE dev install
-  (`…dev clean install\`) has **no `BD6100.BCS`** in its KEY (the SoD DLC isn't merged there), so
-  a byte-diff of the standalone script wasn't possible. Treat §5 as **inferred**; confirm on a
-  clean BG:EE+SoD install if the standalone ambush/`sodcin05` ending needs separate handling.
+- On **standalone** BG:EE+SoD (no BG2), both native BD6100 terminal paths run
+  `EndCutSceneMode()`, `ContinueGame(FALSE)`, and `EndCredits()` after the ambush/movie. There is
+  no `K#TELBGT` or `MoveToCampaign`.
+- Verified 2026-07-16 by extracting and decompiling native `BD6100.BCS` from standalone SoD.
+  The approved replacement calls the native campaign-termination actions from Dazzo in BD4300;
+  it does not load BD6100 or replay `sodcin05`.
 
 ---
 
 ## 6. Removal surface — everything a full epilogue cut must re-home or re-time
 
-**Clean seams (verified — answers CLAUDE.md's claim precisely):**
-- **Entry to the trial/jail block = `BDCUT61`** (the companion-strip + `chptxt13` + move to
-  bd0112). ✔ But the *removable epilogue starts earlier*: the celebration (`bd_plot 590`,
-  `BDCUT60`) + Skie murder (`BDCUT60X`/`60A`) precede BDCUT61. A "remove the whole epilogue" cut
-  must start at the celebration entry (bd_plot 590), not at BDCUT61.
-- **Exit = `BD6200`** → via `BDCUT64X`→`BDCUT65`→**BD6100**. ✔ Everything from 590 to 671 is the
-  removable band; BD6100 (680-700) is the preserved EET handoff.
+**Approved live seam:** preserve `BDCUT59/59A/59B` and the short public celebration in BD4300.
+Dazzo replaces both `BDCUT60` launches with the platform endpoint. Murder/arrest roots plus
+production/debug launchers into the retired band are false-gated, making `BDCUT60` onward and
+BD6100 unreachable. Retired resources remain on disk as inert, reversible content.
 
-**Areas:** BD4100 (celebration), BD0112 (cell), **BD0035** (trial — empty area script), BD0104
-(holding — **DUAL-USE**, keep the ch7/8 refugee/Tiax function), BD0105 (escape route), BD6000
-(sewers), BD6200 (reunion) — all removable. **BD6100 = PRESERVE.**
+**Areas made unreachable:** BD4100, BD0112, **BD0035** (trial — empty area script), the
+chapter-13 use of BD0104, BD0105, BD6000, BD6200, and BD6100. BD0104 itself is **DUAL-USE**:
+its earlier Coalition/refugee/Tiax content remains byte-for-byte intact. BD4300 remains live.
 
-**Cutscenes (removable):** `BDCUT60`, `60X`, `60A`, `60B`, `60Y`; `BDCUT61`, `61A`, `61T`;
-`BDCUT62`; `BDCUT63`; `BDCUT64`, `64A`, `64B`, `64X`; `BDCUT65`. **Preserve:** the BD6100 ambush
-machine + `K#TELBGT`.
+**Cutscenes made unreachable:** `BDCUT60`, `60X`, `60A`, `60B`, `60Y`; `BDCUT61`, `61A`, `61T`;
+`BDCUT62`; `BDCUT63`; `BDCUT64`, `64A`, `64B`, `64X`; `BDCUT65`; and the BD6100 ambush machine.
+**Preserve live:** `BDCUT59`, `59A`, `59B`. Clone the installed K# handoff for EET; never edit
+the original.
 
 **Companions:** all stripped at `BDCUT61` (18 `bd_<name>_party_epilogue` globals). Only the canon
 5 (Imoen/Minsc/Dynaheir/Khalid/Jaheira) reassemble at BD6200. SoD-only joinables (Corwin, Glint,
 Rasaad, Baeloth, Viconia, Voghiln, M'Khiin, Edwin, Safana, Dorn, Neera, Aura, `L#BRIST`) simply
 vanish. Their only "ending talk" is the horror bark at `bd_plot 591` (`BD4100.baf:126-522`).
+Under the approved route BDCUT61 never launches, so the current party—including Skie, Imoen,
+and mod NPCs—remains assembled until the platform handoff and no horror bark fires.
 
-**Entar Silvershield deferred pieces (coupling flagged):**
+**Entar Silvershield coupling and resolution:**
 - `BDENTAR.CRE` + `BDENTAR.dlg` exist in the dev override. **They are used in the chapter-7 Ducal
   Palace scene** (`BD0102.baf:31-268`, and `BDPALACE.baf:58-64`), which **introduces Skie and her
   father** — *not* only the trial. **Deleting `BDENTAR.cre/.dlg` therefore breaks BD0102/BDPALACE
-  unless that scene is also removed/rehomed.** Flag this coupling before any deletion.
+  unless that scene is also removed/rehomed.** Component 185 has since removed the BD0102 Entar
+  spawns/staging; the approved ending cleanup false-gates the last live `BDPALACE.BCS` reference.
+  `BDENTAR.CRE/.DLG` remain inert rather than being destructively deleted.
 - Trial guards: **`bdff1697`** ("BDGU1697") + "Entar Guard 1/2" (`BDCUT62.baf:5-14`) — trial-only,
   safe to drop with the trial.
 - Journal residue naming Entar: `BD0120.baf:7551-7576` (BG1 "Rise of Sarevok" erase-block — a
   *different*, BG1-era context; do not conflate).
 
-**Hooded-man residue:** `BDRUMOR3.dlg` ch8/9/10 rumor lines (§2); `BDIRENI` actor + `bdcut60x`/
-`bdcut63`; the four rest-dreams (doc 09).
+**Hooded-man residue resolution:** false-gate `BDRUMOR3` states 7/20/37; the `BDIRENI` actor and
+`bdcut60x`/`bdcut63` are unreachable; component 130 already suppresses the four rest-dreams.
 
 **Pursuit-mob scripts:** `BDFIST60`, `BDFISTCE`, `BDCHAINS`, `BDSTONE`, `BDSEWER` ("avenge Skie").
 
@@ -298,28 +310,21 @@ vanish. Their only "ending talk" is the horror bark at `bd_plot 591` (`BD4100.ba
 
 ---
 
-## 7. OPEN questions (for `docs/design/`, not decided here)
+## 7. Design questions — one open, the ending mechanics resolved
 
 1. **Belhifet placement (parked on the wishlist).** Today Belhifet is the ch12 final boss
    (`BD4700`) and Caelar is redeemed/sacrificed (`bd_caelar_fate`). The remix wants **Caelar as
    the main antagonist & final boss** — so: keep Belhifet as a fight *before* Caelar, or have
    Caelar *defeat/replace* Belhifet in a scene (Belhifet defeated by Caelar)? This reshapes
    BD4700 + BDCUT57/57A + `bd_caelar_fate`.
-2. **The ambush is the one load-bearing hooded-man beat.** BD6100 = the Shadow Thieves capturing
-   the party *for Irenicus* — and it's the mandatory EET handoff. Removing "the hooded man" while
-   preserving the handoff means **re-motivating or minimizing the ambush's framing** (why is the
-   party captured, if not by Irenicus's agents?). How to keep it as a clean mechanical seam?
-3. **Re-timing seam.** After Belhifet's death (570) / Dragonspear return (586), how to deliver the
-   party to BD6100 (680) with **full inventory** (§4), skipping 590-671? Who sets `bd_plot`
-   forward, and where do the canon-5 (Imoen/Jaheira/Khalid/Minsc/Dynaheir) get assembled if BD6200
-   is cut? (Note: EET re-establishes them in Irenicus's dungeon regardless.)
-4. **Skie.** Kept playable per the wishlist; her murder is the epilogue's ignition. Confirm Skie
-   survives to the handoff (or is written out cleanly), and decide whether Entar's BD0102 palace
-   introduction of Skie is kept, cut, or rehomed (couples to the `BDENTAR.cre/.dlg` deletion).
-5. **BD0104 dual-use.** Preserve the ch7/8 refugee/Tiax function while removing the ch13 jail use.
-6. **`bd_player_exiled` two-branch verdict.** Fully cut, or is any exile/escape flavor worth
-   keeping in a re-motivated departure from Dragonspear?
-7. **Precise `bd_plot 590` production trigger.** Confirm which dialogue sets 590 + launches
-   `bdcut60` (only `BDDEBUG` mirrors it in the `.baf` set); needed to place the removal seam.
-8. **Standalone path (§5).** Verify on a clean BG:EE+SoD install whether the non-EET
-   ambush/`sodcin05` ending needs its own handling.
+2. **Resolved — ambush:** remove it entirely; no re-motivation. EET uses the container invariant.
+3. **Resolved — handoff:** Dazzo runs the installed K# clone from BD4300; the bank moves across
+   areas, while BG2 recreates its own opening party normally.
+4. **Resolved — Skie/Entar:** Skie survives in the party; Entar's last live reference is gated;
+   retired files remain inert.
+5. **Resolved — BD0104:** preserve all earlier Coalition/refugee/Tiax content; chapter-13 use is
+   unreachable.
+6. **Resolved — verdict:** fully cut; no exile/escape flavor remains.
+7. **Resolved — production trigger:** BDDELANC 77 sets plot 590; BDDAZZO states 2/3 launch
+   BDCUT60. Both Dazzo endpoints are replaced; the debug launcher is retired.
+8. **Resolved — standalone:** native termination is verified and called directly from Dazzo.
