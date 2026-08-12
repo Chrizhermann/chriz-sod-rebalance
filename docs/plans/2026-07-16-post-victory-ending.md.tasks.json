@@ -5,37 +5,37 @@
     {
       "id": "verifier-red",
       "title": "Add and run the failing ending verifier",
-      "status": "pending",
+      "status": "completed",
       "depends_on": []
     },
     {
       "id": "component-290",
       "title": "Implement component 290 for EET and standalone",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["verifier-red"]
     },
     {
       "id": "eet-scratch",
       "title": "Prove positive and negative EET installs on disposable copies",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["component-290"]
     },
     {
       "id": "standalone-scratch",
       "title": "Prove the standalone install on a disposable merged-SoD copy",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["component-290"]
     },
     {
       "id": "review-dev-install",
       "title": "Review and tail-install component 290 once on dev EET",
-      "status": "pending",
+      "status": "completed",
       "depends_on": ["eet-scratch", "standalone-scratch"]
     },
     {
       "id": "eet-runtime",
       "title": "Run and record the full EET runtime matrix",
-      "status": "pending",
+      "status": "in_progress",
       "depends_on": ["review-dev-install"]
     },
     {
@@ -57,5 +57,5 @@
       "depends_on": ["docs"]
     }
   ],
-  "lastUpdated": "2026-07-16T15:38:49+09:00"
+  "lastUpdated": "2026-07-17T00:22:15.4568778+09:00"
 }
