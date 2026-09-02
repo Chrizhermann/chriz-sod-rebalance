@@ -1,6 +1,10 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.4~
+VERSION ~v0.6.5~
+
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
+END
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -214,6 +218,12 @@ COPY_EXISTING ~bd5100.bcs~ ~override~
   Global("bd_unnamed_ugr","bd5100",0)~
   END
 BUT_ONLY
+
+LAF csr_disable_bdscry_picker_route
+  STR_VAR
+    csr_scry_flag = ~bd_sddd12_hood~
+    csr_scry_component = ~120~
+END
 
 COMPILE ~chriz-sod-remix/dlg/csrhood.d~
 

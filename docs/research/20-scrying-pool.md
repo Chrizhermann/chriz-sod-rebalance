@@ -29,7 +29,7 @@ The pool object uses `BDODSCRY.BCS` in BD1200 at approximately `(1325,2095)`.
 4. Vanilla supplies two Essences, so they pay for old visions two and three. The actual
    vanilla economy was **first vision free, then one Essence for each remaining vision**.
 
-The old picker used states 0 and 4 of `BDSCRY.DLG`:
+The current no-Aura `BDSCRY.DLG` has four states and uses state 0 as its only picker:
 
 | Choice | Local once-flag | Old route | Staging |
 |---|---|---|---|
@@ -96,10 +96,11 @@ group.
 - The existing 3,000 party-total reward on the third scepter remains untouched.
 - `BD1200.ARE` retains the original Shelf Essence and all three scepters. The missing Essence
   is appended to `Sarcophagus01` without restoring `BDWIGHDD` or overwriting its scepter.
-- Component 120 already False-gates the Hooded-Man transitions in `BDSCRY` states 0 and 4;
-  component 225 False-gates the Imoen and Caelar transitions there as well. The dialog file
-  and its state structure remain installed, preserving Aura's state-0 interjection target,
-  but the pool object no longer launches the dialog at all.
+- Component 120 False-gates every Hooded-Man picker route by its
+  `bd_sddd12_hood=0` trigger; component 225 does the same for Imoen and Caelar. A guarded
+  guarded helper requires the current no-Aura four-state layout and one route for each
+  semantic flag, rejecting changed shapes. The dialog file and its existing state structure
+  remain installed, but the pool object no longer launches the dialog at all.
 - The old `BDSCRY01`–`BDSCRY07` resources remain on disk as unreachable dead code. There is
   no live area travel, cutscene-mode entry, creature creation, dialog continuation, retry
   loop, or CUTSKIP path from the pool.
