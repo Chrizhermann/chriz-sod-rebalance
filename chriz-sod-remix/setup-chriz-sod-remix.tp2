@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.3~
+VERSION ~v0.6.4~
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -407,6 +407,21 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 1
 INCLUDE ~chriz-sod-remix/lib/comp195.tpa~
 
 // ============================================================
+// 210 — Coast Way Forest (BD7000) removed; Rasaad at the camp
+// ============================================================
+// The vampire-hunters map never appears on the worldmap (its
+// static WMP visibility flag is the ONLY thing that reveals it —
+// no script does). Rasaad's recruitment moves to the Flaming Fist
+// camp on BD1000, cloned from his verified BD7000 state machine.
+// docs/design/chapters/02-coastway.md §2.
+
+BEGIN @210 DESIGNATED 210 GROUP @1002 LABEL ~csr_no_bd7000~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7000.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp210.tpa~
+
+// ============================================================
 // 197 — Prologue: Skie becomes a plain talk-to-join recruit
 // ============================================================
 // The vanilla palace meeting ran her full SoD plot opener ("I heard you
@@ -460,21 +475,6 @@ BEGIN @200 DESIGNATED 200 GROUP @1002 LABEL ~csr_coastway_field~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp200.tpa~
-
-// ============================================================
-// 210 — Coast Way Forest (BD7000) removed; Rasaad at the camp
-// ============================================================
-// The vampire-hunters map never appears on the worldmap (its
-// static WMP visibility flag is the ONLY thing that reveals it —
-// no script does). Rasaad's recruitment moves to the Flaming Fist
-// camp on BD1000, cloned from his verified BD7000 state machine.
-// docs/design/chapters/02-coastway.md §2.
-
-BEGIN @210 DESIGNATED 210 GROUP @1002 LABEL ~csr_no_bd7000~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7000.are~) @9000
-
-INCLUDE ~chriz-sod-remix/lib/comp210.tpa~
 
 // ============================================================
 // 215 — XP ledger: Coast Way Forest removal compensated

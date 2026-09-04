@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install pinned WeiDU 249
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output weidu.zip \
+            https://github.com/WeiDUorg/weidu/releases/download/v249.00/WeiDU-Linux-249-amd64.zip
+          echo "812da3eedd141ada27bb91469ff5da78a2709732949777b37b9ead9b67f89af0  weidu.zip" | sha256sum --check --strict
+          unzip -q weidu.zip
+          chmod +x WeiDU-Linux/weidu
+          sudo mv WeiDU-Linux/weidu /usr/local/bin/weidu
+
+      - name: Parse-check installer and libraries
+        run: |
+          weidu --noautoupdate --nogame --parse-check TP2 chriz-sod-remix/setup-chriz-sod-remix.tp2
+          while IFS= read -r library; do
+            weidu --noautoupdate --nogame --parse-check TPA "$library"
+          done < <(find chriz-sod-remix/lib -type f -name '*.tpa' -print | LC_ALL=C sort)
+
+      - name: Run regression tests
+        run: python3 -m unittest discover -s tests -v

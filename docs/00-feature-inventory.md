@@ -6,7 +6,7 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.3, 31
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.4, 31
 component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
@@ -83,7 +83,7 @@ BD7000 and set `csr_treasure_removed=1`. It is not one of the 30 installed compo
 
 ### Meta
 
-`chriz-sod-remix` v0.6.3, tail-installable WeiDU mod; 31 component declarations in 5
+`chriz-sod-remix` v0.6.4, tail-installable WeiDU mod; 31 component declarations in 5
 install GROUPs; 30 selected components are installed on dev (901 is the exclusive
 unchosen alternative); all in-place patches with loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
