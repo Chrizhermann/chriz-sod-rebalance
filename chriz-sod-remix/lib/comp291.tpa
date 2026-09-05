@@ -1,0 +1,133 @@
+// Component 291: append-only repair for component 290's EET carrier launch.
+// Full cutscene mode suspends ordinary AI scripts. Installed BD6100 releases
+// it and enables lite mode before creating K#TELBGT; use the same boundary.
+// Only BDDAZZO.DLG and the private CSRETBGT.BCS may change. All preflights run
+// before either write, and an already-corrected installation is byte-exact no-op.
+
+OUTER_SPRINT csr291_nl ~%MNL%?%LNL%~
+OUTER_SET csr291_signatures = 0
+ACTION_FOR_EACH csr291_resource IN ~K#TELBGT.BCS~ ~K#TELBGT.CRE~ ~AR0602.BCS~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr291_resource%~ BEGIN
+    OUTER_SET csr291_signatures += 1
+  END
+END
+ACTION_IF (csr291_signatures != 3) BEGIN
+  FAIL ~chriz-sod-remix #291: expected all three EET handoff resources, found %csr291_signatures%; refusing an absent or partial EET signature.~
+END
+ACTION_FOR_EACH csr291_resource IN ~BDDAZZO.DLG~ ~CSRETBGT.BCS~ BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr291_resource%~ BEGIN
+    FAIL ~chriz-sod-remix #291: component 290 resource %csr291_resource% is missing.~
+  END
+END
+
+// Compare complete terminal actions, bound to their numeric state/transition
+// records. Only CR/LF differences are normalized; whitespace inside quoted
+// names must not disguise a different global, resource, or object.
+OUTER_SPRINT csr291_old_action ~SetGlobal("CSR_ENDING_USED","GLOBAL",1)EraseJournalEntry(266908)StartCutSceneMode()FadeToColor([1.0],0)CreateCreatureObject("CSRETBGT",Player1,0,0,0)~
+OUTER_SPRINT csr291_new_action ~SetGlobal("CSR_ENDING_USED","GLOBAL",1)EraseJournalEntry(266908)StartCutSceneMode()FadeToColor([1.0],0)EndCutSceneMode()SetCutSceneLite(TRUE)CreateCreatureObject("CSRETBGT",Player1,0,0,0)~
+OUTER_SET csr291_old_dazzo = 0
+OUTER_SET csr291_new_dazzo = 0
+COPY_EXISTING - ~BDDAZZO.DLG~ ~override~
+  PATCH_IF (SOURCE_SIZE < 0x34) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO]: truncated DLG header.~
+  END
+  READ_ASCII 0 csr291_sig (8)
+  PATCH_IF NOT (~%csr291_sig%~ STRING_EQUAL_CASE ~DLG V1.0~) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO]: expected DLG V1.0.~
+  END
+  READ_LONG 0x08 csr291_states
+  READ_LONG 0x0c csr291_state_off
+  READ_LONG 0x10 csr291_transitions
+  READ_LONG 0x14 csr291_transition_off
+  READ_LONG 0x28 csr291_action_off
+  READ_LONG 0x2c csr291_actions
+  PATCH_IF ((csr291_states < 4) OR (csr291_state_off < 0x34) OR
+            (csr291_state_off + csr291_states * 0x10 > SOURCE_SIZE) OR
+            (csr291_transitions < 1) OR (csr291_transition_off < 0x34) OR
+            (csr291_transition_off + csr291_transitions * 0x20 > SOURCE_SIZE) OR
+            (csr291_actions < 1) OR (csr291_action_off < 0x34) OR
+            (csr291_action_off + csr291_actions * 8 > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO]: invalid state/transition/action tables.~
+  END
+  PATCH_FOR_EACH csr291_state IN 2 3 BEGIN
+    SET csr291_state_base = csr291_state_off + csr291_state * 0x10
+    READ_LONG (csr291_state_base + 4) csr291_first
+    READ_LONG (csr291_state_base + 8) csr291_count
+    PATCH_IF ((csr291_count != 1) OR (csr291_first < 0) OR
+              (csr291_first >= csr291_transitions)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO state %csr291_state%]: expected one valid terminal transition.~
+    END
+    SET csr291_transition = csr291_transition_off + csr291_first * 0x20
+    READ_LONG csr291_transition csr291_flags
+    READ_LONG (csr291_transition + 0x10) csr291_action_index
+    PATCH_IF (((csr291_flags BAND 0xc) != 0xc) OR (csr291_action_index < 0) OR
+              (csr291_action_index >= csr291_actions)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO state %csr291_state%]: expected an EXIT transition with a valid action.~
+    END
+    SET csr291_entry = csr291_action_off + csr291_action_index * 8
+    READ_LONG csr291_entry csr291_string_off
+    READ_LONG (csr291_entry + 4) csr291_string_len
+    PATCH_IF ((csr291_string_off < 0x34) OR (csr291_string_len < 1) OR
+              (csr291_string_off + csr291_string_len > SOURCE_SIZE)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO state %csr291_state%]: action string is out of bounds.~
+    END
+    READ_ASCII csr291_string_off csr291_action (csr291_string_len)
+    INNER_PATCH_SAVE csr291_action ~%csr291_action%~ BEGIN
+      REPLACE_TEXTUALLY ~[%MNL%%LNL%]~ ~~
+    END
+    PATCH_IF (~%csr291_action%~ STRING_EQUAL_CASE ~%csr291_old_action%~) BEGIN
+      SET csr291_old_dazzo += 1
+    END ELSE PATCH_IF (~%csr291_action%~ STRING_EQUAL_CASE ~%csr291_new_action%~) BEGIN
+      SET csr291_new_dazzo += 1
+    END ELSE BEGIN
+      PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO state %csr291_state%]: endpoint differs from both the original and corrected component 290 action lists.~
+    END
+  END
+  PATCH_IF NOT (((csr291_old_dazzo = 2) AND (csr291_new_dazzo = 0)) OR
+                ((csr291_old_dazzo = 0) AND (csr291_new_dazzo = 2))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #291 [BDDAZZO]: mixed endpoint versions; refusing to guess.~
+  END
+
+// Match the entire first guard block. The existing numeric diagnostic strref
+// and decompiler comments are retained. No installed third-party capture block
+// or inventory action is changed, removed, reordered, or run as a cutscene.
+OUTER_SPRINT csr291_guard_head ~^IF%csr291_nl%  OR(2)%csr291_nl%    !AreaCheck("BD4300")%csr291_nl%    !Exists("K#ImportContainer")[^%WNL%]*%csr291_nl%THEN%csr291_nl%  RESPONSE #100%csr291_nl%    DisplayStringNoName(Player1,[0-9]+)[^%WNL%]*%csr291_nl%    FadeFromColor(\[1\.0\],0)%csr291_nl%~
+OUTER_SPRINT csr291_guard_tail ~    EndCutSceneMode()%csr291_nl%    SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)%csr291_nl%    DestroySelf()%csr291_nl%END~
+OUTER_SET csr291_old_guard = 0
+OUTER_SET csr291_new_guard = 0
+COPY_EXISTING - ~CSRETBGT.BCS~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~%csr291_guard_head%%csr291_guard_tail%~ csr291_old_guard
+    COUNT_REGEXP_INSTANCES ~%csr291_guard_head%    SetCutSceneLite(FALSE)%csr291_nl%%csr291_guard_tail%~ csr291_new_guard
+    PATCH_IF NOT (((csr291_old_guard = 1) AND (csr291_new_guard = 0)) OR
+                  ((csr291_old_guard = 0) AND (csr291_new_guard = 1))) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #291 [CSRETBGT guard]: first block differs from both the original and corrected component 290 guard.~
+    END
+    READ_ASCII 0 csr291_script (BUFFER_LENGTH)
+    PATCH_IF (INDEX(~%csr291_guard_head%~ ~%csr291_script%~) != 0) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #291 [CSRETBGT guard]: safety guard is not the first script block.~
+    END
+  END
+
+// All validation has succeeded. Each resource can independently already be
+// corrected; write only the old resource, preserving a fully current install.
+ACTION_IF (csr291_old_guard = 1) BEGIN
+  COPY_EXISTING ~CSRETBGT.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      COUNT_REGEXP_INSTANCES ~FadeFromColor(\[1\.0\],0)%csr291_nl%    EndCutSceneMode()%csr291_nl%    SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)~ csr291_count
+      PATCH_IF (csr291_count != 1) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #291 [CSRETBGT guard]: expected one failure-cleanup action sequence.~
+      END
+      REPLACE_TEXTUALLY ~FadeFromColor(\[1\.0\],0)%csr291_nl%    EndCutSceneMode()%csr291_nl%    SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)~ ~FadeFromColor([1.0],0)
+    SetCutSceneLite(FALSE)
+    EndCutSceneMode()
+    SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)~
+    END
+  BUT_ONLY
+END
+ACTION_IF (csr291_old_dazzo = 2) BEGIN
+  COMPILE ~chriz-sod-remix/dlg/csr290eet.d~
+END
+ACTION_IF ((csr291_old_guard = 0) AND (csr291_old_dazzo = 0)) BEGIN
+  PRINT ~Component 290 already has the corrected EET script handoff; no resources changed.~
+END

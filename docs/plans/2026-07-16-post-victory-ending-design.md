@@ -1,6 +1,10 @@
 # Post-victory ending: short celebration and direct campaign handoff
 
-**Status:** approved by the user on 2026-07-16; not yet implemented.
+**Status:** approved by the user on 2026-07-16 and implemented as component 290.
+The EET script-execution repair is available as tail component 291. See the
+[2026-09-06 runtime record](../playtest/2026-09-06-ending-runtime.md) for the successful
+guard, celebration, reload, and reduced inventory test; broader coverage and the
+standalone runtime smoke remain open.
 
 ## Purpose
 

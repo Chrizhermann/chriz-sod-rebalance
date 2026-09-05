@@ -198,6 +198,8 @@ ACTION_IF (csr290_is_eet = 1) BEGIN
   END
 
   // Destination bank: exactly one empty K#ImportContainer in BD6100.
+  // Engine object-name lookup ignores case AND ASCII spaces. Normalize only
+  // the comparison string, so aliases cannot hide a duplicate/conflicting bank.
   COPY_EXISTING - ~BD6100.ARE~ ~override~
     READ_ASCII 0x00 csr290_sig (8)
     PATCH_IF NOT (~%csr290_sig%~ STRING_EQUAL_CASE ~AREAV1.0~) BEGIN
@@ -213,6 +215,9 @@ ACTION_IF (csr290_is_eet = 1) BEGIN
     FOR (csr290_i = 0; csr290_i < csr290_cc; csr290_i += 1) BEGIN
       SET csr290_b = csr290_co + csr290_i * 0xc0
       READ_ASCII csr290_b csr290_name (32) NULL
+      INNER_PATCH_SAVE csr290_name ~%csr290_name%~ BEGIN
+        REPLACE_TEXTUALLY ~ ~ ~~
+      END
       TO_UPPER csr290_name
       PATCH_IF (~%csr290_name%~ STRING_EQUAL_CASE ~K#IMPORTCONTAINER~) BEGIN
         SET csr290_hits += 1
@@ -261,6 +266,9 @@ ACTION_IF (csr290_is_eet = 1) BEGIN
                 (csr290_first_vertex > csr290_vc) OR
                 (csr290_live_vertices > csr290_vc - csr290_first_vertex)) BEGIN
         PATCH_FAIL ~chriz-sod-remix #290 [BD4300 local bank]: existing container %csr290_i% has an invalid item or vertex run (items %csr290_first_item% + %csr290_live_items% of %csr290_item_count%; vertices %csr290_first_vertex% + %csr290_live_vertices% of %csr290_vc%).~
+      END
+      INNER_PATCH_SAVE csr290_name ~%csr290_name%~ BEGIN
+        REPLACE_TEXTUALLY ~ ~ ~~
       END
       TO_UPPER csr290_name
       PATCH_IF (~%csr290_name%~ STRING_EQUAL_CASE ~K#IMPORTCONTAINER~) BEGIN

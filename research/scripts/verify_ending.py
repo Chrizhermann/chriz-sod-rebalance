@@ -444,6 +444,16 @@ class Container:
     vertices: tuple[tuple[int, int], ...]
 
 
+def import_containers(containers: list[Container]) -> list[Container]:
+    """Match the engine's case- and ASCII-space-insensitive object lookup."""
+
+    return [
+        container
+        for container in containers
+        if container.name.casefold().replace(" ", "") == "k#importcontainer"
+    ]
+
+
 def bd4300_import_geometry_ok(container: Container) -> bool:
     """Match the audited local import container, including vertex order."""
 
@@ -669,7 +679,7 @@ def guard_trigger_is_fail_closed(trigger: str) -> bool:
 
 
 def guard_actions_are_fail_closed(actions: str) -> bool:
-    """Accept only the five audited guard actions, once and in exact order."""
+    """Require the guard to restore both lite and full cutscene controls."""
 
     canonical_lines = canonical_code(actions).splitlines()
     response_count = sum(
@@ -680,6 +690,7 @@ def guard_actions_are_fail_closed(actions: str) -> bool:
     patterns = (
         re.compile(r"DisplayStringNoName\s*\([^\r\n]*\)", re.IGNORECASE),
         re.compile(r"FadeFromColor\s*\([^\r\n]*\)", re.IGNORECASE),
+        re.compile(r"SetCutSceneLite\s*\(\s*FALSE\s*\)", re.IGNORECASE),
         re.compile(r"EndCutSceneMode\s*\(\s*\)", re.IGNORECASE),
         re.compile(
             r'SetGlobal\s*\(\s*"CSR_ENDING_FAILED"\s*,\s*"GLOBAL"\s*,\s*1\s*\)',
@@ -716,11 +727,18 @@ def dazzo_endpoint_is_ordered(
         re.compile(r"FadeToColor\s*\([^\r\n]*\)", re.IGNORECASE),
     ]
     if platform == "eet":
-        patterns.append(
-            re.compile(
-                r'CreateCreatureObject\s*\(\s*"CSRETBGT"\s*,\s*Player1\s*,'
-                r"\s*0\s*,\s*0\s*,\s*0\s*\)",
-                re.IGNORECASE,
+        # Full cutscene mode suspends the carrier's ordinary script, including
+        # its missing-container guard. Mirror native BD6100's script-enabled
+        # lite mode before creating the carrier (runtime regression R0).
+        patterns.extend(
+            (
+                re.compile(r"EndCutSceneMode\s*\(\s*\)", re.IGNORECASE),
+                re.compile(r"SetCutSceneLite\s*\(\s*TRUE\s*\)", re.IGNORECASE),
+                re.compile(
+                    r'CreateCreatureObject\s*\(\s*"CSRETBGT"\s*,\s*Player1\s*,'
+                    r"\s*0\s*,\s*0\s*,\s*0\s*\)",
+                    re.IGNORECASE,
+                ),
             )
         )
     elif platform == "standalone":
@@ -736,6 +754,29 @@ def dazzo_endpoint_is_ordered(
     return len(actions) == len(patterns) and all(
         pattern.fullmatch(action)
         for pattern, action in zip(patterns, actions)
+    )
+
+
+def dazzo_entry_is_available_once(trigger: str, once_flag: str) -> bool:
+    """Require both positive gates and the preserved native True() conjunct.
+
+    A substring check accepts OR(2), negated Global(), or a terminal False()
+    while still claiming the ending is available only after victory and once.
+    The installer preflights exactly True() before adding these two gates, so
+    there are no other audited predicates to preserve in the resulting state.
+    """
+
+    atoms = trigger_atoms(trigger)
+    if not once_flag or atoms is None or len(atoms) != 3:
+        return False
+    patterns = (
+        r'Global\s*\(\s*"bd_plot"\s*,\s*"GLOBAL"\s*,\s*590\s*\)',
+        rf'Global\s*\(\s*"{re.escape(once_flag)}"\s*,\s*"GLOBAL"\s*,\s*0\s*\)',
+        r'True\s*\(\s*\)',
+    )
+    return all(
+        sum(bool(re.fullmatch(pattern, atom, re.IGNORECASE)) for atom in atoms) == 1
+        for pattern in patterns
     )
 
 
@@ -1066,9 +1107,9 @@ def check_dialog_cleanup(report: Reporter, texts: dict[str, str], platform: str)
         re.IGNORECASE,
     )
     report.check(
-        "BDDAZZO state 0 requires plot 590 and one component once flag",
+        "BDDAZZO state 0 is available only with plot 590 and the unused once flag",
         len(once_matches) == 1
-        and bool(re.search(r'Global\s*\(\s*"bd_plot"\s*,\s*"GLOBAL"\s*,\s*590\s*\)', state0.trigger, re.I)),
+        and dazzo_entry_is_available_once(state0.trigger, once_matches[0]),
         f"once flags {once_matches}",
     )
     endpoint_routes = []
@@ -1247,7 +1288,7 @@ def check_reachability(report: Reporter, texts: dict[str, str]) -> None:
 
 def check_eet(report: Reporter, store: ResourceStore, texts: dict[str, str]) -> None:
     bd4300 = parse_containers(store.read_bytes("BD4300.ARE"), "BD4300.ARE")
-    local = [c for c in bd4300 if c.name.casefold() == "k#importcontainer"]
+    local = import_containers(bd4300)
     geometry = len(local) == 1 and bd4300_import_geometry_ok(local[0])
     report.check(
         "BD4300 has exactly one empty K#ImportContainer with audited geometry",
@@ -1255,7 +1296,7 @@ def check_eet(report: Reporter, store: ResourceStore, texts: dict[str, str]) -> 
         f"found {len(local)}",
     )
     bd6100 = parse_containers(store.read_bytes("BD6100.ARE"), "BD6100.ARE")
-    destination = [c for c in bd6100 if c.name.casefold() == "k#importcontainer"]
+    destination = import_containers(bd6100)
     report.check(
         "BD6100 retains exactly one empty K#ImportContainer destination",
         len(destination) == 1 and destination[0].item_count == 0,
@@ -1418,6 +1459,23 @@ def verify(
 class ContractFixtureTests(unittest.TestCase):
     """Focused fixtures for the binary/text primitives used by the verifier."""
 
+    def test_import_bank_aliases_count_as_the_same_engine_object(self) -> None:
+        def container(name: str) -> Container:
+            return Container(
+                name, 88, 76, 8, 100, 100, 0, (72, 26, 120, 58), (80, 70),
+                ((111, 58), (72, 45), (82, 26), (120, 39)),
+            )
+
+        canonical = container("K#ImportContainer")
+        spaced = container(" k# import CONTAINER ")
+        unrelated = container("Ordinary Treasure Chest")
+        self.assertEqual(import_containers([unrelated, spaced]), [spaced])
+        self.assertEqual(import_containers([canonical, spaced]), [canonical, spaced])
+        self.assertTrue(bd4300_import_geometry_ok(canonical))
+        # The newly appended local bank must retain its canonical on-disk name;
+        # existing destination names may contain spaces if they resolve uniquely.
+        self.assertFalse(bd4300_import_geometry_ok(spaced))
+
     def test_platform_signature_is_all_or_nothing(self) -> None:
         self.assertEqual(classify_platform((True, True, True), "auto"), "eet")
         self.assertEqual(classify_platform((False, False, False), "auto"), "standalone")
@@ -1521,6 +1579,7 @@ END
         good = """RESPONSE #100
 DisplayStringNoName(Player1,123)
 FadeFromColor([1.0],0)
+SetCutSceneLite(FALSE)
 EndCutSceneMode()
 SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)
 DestroySelf()
@@ -1561,6 +1620,12 @@ DestroySelf()
             )
         )
         self.assertFalse(guard_actions_are_fail_closed(good + "RESPONSE #1\n"))
+        self.assertFalse(
+            guard_actions_are_fail_closed(good.replace("SetCutSceneLite(FALSE)\n", ""))
+        )
+        self.assertFalse(
+            guard_actions_are_fail_closed(good.replace("SetCutSceneLite(FALSE)", "SetCutSceneLite(TRUE)"))
+        )
 
     def test_guard_trigger_is_exact_and_has_no_extra_predicates(self) -> None:
         good = """OR(2)
@@ -1584,13 +1649,38 @@ DestroySelf()
             )
         )
 
+    def test_dazzo_entry_requires_live_positive_conjuncts(self) -> None:
+        plot = 'Global("bd_plot","GLOBAL",590)'
+        once = 'Global("CSR_ENDING_USED","GLOBAL",0)'
+        valid = f"{plot}\n{once}\nTrue()"
+        for trigger in (valid, f"True()\n{once}\n{plot}", valid.lower()):
+            with self.subTest(valid=trigger):
+                self.assertTrue(dazzo_entry_is_available_once(trigger, "CSR_ENDING_USED"))
+        invalid = (
+            f"OR(2)\n{plot}\n{once}\nTrue()",
+            f"OR(2)\n{plot}\nTrue()\n{once}",
+            f"!{plot}\n{once}\nTrue()",
+            f"{plot}\n!{once}\nTrue()",
+            valid + "\nFalse()",
+            valid.replace("True()", "False()"),
+            valid.replace("True()", "!True()"),
+            valid.replace("True()", plot),
+            f"{plot}\nTrue()",
+        )
+        for trigger in invalid:
+            with self.subTest(invalid=trigger):
+                self.assertFalse(dazzo_entry_is_available_once(trigger, "CSR_ENDING_USED"))
+
     def test_dazzo_endpoint_order_is_platform_exact_and_unique(self) -> None:
         common = """DO ~SetGlobal("CSR_ENDING_DONE","GLOBAL",1)
 EraseJournalEntry(266908)
 StartCutSceneMode()
 FadeToColor([1.0],0)
 """
-        eet = common + 'CreateCreatureObject("CSRETBGT",Player1,0,0,0)\n~ EXIT'
+        eet = (
+            common + "EndCutSceneMode()\nSetCutSceneLite(TRUE)\n"
+            + 'CreateCreatureObject("CSRETBGT",Player1,0,0,0)\n~ EXIT'
+        )
         standalone = (
             common
             + "EndCutSceneMode()\nContinueGame(FALSE)\nEndCredits()\n~ EXIT"
@@ -1605,6 +1695,23 @@ FadeToColor([1.0],0)
                 standalone, "standalone", "CSR_ENDING_DONE", 266908
             )
         )
+        old_full_cutscene_endpoint = eet.replace(
+            "EndCutSceneMode()\nSetCutSceneLite(TRUE)\n", ""
+        )
+        for broken in (
+            old_full_cutscene_endpoint,
+            eet.replace("SetCutSceneLite(TRUE)\n", ""),
+            eet.replace("EndCutSceneMode()\n", ""),
+            eet.replace("SetCutSceneLite(TRUE)", "SetCutSceneLite(FALSE)"),
+            eet.replace(
+                "EndCutSceneMode()\nSetCutSceneLite(TRUE)",
+                "SetCutSceneLite(TRUE)\nEndCutSceneMode()",
+            ),
+        ):
+            with self.subTest(broken_carrier_mode=broken):
+                self.assertFalse(
+                    dazzo_endpoint_is_ordered(broken, "eet", "CSR_ENDING_DONE", 266908)
+                )
         self.assertFalse(
             dazzo_endpoint_is_ordered(
                 eet.replace(

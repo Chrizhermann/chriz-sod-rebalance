@@ -690,6 +690,21 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 2
 INCLUDE ~chriz-sod-remix/lib/comp290.tpa~
 
 // ============================================================
+// 291 — repair previously installed EET ending script suspension
+// ============================================================
+// Older 290 endpoints spawned an ordinary AI carrier in full cutscene mode,
+// which stops that script (including its missing-container guard). Match EET's
+// native caller: release full mode and retain input protection with lite mode.
+// New 290 installs already include the correction; this tail repair then does
+// nothing. Never reinstall 290 to update an existing WeiDU stack.
+
+BEGIN @291 DESIGNATED 291 GROUP @1005 LABEL ~csr_victory_ending_script_fix~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~290~ ~Component 291 repairs the EET handoff of component 290; install component 290 first.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~K#TELBGT.BCS~ AND FILE_EXISTS_IN_GAME ~K#TELBGT.CRE~ AND FILE_EXISTS_IN_GAME ~AR0602.BCS~) @9001
+
+INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
+
+// ============================================================
 // 900/901 — treasure from removed content (mod-wide choice)
 // ============================================================
 // One choice, reused by every future removal pass: notable loot

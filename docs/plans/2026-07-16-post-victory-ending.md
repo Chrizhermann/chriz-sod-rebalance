@@ -6,6 +6,12 @@
 celebration and a Dazzo-triggered ending that enters SoA directly on EET or ends at credits on
 standalone BG:EE+SoD, with no party visit to the BD6100 ambush and no gear loss.
 
+**Runtime status, 2026-09-06:** The [current evidence record](../playtest/2026-09-06-ending-runtime.md)
+records the component 291 guard repair and passing EET R0, R1, R6, and the
+user-approved reduced single inventory handoff. The original expanded matrix was
+not completed; standalone remains pending. These results do not mark this whole
+implementation plan complete.
+
 **Architecture:** Add tail component 290 in a new Ending group, requiring the already shipped
 Hooded-Man/dream/Entar removals (120, 130, 185). Patch only the live celebration and retired-band
 entry points. On EET, add a local import container to BD4300, clone the currently installed

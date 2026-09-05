@@ -1,5 +1,13 @@
 # Runtime verification — post-victory ending (component 290)
 
+**Update 2026-09-06:** The [current isolated runtime record](2026-09-06-ending-runtime.md)
+records the original EET guard softlock, corrective tail component 291, and passing
+R0, R1, R6, plus the user-approved reduced single inventory handoff. Standalone is
+pending; the original expanded matrix below was not completed. The September run
+uses separate game/profile copies, superseding this document's historical shared
+profile staging notes for that run. The actual dev installation subsequently received
+tail component 291 and passed all 43 installed-state checks; live remains untouched.
+
 Target: **dev EET install** `C:\Games\Baldur's Gate II Enhanced Edition modded - dev eet
 install`, mod v0.6.4, component 290 tail-installed 2026-07-16 (sole last WeiDU.log row).
 Static state re-confirmed **2026-08-12**: `verify_ending.py --platform eet` = **40/40 PASS**
@@ -53,7 +61,7 @@ behave exactly like an unmodified SoD→SoA handoff. Journal entry 266908 erased
 
 ---
 
-## R0 — missing-container guard (fail-closed) — PENDING
+## R0 — missing-container guard (fail-closed) — PASS after repair
 
 Seed: `000000435-safety safe` (copy → `CSR END R0`). BD4300 in this save predates the
 container patch, so the clone's guard MUST refuse the handoff.
@@ -64,9 +72,11 @@ Expected: visible diagnostic (@29000 string) BEFORE any item sweep; fade returns
 cutscene mode ends; ALL gear still on the party; campaign does NOT move; save, reload,
 confirm the save remains playable.
 
-Result: _pending_ · Markers: _record resrefs_ · Evidence: _screenshots/save copy_
+Result: original softlock reproduced; repaired guard, inventory retention, and
+native save/reload **PASS**. See the [2026-09-06 record](2026-09-06-ending-runtime.md)
+for marker `M290G001` and evidence.
 
-## R1 — primary happy path, real conversation spine — PENDING
+## R1 — primary happy path, real conversation spine — PASS
 
 Seed: preferred = a genuine save from immediately before BDCUT59; fallback = copy of
 `000000018-Kool Koveras-Chapter 10 Start` staged via the console shortcut (move to
@@ -81,7 +91,9 @@ play; Bence exits; free control returns; player can talk, loot, save, reload bef
 Dazzo; NO private Waterdeep pitch, Corwin/Neera forced finale, Skie check, or any other
 coda fires.
 
-Result: _pending_ · BDCUT59/59A coverage: _pending_ · Evidence: _pending_
+Result: **PASS** through native BDCUT58 staging, Caelar/Aun dialogue, full
+BDCUT59/59A/59B, barks, public de Lancie/Bence dialogue, and playable celebration.
+See the [2026-09-06 record](2026-09-06-ending-runtime.md).
 
 ## R2 — full six-person party, loaded inventories — PENDING
 
@@ -106,9 +118,10 @@ Result: _pending_
 
 Result: _pending_ · NPC used: _record_
 
-## R6 — save/reload during celebration, then Dazzo — PENDING
+## R6 — save/reload during celebration, then Dazzo — PASS
 
-Result: _pending_
+Result: **PASS** after native UI reload of `904VictoryBase`, followed by Dazzo and
+the normal SoA arrival. See the [2026-09-06 record](2026-09-06-ending-runtime.md).
 
 ## R7 — multiplayer host/client smoke — PENDING
 

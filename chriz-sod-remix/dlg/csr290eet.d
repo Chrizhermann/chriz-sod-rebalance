@@ -5,6 +5,8 @@ ALTER_TRANS ~BDDAZZO~ BEGIN 2 3 END BEGIN 0 END BEGIN
 EraseJournalEntry(266908)
 StartCutSceneMode()
 FadeToColor([1.0],0)
+EndCutSceneMode()
+SetCutSceneLite(TRUE)
 CreateCreatureObject("CSRETBGT",Player1,0,0,0)~
   EPILOGUE ~EXIT~
 END

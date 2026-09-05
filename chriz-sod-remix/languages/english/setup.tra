@@ -33,6 +33,7 @@
 @280 = ~SoD remix: no party dispel at the basement reveal~
 
 @290 = ~SoD remix: end at the Dragonspear victory celebration~
+@291 = ~SoD remix: repair script execution in an existing EET victory ending~
 
 @900 = ~Collected in the camp chest at the Coast Way crossing~
 @901 = ~Removed along with the content~
@@ -46,3 +47,4 @@
 @1005 = ~Ending and campaign handoff~
 
 @9000 = ~Siege of Dragonspear content not found in this game (loose BD* files required - SoD, or EET with SoD imported).~
+@9001 = ~This repair requires EET's complete SoD-to-BG2 handoff resources.~

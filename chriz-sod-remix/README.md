@@ -29,3 +29,23 @@ standard WeiDU backups (`weidu_external/backup/chriz-sod-remix`).
 
 `.are`/`.bcs`/`.dlg` load by resref at runtime: changes apply to areas not yet visited and on
 next area (re)load. Scenes whose gate globals are already past simply never re-fire.
+
+## Victory ending (components 290 and 291)
+
+Component 290 keeps the short victory celebration and uses Dazzo's rest conversation
+to end SoD. On EET it preserves the installed equipment-import rules and moves directly
+into BG2's normal opening; standalone SoD uses its native credits endpoint. Install 290
+with its declared prerequisites before first visiting BD4300. An older save without the
+local import container receives a diagnostic and keeps its equipment and control.
+
+For an EET installation that already has 290, append **291** to repair the original
+carrier-script softlock. Do not reinstall 290 or uninstall earlier components:
+
+```
+weidu.exe chriz-sod-remix/setup-chriz-sod-remix.tp2 --force-install-list 291 --language 0 --use-lang en_US --no-exit-pause
+```
+
+Fresh 290 installations already include this correction; 291 then leaves game resources
+unchanged. The repair refuses unexpected endpoint or guard changes before writing.
+See the [runtime evidence](../docs/playtest/2026-09-06-ending-runtime.md) for completed
+EET checks and the remaining standalone and broader compatibility coverage.
