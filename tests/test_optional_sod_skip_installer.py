@@ -136,7 +136,7 @@ END
         if "SUCCESSFULLY INSTALLED" not in self.transcript(result):
             raise AssertionError(self.transcript(result))
         # Fixture-only install history: never edit a real install's WeiDU.log.
-        log = self.root / "WeiDU.log"
+        log = self._find_output(self.root, "weidu.log")
         prerequisites = [
             ("EET_END/EET_END.TP2", 0),
             *(("CHRIZ-SOD-REMIX/SETUP-CHRIZ-SOD-REMIX.TP2", n) for n in (110, 140, 150, 160)),
