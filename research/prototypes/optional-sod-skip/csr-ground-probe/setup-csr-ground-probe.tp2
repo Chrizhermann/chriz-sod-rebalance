@@ -1,0 +1,118 @@
+BACKUP ~weidu_external/backup/csr-ground-probe~
+AUTHOR ~Christopher Hermann~
+VERSION ~ground-probe-1~
+
+BEGIN ~DISPOSABLE TEST ONLY: named ground-pile import probe~
+REQUIRE_PREDICATE (FILE_EXISTS ~csr_ground_probe_disposable.ok~)
+  ~This probe is disabled. An operator must first verify a disposable game path and create csr_ground_probe_disposable.ok there. Never install it in a live or accepted collection game.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0103.are~)
+  ~The source palace-room resource BD0103.ARE is required.~
+
+// Every output resref is new and probe-owned. No campaign area/script is patched.
+ACTION_FOR_EACH csr_probe_item IN ~csrgpa~ ~csrgpb~ ~csrgpc~ ~csrgpd~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr_probe_item%.itm~ BEGIN
+    FAIL ~A csr-ground-probe item already exists; use a fresh disposable copy.~
+  END
+END
+ACTION_FOR_EACH csr_probe_area IN ~csrgp001~ ~csrgp002~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr_probe_area%.are~ BEGIN
+    FAIL ~A csr-ground-probe area already exists; use a fresh disposable copy.~
+  END
+END
+
+COPY_EXISTING ~potn08.itm~ ~override/csrgpa.itm~
+  SAY NAME1 ~Probe A: source ground pile one~
+  SAY NAME2 ~Probe A: source ground pile one~
+  WRITE_SHORT 0x68 0
+  WRITE_SHORT 0x70 0
+COPY_EXISTING ~potn08.itm~ ~override/csrgpb.itm~
+  SAY NAME1 ~Probe B: source ground pile two~
+  SAY NAME2 ~Probe B: source ground pile two~
+  WRITE_SHORT 0x68 0
+  WRITE_SHORT 0x70 0
+COPY_EXISTING ~potn08.itm~ ~override/csrgpc.itm~
+  SAY NAME1 ~Probe C: source chest - must NOT be copied~
+  SAY NAME2 ~Probe C: source chest - must NOT be copied~
+  WRITE_SHORT 0x68 0
+  WRITE_SHORT 0x70 0
+COPY_EXISTING ~potn08.itm~ ~override/csrgpd.itm~
+  SAY NAME1 ~Probe D: destination chest - must NOT move~
+  SAY NAME2 ~Probe D: destination chest - must NOT move~
+  WRITE_SHORT 0x68 0
+  WRITE_SHORT 0x70 0
+
+DEFINE_PATCH_FUNCTION csr_probe_room INT_VAR csr_source = 0 BEGIN
+  PATCH_IF (SOURCE_SIZE < 0x11c) BEGIN PATCH_FAIL ~Invalid ARE header.~ END
+  READ_ASCII 0 csr_sig (8)
+  PATCH_IF NOT (~%csr_sig%~ STRING_EQUAL ~AREAV1.0~) BEGIN
+    PATCH_FAIL ~Probe requires ARE V1.0.~
+  END
+
+  // Keep the WED/searchmap/background, but no actors, travel/trigger regions,
+  // scripted spawns, ambient sounds, or area script from the source room.
+  WRITE_SHORT 0x58 0
+  WRITE_SHORT 0x5a 0
+  WRITE_LONG 0x64 0
+  WRITE_SHORT 0x82 0
+  WRITE_ASCII 0x94 ~~ #8
+  READ_LONG 0xc0 csr_rest
+  PATCH_IF (csr_rest > 0) BEGIN
+    WRITE_SHORT (csr_rest + 0x98) 0
+  END
+
+  // Relocate only the container/item tables to EOF. Existing byte-offset
+  // sections are not shifted; original table bytes become unreachable.
+  SET csr_cont = SOURCE_SIZE
+  SET csr_items = csr_cont + 3 * 0xc0
+  PATCH_IF csr_source BEGIN SET csr_count = 3 END ELSE BEGIN SET csr_count = 1 END
+  INSERT_BYTES csr_cont (3 * 0xc0 + csr_count * 0x14)
+  WRITE_LONG 0x70 csr_cont
+  WRITE_SHORT 0x74 3
+  WRITE_SHORT 0x76 csr_count
+  WRITE_LONG 0x78 csr_items
+
+  FOR (csr_i = 0; csr_i < 3; ++csr_i) BEGIN
+    SET csr_pos = csr_cont + csr_i * 0xc0
+    SET csr_x = 190 + csr_i * 180
+    WRITE_SHORT (csr_pos + 0x20) csr_x
+    WRITE_SHORT (csr_pos + 0x22) 540
+    WRITE_SHORT (csr_pos + 0x24) 2
+    WRITE_SHORT (csr_pos + 0x38) (csr_x - 12)
+    WRITE_SHORT (csr_pos + 0x3a) 528
+    WRITE_SHORT (csr_pos + 0x3c) (csr_x + 12)
+    WRITE_SHORT (csr_pos + 0x3e) 552
+  END
+
+  PATCH_IF csr_source BEGIN
+    WRITE_ASCII csr_cont ~CSRSourceA~ #32
+    WRITE_ASCII (csr_cont + 0xc0) ~CSRSourceB~ #32
+    WRITE_ASCII (csr_cont + 0x180) ~CSRSourceControl~ #32
+    WRITE_SHORT (csr_cont + 0x24) 4
+    WRITE_SHORT (csr_cont + 0xc0 + 0x24) 4
+    FOR (csr_i = 0; csr_i < 3; ++csr_i) BEGIN
+      WRITE_LONG (csr_cont + csr_i * 0xc0 + 0x40) csr_i
+      WRITE_LONG (csr_cont + csr_i * 0xc0 + 0x44) 1
+    END
+    WRITE_ASCII csr_items ~csrgpa~ #8
+    WRITE_ASCII (csr_items + 0x14) ~csrgpb~ #8
+    WRITE_ASCII (csr_items + 0x28) ~csrgpc~ #8
+  END ELSE BEGIN
+    WRITE_ASCII csr_cont ~CSRBG1PILE~ #32
+    WRITE_SHORT (csr_cont + 0x24) 4
+    WRITE_ASCII (csr_cont + 0xc0) ~CSRProbeBank~ #32
+    WRITE_ASCII (csr_cont + 0x180) ~CSRTargetControl~ #32
+    WRITE_LONG (csr_cont + 0x180 + 0x44) 1
+    WRITE_ASCII csr_items ~csrgpd~ #8
+  END
+  FOR (csr_i = 0; csr_i < csr_count; ++csr_i) BEGIN
+    WRITE_SHORT (csr_items + csr_i * 0x14 + 0xa) 1
+    WRITE_LONG (csr_items + csr_i * 0x14 + 0x10) 1
+  END
+END
+
+COPY_EXISTING ~bd0103.are~ ~override/csrgp001.are~
+  LPF csr_probe_room INT_VAR csr_source = 1 END
+COPY_EXISTING ~bd0103.are~ ~override/csrgp002.are~
+  LPF csr_probe_room INT_VAR csr_source = 0 END
+
+PRINT ~Probe installed to a disposable copy. No game was launched; no ground-pile behavior has been tested yet.~

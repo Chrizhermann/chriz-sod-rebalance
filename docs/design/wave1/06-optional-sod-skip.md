@@ -1,7 +1,8 @@
 # Optional SoD skip at palace arrival (EET)
 
-Status: user-requested on 2026-09-05; source research only. Implementation is
-paused for the equipment-scope choice below. This is not part of released
+Status: user-requested on 2026-09-05; inventory scope approved on the same date.
+Dialogue/XP source prototype and a ground-pile probe are prepared; the full skip
+is not implemented or installable. This is not part of released
 v0.6.5, the frozen CEBG r4 recipe, or the separate component-290 ending work.
 
 ## DECIDED: requested behavior
@@ -76,7 +77,32 @@ EET v14.0 source was read without modifying the test copy:
 - Do not patch K#TELBGT.BCS, AR0602.BCS, CAMPAIGN.2DA, STARTARE.2DA, or write
   ENDOFBG1. Let EET own its normal transition effects.
 
-## OPEN: equipment scope before implementation
+### Effective import rules: source-template-only inspection is insufficient
+
+On 2026-09-05 the effective `K#TELBGT.BCS` and `AR0602.BCS` were decompiled
+read-only from `C:\Users\chris\Games\CEBG-SOD120-v065-test\game`. Outputs went to
+an external inspection directory; the game's WeiDU.log SHA-256 was identical
+before and after (`47a3d364d37085f0c5e29cfd404737223f9a1ae133604a4bfd3e1c142bee4f07`).
+
+`EET_end/EET_end.tp2:724-761` generates item-import blocks from BDSODIMP's
+PartyHasItem references and IMPORT01/02/03 plus K#IMPORT.2DA. These blocks run
+**before** the bulk item bank: an eligible party item is removed and registered
+in K#IMPORT's bag/store. The bare K#TELBGT source template does not contain them.
+AR0602 subsequently runs the existing BDSODIMP and IMPORT-table rules before
+banking the remaining inventory and reading the BD6100 bank.
+
+Therefore **directly moving all bedroom storage to the bulk BD6100 bank is not
+sufficient** for this approval. The stored-item adapter must make eligible
+possessions participate in the effective selection rules, without duplicating
+an item already covered by a party copy, inventing destinations, or bypassing
+bag handling. No such adapter has been enabled or claimed tested yet.
+
+Inspected effective resource SHA-256 values:
+
+- K#TELBGT.BCS: `e4035461e31c20a815ad4cf625b2f49a4f8e39d20f16f7fd995d908174a968c3`
+- AR0602.BCS: `ca22da807a3d7dda475d2891b12e1b3c379a0842f0b3ed0202992bd7ba066eae`
+
+## DECIDED: equipment scope (approved 2026-09-05)
 
 A direct bedroom skip has a real item-loss edge:
 
@@ -87,16 +113,18 @@ A direct bedroom skip has a real item-loss edge:
 - Component 140 also redirects BG1 finale ground piles beside the bedroom beds.
   These are not carried inventory and are not collected by K#TELBGT.
 
-Question to settle: **Should confirming skip automatically include the stored
-party backpacks, imported Imoen's equipment, and imported finale ground loot in
-EET's normal BG2 equipment-import handling?**
+Christopher approved including the stored party backpacks, imported Imoen's
+equipment, and **verified imported BG1 finale ground loot** in EET's normal BG2
+equipment-import handling. This makes eligible possessions available to the
+existing import rules; it does **not** mean keeping all equipment in BG2, giving
+everything to the protagonist, or inventing item destinations. His expectation
+that some items become BG2 loot is context to verify, not a new placement rule.
 
-Recommendation: yes, preserving the existing BG1 possessions without requiring
-the player to unpack or re-recruit someone before an immediate skip. This is a
-proposal, not permission to collect arbitrary palace/world loot or award SoD
-quest rewards. Exact provenance of the imported ground pile needs verification
-before sweeping a whole room. Do not promise that every imported item is then
-freely available in BG2: EET and the installed BG2 import rules still decide that.
+There is no permission to collect arbitrary palace/world loot or award SoD quest
+rewards. Exact provenance of the imported ground pile must be verified before
+collection. Do not use a whole-room sweep merely because the imported pile is in
+that room. EET and the installed BG2 import rules still decide item eligibility
+and availability.
 
 Gold is already impounded by BDCUT00Z. No new gold refund, skipped quest reward,
 romance outcome, or item entitlement is authorized by the XP-only request.
@@ -118,18 +146,59 @@ If a candidate needs any further meaningful choice in those areas, stop and ask.
   EET handoff does not authorize silently absorbing either mod's code or assets.
   Any future actual reuse requires explicit attribution and license review.
 
-## Required candidate tests and user check
+## Source prototype and validation status
 
-No implementation or candidate tests have run yet. Begin TDD after the open
-equipment choice is resolved:
+The bounded prototype lives outside the released payload in
+`research/prototypes/optional-sod-skip/`. The public TP2, its v0.6.5 version, all
+31 component declarations, component 290's separate worktree, and the frozen
+collection recipe are unchanged.
 
-- Compile a synthetic three-state question/confirmation dialogue; test both
-  confirmation declines looping back without changing XP or campaign state.
-- Verify a confirmed No permanently records play-SoD, adds nothing, and leaves
-  the servant/rest/council flow unchanged.
-- Verify confirmed Yes uses `AddXPObject(Player1,250000)` exactly once, never
-  `AddExperienceParty`, `SetXP`, or a threshold. Guard before awarding; check
-  save/reload and repeated trigger evaluations cannot award again.
+`tests/test_optional_sod_skip.py` was added RED before the prototype sources,
+then made green. The full repository suite passes **23 tests on Windows with
+WeiDU 249** (2026-09-05):
+
+- Real compilation/decompilation of the three-state dialogue and XP action.
+- Both confirmation declines loop with no side effects; confirmed play-SoD
+  records choice 2 and awards nothing; confirmed skip cannot award before item
+  readiness and adds 250,000 only to Player1 once in repeated/model-reload tests.
+- The probe's installer refuses to run without a disposable-copy opt-in marker,
+  creates exactly six new probe-owned resources, and leaves every pre-existing
+  synthetic resource byte-identical.
+- The read-only save verifier rejects unnamed-pile copies, duplicate/missing
+  items, unrelated chest loot, duplicate named receptacles, and truncated data.
+
+The state replay and synthetic SAV fixtures **do not test native script
+scheduling, XP caps, campaign transition, or real save/reload behavior**. No game
+was launched and no accepted/live game or save was modified.
+
+### Ground-pile validation gate
+
+The inspected BD0103.ARE has exactly four containers: PlayerChest00,
+Imoen_equipment, and two bookcases; **none is a ground pile**. Component 140's
+sole BDSODTRN import target is BD0103 [190.540]. A narrowly owned, initially empty
+named ground-pile receptacle at that point is a possible collection mechanism.
+It is not yet proven that the native engine merges into it and preserves its
+script name; no whole-room sweep or low-level EEex mutation is substituted.
+
+The isolated two-room `csr-ground-probe` and read-only `verify_ground_probe.py`
+are ready for a coordinated disposable-game test. Its README gives the exact
+sequence: copy two distinct ground tokens while excluding a source chest, verify
+the named destination and untouched destination chest, save/reload, then move
+only the named pile into a probe bank and verify save/reload again. **Do not
+install the skip or collect real BG1 belongings until this gate passes.**
+
+### Remaining before an installable candidate
+
+- Complete the stored-item adapter against EET's effective eligibility rules,
+  including duplicate-party-copy and bag handling, with disposable fixtures.
+- Wire the tested dialogue and guarded XP action into the bedroom arrival and
+  handoff only after the ground-pile gate passes. Preserve both confirmation
+  loops and the no-side-effect behavior already covered by the source tests.
+- In the engine, verify a confirmed No permanently records play-SoD, adds
+  nothing, and leaves the servant/rest/council flow unchanged.
+- In the engine, verify confirmed Yes adds exactly 250,000 to Player1 once;
+  check XP caps, save/reload, and repeated trigger evaluations, which source
+  compilation and modeled replay do not establish.
 - Use disposable fixtures to verify the arrival hook's ordering and prerequisite
   failures, and that only intended resources change. Separately test the actual
   campaign transition and agreed equipment handling on a disposable game/save
@@ -144,6 +213,9 @@ confirm skip, check protagonist XP increased by exactly 250,000 and the normal
 BG2 opening starts; save/reload there and check the agreed imported items and no
 second XP award.
 
-Release/pin readiness: **not ready**. This is a durable request and bounded design
-handoff only. Keep v0.6.5 and the frozen r4 recipe unchanged; a later tested
-candidate and separate publication authorization are required.
+Release/pin readiness: **not ready**. Remaining implementation includes the
+bedroom offer hook, effective-EET-rule-aware stored-item adapter, and final
+handoff, followed by a real end-to-end acceptance test. The present deliverable
+is a tested source prototype plus a focused native probe, not a completed skip
+candidate. Keep v0.6.5 and frozen r4 unchanged; a later tested candidate and
+separate publication authorization are required.

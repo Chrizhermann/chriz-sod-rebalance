@@ -1,0 +1,12 @@
+// Prototype only. Nothing currently sets CSR_SKIP_ITEMS_READY or installs this
+// script in a campaign. Item preflight/handoff must be implemented and verified
+// before wiring it in. The guard precedes the one protagonist-only award.
+IF
+  Global("CSR_SKIP_CHOICE","GLOBAL",1)
+  Global("CSR_SKIP_ITEMS_READY","GLOBAL",1)
+  Global("CSR_SKIP_XP","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_XP","GLOBAL",1)
+    AddXPObject(Player1,250000)
+END
