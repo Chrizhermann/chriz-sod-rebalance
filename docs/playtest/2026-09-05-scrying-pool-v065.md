@@ -18,7 +18,7 @@ repair; it does not establish full-playthrough or standalone-game compatibility.
 
 ## Automated evidence already completed
 
-WeiDU parsing passed for the TP2 and all 34 TPA files; all 11 tests passed. The fresh
+WeiDU parsing passed for the TP2 and all 33 TPA files; all 11 tests passed. The fresh
 120/225 installation completed with exit 0 and no warnings or errors. The semantic
 verifier on the newly patched resources reported `SUMMARY: 0 failure(s)`.
 

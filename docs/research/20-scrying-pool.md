@@ -122,7 +122,7 @@ Historical checks on the v0.6.3 dev EET install (which included Aura's extra pic
 
 Completed for the v0.6.5 no-Aura repair on 2026-09-05:
 
-- the TP2 and all 34 TPA files passed WeiDU parsing; all 11 tests passed;
+- the TP2 and all 33 TPA files passed WeiDU parsing; all 11 tests passed;
 - components 120 and 225 installed successfully on a disposable copy of the failed
   collection install, retaining its existing component 220 and prior WeiDU entries;
 - the semantic verifier passed against those newly patched resources with
