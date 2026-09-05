@@ -125,6 +125,11 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
    barrel fast-fix (BDKEGX 25 hp/0% fire → 120 hp/75% fire — random mephit splash
    no longer a no-counter loss).** The elemental/portal sequence rework ("why not
    just throw a fireball?") stays open — see 04-coalition.md later-flesh list.
+   **Updated direction 2026-09-05 — [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14):**
+   remove all smokepowder barrels and related mechanics. Proposed replacement:
+   losing crusaders use multiple wizards and fire/earth elementals to destroy the
+   bridge, with difficulty scaling. Exact encounter/progression design is OPEN;
+   see `docs/01-remix-wishlist.md`, September 5 additions.
 4. Temple relocation target + the cave/temple/Ziatar/Neothelid recomposition (item 15
    fight shape).
 5. Morentherene treatment (item 16 optional component; she guards the cave→temple
