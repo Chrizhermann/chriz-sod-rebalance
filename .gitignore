@@ -1,2 +1,4 @@
 research/data/sod_baf/
 .worktrees/
+__pycache__/
+*.pyc

@@ -1,9 +1,10 @@
 # 20 — Dig-site scrying pool: mechanics, locked replacement, and component 225
 
 **Status:** research complete; user decision locked 2026-07-15; implemented in
-`chriz-sod-remix` v0.6.3 as component 225. The component is tail-installed on the dev EET
-copy and the semantic verifier reports `SUMMARY: 0 failure(s)`. Runtime checks remain for
-the next SoD playthrough. The live install remains on v0.5.0 and was not changed.
+`chriz-sod-remix` v0.6.3 as component 225. The v0.6.5 no-Aura installation repair passed
+fresh installed-resource verification and Christopher accepted the focused in-game test,
+including save/reload, on 2026-09-05. Natural item acquisition remains for a later
+playthrough. See `docs/playtest/2026-09-05-scrying-pool-v065.md` for evidence and limits.
 
 Issue: GitHub #6 (PT-6). Playtest source:
 `docs/playtest/2026-07-11-stream-playtest.md`. Design record:
@@ -29,7 +30,7 @@ The pool object uses `BDODSCRY.BCS` in BD1200 at approximately `(1325,2095)`.
 4. Vanilla supplies two Essences, so they pay for old visions two and three. The actual
    vanilla economy was **first vision free, then one Essence for each remaining vision**.
 
-The old picker used states 0 and 4 of `BDSCRY.DLG`:
+The current no-Aura `BDSCRY.DLG` has four states and uses state 0 as its only picker:
 
 | Choice | Local once-flag | Old route | Staging |
 |---|---|---|---|
@@ -96,17 +97,18 @@ group.
 - The existing 3,000 party-total reward on the third scepter remains untouched.
 - `BD1200.ARE` retains the original Shelf Essence and all three scepters. The missing Essence
   is appended to `Sarcophagus01` without restoring `BDWIGHDD` or overwriting its scepter.
-- Component 120 already False-gates the Hooded-Man transitions in `BDSCRY` states 0 and 4;
-  component 225 False-gates the Imoen and Caelar transitions there as well. The dialog file
-  and its state structure remain installed, preserving Aura's state-0 interjection target,
-  but the pool object no longer launches the dialog at all.
+- Component 120 False-gates every Hooded-Man picker route by its
+  `bd_sddd12_hood=0` trigger; component 225 does the same for Imoen and Caelar. A guarded
+  helper requires the current no-Aura four-state layout and one route for each
+  semantic flag, rejecting changed shapes. The dialog file and its existing state structure
+  remain installed, but the pool object no longer launches the dialog at all.
 - The old `BDSCRY01`–`BDSCRY07` resources remain on disk as unreachable dead code. There is
   no live area travel, cutscene-mode entry, creature creation, dialog continuation, retry
   loop, or CUTSKIP path from the pool.
 
 ## 5. Verification state
 
-Completed on the v0.6.3 dev EET install:
+Historical checks on the v0.6.3 dev EET install (which included Aura's extra picker):
 
 - sandbox verification is green;
 - component 225 tail-install completed;
@@ -118,7 +120,20 @@ Completed on the v0.6.3 dev EET install:
   all six vanilla picker routes False-gated; and
 - verifier result: `SUMMARY: 0 failure(s)`.
 
-Still pending for the next SoD playthrough: acquire all five items naturally, confirm that
-one Essence is rejected without consumption or XP, activate the exact omen with both, save
-and reload, re-click the dormant pool, and confirm visually that no dialog, cutscene, travel,
-or staged actor appears.
+Completed for the v0.6.5 no-Aura repair on 2026-09-05:
+
+- the TP2 and all 34 TPA files passed WeiDU parsing; all 11 tests passed;
+- components 120 and 225 installed successfully on a disposable copy of the failed
+  collection install, retaining its existing component 220 and prior WeiDU entries;
+- the semantic verifier passed against those newly patched resources with
+  `SUMMARY: 0 failure(s)`, including the four-state picker, rehomed Essence, two-Essence
+  transaction, once-only reward, and absence of cinematic/travel/spawn actions;
+- Christopher accepted the focused pool playtest. Screenshots show the 3,000 party-total
+  scepter reward, the tested character's 1,000-XP omen reward, the exact approved text,
+  and repeated dormant responses without a second visible reward;
+- Christopher separately confirmed completing the save/reload check.
+
+Natural acquisition of all five items remains unplayed. The screenshots do not separately
+establish one-Essence refusal, inventory consumption, or rewards for every party slot;
+those contracts have installed-resource verification, not independent visual evidence.
+This is focused EET acceptance, not standalone BG:EE+SoD or a full curated-install test.

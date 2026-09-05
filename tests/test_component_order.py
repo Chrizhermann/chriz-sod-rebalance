@@ -55,10 +55,10 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_4(self) -> None:
+    def test_patch_release_version_is_v0_6_5(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.4~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.5~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()

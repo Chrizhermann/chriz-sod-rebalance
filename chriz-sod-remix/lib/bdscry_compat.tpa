@@ -1,0 +1,48 @@
+// BDSCRY native-layout helper shared by components 120 and 225.
+//
+// The current no-Aura target has a four-state graph and one picker in
+// state 0. Identify a route by its local once-flag instead of a transition number,
+// then require that exact graph before editing it. This keeps neighboring
+// transitions untouched and fails before mutation if another mod changed BDSCRY.
+
+DEFINE_ACTION_FUNCTION csr_disable_bdscry_picker_route
+  STR_VAR
+    csr_scry_flag = ~~
+    csr_scry_component = ~~
+BEGIN
+  ACTION_IF (~%csr_scry_flag%~ STR_EQ ~~) BEGIN
+    FAIL ~chriz-sod-remix: BDSCRY native-layout patch requires a route flag.~
+  END
+
+  COPY_EXISTING ~bdscry.dlg~ ~override~
+    READ_LONG 0x08 csr_scry_state_count
+    DECOMPILE_DLG_TO_D
+      SPRINT csr_scry_route_re
+        ~Global("%csr_scry_flag%","LOCALS",0)~
+      SPRINT csr_scry_reset_re
+        ~SetGlobal("%csr_scry_flag%","LOCALS",0)~
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE
+        ~%csr_scry_route_re%~ csr_scry_route_count
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE
+        ~%csr_scry_reset_re%~ csr_scry_reset_count
+      // A SetGlobal(...,0) contains the route text as a substring. None is
+      // present in the verified dialog; reject it so the replacement below
+      // can only touch transition triggers.
+      PATCH_IF (csr_scry_reset_count != 0) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #%csr_scry_component%: BDSCRY unexpectedly resets %csr_scry_flag% to 0; refusing an ambiguous picker patch.~
+      END
+      PATCH_IF NOT ((csr_scry_state_count = 4) AND
+                    (csr_scry_route_count = 1)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #%csr_scry_component%: BDSCRY does not match the current no-Aura four-state picker (expected one %csr_scry_flag% route; found %csr_scry_state_count% states and %csr_scry_route_count% routes).~
+      END
+
+      SPRINT csr_scry_route
+        ~Global("%csr_scry_flag%","LOCALS",0)~
+      SPRINT csr_scry_disabled
+~False()
+Global("%csr_scry_flag%","LOCALS",0)~
+      REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH
+        ~%csr_scry_route%~ ~%csr_scry_disabled%~
+    COMPILE_D_TO_DLG
+  BUT_ONLY
+END

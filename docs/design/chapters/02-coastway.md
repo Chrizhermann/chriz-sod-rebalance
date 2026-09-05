@@ -214,9 +214,8 @@ requires and consumes both Essences atomically, grants 1,000 XP once to each of
 Player1–6, restores the murky ambient state, and makes the pool permanently dormant.
 `BDWIGHDD` stays schedule-zero; its vial is re-homed into the existing unlocked,
 untrapped `Sarcophagus01` at `(2414,1736)` beside that container's scepter. The original
-`BDSCRY.DLG` structure remains installed for third-party compatibility (including Aura's
-state-0 interjection), but it has no live launcher and all six vanilla picker routes are
-False-gated.
+`BDSCRY.DLG` remains installed, but it has no live launcher and all three native picker
+routes are False-gated.
 
 **Verification:** sandbox green; v0.6.3 tail-installed on the dev EET copy; installed-
 resource verifier `SUMMARY: 0 failure(s)`. Natural item pickup, activation, save/reload,

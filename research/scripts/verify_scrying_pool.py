@@ -234,6 +234,22 @@ def dialog_states(text: str) -> dict[int, str]:
     return states
 
 
+def scry_picker_states(states: dict[int, str]) -> tuple[int, ...]:
+    """Return the picker state for the supported no-Aura BDSCRY layout.
+
+    The current no-Aura target has exactly native states 0..3. Non-contiguous,
+    appended, or truncated dialogs are evidence failures for this bounded build.
+    """
+    numbers = tuple(sorted(states))
+    if numbers != tuple(range(len(numbers))):
+        raise VerificationError(f"BDSCRY states are non-contiguous: {numbers}")
+    if numbers == (0, 1, 2, 3):
+        return (0,)
+    raise VerificationError(
+        f"BDSCRY has {len(numbers)} states; expected the no-Aura four-state graph"
+    )
+
+
 def trigger_lines(text: str, pattern: str) -> list[str]:
     """Return uncommented trigger lines that match with the requested polarity."""
     compiled = re.compile(pattern, re.IGNORECASE)
@@ -714,7 +730,14 @@ def verify(game_dir: Path) -> int:
     report.check("one 3,000 party-total scepter award remains", len(party_awards) == 1, f"found {len(party_awards)}")
 
     states = dialog_states(dialog)
-    for state_number in (0, 4):
+    try:
+        picker_states = scry_picker_states(states)
+    except VerificationError as error:
+        report.check("BDSCRY picker-state layout is supported", False, str(error))
+        picker_states = (0,)
+    else:
+        report.check("BDSCRY picker-state layout is supported", True, "no-Aura four-state")
+    for state_number in picker_states:
         transitions = dialog_transitions(states.get(state_number, ""))
         for destination in (1, 2, 3):
             routes = [
