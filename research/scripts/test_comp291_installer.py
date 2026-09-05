@@ -95,12 +95,14 @@ def tree(directory: Path) -> dict[str, str]:
 
 def write_fake_game(directory: Path) -> None:
     """One BIFF resource identifies BG2EE; every tested resource is in override."""
-    (directory / "DATA").mkdir()
+    # Unix WeiDU normalizes paths to lowercase. Use that physical layout for
+    # the BIFF, IDS, sources, and override resources on every platform.
+    (directory / "data").mkdir()
     payload = b"synthetic BG2EE marker"
     bif = (struct.pack("<4s4sIII", b"BIFF", b"V1  ", 1, 0, 0x14)
            + struct.pack("<IIIHH", 0, 0x24, len(payload), 1010, 0) + payload)
-    (directory / "DATA/CSR291.BIF").write_bytes(bif)
-    name = b"DATA\\CSR291.BIF\0"
+    (directory / "data/csr291.bif").write_bytes(bif)
+    name = b"data\\csr291.bif\0"
     key = (struct.pack("<4s4sIIII", b"KEY ", b"V1  ", 1, 1, 0x18, 0x24)
            + struct.pack("<IIHH", len(bif), 0x32, len(name), 1)
            + struct.pack("<8sHI", b"OH6000\0\0", 1010, 0) + name)
@@ -116,7 +118,7 @@ def write_fake_game(directory: Path) -> None:
     for name in ("EA", "GENERAL", "RACE", "CLASS", "SPECIFIC", "GENDER", "ALIGN"):
         ids[name] = "IDS V1.0\n0 ANYONE\n"
     for name, value in ids.items():
-        (override / f"{name}.IDS").write_text(value, encoding="ascii")
+        (override / f"{name.lower()}.ids").write_text(value, encoding="ascii")
 
 
 @unittest.skipUnless(WEIDU.is_file(), "real WeiDU unavailable; set WEIDU_EXE")
@@ -131,8 +133,8 @@ class Component291InstallerTests(unittest.TestCase):
         (self.game / "fixture/setup-fixture.tp2").write_text('''BACKUP ~fixture/backup~
 AUTHOR ~fixture~
 BEGIN ~compile synthetic ending fixture~ DESIGNATED 0
-COMPILE ~fixture/BDDAZZO.d~
-COMPILE ~fixture/CSRETBGT.baf~
+COMPILE ~fixture/bddazzo.d~
+COMPILE ~fixture/csretbgt.baf~
 ''', encoding="ascii")
         (self.game / "repair.tp2").write_text('''BACKUP ~repair-backup~
 AUTHOR ~fixture~
@@ -140,7 +142,7 @@ BEGIN ~production component 291 harness~ DESIGNATED 291
 INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
 ''', encoding="ascii")
         for name in ("K#TELBGT.BCS", "K#TELBGT.CRE", "AR0602.BCS", "BD6100.ARE", "BD6100.BCS", "CSRETBGT.CRE"):
-            (self.game / "override" / name).write_bytes(f"immutable sentinel for {name}".encode("ascii"))
+            (self.game / "override" / name.lower()).write_bytes(f"immutable sentinel for {name}".encode("ascii"))
 
     def run_weidu(self, *arguments: str) -> subprocess.CompletedProcess:
         return subprocess.run([str(WEIDU), *arguments, "--game", str(self.game),
@@ -157,8 +159,8 @@ INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
             if index == 2 and extra_transition:
                 transition += '\nIF ~~ THEN EXIT'
             states.append(f'IF ~True()~ THEN BEGIN {index}\nSAY #0\n{transition}\nEND')
-        (self.game / "fixture/BDDAZZO.d").write_text("\n\n".join(states), encoding="ascii")
-        (self.game / "fixture/CSRETBGT.baf").write_text(guard + FOREIGN_TAIL, encoding="ascii")
+        (self.game / "fixture/bddazzo.d").write_text("\n\n".join(states), encoding="ascii")
+        (self.game / "fixture/csretbgt.baf").write_text(guard + FOREIGN_TAIL, encoding="ascii")
         result = self.run_weidu("fixture/setup-fixture.tp2", "--force-install-list", "0")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("SUCCESSFULLY INSTALLED", result.stdout)
@@ -166,7 +168,7 @@ INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
     def baseline(self) -> dict[str, object]:
         return {"override": tree(self.game / "override"),
                 "protected": {str(path.relative_to(self.game)): path.read_bytes() for path in (
-                    self.game / "chitin.key", self.game / "DATA/CSR291.BIF", self.game / "dialog.tlk",
+                    self.game / "chitin.key", self.game / "data/csr291.bif", self.game / "dialog.tlk",
                     self.game / "lang/en_us/dialog.tlk")}}
 
     def repair(self) -> subprocess.CompletedProcess:
@@ -175,7 +177,7 @@ INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
     def decompile(self, name: str) -> str:
         destination = self.game / "decompiled"
         destination.mkdir(exist_ok=True)
-        result = self.run_weidu(str(self.game / "override" / name), "--out", str(destination),
+        result = self.run_weidu(str(self.game / "override" / name.lower()), "--out", str(destination),
                                 "--log", str(destination / "audit.log"))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         extension = ".d" if name.upper().endswith(".DLG") else ".baf"
@@ -275,7 +277,7 @@ INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
 
     def test_missing_eet_anchor_fails_before_any_write(self):
         self.fixture()
-        (self.game / "override/K#TELBGT.CRE").unlink()
+        (self.game / "override/k#telbgt.cre").unlink()
         before = self.baseline()
         self.assert_failure_before_writes(before, self.repair())
 

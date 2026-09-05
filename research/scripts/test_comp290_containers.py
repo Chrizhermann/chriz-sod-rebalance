@@ -70,7 +70,9 @@ class ContainerPreflightTests(unittest.TestCase):
                 "AR0602.BCS": b"SC\nSC\n",
             }
             for name, data in fixtures.items():
-                (override / name).write_bytes(data)
+                # Unix WeiDU normalizes resource paths to lowercase; mirror
+                # that layout without changing the resource-name assertions.
+                (override / name.lower()).write_bytes(data)
             harness = game / "container-fixture.tp2"
             harness.write_text(
                 "BACKUP ~backup~\nAUTHOR ~CSR tests~\n"
