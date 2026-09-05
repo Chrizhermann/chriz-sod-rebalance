@@ -117,6 +117,9 @@ Implementation findings (ground truth, 2026-07-12):
   up the bridge with ready-made barrels and they for some reason need a portal to
   the fire plane...? What? Why not just throw a fireball or something like that?"
   The fight until then is fine. comp255 is the stopgap.
+  **Updated 2026-09-05 — [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14):**
+  remove all barrels and related mechanics. Multiple wizards with fire/earth
+  elementals are the proposed replacement; full design remains open.
 
 ## OPEN for the flesh-out round
 
@@ -126,6 +129,13 @@ Implementation findings (ground truth, 2026-07-12):
 3. The druid/corrupted-grove storyline treatment across BD5100/BD7300.
 4. Albino wyvern ability nerf (design the ability changes, difficulty-gate?).
 5. Kanaglym south-quest cluster sizes (quest-staged spawns, needs script surgery).
-6. The bridge elemental/portal sequence rework (writing + encounter design).
+6. The bridge demolition rework (writing + encounter design): barrel removal is the
+   current direction; see [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14)
+   and `docs/01-remix-wishlist.md`, September 5 additions.
 7. XP ledger checkpoint: chunk-on-transition pays even for map-skippers — revisit
    with playtest curve data.
+
+**Coverage audit queued 2026-09-05 — [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16):**
+revisit filler across SoD, including this chapter's map density, scripted
+treant/shambler waves, and quest-staged Kanaglym groups. The earlier placed-actor
+cuts do not establish full coverage; additional removals need per-map triage.

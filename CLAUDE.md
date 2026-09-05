@@ -61,12 +61,13 @@ To hit a target felt rate `F`, set the field to `100·(1−(1−F)^(1/8))` (≈ 
 See `docs/research/01-rest-ambush-mechanic.md`.
 
 ## Verified EET-transition hard requirement (for the ending rework)
-On EET, SoD→BG2 must end with the party in **BD6100** ("The Ambush"): gear banked into
-`K#ImportContainer` there and `CreateCreatureObject("K#TELBGT",Player1,...)` fired —
-`ar0602.bcs` hardcodes BD6100 as the gear source. **Never modify** `K#TELBGT.BCS`,
-`ar0602.bcs`, `CAMPAIGN.2DA`/`STARTARE.2DA`, or the `ENDOFBG1` global (third-party mods patch
-them). Mid-campaign hooded-man scenes set nothing the endgame reads (safe to remove); the
-trial/jail sequence is self-contained between clean seams (BDCUT61 entry / BD6200 exit).
+On EET, SoD→BG2 requires the banked inventory to reach
+**`BD6100*K#ImportContainer`** because `ar0602.bcs` hardcodes that area-qualified source; the
+party does **not** need to enter or display BD6100. The approved ending clones the currently installed
+`K#TELBGT.BCS`/`.CRE`, runs the clone from BD4300, and adds one cross-area container move before
+the clone's normal campaign transition. **Never modify the original** `K#TELBGT.BCS`/`.CRE`,
+`ar0602.bcs`, BD6100 resources, `CAMPAIGN.2DA`/`STARTARE.2DA`, or `ENDOFBG1` (third-party mods
+patch them). See `docs/plans/2026-07-16-post-victory-ending-design.md`.
 
 ## Layout
 - `docs/01-remix-wishlist.md` — **scope anchor**: the user's wishlist + locked decisions.

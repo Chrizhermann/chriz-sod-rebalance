@@ -119,10 +119,9 @@ chapter-pass docs only.
   role, and we may add our own content in his place in phase 2/3. **City chapter DONE
   (component 185, 2026-07-09):** unspawned from the plot-51 war council, the plot-56
   departure send-off rebuilt around Belt, Liia's roll-call drops his name, the
-  "weren't you killed?" resurrection reply gated. **Still deferred (epilogue-coupled):**
-  his BD0035 trial placement/guards, BDCUT62 trial/exile, and deletion of
-  BDENTAR.CRE/DLG — they die with the post-victory epilogue removal, and the trial
-  still references the CRE/DLG, so deleting them now would spam "creature not found."
+  "weren't you killed?" resurrection reply gated. **Superseded/resolved 2026-07-16:**
+  the approved ending makes BD0035/BDCUT62 unreachable, gates the last BDPALACE reference,
+  and leaves BDENTAR.CRE/DLG inert rather than deleting files that other mods may expect.
 - **Fresh-start/import party grant cut** (prologue §10, component 145): the vanilla
   default-party grant on fresh SoD starts is removed — you wake alone and gather your
   party in the city. Item 1's "keep everyone" applies to the *continuous* BG1→SoD
@@ -170,7 +169,8 @@ Implemented + installed + verified on the dev install (components 185/190/195):
     deferred.
   - **Full Corwin dialogue rewrite:** user finds SoD-Corwin's writing poor and wants a
     proper redo later; comp195 only removed her assassination residue, not rewrote her.
-  - **Epilogue-coupled Entar removal** (BD0035 trial, BDCUT62, BDENTAR.CRE/DLG).
+  - **Entar's final inert reference:** assigned to the approved 2026-07-16 ending cleanup;
+    BD0035/BDCUT62 become unreachable and BDENTAR.CRE/DLG remain harmless files.
 
 ## Decisions locked (2026-07-10, triage round)
 - **Prologue XP:** option (c) **24,000/char**, delivered as **Liia's quest reward** on
@@ -185,10 +185,11 @@ Implemented + installed + verified on the dev install (components 185/190/195):
   as replacement bodies.
 - **Ending pass scope CONFIRMED = pure removal, no rewrites:** the campaign ends at
   the post-Avernus victory celebration; the whole dream → Skie murder → arrest → trial
-  → jail → breakout → endgame-hooded-man band (bd_plot 590–671, research/14) is
-  removed; straight to the BG2 handoff (EET: the preserved BD6100 seam; standalone:
-  native campaign end). Caelar as final boss reaffirmed — the Avernus/end-fight rework
-  itself is item 13, a separate later pass.
+  → jail → breakout → endgame-hooded-man band is removed. EET banks the party from
+  BD4300 into `BD6100*K#ImportContainer` and enters BG2 without the party entering BD6100;
+  standalone ends natively from BD4300. Caelar as final boss reaffirmed — the
+  Avernus/end-fight rework itself is item 13, a separate later pass. The precise
+  celebration and handoff were approved on 2026-07-16 below.
 - **Skie scope sharpened:** remove EVERYTHING else of her SoD plot involvement; she
   becomes the BG1-style talk-to-join recruit (research/15 has the surface: Beamdog's
   own JoinParty scaffold + her CRE already carries the BG1 soundset). **Fulfilled by
@@ -205,7 +206,7 @@ Implemented + installed + verified on the dev install (components 185/190/195):
 ## Additions (2026-07-10, Discord announcement post — user's own wording)
 - **Boareskyr bridge-battle rework** is on the list — "at least the explosive barrels
   part." (Filed by the user under "later"; the battle itself is ch-9 content — see
-  03-roadnorth.md OPEN #3.)
+  03-roadnorth.md OPEN #3.) Expanded by the 2026-09-05 roadmap direction below.
 - **Scaling encounters generalized:** BG2-style scaling encounters **with better
   pre-buffs, for higher difficulties only** — broadens the dig-site tiered-miniboss
   idea (research 17/18) toward item 17's SCS-style-fights lever.
@@ -231,6 +232,8 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   you're warned the fight is coming, the enemy side gets real prebuffs + scripted
   sequencers. "I will think about this." (Ashatiel = Caelar's champion; the single
   combat offered during the final assault on Dragonspear Castle.)
+  **Update 2026-09-05:** now requested as a separate component for design triage;
+  the full encounter still needs a back-and-forth design discussion. See below.
 - **Caelar arc — first workshop seeds (feeds the item-13 open writing question):**
   Jester's frame: keep her motive (rescue her uncle from the Hells), but the uncle
   comes back *wrong* — soul-tortured, turned evil — and the final fight is Caelar +
@@ -260,6 +263,8 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   the **elemental/portal sequence still needs its big rework**: "They want to blow up
   the bridge with ready-made barrels and they for some reason need a portal to the
   fire plane...? Why not just throw a fireball?" The fight until then is fine.
+  **Update 2026-09-05:** remove the barrels and their mechanics entirely; the new
+  elemental-demolition proposal below supersedes the durable-barrel endpoint.
 - **Set-piece battles are KEEPS:** coalition camp, castle assault, Avernus, and the
   Boareskyr scripted battle stay mostly vanilla — "The expansion is called SIEGE of
   dragonspear, so battles like that actually make some sense"; "hell seems fun for
@@ -304,9 +309,90 @@ USER took a position). Statuses explicit — none of these are locked decisions 
 - A future save-persistent record of acquired import items is deferred in
   [issue #18](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/18), not
   added to the immediate skip.
-- Component 910 is an isolated, unreleased candidate. It is separate from the
-  shortened post-victory ending and requires native acceptance before shipping.
+- Component 910 is separate from the shortened post-victory ending. The direct
+  Yes route was accepted in-game and authorized for v0.6.7; visual transition
+  polish and broader runtime coverage are deferred. No collection pin changes.
   Details: [current design](design/wave1/06-optional-sod-skip.md).
+
+## Decisions locked (2026-07-16, post-victory ending)
+- **Short playable celebration in BD4300:** preserve BDCUT59/59A/59B, compress the
+  party's one-line victory-bark delays to about two seconds, keep de Lancie's public
+  acknowledgment and Bence's cheer/acknowledgment, then restore free control. Dazzo's
+  existing rest conversation is gated to `bd_plot=590` and is the deliberate endpoint.
+- **Everything after the celebration is removed:** no Bence "check on Skie," private
+  Waterdeep pitch, Corwin/Neera forced romance finales, other optional plot-590 coda,
+  sleep/dream, Skie corpse, Irenicus, arrest, trial, jail, escape, sewers, reunion,
+  Shadow-Thief ambush, or ambush movie. Skie and Imoen may both be in the party.
+- **Entar remains fully scrapped:** remove his final live SoD reference with the ending
+  cleanup while preserving unrelated chapter-7/8 BD0104 Coalition/refugee/Tiax content.
+  Retired resource files may remain inert for compatibility and reversibility.
+- **Neera's BG2 romance is unaffected:** SoD's `bd_neera_romanceactive` and
+  `bd_NeeraRomance6` are separate from BG2's `NeeraRomanceActive`, `NeeraLovetalks`,
+  and `NEERA_ROMANCE`. Do not fake SoD-finale completion or synthesize a bridge.
+- **Direct platform endings:** on EET, clone the installed K# handoff, bank locally in
+  BD4300, move the bank to `BD6100*K#ImportContainer`, and enter SoA without the party visiting
+  BD6100; originals stay untouched. Standalone runs `EndCutSceneMode()`,
+  `ContinueGame(FALSE)`, and `EndCredits()` directly from Dazzo.
+- **First-party tests on both platforms:** thorough EET static/runtime coverage plus
+  one staged standalone Dazzo-to-credits smoke. Stream/Discord testing supplements,
+  but does not replace, those checks. Full design:
+  `docs/plans/2026-07-16-post-victory-ending-design.md`.
+
+## Roadmap additions (2026-09-05, user direction)
+
+These are queued design/audit tasks. Requested directions and open design choices
+are separated below; the encounters have not been implemented.
+
+### Boareskyr Bridge: replace the barrel finale — [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14)
+
+- **DECIDED direction:** overhaul the bridge-destruction sequence and remove all
+  smokepowder barrels and associated objectives, staging, dialogue, and destruction
+  gimmicks. Retire the single weak unnamed wizard / Plane-of-Fire portal premise.
+  Component 255's durable barrels remain the installed stopgap until this ships.
+- **PROPOSED replacement:** as the crusaders lose the battle, multiple wizards try
+  to destroy the bridge with **fire and earth elementals**, already summoned and/or
+  being summoned during the encounter. A difficult battle scaling with difficulty.
+- **OPEN for triage/design:** wizard roster and roles, elemental mix/counts, summoning
+  presentation and timing, placement, player counterplay, bridge failure conditions,
+  difficulty tiers, dialogue, and XP/loot accounting. Preserve the wider siege battle
+  direction while designing this replacement finale.
+- **Research before implementation:** trace barrel/portal scripts, dialogue, placed
+  and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
+  determine how the replacement supersedes component 255 on both supported platforms.
+
+### Ashatiel: Chosen of Cyric-style party fight — [#15](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15)
+
+- **DECIDED scope/process:** queue a separate component for the default Ashatiel
+  encounter during the final castle assault. Triage first, then a **full back-and-forth
+  design discussion with substantial input from both the user and the agent**, before
+  implementation. This is separate from the Caelar/Avernus and post-victory passes.
+- **Requested starting brief:** a Chosen of Cyric-style party encounter, with about
+  **30 seconds for the player to buff before the opposing group spawns**. Enemies get
+  prebuffs, sequencers, and potions too. Carry forward the earlier preference to warn
+  the player and preserve their existing buffs.
+- **OPEN:** reference-fight mechanics to adopt, enemy roster/roles, Ashatiel's role,
+  dialogue and existing duel/alternate routes, preparation-window trigger and warning,
+  exact timing/spawn positions, spell/potion loadouts, difficulty tiers, and rewards.
+  Research the current encounter and reference fight, then bring alternatives to the
+  discussion; this sketch is not a signed-off encounter design.
+
+### Campaign filler and trash coverage audit — [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16)
+
+- **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
+  removed across SoD. Reconcile shipped cut lists, chapter decisions, research datasets,
+  and effective dev-copy resources, including **scripted spawns, respawns/re-arm loops,
+  travel ambushes, and quest-staged groups**, as well as placed actors.
+- **Deliverable:** a map-by-map gap list distinguishing missed approved removals,
+  intentionally retained encounters, redundant filler, and unreviewed content. Record
+  resource/spawn evidence, quest/progression hooks, unique loot/recruit dependencies,
+  and XP-ledger impact; distinguish static findings from remaining playtest work.
+- **Starting candidates:** road-north ambient respawns; temple/Ziatar filler;
+  Bloodbark Grove's purpose; Underground River density/drow; druid/corrupted-grove
+  content and scripted treant/shambler waves; Kanaglym south quest clusters; deferred
+  travel-ambush arenas. Earlier placed-actor cuts did not cover all these systems.
+- **OPEN:** further keep/cut/consolidate decisions and replacement encounters. Present
+  findings for triage, retaining the reasons for keeping story/siege set-pieces.
+  The audit is queued; its results and additional removals are not yet decided.
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

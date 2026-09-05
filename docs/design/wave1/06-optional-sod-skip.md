@@ -1,8 +1,8 @@
 # Optional SoD skip at palace arrival (EET)
 
 Status: user-requested on 2026-09-05; simplified inventory scope approved on
-2026-09-06. Component 910 is an **installed, unreleased test candidate** on the
-isolated v0.6.5-based copy. The current `20260906-r3` candidate retains carried
+2026-09-06. Component 910 is **accepted for v0.6.7**, tested on an isolated
+v0.6.5-based copy. The `20260906-r3` test candidate retains carried
 party inventory and uses the original EET handoff. The rejected ground-loot
 collector and private staging area have been removed. The direct Yes route was
 accepted in-game on September 6 for v0.6.7; visual polish and remaining variant
@@ -26,7 +26,8 @@ frozen CEBG r4 recipe, or the separate component-290 ending work.
 - Work in an isolated source worktree and disposable test data only. Native
   testing was subsequently authorized in coordinated PC windows; never overlap
   another game task or the user's play session. Do not change a live/stream
-  install/save, amend the frozen collection recipe, or publish this feature.
+  install/save or amend the frozen collection recipe. The initial no-publication
+  boundary was superseded by explicit v0.6.7 release approval on September 6.
 
 ## Candidate component and scope
 

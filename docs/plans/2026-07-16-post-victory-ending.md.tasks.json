@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "plan": "docs/plans/2026-07-16-post-victory-ending.md",
+  "tasks": [
+    {
+      "id": "verifier-red",
+      "title": "Add and run the failing ending verifier",
+      "status": "completed",
+      "depends_on": []
+    },
+    {
+      "id": "component-290",
+      "title": "Implement component 290 for EET and standalone",
+      "status": "completed",
+      "depends_on": ["verifier-red"]
+    },
+    {
+      "id": "eet-scratch",
+      "title": "Prove positive and negative EET installs on disposable copies",
+      "status": "completed",
+      "depends_on": ["component-290"]
+    },
+    {
+      "id": "standalone-scratch",
+      "title": "Prove the standalone install on a disposable merged-SoD copy",
+      "status": "completed",
+      "depends_on": ["component-290"]
+    },
+    {
+      "id": "review-dev-install",
+      "title": "Review and tail-install component 290 once on dev EET",
+      "status": "completed",
+      "depends_on": ["eet-scratch", "standalone-scratch"]
+    },
+    {
+      "id": "eet-runtime",
+      "title": "Run and record the full EET runtime matrix",
+      "status": "in_progress",
+      "depends_on": ["review-dev-install"]
+    },
+    {
+      "id": "standalone-runtime",
+      "title": "Run and record the first-party standalone smoke",
+      "status": "pending",
+      "depends_on": ["review-dev-install"]
+    },
+    {
+      "id": "docs",
+      "title": "Update shipped status and documentation",
+      "status": "pending",
+      "depends_on": ["eet-runtime", "standalone-runtime"]
+    },
+    {
+      "id": "final-review",
+      "title": "Run final verification and hand off",
+      "status": "pending",
+      "depends_on": ["docs"]
+    }
+  ],
+  "lastUpdated": "2026-07-17T00:22:15.4568778+09:00"
+}

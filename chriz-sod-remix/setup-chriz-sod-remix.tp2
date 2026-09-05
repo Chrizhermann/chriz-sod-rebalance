@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.5~
+VERSION ~v0.6.7~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -49,11 +49,14 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //       into the temple (+XP chunk on the Neothelid)
 //   250 Morentherene stat tiers on Hard / Insane
 //   255 Boareskyr battle: durable explosive barrels
-// 260-299: coalition-camp chapter pass (Ch. 10-12)
+// 260-289: coalition-camp chapter pass (Ch. 10-12)
 //   260 scouting maps + shadow vault trash cut (+XP chunk on the
 //       chapter-11 transition)
 //   270 Kanaglym: fewer undead (+XP chunk on the Kherriun award)
 //   280 no party dispel at the basement reveal
+// 290-299: ending and campaign handoff
+//   290 end at the Dragonspear victory celebration
+//   291 repair an existing EET victory-ending installation
 // 900-999: mod-wide choice components
 //   900/901 treasure from removed content: collect / remove
 //           (requires 210)
@@ -663,6 +666,46 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp280.tpa~
 
 // ============================================================
+// 290 — end at the Dragonspear victory celebration
+// ============================================================
+// Keep the playable victory and its public de Lancie/Bence exchange, then
+// let Dazzo end the campaign directly. The EET branch clones the installed
+// transition carrier and banks gear locally in BD4300; standalone uses SoD's
+// native credits endpoint. The murder, arrest, jail, and private codas never
+// launch. Original K#/AR0602/BD6100 resources remain untouched.
+
+BEGIN @290 DESIGNATED 290 GROUP @1005 LABEL ~csr_victory_ending~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4300.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdpalace.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddebug.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddebug.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddazzo.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbence.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddelanc.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdrumor3.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcorwij.dlg~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~120~ ~Component 290 (the direct victory ending) requires component 120 (the Hooded Man removed from the mid-campaign).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~130~ ~Component 290 (the direct victory ending) requires component 130 (the chapter rest-dreams removed).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 290 (the direct victory ending) requires component 185 (Entar Silvershield removed).~
+
+INCLUDE ~chriz-sod-remix/lib/comp290.tpa~
+
+// ============================================================
+// 291 — repair previously installed EET ending script suspension
+// ============================================================
+// Older 290 endpoints spawned an ordinary AI carrier in full cutscene mode,
+// which stops that script (including its missing-container guard). Match EET's
+// native caller: release full mode and retain input protection with lite mode.
+// New 290 installs already include the correction; this tail repair then does
+// nothing. Never reinstall 290 to update an existing WeiDU stack.
+
+BEGIN @291 DESIGNATED 291 GROUP @1005 LABEL ~csr_victory_ending_script_fix~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~290~ ~Component 291 repairs the EET handoff of component 290; install component 290 first.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~K#TELBGT.BCS~ AND FILE_EXISTS_IN_GAME ~K#TELBGT.CRE~ AND FILE_EXISTS_IN_GAME ~AR0602.BCS~) @9001
+
+INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
+
+// ============================================================
 // 900/901 — treasure from removed content (mod-wide choice)
 // ============================================================
 // One choice, reused by every future removal pass: notable loot
@@ -684,7 +727,7 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~The treasur
 OUTER_SET csr_keep_treasure = 0
 INCLUDE ~chriz-sod-remix/lib/comp900.tpa~
 
-// Optional, unreleased EET bedroom skip. Install after EET_end so the effective
+// Optional, experimental EET bedroom skip. Install after EET_end so the effective
 // item-import rules (including other mods' additions) can be inspected.
 BEGIN @910 DESIGNATED 910 GROUP @1001 LABEL ~csr_optional_sod_skip~
 REQUIRE_PREDICATE (GAME_IS ~eet~) ~The optional bedroom skip requires EET.~

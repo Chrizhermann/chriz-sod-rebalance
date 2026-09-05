@@ -75,7 +75,8 @@ The pre-integration feature worktree passed **34 tests** on Windows with Python
 EET fixtures and checks prerequisites, rejected effective rules/layouts, the exact
 three-new/three-modified resource set, protected-resource identity, confirmation
 loops, XP/failure guards, delayed impound, and imported-Imoen receipt ordering.
-The release notes record the final integrated suite results.
+The integrated v0.6.7 source passed **82 tests** on Windows (35 main, 33 research,
+14 ending-verifier self-tests); the TP2 and all **36 libraries** parse.
 
 Earlier candidate native evidence covers both confirmation declines, confirmed
 No, helper cleanup, no skip XP, and No save/reload. The current candidate changes
@@ -85,7 +86,8 @@ Follow-up coverage: imported off-party Imoen including bags; final No impound
 and servant/rest/council continuation; a protagonist award crossing 500,000 XP;
 explicit BG2 reload/re-entry; broader party and multiplayer variants. Synthetic
 tests do not prove native scheduling or persistence for those cases. Component
-910 is EET-only; standalone is deliberately rejected.
+910 is EET-only; standalone is deliberately rejected. These follow-ups and visual
+polish are tracked in [issue #19](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/19).
 
 ## Evidence and harness boundaries
 

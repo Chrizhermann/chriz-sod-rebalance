@@ -7,7 +7,8 @@ appearance is script-created; corpus-wide search).
 ## Decided (user, 2026-07-03)
 Remove the hooded man / Irenicus 100% from the plot. This component removes every
 **mid-campaign** appearance. The **endgame** appearances (dream/arrest/jail) die with the
-ending rework (separate component) — until that ships, the endgame chain stays functional.
+approved ending rework (separate component) — until that ships, the endgame chain stays
+functional. See `docs/plans/2026-07-16-post-victory-ending-design.md`.
 
 Verified safety: none of the five mid-campaign scenes sets any variable the endgame reads.
 
@@ -52,10 +53,10 @@ Mechanical cost of skipping: four guaranteed ambush-proof full-heal rests become
 rests — negligible under the 5× ambush reduction. The endgame celebration dream (`BDCUT60`,
 BD4100) runs on its own dialog-launched locals and is unaffected.
 
-## Minor open question
-Three tavern-rumor lines (`BDRUMOR3`, chapters 8/9/10) mention "a hooded fellow asking about
-you." Once the ending rework removes him entirely, they're red herrings. Remove them here, or
-with the ending component?
+## Tavern-rumor residue — DECIDED (user, 2026-07-16)
+Three tavern-rumor lines (`BDRUMOR3` states 7/20/37, chapters 8/9/10) mention "a hooded fellow
+asking about you." False-gate all three in the ending component so no red-herring foreshadowing
+survives after Irenicus is removed.
 
 ## Implementation sketch (after sign-off)
 Tail-mod `COPY_EXISTING` patches: `BD0103.bcs`, `BDCUT10.bcs`, `BDCUT28.bcs`, `BD5100.bcs`

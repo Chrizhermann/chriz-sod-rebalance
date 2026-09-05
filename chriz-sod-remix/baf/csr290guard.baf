@@ -1,0 +1,13 @@
+IF
+  OR(2)
+    !AreaCheck("BD4300")
+    !Exists("K#ImportContainer")
+THEN
+  RESPONSE #100
+    DisplayStringNoName(Player1,@29000)
+    FadeFromColor([1.0],0)
+    SetCutSceneLite(FALSE)
+    EndCutSceneMode()
+    SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)
+    DestroySelf()
+END

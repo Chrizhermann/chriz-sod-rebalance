@@ -2,12 +2,12 @@
 
 Status snapshot: 6 September 2026. These are priorities, not promised dates.
 
-- **WIP — optional full SoD skip.** A bedroom choice lets you continue SoD or
+- **v0.6.7 — optional full SoD skip.** A bedroom choice lets you continue SoD or
   move into the normal BG2 opening with 250,000 extra XP for your main character.
   It uses normal carried-inventory import handling; automatic recovery of loose
-  loot is deferred. The candidate is implemented and installed in an isolated
-  test copy; final in-game transition and equipment checks are still outstanding.
-  Not released or ready for a collection pin yet.
+  loot is deferred. The six-person Yes route passed in an isolated test copy,
+  with saved XP and sampled import evidence. Visual polish and broader native
+  coverage remain follow-ups. No collection pin is changed by this release.
 - **Planned design — a better Boareskyr Bridge finale.** Remove the explosive
   barrel gimmick. Several wizards attacking the bridge with fire and earth
   elementals is the proposed replacement, not a finalized encounter.
@@ -34,5 +34,7 @@ Maintainer references: [full-skip candidate/test status](design/wave1/06-optiona
 [filler audit #16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16).
 The future acquired-item registry is tracked separately in
 [issue #18](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/18).
+Full-skip visual polish and remaining native coverage are in
+[issue #19](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/19).
 The planned directions are recorded in master at `25ab509`,
 `docs/01-remix-wishlist.md`, under the September 5 roadmap additions.
