@@ -9,6 +9,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 TP2 = ROOT / "chriz-sod-remix" / "setup-chriz-sod-remix.tp2"
 HOOD = ROOT / "chriz-sod-remix" / "dlg" / "csrhood.d"
+SCRY_COMPAT = ROOT / "chriz-sod-remix" / "lib" / "bdscry_compat.tpa"
 COMP150 = ROOT / "chriz-sod-remix" / "lib" / "comp150.tpa"
 ARRIVAL = ROOT / "chriz-sod-remix" / "baf" / "csrarr.baf"
 COUNCIL = ROOT / "chriz-sod-remix" / "dlg" / "csrcncl.d"
@@ -18,15 +19,24 @@ class StandalonePrerequisiteSourceTests(unittest.TestCase):
     def test_component_120_disables_hood_picker_by_semantics(self) -> None:
         source = HOOD.read_text(encoding="utf-8")
         tp2 = TP2.read_text(encoding="utf-8")
-        self.assertIn("REPLACE_TRIGGER_TEXT BDSCRY", source)
-        self.assertIn('Global("bd_sddd12_hood","LOCALS",0)', source)
+        library = SCRY_COMPAT.read_text(encoding="utf-8")
+        self.assertNotIn("REPLACE_TRIGGER_TEXT BDSCRY", source)
         self.assertNotIn("ADD_TRANS_TRIGGER BDSCRY", source)
         self.assertIn("ADD_TRANS_TRIGGER BDIMOEN 67 ~False()~ DO 1", source)
-        self.assertIn(
-            'COUNT_REGEXP_INSTANCES ~Global("bd_sddd12_hood","LOCALS",0)~ csr120_hood_count',
+        self.assertRegex(
             tp2,
+            r'ALWAYS\s+INCLUDE ~chriz-sod-remix/lib/bdscry_compat\.tpa~\s+END',
         )
-        self.assertIn("PATCH_IF (csr120_hood_count < 1)", tp2)
+        self.assertRegex(
+            tp2,
+            r'LAF csr_disable_bdscry_picker_route\s+STR_VAR\s+'
+            r'csr_scry_flag = ~bd_sddd12_hood~\s+csr_scry_component = ~120~\s+END',
+        )
+        self.assertIn("DEFINE_ACTION_FUNCTION csr_disable_bdscry_picker_route", library)
+        self.assertIn("csr_scry_state_count = 4", library)
+        self.assertIn("csr_scry_route_count = 1", library)
+        self.assertIn("csr_scry_reset_count != 0", library)
+        self.assertIn("PATCH_FAIL", library)
 
     def test_component_150_classifies_eet_all_or_nothing(self) -> None:
         source = COMP150.read_text(encoding="utf-8")

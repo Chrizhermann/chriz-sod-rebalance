@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.5~
+VERSION ~v0.6.6~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -56,6 +56,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   280 no party dispel at the basement reveal
 // 290-299: ending and campaign handoff
 //   290 end at the Dragonspear victory celebration
+//   291 repair an existing EET victory-ending installation
 // 900-999: mod-wide choice components
 //   900/901 treasure from removed content: collect / remove
 //           (requires 210)

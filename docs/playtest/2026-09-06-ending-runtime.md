@@ -7,6 +7,14 @@ directive was needed. After the isolated runtime pass, the actual dev EET
 installation received tail component 291 and passed its installed-state verifier.
 The live installation remains untouched.
 
+The user accepted release of this tested scope on 2026-09-06. Remaining standalone,
+party-variant, multiplayer, and re-entry coverage is tracked in
+[#17](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/17); unrun rows below
+remain unrun. Release v0.6.6 integrates the existing v0.6.4 installer ordering and
+v0.6.5 scrying-pool fix. All 59 integrated tests and the TP2/35-library WeiDU 249
+parse check pass. The ending runtime test used the pre-merge ending resources;
+the integrated release was not separately played through end to end.
+
 ## Isolated test environment
 
 - Task root: `C:\Games\csr290-test-20260905`.
@@ -132,7 +140,7 @@ and [history/resource comparison](C:/Games/csr290-test-20260905/evidence/dev-291
 Local evidence:
 
 - [Install log](C:/Games/csr290-test-20260905/evidence/install-291.log) and [pre-repair WeiDU log](C:/Games/csr290-test-20260905/evidence/eet-before-291.log).
-- [Current isolated WeiDU log](C:/Games/csr290-test-20260905/eet/WeiDU.log).
+- [Archived isolated WeiDU log](C:/Games/csr290-test-20260905/evidence/isolated-eet-after-291.log).
 - [Installed-state verifier output](C:/Games/csr290-test-20260905/evidence/csr291-verifier-scratch-20260906.txt).
 - [Repository test discovery](C:/Games/csr290-test-20260905/evidence/source-suite.log) and [explicit six-test WeiDU rerun](C:/Games/csr290-test-20260905/evidence/container-suite.log).
 - [Preservation audit manifest](C:/Games/csr290-test-20260905/evidence/291-preservation.json).

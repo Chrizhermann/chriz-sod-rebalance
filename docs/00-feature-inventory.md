@@ -6,7 +6,7 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.5, 31
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.6, 33
 component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
@@ -14,14 +14,15 @@ component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 
 ## 1. Implemented (built + installed on the dev install)
 
-Five install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
-Prologue-city, **@1002** Coast Way, **@1003** road north, and **@1004** coalition camp.
-All are in-place patches (COPY_EXISTING / EXTEND_TOP / EXTEND_BOTTOM /
-DECOMPILE_AND_PATCH); nothing is uninstalled. Every
-component carries a REQUIRE_PREDICATE that the SoD loose `BD*` content exists, so the
-whole mod no-ops cleanly on a BG2:EE-only install. The dev target has **30 selected
-components installed**; 901 is the unchosen half of the exclusive 900/901 pair. The
-live install remains on v0.5.0 and is not the implementation target.
+Six install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
+Prologue-city, **@1002** Coast Way, **@1003** road north, **@1004** coalition camp,
+and **@1005** ending. Components patch installed resources and add guarded private
+resources where needed; nothing is uninstalled. Resource and dependency checks
+require the appropriate SoD content; repair 291 additionally requires EET.
+A normal fresh selection installs **31 components**, excluding repair 291 and one
+of the exclusive 900/901 alternatives. The designated dev target has **32 installed
+component rows**, including its existing 290 plus appended repair 291; 901 remains
+unchosen. The live install is not the implementation target.
 
 ### Global levers (Wave 1 — GROUP @1000)
 
@@ -29,7 +30,7 @@ live install remains on v0.5.0 and is not the implementation target.
 |---|---------|--------------|------|
 | 100 | Rest-ambush felt-rate 5× reduction | Remaps each area's `.are` day/night rest-% down ~5× (via `restmap.tpa`) across the 30 areas with an active rest table; the engine rolls per in-game hour, so listed 6–18% = felt 39–80%/8h → knocked to felt ~8–15%. Reads current value (composes with other mods); leaves BDNOREST cancellers + empty tables. Changes **frequency only**, not pack size. | pred `bd0120.are` |
 | 110 | Keep all companions at SoD start | Strips the 28 BD0103 `LeaveParty()+DestroySelf` dismiss blocks (29 names) so the whole BG1 party carries into SoD; +9 recruiter-site EXTEND_TOP skip-blocks (BD0101/0108/0110/0111/1000/2000/2100/7000/7100) suppress duplicate recruit-spawns / Dorn gear-grab for kept members. | pred `bd0103.bcs` |
-| 120 | Remove the hooded man (mid-campaign) | Excises Irenicus from his 5 mid-campaign scenes (BD0103 bedside, BDCUT10/11 interrogation vision, BDCUT28 Bhaal-vision, BD5100 cameo, BDSCRY/BDIMOEN dangling options). Sets nothing the endgame reads; the endgame chain is deliberately left for the ending rework. | pred `bd0103.bcs` |
+| 120 | Remove the hooded man (mid-campaign) | Excises Irenicus from his 5 mid-campaign scenes (BD0103 bedside, BDCUT10/11 interrogation vision, BDCUT28 Bhaal-vision, BD5100 cameo, BDSCRY/BDIMOEN dangling options). Sets nothing the endgame reads; component 290 removes the endgame chain. | pred `bd0103.bcs` |
 | 130 | Skip the four chapter rest-dreams | EXTEND_TOP on BDBALDUR.bcs pre-sets `bd_ddd=4` (natural post-all-dreams value) so PLAYER1D's dream launchers never fire; the four nights become ordinary rests. PLAYER1D.BCS left untouched (EET-compat). | pred `bdbaldur.bcs` |
 
 ### Prologue — city (GROUP @1001)
@@ -43,7 +44,7 @@ live install remains on v0.5.0 and is not the implementation target.
 | 170 | The Korlasz jailbreak | Re-timed BD0116 fight on vanilla rematch scaffolding: rebuilt `csrkorl` (Mage 12, Slow+Confusion+Glitterdust sequencer) + named 6-member crew (Hasska/Vhast/Sillune/Porios/Grit/dying Fist) carrying the re-homed dungeon loot; difficulty-branched roster; HARDEST buff layer resolved by spell NAME; SCS detect-and-adapt. Stairs-top BD0102 hint beat re-times the trigger. | REQUIRE 140 |
 | 175 | XP ledger: Liia's reward after the jailbreak | The skipped dungeon carried ~24,700/char guaranteed XP; the jailbreak returns ~1,600/char in kills. Liia's return-beat close pays **24,000/char** as one quest reward (user option c, 2026-07-10; anchor-checked patch of csrcele state 2, award before DestroySelf). **Unit-corrected 2026-07-12: delivery is now `AddXPObject(Player1..6,24000)` — the original single `AddexperienceParty(24000)` divides among the party and paid only ~4,000/char (user-verified in-game).** | REQUIRE 170+180 |
 | 180 | Celebration + Caelar's proclamation | Victory beat on first walk into BD0102 (nobles + Fist dressing w/ click-dialogs, Liia toast / Belt seconds, BG1 register, palace locked for the night); opens the jailbreak-quest journal and hands over Caelar's proclamation naming the Bhaalspawn (`csrpam`); Liia return beat + Fist march after the jailbreak. | REQUIRE 140+150 |
-| 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. The approved ending pass owns the last inert BDPALACE reference; the unreachable trial files stay on disk. | REQUIRE 140+150 |
+| 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. Component 290 false-gates the last BDPALACE reference; the unreachable trial files stay on disk. | REQUIRE 140+150 |
 | 187 | Assassination night set never spawns | Schedule-zeroes the nine always-placed BD0100 night actors (Corwin, three assassins, two guards, three corpses), preventing the one-frame render/pop that comp150's script sweep could not stop. The sweep remains as protection for saves with BD0100 already baked. | REQUIRE 150; pred `bd0100.are` |
 | 190 | Skie's second-night bedroom visit removed | A Skie-free dawn wake mirrors the two BD0103 night blocks and pre-sets `BD_MDD005=1` so they can never fire (party sleeps to dawn, `bd_plot` 54→55 as before); BDSKIE night root (state 16) sealed with False(). | REQUIRE 150 |
 | 195 | Assassination/poison references scrubbed | Zero-new-text cleanup after 150: reply/state False() gates + 2 ALTER_TRANS re-routes (BDSCHAEL 227 retire-commit moves onto the "ready to march" reply + EXIT; BDLIIA 13 "how fares Imoen?" → training advice) across Corwin/Eltan/Edwin/Liia/Fist/debug. de Lancie supply-poison quest explicitly out of scope. | REQUIRE 150 |
@@ -62,7 +63,7 @@ live install remains on v0.5.0 and is not the implementation target.
 | 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. **Installed on dev.** | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 
 Component 901 is the declared but unselected XOR alternative: remove the treasure with
-BD7000 and set `csr_treasure_removed=1`. It is not one of the 30 installed component rows.
+BD7000 and set `csr_treasure_removed=1`. It is not one of the 32 installed dev component rows.
 
 ### The road north / Ch. 9 (GROUP @1003) — quick-win pass, shipped 2026-07-11
 
@@ -81,11 +82,27 @@ BD7000 and set `csr_treasure_removed=1`. It is not one of the 30 installed compo
 | 270 | Kanaglym: fewer undead | NE graveyard 19→8 (3 banned shadowed souls; archers 9→3, armored 3→2, bladed 2→1; the 4k skeleton-warrior mini-boss anchors the rest). South quest cluster neutral-until-quest = untouched by construction; C0MNEV01 (foreign mod) never touched. **+5,200 party-total** (≈870/char at 6; unit-corrected 2026-07-12) riding the Kherriun 12,000 award (both branches, one fires). | pred `bd5300.are` + `.bcs` |
 | 280 | No party dispel at the basement reveal | BOTH reveal variants strip the party (6× bddispel on Player1–6 in BDCUT45A **and** BDCUT45B) and CUTSKIP mirrors both (12 more) — all 24 removed; ward flare, bdglowgr glow and every enemy-side dispel stay. Corrects the earlier "45B only dispels enemies" note. | pred `bdcut45a/b.bcs` + `cutskip.bcs` |
 
+### Victory ending (GROUP @1005)
+
+| # | Feature | What it does | Deps |
+|---|---------|--------------|------|
+| 290 | End SoD at the victory celebration | Preserves BDCUT59/59A/59B, party barks, public de Lancie/Bence dialogue, and a playable BD4300 celebration; Dazzo ends SoD at plot 590. Retires the optional codas, Skie murder/arrest/trial/jail/escape/ambush chain, remaining Hooded-Man rumors, and final BDPALACE Entar reference. EET uses a private guarded clone of the installed handoff, transfers the local bank through `BD6100*K#ImportContainer`, and enters normal SoA without a party visit to BD6100. Standalone uses native credits. | REQUIRE 120+130+185; guarded ending resources |
+| 291 | Repair an existing EET ending installation | Append-only correction for the original 290 carrier-script softlock: release full cutscene mode, enter native lite mode before spawning the carrier, and clear lite mode when the guard fails. Validates legacy/current endpoints and guard before writing; only BDDAZZO.DLG and private CSRETBGT.BCS can change. Fresh 290 already includes the correction, so 291 is unnecessary there and leaves corrected resources unchanged. | REQUIRE 290 + complete EET handoff resource family |
+
+**Verified boundary:** the isolated EET guard and its save/reload passed; one real
+return/celebration run, celebration reload, and user-approved reduced inventory
+handoff passed. Six markers and a bag reached the normal hidden AR0602 import bank
+exactly, with the bag store contents preserved. This is bank retention under EET's
+existing rules, not an award into party inventory; downstream placement is unchanged.
+The original expanded party/inventory matrix was not completed, and standalone
+runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-runtime.md).
+
 ### Meta
 
-`chriz-sod-remix` v0.6.5, tail-installable WeiDU mod; 31 component declarations in 5
-install GROUPs; 30 selected components are installed on dev (901 is the exclusive
-unchosen alternative); all in-place patches with loud count-guards (PATCH_FAIL on mismatch);
+`chriz-sod-remix` v0.6.6, tail-installable WeiDU mod; 33 component declarations in 6
+install GROUPs; 31 components in a normal fresh selection (omit repair 291 and one
+900/901 alternative); 32 installed dev rows include existing 290 and repair 291.
+Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
 scope.
 
@@ -100,11 +117,12 @@ scrying visions retired → **225**; treasure choice → **900 selected / 901 un
 2026-07-10/11 road-north
 quick-wins (trash cut, bugbear-cave removal + temple rewire, dragon tiers) →
 **230/240/250**; 2026-07-12 coalition-camp quick-wins (scouting-map + Kanaglym cuts,
-no reveal dispel, durable barrels) → **260/270/280/255**.
+no reveal dispel, durable barrels) → **260/270/280/255**; approved victory-celebration
+ending and EET carrier repair → **290/291**.
 
 ---
 
-## 2. Locked policy and remaining unbuilt work
+## 2. Locked policy and remaining work
 
 ### Guiding principles (locked, cross-cutting)
 - **Compatibility first** — must play well with vanilla, SCS, Spell Revisions, Artisan's
@@ -122,18 +140,19 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
   area; bone bats + the Unsleeping Guardian on the not-fun list. First realized in Coast
   Way (comp 220); applies to every later pass.
 
-### Narrative arc (locked, not yet built)
+### Narrative arc (locked, partially built)
 - **Caelar Argent = main antagonist & final boss** (lore verified: crusade to free her
   uncle Aun Argent from Avernus).
-- **End at a short playable BD4300 victory celebration** — keep the return, compact
+- **End at a short playable BD4300 victory celebration — implemented by 290**: keep the return, compact
   party barks, de Lancie's public acknowledgment, Bence's cheer, and Dazzo's rest
   conversation (gated to plot 590) as the endpoint. Remove every optional coda and the
   whole dream → Skie murder → arrest → trial → jail → escape → ambush chain. EET clones
   the installed K# handoff, banks in BD4300, transfers the bank to
   `BD6100*K#ImportContainer`, and
   enters SoA without the party entering BD6100; standalone ends directly via native credits.
-  Originals remain untouched. This pass completes Skie's survival, the endgame
-  hooded-man removal, and Entar's final live-reference cleanup.
+  Originals remain untouched. Component 290 implements Skie's survival, the endgame
+  hooded-man removal, and Entar's final live-reference cleanup. The reduced EET
+  runtime case passes; standalone and the expanded matrix remain unverified.
 
 ### Companions (locked, partially shipped)
 - **Skie playable as a simple BG1-style talk-to-join recruit** — shipped by component
@@ -172,7 +191,6 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
 | Coldhearth Lich fight rework (Coast Way §3) | A dedicated lich pass (phylactery telegraph / power-down / SCS brain) |
 | Skie estate/gear inheritance | Optional follow-up only; the talk-to-join core and BG1 soundset are already shipped by 197 |
 | Full Corwin dialogue rewrite | Surface census prepped (docs/research/16); a later rewrite pass |
-| Final live Entar-reference cleanup | Approved ending pass; false-gate the remaining BDPALACE reference and leave retired CRE/DLG inert |
 | Per-playthrough sequencer randomization (Korlasz) | Cheap roadmap note |
 | Rioters-instead-of-assassins street vignettes (prologue §4) | Roadmap |
 | Imoen BG1-death detection | Intentionally skipped — unconditionally present by design |
@@ -219,7 +237,7 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 - **XP baseline trust**: calibrate against a real save near the BG2 transition.
 - **Per-area rest treatment:** component 100 already shipped the frequency-only 5×
   remap; pack-size and zero-ambush-area decisions remain per-chapter questions.
-- **Hooded-man tavern rumors (BDRUMOR3 states 7/20/37):** resolved — remove with the approved ending pass.
+- **Hooded-man tavern rumors (BDRUMOR3 states 7/20/37):** implemented by component 290.
 - **Travel-ambush frequency + per-arena treatment** (BD0066 goblin horde first cut candidate).
 - **Prologue OPEN sign-offs**: §4 cut surface (OPEN#1), proclamation tone/delivery (§9/OPEN#3), comp150 beyond-spec gates (OPEN#4).
 

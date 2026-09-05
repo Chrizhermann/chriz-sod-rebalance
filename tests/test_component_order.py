@@ -39,6 +39,8 @@ EXPECTED_COMPONENTS = {
     260,
     270,
     280,
+    290,
+    291,
     900,
     901,
 }
@@ -55,20 +57,27 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_5(self) -> None:
+    def test_patch_release_version_is_v0_6_6(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.5~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.6~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()
 
         self.assertLess(components.index(210), components.index(197))
 
-    def test_all_31_component_declarations_remain_unique(self) -> None:
+    def test_ending_prerequisites_precede_290_and_repair_291(self) -> None:
         components = designated_components()
 
-        self.assertEqual(31, len(components))
+        for prerequisite in (120, 130, 185):
+            self.assertLess(components.index(prerequisite), components.index(290))
+        self.assertLess(components.index(290), components.index(291))
+
+    def test_all_33_component_declarations_remain_unique(self) -> None:
+        components = designated_components()
+
+        self.assertEqual(33, len(components))
         self.assertEqual(EXPECTED_COMPONENTS, set(components))
 
 

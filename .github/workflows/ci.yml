@@ -13,6 +13,8 @@ jobs:
   verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    env:
+      WEIDU_EXE: /usr/local/bin/weidu
     steps:
       - name: Check out source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -35,4 +37,7 @@ jobs:
           done < <(find chriz-sod-remix/lib -type f -name '*.tpa' -print | LC_ALL=C sort)
 
       - name: Run regression tests
-        run: python3 -m unittest discover -s tests -v
+        run: |
+          python3 -m unittest discover -s tests -v
+          python3 -m unittest discover -s research/scripts -p 'test_*.py' -v
+          python3 research/scripts/verify_ending.py --self-test
