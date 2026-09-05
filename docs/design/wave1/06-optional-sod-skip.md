@@ -2,7 +2,9 @@
 
 Status: user-requested on 2026-09-05; inventory scope approved on the same date.
 Dialogue/XP source prototype and a ground-pile probe are prepared; the full skip
-is not implemented or installable. This is not part of released
+is not implemented or installable. The native ground-pile probe failed its
+collection gate on 2026-09-05; the proposed receptacle method is rejected for the
+tested build. This is not part of released
 v0.6.5, the frozen CEBG r4 recipe, or the separate component-290 ending work.
 
 ## DECIDED: requested behavior
@@ -154,7 +156,8 @@ The bounded prototype lives outside the released payload in
 collection recipe are unchanged.
 
 `tests/test_optional_sod_skip.py` was added RED before the prototype sources,
-then made green. The full repository suite passes **23 tests on Windows with
+then made green. Including the later native-result regression, the full
+repository suite passes **24 tests on Windows with
 WeiDU 249** (2026-09-05):
 
 - Real compilation/decompilation of the three-state dialogue and XP action.
@@ -168,31 +171,40 @@ WeiDU 249** (2026-09-05):
   items, unrelated chest loot, duplicate named receptacles, and truncated data.
 
 The state replay and synthetic SAV fixtures **do not test native script
-scheduling, XP caps, campaign transition, or real save/reload behavior**. No game
-was launched and no accepted/live game or save was modified.
+scheduling, XP caps, campaign transition, or real save/reload behavior**. That
+source-only work launched no game. A later explicitly authorized disposable
+engine test is recorded below; no accepted/live game or save was modified.
 
 ### Ground-pile validation gate
 
 The inspected BD0103.ARE has exactly four containers: PlayerChest00,
 Imoen_equipment, and two bookcases; **none is a ground pile**. Component 140's
-sole BDSODTRN import target is BD0103 [190.540]. A narrowly owned, initially empty
-named ground-pile receptacle at that point is a possible collection mechanism.
-It is not yet proven that the native engine merges into it and preserves its
-script name; no whole-room sweep or low-level EEex mutation is substituted.
+sole BDSODTRN import target is BD0103 [190.540]. The original hypothesis was a
+narrowly owned, initially empty named ground-pile receptacle at that point.
+Its required native merge behavior was tested below; no whole-room sweep or
+low-level EEex mutation was substituted.
 
-The isolated two-room `csr-ground-probe` and read-only `verify_ground_probe.py`
-are ready for a coordinated disposable-game test. Its README gives the exact
-sequence: copy two distinct ground tokens while excluding a source chest, verify
-the named destination and untouched destination chest, save/reload, then move
-only the named pile into a probe bank and verify save/reload again. **Do not
-install the skip or collect real BG1 belongings until this gate passes.**
+On 2026-09-05, after Christopher authorized PC use, the isolated two-room probe
+was run in a new copy/profile on **BG2:EE 2.7.3.0 / EEex 1.2.0**. It failed:
+the imported A/B tokens went into a new source-named pile while the preplaced
+CSRBG1PILE remained empty. The source and destination control chests were
+untouched. Full restart/reload and a new save preserved the failure. The
+banking command was not run, as required by the failed precondition.
+
+See `research/prototypes/optional-sod-skip/engine-results-20260905.md` for
+version/hash evidence and test-harness caveats. This result rejects the empty
+named-receptacle method on the tested build; it does not authorize a whole-room
+sweep or treating the observed source name as a stable production identifier.
+**A different provenance-safe collection mechanism is required.**
 
 ### Remaining before an installable candidate
 
 - Complete the stored-item adapter against EET's effective eligibility rules,
   including duplicate-party-copy and bag handling, with disposable fixtures.
+- Replace the rejected ground-pile collection method and verify its provenance
+  and persistence in a disposable engine test.
 - Wire the tested dialogue and guarded XP action into the bedroom arrival and
-  handoff only after the ground-pile gate passes. Preserve both confirmation
+  handoff only after the replacement passes. Preserve both confirmation
   loops and the no-side-effect behavior already covered by the source tests.
 - In the engine, verify a confirmed No permanently records play-SoD, adds
   nothing, and leaves the servant/rest/council flow unchanged.

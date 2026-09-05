@@ -4,6 +4,12 @@ This is **not an installable skip candidate**. The public remix installer and
 v0.6.5 payload have not changed. Component 910's bedroom hook and EET equipment
 adapter are not wired in. Do not pin this branch in CEBG or publish it.
 
+**Native result, 2026-09-05: collection gate FAILED.** On the tested BG2:EE
+2.7.3.0 / EEex 1.2.0 copy, imported tokens occupied a new source-named pile;
+CSRBG1PILE remained empty, including after restart/reload. The banking step was
+not run. See [the evidence report](engine-results-20260905.md). The instructions
+below are retained as the reproducible probe, not a production recommendation.
+
 Implemented here: the exact three-state question/confirmation dialogue and a
 protagonist-only, once-guarded 250,000 XP action behind an unset item-readiness
 gate. Tests compile those sources with WeiDU and replay their decompiled actions.
@@ -17,6 +23,9 @@ prove that `CopyGroundPilesTo` merges all copied items into that named receptacl
 preserves its name on save/reload, and allows targeted `MoveContainerContents`.
 If the engine creates a separate unnamed pile, this approach is rejected.
 
+A separate **source-named** pile also rejects the approach; that is the result
+actually observed. Do not assume its observed name identifies future imports.
+
 The `csr-ground-probe` tail mod creates only **CSRGPA-D.ITM** and two new areas,
 **CSRGP001/CSRGP002**, using the palace's existing background. It changes no
 campaign script or area. All placed actors, triggers, scripted spawns, ambient
@@ -28,6 +37,9 @@ separate ground piles. Probe items are inert test tokens, not campaign rewards.
 
 1. Choose a **new disposable game copy and separate save profile**, not the live
    install, accepted v0.6.5 test copy/profile, or frozen collection build.
+   Isolate Steam cloud integration too; a new engine_name/profile alone is
+   insufficient on the tested 2.7 build. See the evidence report for the tested
+   copy-local offline setup. Never change the user's global Steam settings.
 2. Verify the resolved path and confirm its game and loader are closed. Copy
    only `csr-ground-probe/` into that disposable game. Create the intentional
    opt-in file `csr_ground_probe_disposable.ok` in that game root only after this

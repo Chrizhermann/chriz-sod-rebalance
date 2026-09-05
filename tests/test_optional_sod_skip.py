@@ -263,6 +263,17 @@ class GroundProbeVerifierTests(unittest.TestCase):
         rows.append(("", 4, ["csrgpa", "csrgpb"]))
         self.assertFalse(self.verifier.verify(self.archive(rows), "copy")["passed"])
 
+    def test_rejects_native_source_named_copy_beside_empty_receptacle(self):
+        # Native 2.7.3.0 probe result: the copy created a source-named pile,
+        # leaving the preplaced destination receptacle empty at the same point.
+        rows = self.target()
+        rows[0] = ("CSRBG1PILE", 4, [])
+        rows.append(("CSRSourceA", 4, ["csrgpa", "csrgpb"]))
+        result = self.verifier.verify(self.archive(rows), "copy")
+        self.assertFalse(result["passed"])
+        self.assertEqual(1, len(result["errors"]))
+        self.assertIn("CSRBG1PILE", result["errors"][0])
+
     def test_rejects_unrelated_chest_item_or_duplicate_ground_item(self):
         for unexpected in ("csrgpc", "csrgpa"):
             rows = self.target()
