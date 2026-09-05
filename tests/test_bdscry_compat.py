@@ -57,7 +57,7 @@ def _load_verifier():
 def _write_key_and_bif(game_root: Path) -> None:
     """Write a minimal BG2EE-shaped KEY/BIFF with one marker resource."""
     payload = b"synthetic BG2EE marker"
-    bif_relative = Path("DATA/BDSCTEST.BIF")
+    bif_relative = Path("data/bdsctest.bif")
     bif_path = game_root / bif_relative
     bif_path.parent.mkdir(parents=True)
     table_offset = 0x14
@@ -161,7 +161,7 @@ class SyntheticDialogGame:
         self.root = Path(self.temporary.name) / "game"
         self.root.mkdir()
         (self.root / "override").mkdir()
-        (self.root / "override/TRIGGER.IDS").write_text(
+        (self.root / "override/trigger.ids").write_text(
             "IDS V1.0\n"
             "0x400F Global(S:Name*,S:Area*,I:Value*)\n"
             "0x4023 True()\n"
@@ -169,7 +169,7 @@ class SyntheticDialogGame:
             encoding="ascii",
             newline="\n",
         )
-        (self.root / "override/ACTION.IDS").write_text(
+        (self.root / "override/action.ids").write_text(
             "IDS V1.0\n"
             "30 SetGlobal(S:Name*,S:Area*,I:Value*)\n"
             "120 StartCutSceneEx(S:CutScene*,I:evaluateConditions*BOOLEAN)\n"
@@ -177,7 +177,7 @@ class SyntheticDialogGame:
             encoding="ascii",
             newline="\n",
         )
-        (self.root / "override/BOOLEAN.IDS").write_text(
+        (self.root / "override/boolean.ids").write_text(
             "IDS V1.0\n0 FALSE\n1 TRUE\n",
             encoding="ascii",
             newline="\n",
@@ -185,7 +185,8 @@ class SyntheticDialogGame:
         _write_key_and_bif(self.root)
         self.tlks = (
             self.root / "dialog.tlk",
-            self.root / "lang/en_US/dialog.tlk",
+            # WeiDU 249 detects EE layouts through this lowercase path on Linux.
+            self.root / "lang/en_us/dialog.tlk",
         )
         for tlk in self.tlks:
             tlk.parent.mkdir(parents=True, exist_ok=True)
@@ -209,6 +210,7 @@ class SyntheticDialogGame:
         )
         result = self._run(bootstrap)
         if "SUCCESSFULLY INSTALLED" not in self.transcript(result):
+            self.cleanup()
             raise AssertionError(self.transcript(result))
         self.pre_patch_tlks = tuple(tlk.read_bytes() for tlk in self.tlks)
 
@@ -229,7 +231,7 @@ class SyntheticDialogGame:
                 "--language",
                 "0",
                 "--use-lang",
-                "en_US",
+                "en_us",
                 "--no-exit-pause",
                 "--quick-log",
             ],
@@ -284,13 +286,26 @@ class SyntheticDialogGame:
     def tlks_unchanged(self) -> bool:
         return tuple(tlk.read_bytes() for tlk in self.tlks) == self.pre_patch_tlks
 
+    @staticmethod
+    def _find_output(directory: Path, filename: str) -> Path:
+        matches = [
+            path for path in directory.iterdir()
+            if path.name.casefold() == filename.casefold() and path.is_file()
+        ]
+        if len(matches) != 1:
+            raise AssertionError(f"expected exactly one {filename} in {directory}: {matches}")
+        return matches[0]
+
+    def dialog_path(self, resource: str = "BDSCRY") -> Path:
+        return self._find_output(self.root / "override", f"{resource}.dlg")
+
     def decompile(self, resource: str = "BDSCRY") -> str:
         output = Path(self.temporary.name) / "decompiled"
         output.mkdir(exist_ok=True)
         result = subprocess.run(
             [
                 str(WEIDU),
-                str(self.root / f"override/{resource}.DLG"),
+                str(self.dialog_path(resource)),
                 "--game",
                 str(self.root),
                 "--out",
@@ -305,7 +320,7 @@ class SyntheticDialogGame:
         )
         if result.returncode:
             raise AssertionError(self.transcript(result))
-        return (output / f"{resource}.d").read_text(encoding="utf-8")
+        return self._find_output(output, f"{resource}.d").read_text(encoding="utf-8")
 
 
 @unittest.skipUnless(WEIDU.is_file(), f"WeiDU 249 fixture input not found: {WEIDU}")
@@ -366,12 +381,12 @@ class BdscryNativeLayoutTests(unittest.TestCase):
                 extra_hood_choice=True,
             )
         )
-        original = (game.root / "override/BDSCRY.DLG").read_bytes()
+        original = game.dialog_path().read_bytes()
         result = game.install_patch("bd_sddd12_hood")
         transcript = game.transcript(result)
         self.assertNotIn("SUCCESSFULLY INSTALLED", transcript, transcript)
         self.assertIn("does not match the current no-Aura four-state picker", transcript)
-        self.assertEqual((game.root / "override/BDSCRY.DLG").read_bytes(), original)
+        self.assertEqual(game.dialog_path().read_bytes(), original)
 
     def test_no_aura_picker_rejects_a_missing_hood_route(self) -> None:
         game = self._game(
@@ -379,12 +394,12 @@ class BdscryNativeLayoutTests(unittest.TestCase):
                 omit_hood_choice=True,
             )
         )
-        original = (game.root / "override/BDSCRY.DLG").read_bytes()
+        original = game.dialog_path().read_bytes()
         result = game.install_patch("bd_sddd12_hood")
         transcript = game.transcript(result)
         self.assertNotIn("SUCCESSFULLY INSTALLED", transcript, transcript)
         self.assertIn("does not match the current no-Aura four-state picker", transcript)
-        self.assertEqual((game.root / "override/BDSCRY.DLG").read_bytes(), original)
+        self.assertEqual(game.dialog_path().read_bytes(), original)
 
     def test_components_use_the_semantic_helper_not_numeric_bdscry_edits(self) -> None:
         self.assertTrue(HELPER.is_file(), "production native-layout helper is missing")
