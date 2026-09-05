@@ -48,9 +48,13 @@ dialog implicitly terminates the cutscene, and removing it without the replaceme
 - Script block: `REPLACE_TEXTUALLY` its most distinctive trigger line with
   `False()` + newline + the original line. Whole block dead, no structure change.
   Prefer this over deleting blocks that contain `SetCutSceneLite`/state changes.
-- Dialog reply: `.d` file with `ADD_TRANS_TRIGGER DLGNAME state ~False()~ DO transIdx`
-  (appends/ANDs — never overwrites existing triggers, so mod-added transitions in the same
-  state are safe). Verify transition indices by decompiling the LIVE dlg first.
+- Dialog reply with a stable layout: `.d` file with
+  `ADD_TRANS_TRIGGER DLGNAME state ~False()~ DO transIdx` (appends/ANDs — never overwrites
+  existing triggers, so mod-added transitions in the same state are safe).
+- Dialog reply across known layout variants: decompile inside `COPY_EXISTING`, count and
+  replace a semantic trigger unique to that reply, and reject every unproved shape before
+  recompiling. Component 120/225's `BDSCRY` helper matches each native picker route by
+  its dedicated local flag; it no longer assumes that a state 4 exists.
 
 ## 8. Verification loop (proved: whole Wave 1)
 After every install on the dev copy: (a) binary read-back of patched fields via Python

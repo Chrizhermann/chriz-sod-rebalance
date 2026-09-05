@@ -1,6 +1,10 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.4~
+VERSION ~v0.6.5~
+
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
+END
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
@@ -217,15 +221,11 @@ COPY_EXISTING ~bd5100.bcs~ ~override~
   END
 BUT_ONLY
 
-// Require at least one installed Hood picker before the semantic dialog edit.
-// Aura may copy it, so the exact count is intentionally not fixed.
-COPY_EXISTING - ~BDSCRY.DLG~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~Global("bd_sddd12_hood","LOCALS",0)~ csr120_hood_count
-    PATCH_IF (csr120_hood_count < 1) BEGIN
-      PATCH_FAIL ~chriz-sod-remix #120: BDSCRY has no Hooded Man picker trigger; refusing to guess at a changed dialog graph.~
-    END
-  END
+LAF csr_disable_bdscry_picker_route
+  STR_VAR
+    csr_scry_flag = ~bd_sddd12_hood~
+    csr_scry_component = ~120~
+END
 
 COMPILE ~chriz-sod-remix/dlg/csrhood.d~
 
@@ -419,6 +419,21 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Component 1
 INCLUDE ~chriz-sod-remix/lib/comp195.tpa~
 
 // ============================================================
+// 210 — Coast Way Forest (BD7000) removed; Rasaad at the camp
+// ============================================================
+// The vampire-hunters map never appears on the worldmap (its
+// static WMP visibility flag is the ONLY thing that reveals it —
+// no script does). Rasaad's recruitment moves to the Flaming Fist
+// camp on BD1000, cloned from his verified BD7000 state machine.
+// docs/design/chapters/02-coastway.md §2.
+
+BEGIN @210 DESIGNATED 210 GROUP @1002 LABEL ~csr_no_bd7000~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7000.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp210.tpa~
+
+// ============================================================
 // 197 — Prologue: Skie becomes a plain talk-to-join recruit
 // ============================================================
 // The vanilla palace meeting ran her full SoD plot opener ("I heard you
@@ -472,21 +487,6 @@ BEGIN @200 DESIGNATED 200 GROUP @1002 LABEL ~csr_coastway_field~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp200.tpa~
-
-// ============================================================
-// 210 — Coast Way Forest (BD7000) removed; Rasaad at the camp
-// ============================================================
-// The vampire-hunters map never appears on the worldmap (its
-// static WMP visibility flag is the ONLY thing that reveals it —
-// no script does). Rasaad's recruitment moves to the Flaming Fist
-// camp on BD1000, cloned from his verified BD7000 state machine.
-// docs/design/chapters/02-coastway.md §2.
-
-BEGIN @210 DESIGNATED 210 GROUP @1002 LABEL ~csr_no_bd7000~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7000.are~) @9000
-
-INCLUDE ~chriz-sod-remix/lib/comp210.tpa~
 
 // ============================================================
 // 215 — XP ledger: Coast Way Forest removal compensated

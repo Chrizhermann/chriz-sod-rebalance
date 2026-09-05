@@ -4,7 +4,7 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-## Components (Wave 1)
+## Components
 
 | # | Component | What it does |
 |---|---|---|
@@ -15,11 +15,16 @@ parent repo (`docs/`); every component ships only after explicit sign-off
 
 ## Install
 
-Copy `chriz-sod-remix/` into the game directory, then:
+Extract the release ZIP into the game directory that contains `chitin.key`,
+close the game and any mod manager using that directory, then run:
 
 ```
-weidu.exe chriz-sod-remix/setup-chriz-sod-remix.tp2 --force-install-list 100 110 120 130 --language 0 --use-lang en_US --no-exit-pause
+setup-chriz-sod-remix.exe
 ```
+
+The release exposes 31 declarations. Components `900` and `901` are mutually
+exclusive alternatives, so selecting the complete intended setup installs 30
+components. The release includes the full inventory as `COMPONENTS.md`.
 
 Position: tail-install (after EET_end on EET installs — all patches are in-place edits of
 final files). Standalone BG:EE+SoD is supported by the same components. Reversible via the

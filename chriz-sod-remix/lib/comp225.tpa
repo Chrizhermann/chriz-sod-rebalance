@@ -87,9 +87,19 @@ BUT_ONLY
 EXTEND_TOP ~bdodscry.bcs~ ~chriz-sod-remix/baf/csr225om.baf~
 
 // The Hooded-Man replies were retired by required component 120. Retire the
-// Imoen and Caelar replies too, leaving BDSCRY's structure in place for mods
-// that interject into it even though the object script can no longer launch it.
-COMPILE ~chriz-sod-remix/dlg/csr225scry.d~
+// Imoen and Caelar replies too. BDSCRY's structure stays installed even though
+// the object script can no longer launch it.
+// The semantic helper targets the current no-Aura four-state picker.
+LAF csr_disable_bdscry_picker_route
+  STR_VAR
+    csr_scry_flag = ~bd_sddd12_imoen~
+    csr_scry_component = ~225~
+END
+LAF csr_disable_bdscry_picker_route
+  STR_VAR
+    csr_scry_flag = ~bd_sddd12_caelar~
+    csr_scry_component = ~225~
+END
 
 // ------------------------------------------------------------
 // 225.2 — rehome the cut wight's Essence in the existing sarcophagus
