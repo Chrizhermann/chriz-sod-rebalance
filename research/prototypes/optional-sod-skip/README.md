@@ -1,8 +1,15 @@
-# Optional SoD skip: isolated source prototype
+# Optional SoD skip: historical source prototype
 
-This is **not an installable skip candidate**. The public remix installer and
-v0.6.5 payload have not changed. Component 910's bedroom hook and EET equipment
-adapter are not wired in. Do not pin this branch in CEBG or publish it.
+This directory retains the **original research prototype**, not the production
+component. Component 910 has since been implemented in `chriz-sod-remix` and
+accepted for v0.6.7 after a disposable-copy native Yes-to-BG2 pass. Broader runtime
+coverage remains open. See [the current design](../../../docs/design/wave1/06-optional-sod-skip.md)
+and [test handoff](../../../docs/design/wave1/06-optional-sod-skip-testing.md).
+These historical probe assets are not installed by the production component.
+
+**Scope update, 2026-09-06:** the current candidate uses normal carried inventory.
+The user deferred loose-loot recovery; neither this failed ground receptacle nor
+the later rejected private-area pickup scanner is used by component 910.
 
 **Native result, 2026-09-05: collection gate FAILED.** On the tested BG2:EE
 2.7.3.0 / EEex 1.2.0 copy, imported tokens occupied a new source-named pile;
@@ -15,9 +22,9 @@ protagonist-only, once-guarded 250,000 XP action behind an unset item-readiness
 gate. Tests compile those sources with WeiDU and replay their decompiled actions.
 Replay across serialized test state is not an engine save/reload test.
 
-## Native check required before handling imported ground loot
+## Historical native check for imported ground loot (rejected)
 
-The proposed production approach adds one empty named ground-pile container at
+The original proposed approach added one empty named ground-pile container at
 BD0103 [190.540], the existing component-140 import point. Before relying on it,
 prove that `CopyGroundPilesTo` merges all copied items into that named receptacle,
 preserves its name on save/reload, and allows targeted `MoveContainerContents`.
@@ -103,4 +110,7 @@ generated blocks. Therefore, transferring stored equipment directly into
 BD6100*K#ImportContainer is **not sufficient proof** that it participates in the
 normal import eligibility rules. An eventual adapter must preserve the effective
 rules, duplication behavior and bag handling without patching K#TELBGT/AR0602 or
-inventing destinations. That work remains open even after the ground probe.
+inventing destinations. The current component avoids the party-storage problem
+by retaining carried backpacks on Yes. Its small off-party adapter applies only
+to imported Imoen's existing belongings; ground loot is excluded. The native
+acceptance boundary is documented in the links above.

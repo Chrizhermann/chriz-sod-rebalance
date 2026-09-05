@@ -1,0 +1,296 @@
+// Optional bedroom skip: retain carried inventory and use the original EET
+// handoff. No pickup worker, private area, ground sweep, or EEex dependency.
+// Loose-loot recovery was explicitly deferred by Christopher on 2026-09-06.
+
+ACTION_FOR_EACH csr910_file IN ~bd0103.are~ ~bd0103.bcs~ ~bd6100.are~
+  ~bd6100.bcs~ ~baldur.bcs~ ~K#TELBGT.bcs~ ~K#TELBGT.cre~
+  ~K#IMPORT.sto~ ~cutspy.cre~ BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr910_file%~ BEGIN
+    FAIL ~Optional SoD skip: missing %csr910_file%. Install after EET_end and the required remix components.~
+  END
+END
+ACTION_FOR_EACH csr910_file IN ~csrskask.bcs~ ~csrskask.cre~ ~csrskip.dlg~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr910_file%~ BEGIN
+    FAIL ~Optional SoD skip: reserved resource %csr910_file% already exists.~
+  END
+END
+
+COPY_EXISTING - ~bd0103.are~ ~override~
+  READ_LONG 0x70 csr910_co
+  READ_SHORT 0x74 csr910_cn
+  SET csr910_chests = 0
+  FOR (i = 0; i < csr910_cn; ++i) BEGIN
+    READ_ASCII (csr910_co + i * 0xc0) csr910_name (32) NULL
+    PATCH_IF (~%csr910_name%~ STRING_EQUAL_CASE ~PlayerChest00~) BEGIN
+      SET csr910_chests += 1
+      READ_LONG (csr910_co + i * 0xc0 + 0x44) csr910_items
+      PATCH_IF csr910_items != 0 BEGIN
+        PATCH_FAIL ~Optional SoD skip: PlayerChest00 must start empty; refusing to import unrelated palace treasure.~
+      END
+    END
+  END
+  PATCH_IF csr910_chests != 1 BEGIN PATCH_FAIL ~Optional SoD skip: expected one PlayerChest00.~ END
+COPY_EXISTING - ~bd6100.are~ ~override~
+  READ_LONG 0x70 csr910_co
+  READ_SHORT 0x74 csr910_cn
+  SET csr910_chests = 0
+  FOR (i = 0; i < csr910_cn; ++i) BEGIN
+    READ_ASCII (csr910_co + i * 0xc0) csr910_name (32) NULL
+    PATCH_IF (~%csr910_name%~ STRING_EQUAL_CASE ~K#ImportContainer~) BEGIN SET csr910_chests += 1 END
+  END
+  PATCH_IF csr910_chests != 1 BEGIN PATCH_FAIL ~Optional SoD skip: expected EET's BD6100 import chest.~ END
+
+// The sole exception to carried-party gear is the imported Imoen, whom SoD
+// temporarily dismisses. Read the effective EET rules without modifying them.
+// Only items actually on her and absent from the party are handed to this
+// helper. HasItem and GiveItem also search her carried bags (native actions).
+// The rest of her equipment is bulk-banked; party equipment stays carried.
+ACTION_CLEAR_ARRAY csr910_imports
+COPY_EXISTING - ~K#TELBGT.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~PartyHasItem("~ csr910_predicates
+    COUNT_REGEXP_INSTANCES ~AddStoreItem("K#IMPORT",~ csr910_adds
+    REPLACE_EVALUATE CASE_INSENSITIVE
+      ~PartyHasItem("\([^"]+\)")~ BEGIN
+        DEFINE_ASSOCIATIVE_ARRAY csr910_imports BEGIN ~%MATCH1%~ => 1 END
+      END ~PartyHasItem("%MATCH1%")~
+    PATCH_IF csr910_predicates = 0 OR csr910_predicates != csr910_adds BEGIN
+      PATCH_FAIL ~Optional SoD skip: unsupported effective EET item-import script.~
+    END
+  END
+OUTER_SET csr910_index = 0
+OUTER_SPRINT csr910_imoen_baf ~~
+ACTION_PHP_EACH csr910_imports AS item => ignored BEGIN
+  COPY_EXISTING - ~K#TELBGT.bcs~ ~override~
+    DECOMPILE_BCS_TO_BAF
+    REPLACE_TEXTUALLY ~//[^%LNL%%MNL%]*~ ~~
+    REPLACE_TEXTUALLY ~[ %TAB%%LNL%%MNL%]+~ ~~
+    COUNT_REGEXP_INSTANCES ~IFGlobal("K#FrameDelay","LOCALS",0)PartyHasItem("%item%")THENRESPONSE#100TakePartyItem("%item%")DestroyItem("%item%")AddStoreItem("K#IMPORT","%item%",1,1)Continue()END~ csr910_rule
+    PATCH_IF csr910_rule != 1 BEGIN
+      PATCH_FAIL ~Optional SoD skip: unsupported EET rule for %item%.~
+    END
+  OUTER_SPRINT csr910_imoen_baf ~%csr910_imoen_baf%
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",1)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+  Global("CSR_IMOEN_IMPORT","GLOBAL",1)
+  !InPartyAllowDead("IMOEN2")
+  InMyArea("IMOEN2")
+  Global("CSR_SKIM_%csr910_index%","GLOBAL",0)
+  !PartyHasItem("%item%")
+  HasItem("%item%","IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIM_%csr910_index%","GLOBAL",1)
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",12)
+    ActionOverride("IMOEN2",GiveItem("%item%","csrskask"))
+END
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",12)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+  Global("CSR_SKIM_%csr910_index%","GLOBAL",1)
+  HasItem("%item%",Myself)
+THEN
+  RESPONSE #100
+    DestroyItem("%item%")
+    AddStoreItem("K#IMPORT","%item%",1,1)
+    SetGlobal("CSR_SKIM_%csr910_index%","GLOBAL",2)
+    RealSetGlobalTimer("CSR_SKIP_PROGRESS","GLOBAL",15)
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",1)
+    Continue()
+END
+~
+  OUTER_SET csr910_index += 1
+END
+
+COPY_EXISTING ~cutspy.cre~ ~override/csrskask.cre~
+  // CUTSPY's avatar-removal effect blocks ordinary actions. Retain only its
+  // invisible animation, never its effects, equipment, or unrelated scripts.
+  WRITE_LONG 0x20 0
+  WRITE_LONG 0x2c8 0
+  WRITE_ASCII 0x248 ~csrskask~ #8
+  WRITE_ASCII 0x250 ~~ #8
+  WRITE_ASCII 0x258 ~~ #8
+  WRITE_ASCII 0x260 ~~ #8
+  WRITE_ASCII 0x268 ~~ #8
+  WRITE_ASCII 0x280 ~csrskask~ #32
+  WRITE_ASCII 0x2cc ~csrskip~ #8
+  WRITE_BYTE 0x270 128
+  LPF DELETE_CRE_ITEM STR_VAR item_to_delete = ~.*~ END
+
+// Hold the existing impound until a confirmed No. Fresh SoD starts retain the
+// untouched native behavior. Do not set BD_PARTY_ITEMS on the skip branch.
+COPY_EXISTING ~bd0103.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES ~Global("BD_PARTY_ITEMS","BD0103",0)~ csr910_impounds
+    PATCH_IF csr910_impounds != 1 BEGIN
+      PATCH_FAIL ~Optional SoD skip: expected one native backpack impound trigger.~
+    END
+    REPLACE_TEXTUALLY ~Global("BD_PARTY_ITEMS","BD0103",0)~
+      ~Global("BD_PARTY_ITEMS","BD0103",0)
+  OR(2)
+    !Global("SOD_fromimport","GLOBAL",1)
+    Global("CSR_SKIP_CHOICE","GLOBAL",2)~
+  END
+
+<<<<<<<< .../csr910-arrival.baf
+IF
+  Global("SOD_fromimport","GLOBAL",1)
+  Global("BD_PLOT","GLOBAL",50)
+  Global("CSR_ARRIVE","GLOBAL",1)
+  Global("BD_PARTY_ITEMS","BD0103",0)
+  Global("CSR_IMOEN_STAGE","BD0103",2)
+  !Global("BD_Imoen_Items","GLOBAL",1)
+  Global("CSR_SKIP_OFFER","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_OFFER","GLOBAL",1)
+    CreateCreatureObject("csrskask",Player1,0,0,0)
+    Continue()
+END
+>>>>>>>>
+<<<<<<<< .../csrskask.baf
+IF
+  Global("CSR_SKIP_CHOICE","GLOBAL",0)
+  Global("CSR_SKIP_OFFER","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_OFFER","GLOBAL",2)
+    StartDialogueNoSet(Player1)
+END
+IF
+  Global("CSR_SKIP_CHOICE","GLOBAL",2)
+THEN
+  RESPONSE #100
+    DestroySelf()
+END
+IF
+  Global("CSR_SKIP_CHOICE","GLOBAL",1)
+  Global("CSR_SKIP_PHASE","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",1)
+    EndCutSceneMode()
+    SetCutSceneLite(TRUE)
+    FadeToColor([1.0],0)
+    RealSetGlobalTimer("CSR_SKIP_PROGRESS","GLOBAL",15)
+END
+%csr910_imoen_baf%
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",1)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+  Global("CSR_IMOEN_IMPORT","GLOBAL",1)
+  !InPartyAllowDead("IMOEN2")
+  InMyArea("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",2)
+    ActionOverride("PlayerChest00",TakeCreatureItems("IMOEN2",ALL))
+END
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",1)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",2)
+END
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",2)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",5)
+    MoveContainerContents("BD0103*PlayerChest00","BD6100*K#ImportContainer")
+    SetGlobal("bd_finale","BD6100",6)
+    ActionOverride(Player2,LeaveAreaLUA("BD6100","",[695.745],SW))
+    ActionOverride(Player3,LeaveAreaLUA("BD6100","",[695.825],SW))
+    ActionOverride(Player4,LeaveAreaLUA("BD6100","",[745.785],SW))
+    ActionOverride(Player5,LeaveAreaLUA("BD6100","",[745.865],SW))
+    ActionOverride(Player6,LeaveAreaLUA("BD6100","",[795.825],SW))
+    ActionOverride(Player1,LeaveAreaLUA("BD6100","",[645.785],SW))
+    DestroySelf()
+END
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",12)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+  RealGlobalTimerExpired("CSR_SKIP_PROGRESS","GLOBAL")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_FAILED","GLOBAL",1)
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",99)
+    SetCutSceneLite(FALSE)
+    EndCutSceneMode()
+    FadeFromColor([10.0],0)
+    DisplayStringHeadNoLog(Player1,@11)
+END
+>>>>>>>>
+<<<<<<<< .../csr910-handoff.baf
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",5)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+  Exists("K#ImportContainer")
+  InMyArea(Player1)
+  OR(3)
+    !Exists(Player2)
+    Name("None",Player2)
+    InMyArea(Player2)
+  OR(3)
+    !Exists(Player3)
+    Name("None",Player3)
+    InMyArea(Player3)
+  OR(3)
+    !Exists(Player4)
+    Name("None",Player4)
+    InMyArea(Player4)
+  OR(3)
+    !Exists(Player5)
+    Name("None",Player5)
+    InMyArea(Player5)
+  OR(3)
+    !Exists(Player6)
+    Name("None",Player6)
+    InMyArea(Player6)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",6)
+    SetGlobal("CSR_SKIP_ITEMS_READY","GLOBAL",1)
+    FadeToColor([1.0],0)
+    EndCutSceneMode()
+    SetCutSceneLite(TRUE)
+    CreateCreatureObject("K#TELBGT",Player1,0,0,0)
+    Continue()
+END
+IF
+  Global("CSR_SKIP_PHASE","GLOBAL",5)
+  !Exists("K#ImportContainer")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_PHASE","GLOBAL",98)
+    SetGlobal("CSR_SKIP_FAILED","GLOBAL",1)
+    SetCutSceneLite(FALSE)
+    EndCutSceneMode()
+    FadeFromColor([10.0],0)
+    DisplayStringHeadNoLog(Player1,@10)
+END
+>>>>>>>>
+<<<<<<<< .../csr910-xp.baf
+IF
+  AreaCheck("AR0602")
+  Global("CSR_SKIP_CHOICE","GLOBAL",1)
+  Global("CSR_SKIP_ITEMS_READY","GLOBAL",1)
+  Global("CSR_SKIP_XP","GLOBAL",0)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_SKIP_XP","GLOBAL",1)
+    AddXPObject(Player1,250000)
+    Continue()
+END
+>>>>>>>>
+
+COMPILE ~chriz-sod-remix/dlg/csrskip.d~
+COMPILE EVALUATE_BUFFER ~.../csrskask.baf~ USING ~chriz-sod-remix/languages/english/csrskip.tra~
+EXTEND_TOP ~BD0103.bcs~ ~.../csr910-arrival.baf~
+EXTEND_TOP ~BD6100.bcs~ ~.../csr910-handoff.baf~ USING ~chriz-sod-remix/languages/english/csrskip.tra~
+EXTEND_TOP ~BALDUR.bcs~ ~.../csr910-xp.baf~
+PRINT ~Optional bedroom skip: original EET carried-inventory handoff; %csr910_index% effective rules checked for imported Imoen. Loose ground loot is not collected. Start before the first palace arrival.~

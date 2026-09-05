@@ -1,0 +1,7 @@
+@0 = ~Do you want to skip SoD? You will get 250000 experience on your main character if you skip.~
+@1 = ~Yes.~
+@2 = ~No.~
+@3 = ~Are you sure you want to skip SoD?~
+@4 = ~Are you sure you want to play SoD?~
+@10 = ~The SoD skip could not find EET's import chest. No skip experience has been awarded. Please reload the save before the skip and report this installation mismatch.~
+@11 = ~The SoD skip could not complete Imoen's equipment handoff. No skip experience has been awarded. Please reload the save before the skip and report this error.~

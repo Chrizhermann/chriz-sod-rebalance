@@ -1,11 +1,13 @@
 # Optional SoD skip at palace arrival (EET)
 
-Status: user-requested on 2026-09-05; inventory scope approved on the same date.
-Dialogue/XP source prototype and a ground-pile probe are prepared; the full skip
-is not implemented or installable. The native ground-pile probe failed its
-collection gate on 2026-09-05; the proposed receptacle method is rejected for the
-tested build. This is not part of released
-v0.6.5, the frozen CEBG r4 recipe, or the separate component-290 ending work.
+Status: user-requested on 2026-09-05; simplified inventory scope approved on
+2026-09-06. Component 910 is an **installed, unreleased test candidate** on the
+isolated v0.6.5-based copy. The current `20260906-r3` candidate retains carried
+party inventory and uses the original EET handoff. The rejected ground-loot
+collector and private staging area have been removed. The direct Yes route was
+accepted in-game on September 6 for v0.6.7; visual polish and remaining variant
+coverage are follow-ups. This is not part of v0.6.5/v0.6.6, the
+frozen CEBG r4 recipe, or the separate component-290 ending work.
 
 ## DECIDED: requested behavior
 
@@ -21,19 +23,21 @@ v0.6.5, the frozen CEBG r4 recipe, or the separate component-290 ending work.
 - Confirming play-SoD resumes the existing campaign normally and awards no XP.
 - Use the normal safe EET transition into BG2; do not invent a new ending or
   carry the SoD party into BG2 as a replacement for EET's normal opening.
-- Work in an isolated source worktree and disposable test data only. Do not
-  launch a game, change a live/stream install or save, amend the frozen collection
-  recipe, or publish a release under this request.
+- Work in an isolated source worktree and disposable test data only. Native
+  testing was subsequently authorized in coordinated PC windows; never overlap
+  another game task or the user's play session. Do not change a live/stream
+  install/save, amend the frozen collection recipe, or publish this feature.
 
-## Proposed component and scope (not implemented)
+## Candidate component and scope
 
 Home: this repository's existing `chriz-sod-remix` mod, optional component
 **910**, label `csr_optional_sod_skip`, displayed as "Offer to skip SoD at palace
-arrival (EET)". Proposed source files are `lib/comp910.tpa`, a dedicated dialogue,
-and small arrival/handoff scripts. No dependency on component 290.
+arrival (EET, experimental)". Sources are `lib/comp910.tpa`, `dlg/csrskip.d`, and
+`languages/english/csrskip.tra`; small scripts are embedded in the TPA. No
+dependency on component 290.
 
-For the first bounded candidate, require EET plus remix components **110, 140,
-150, and 160**. These give one known party-preserving arrival and Imoen layout.
+For the first bounded candidate, require EET, EET_end, and remix components
+**110, 140, 150, and 160**. These give one known party-preserving arrival and Imoen layout.
 Do not silently broaden this to standalone SoD, fresh SoD starts, or arbitrary
 palace-overhaul combinations. The runtime offer is for a continuous BG1 import
 (`SOD_fromimport=1`) at the initial `bd_plot=50` arrival.
@@ -54,9 +58,10 @@ choice before Sarevok or invent a different story beat:
 2. Component 150's `baf/csrarr.baf` sets `CSR_ARRIVE`, restores visibility and
    control, and leaves the first night behind the servant's `CSR_BEDTIME` choice.
 3. Component 160's `baf/imoen103.baf` takes two area-script passes to replace the
-   scene Imoen and bring the imported Imoen into the room. A prompt must wait for
-   this setup and the party-item impound to finish, rather than interrupting the
-   arrival response or an existing dialogue/cutscene.
+   scene Imoen and bring the imported Imoen into the room. The prompt waits for
+   this setup and arrival control restoration. Component 910 holds the native
+   party-backpack impound until a confirmed No, so a confirmed Yes can use
+   carried equipment directly.
 
 Relevant current sources: `lib/comp140.tpa`, `baf/exit0120.baf`,
 `lib/comp150.tpa`, `baf/csrarr.baf`, `lib/comp160.tpa`, `baf/imoen103.baf`.
@@ -93,18 +98,18 @@ in K#IMPORT's bag/store. The bare K#TELBGT source template does not contain them
 AR0602 subsequently runs the existing BDSODIMP and IMPORT-table rules before
 banking the remaining inventory and reading the BD6100 bank.
 
-Therefore **directly moving all bedroom storage to the bulk BD6100 bank is not
-sufficient** for this approval. The stored-item adapter must make eligible
-possessions participate in the effective selection rules, without duplicating
-an item already covered by a party copy, inventing destinations, or bypassing
-bag handling. No such adapter has been enabled or claimed tested yet.
+Therefore **directly moving bedroom storage to the bulk BD6100 bank would not
+be sufficient** to preserve the effective selection rules. The current design
+avoids putting party backpacks into storage at all on Yes. Its only off-party
+adapter is for imported Imoen's belongings, as described below. The final
+native handoff remains an acceptance gate.
 
 Inspected effective resource SHA-256 values:
 
 - K#TELBGT.BCS: `e4035461e31c20a815ad4cf625b2f49a4f8e39d20f16f7fd995d908174a968c3`
 - AR0602.BCS: `ca22da807a3d7dda475d2891b12e1b3c379a0842f0b3ed0202992bd7ba066eae`
 
-## DECIDED: equipment scope (approved 2026-09-05)
+## DECIDED: equipment scope (revised 2026-09-06)
 
 A direct bedroom skip has a real item-loss edge:
 
@@ -115,18 +120,27 @@ A direct bedroom skip has a real item-loss edge:
 - Component 140 also redirects BG1 finale ground piles beside the bedroom beds.
   These are not carried inventory and are not collected by K#TELBGT.
 
-Christopher approved including the stored party backpacks, imported Imoen's
-equipment, and **verified imported BG1 finale ground loot** in EET's normal BG2
-equipment-import handling. This makes eligible possessions available to the
-existing import rules; it does **not** mean keeping all equipment in BG2, giving
-everything to the protagonist, or inventing item destinations. His expectation
-that some items become BG2 loot is context to verify, not a new placement rule.
+The earlier September 5 scope included verified imported ground loot. After
+rejecting the collector's long delay, Christopher explicitly replaced that part
+with: **"Use normal carried inventory; defer loose-loot recovery."**
 
-There is no permission to collect arbitrary palace/world loot or award SoD quest
-rewards. Exact provenance of the imported ground pile must be verified before
-collection. Do not use a whole-room sweep merely because the imported pile is in
-that room. EET and the installed BG2 import rules still decide item eligibility
-and availability.
+- Party equipment stays carried until EET handles it. A confirmed No releases
+  the original backpack-to-PlayerChest00 block, preserving normal SoD behavior.
+- Imported off-party Imoen's existing belongings remain included. Only eligible
+  items actually on her, including carried bags, and absent from the party are
+  passed through the small adapter. It waits for actual receipt before applying
+  the corresponding effective EET import-store rule. Remaining belongings go
+  to the existing bulk bank. Fresh Imoen's equipment is excluded.
+- No ground-loot recovery, private snapshot, installed-bag catalogue, or queued
+  pickup scan. The original BDSODTRN ground-copy behavior is left untouched.
+- No arbitrary palace/world loot or SoD quest rewards. EET and the installed
+  BG2 import rules still decide item eligibility and availability. This is not
+  a promise to keep every item in BG2 or to invent new item destinations.
+
+The proposed save-persistent "ever acquired" registry is deferred in
+[issue #18](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/18). Its
+format, retroactive treatment of existing saves, and BG2 integration are not
+part of component 910.
 
 Gold is already impounded by BDCUT00Z. No new gold refund, skipped quest reward,
 romance outcome, or item entitlement is authorized by the XP-only request.
@@ -148,12 +162,11 @@ If a candidate needs any further meaningful choice in those areas, stop and ask.
   EET handoff does not authorize silently absorbing either mod's code or assets.
   Any future actual reuse requires explicit attribution and license review.
 
-## Source prototype and validation status
+## Historical prototype and ground-probe result
 
-The bounded prototype lives outside the released payload in
-`research/prototypes/optional-sod-skip/`. The public TP2, its v0.6.5 version, all
-31 component declarations, component 290's separate worktree, and the frozen
-collection recipe are unchanged.
+The original bounded prototype lives in
+`research/prototypes/optional-sod-skip/`. The following 2026-09-05 results are
+historical, not a description of the current public component-910 source.
 
 `tests/test_optional_sod_skip.py` was added RED before the prototype sources,
 then made green. Including the later native-result regression, the full
@@ -195,39 +208,47 @@ See `research/prototypes/optional-sod-skip/engine-results-20260905.md` for
 version/hash evidence and test-harness caveats. This result rejects the empty
 named-receptacle method on the tested build; it does not authorize a whole-room
 sweep or treating the observed source name as a stable production identifier.
-**A different provenance-safe collection mechanism is required.**
+This is historical evidence only. Ground recovery is now deferred, so no
+replacement collection mechanism is required for the current skip.
 
-### Remaining before an installable candidate
+## Current candidate and remaining acceptance (2026-09-06, r3)
 
-- Complete the stored-item adapter against EET's effective eligibility rules,
-  including duplicate-party-copy and bag handling, with disposable fixtures.
-- Replace the rejected ground-pile collection method and verify its provenance
-  and persistence in a disposable engine test.
-- Wire the tested dialogue and guarded XP action into the bedroom arrival and
-  handoff only after the replacement passes. Preserve both confirmation
-  loops and the no-side-effect behavior already covered by the source tests.
-- In the engine, verify a confirmed No permanently records play-SoD, adds
-  nothing, and leaves the servant/rest/council flow unchanged.
-- In the engine, verify confirmed Yes adds exactly 250,000 to Player1 once;
-  check XP caps, save/reload, and repeated trigger evaluations, which source
-  compilation and modeled replay do not establish.
-- Use disposable fixtures to verify the arrival hook's ordering and prerequisite
-  failures, and that only intended resources change. Separately test the actual
-  campaign transition and agreed equipment handling on a disposable game/save
-  when the user has explicitly coordinated a game test.
-- Verify the final BD6100/AR0602 equipment transfer, protagonist XP delta,
-  normal BG2 party state, campaign globals, and absence of the SoD ambush scene.
-  A compilation pass is not live acceptance of those effects.
+1. Delay only the imported game's native backpack impound until confirmed No.
+   Fresh SoD starts retain the native behavior and receive no skip offer.
+2. After arrival and component-160 setup, show the three-state prompt through
+   an invisible-animation helper with its donor's action-blocking effects removed.
+3. On Yes, handle only actual eligible belongings on imported off-party Imoen;
+   keep party equipment carried. A 15-second receipt timeout restores control,
+   blocks handoff/XP, and asks for a reload if that exceptional transfer fails.
+4. Move the party to BD6100 with the ambush suppressed. Wait for all existing
+   party members to arrive, then invoke the original K#TELBGT. It owns the
+   normal inventory selection, bulk banking, party breakup, and BG2 transition.
+5. Award the additive 250,000 XP to Player1 once in AR0602, outside the SoD cap.
 
-Tiny eventual user checklist: save before the question; decline each confirmation
-once; confirm play-SoD and reload to check no repeat; reload the original save,
-confirm skip, check protagonist XP increased by exactly 250,000 and the normal
-BG2 opening starts; save/reload there and check the agreed imported items and no
-second XP award.
+The public installer creates exactly three resources (`csrskask.cre`,
+`csrskask.bcs`, `csrskip.dlg`) and changes only BD0103.BCS, BD6100.BCS, and
+BALDUR.BCS. It changes no ARE or BDSODTRN resource. Protected EET resources were
+hash-verified unchanged in the installed r3 copy. The obsolete worker and private
+area are absent from the current source and removed by the disposable tail update.
 
-Release/pin readiness: **not ready**. Remaining implementation includes the
-bedroom offer hook, effective-EET-rule-aware stored-item adapter, and final
-handoff, followed by a real end-to-end acceptance test. The present deliverable
-is a tested source prototype plus a focused native probe, not a completed skip
-candidate. Keep v0.6.5 and frozen r4 unchanged; a later tested candidate and
-separate publication authorization are required.
+**34 automated tests pass on Windows / WeiDU 249.** Coverage includes real
+installer compilation/decompilation, prerequisites and rejected layouts, the
+exact resource set, protected-resource identity, confirmation loops, XP gates,
+the delayed impound, receipt-before-registration ordering, and failure cleanup.
+The obsolete collector replay was removed with the rejected collector; synthetic
+tests do not establish native scheduling, bag transfers, or save persistence.
+
+Historical native evidence: the earlier candidate passed the automatic prompt,
+both confirmation-decline loops, confirmed No, helper cleanup, and real No
+save/reload with no skip XP. Its Yes route did not complete BG2 acceptance.
+The r3 build completed the Yes route in the six-person fixture. Christopher
+accepted it and the resulting AR0602 save confirms 412,209 protagonist XP,
+the once guard, and sampled native import handling. The changed No impound
+gate still needs a focused native retest.
+
+See [candidate test handoff](06-optional-sod-skip-testing.md) for the exact copy,
+fixture, expected XP, and evidence. Imported-Imoen and above-500k-XP fixtures,
+full servant/rest/council continuation, and final item selection/save-reload
+remain unverified. Christopher authorized v0.6.7 publication with these limits
+recorded and visual polish deferred. No standalone support or collection-pin
+change is implied by that release.

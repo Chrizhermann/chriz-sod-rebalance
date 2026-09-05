@@ -41,6 +41,7 @@ EXPECTED_COMPONENTS = {
     280,
     900,
     901,
+    910,
 }
 
 
@@ -65,10 +66,10 @@ class ComponentOrderTests(unittest.TestCase):
 
         self.assertLess(components.index(210), components.index(197))
 
-    def test_all_31_component_declarations_remain_unique(self) -> None:
+    def test_all_32_component_declarations_remain_unique(self) -> None:
         components = designated_components()
 
-        self.assertEqual(31, len(components))
+        self.assertEqual(32, len(components))
         self.assertEqual(EXPECTED_COMPONENTS, set(components))
 
 

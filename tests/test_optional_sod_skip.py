@@ -29,6 +29,8 @@ def replay(actions, state):
         line = line.split("//", 1)[0].strip()
         if not line:
             continue
+        if line == "Continue()":
+            continue
         match = re.fullmatch(r'SetGlobal\("([^"]+)","GLOBAL",(\d+)\)', line, re.I)
         if match:
             state["globals"][match[1].upper()] = int(match[2])
@@ -66,19 +68,25 @@ class OptionalSkipContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.game = SyntheticDialogGame(_dialog_source())
         cls.addClassCleanup(cls.game.cleanup)
-        shutil.copytree(PROTOTYPE, cls.game.root / "prototype")
         ids = cls.game.root / "override/action.ids"
-        ids.write_text(ids.read_text() + "259 AddXPObject(O:Object*,I:XP*)\n", encoding="ascii")
+        ids.write_text(ids.read_text() + "259 AddXPObject(O:Object*,I:XP*)\n36 Continue()\n", encoding="ascii")
+        triggers = cls.game.root / "override/trigger.ids"
+        triggers.write_text(triggers.read_text() + "0x407E AreaCheck(S:ResRef*)\n", encoding="ascii")
         (cls.game.root / "override/object.ids").write_text(
             "IDS V1.0\n21 Player1\n22 Player2\n23 Player3\n24 Player4\n25 Player5\n26 Player6\n",
             encoding="ascii",
         )
         setup = cls.game.root / "setup-skip-contract.tp2"
+        source = (ROOT / "chriz-sod-remix/lib/comp910.tpa").read_text()
+        xp = re.search(r"<<<<<<<< \.\.\./csr910-xp\.baf\n(.*?)\n>>>>>>>>", source, re.S)
+        if xp is None:
+            raise AssertionError("production XP script not found")
+        (cls.game.root / "fixture/csrskxp.baf").write_text(xp[1], encoding="ascii")
         setup.write_text(
             'BACKUP ~weidu_external/backup/skip-contract~\nAUTHOR ~test~\n'
-            'BEGIN ~compile optional skip prototype~\n'
-            'LOAD_TRA ~prototype/english.tra~\n'
-            'COMPILE ~prototype/csrskip.d~\nCOMPILE ~prototype/csrskxp.baf~\n',
+            'BEGIN ~compile production optional skip contracts~\n'
+            'LOAD_TRA ~chriz-sod-remix/languages/english/csrskip.tra~\n'
+            'COMPILE ~chriz-sod-remix/dlg/csrskip.d~\nCOMPILE ~fixture/csrskxp.baf~\n',
             encoding="ascii",
         )
         result = cls.game._run(setup)
@@ -100,7 +108,8 @@ class OptionalSkipContractTests(unittest.TestCase):
 
     def fresh(self):
         return {"globals": {"CSR_SKIP_CHOICE": 0, "CSR_SKIP_ITEMS_READY": 0,
-                            "CSR_SKIP_XP": 0}, "xp": [161000, 150000, 120000, 100000, 90000, 80000]}
+                            "CSR_SKIP_XP": 0}, "area": "AR0602",
+                "xp": [161000, 150000, 120000, 100000, 90000, 80000]}
 
     def choose(self, index, reply, state):
         transitions = self.verifier.dialog_transitions(self.states[index])
@@ -119,8 +128,10 @@ class OptionalSkipContractTests(unittest.TestCase):
         self.assertEqual(1, len(re.findall(r'RESPONSE\s+#100', action)))
         action = re.sub(r'RESPONSE\s+#100\s*', '', action)
         guards = re.findall(r'Global\("([^"]+)","GLOBAL",(\d+)\)', trigger, re.I)
-        self.assertEqual(3, len(guards), trigger)
-        if all(state["globals"].get(name.upper(), 0) == int(value) for name, value in guards):
+        self.assertEqual(4, len(guards), trigger)
+        areas = re.findall(r'AreaCheck\("([^"]+)"\)', trigger, re.I)
+        self.assertEqual(["AR0602"], areas)
+        if state["area"] == areas[0] and all(state["globals"].get(name.upper(), 0) == int(value) for name, value in guards):
             replay(action, state)
 
     def test_exact_prompt_and_two_independent_confirmation_states(self):
@@ -165,6 +176,21 @@ class OptionalSkipContractTests(unittest.TestCase):
         self.assertEqual(1, self.xp_script.lower().count("addxpobject("))
         self.assertLess(self.xp_script.index('SetGlobal("CSR_SKIP_XP"'), self.xp_script.index("AddXPObject"))
         self.assertNotRegex(self.xp_script + self.dialog, r'(?i)AddexperienceParty|SetXP|GiveGold|GiveItemCreate')
+
+    def test_no_xp_award_before_bg2_arrival(self):
+        state = self.fresh()
+        self.choose(1, 0, state)
+        state["globals"]["CSR_SKIP_ITEMS_READY"] = 1
+        for area in ("BD0103", "CSRS010", "BD6100"):
+            state["area"] = area
+            self.tick(state)
+        self.assertEqual(self.fresh()["xp"], state["xp"])
+
+    def test_failed_transfer_cannot_award_even_if_other_flags_are_set(self):
+        state = self.fresh()
+        state["globals"].update(CSR_SKIP_CHOICE=1, CSR_SKIP_ITEMS_READY=1, CSR_SKIP_FAILED=1)
+        self.tick(state)
+        self.assertEqual(self.fresh()["xp"], state["xp"])
 
 
 @unittest.skipUnless(WEIDU.is_file(), f"WeiDU unavailable: {WEIDU}")

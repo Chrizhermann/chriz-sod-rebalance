@@ -291,6 +291,23 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   verified on the dev EET copy. Runtime verification waits for the next SoD playthrough;
   the live v0.5.0 install remains unchanged. Full trace: `docs/research/20-scrying-pool.md`.
 
+## Decisions locked (2026-09-06, optional full SoD skip)
+
+- An optional palace-bedroom choice can skip the full expansion using EET's
+  normal BG2 opening, with an additive, once-only **250,000 protagonist XP**.
+  Both Yes and No have a confirmation; declining confirmation returns to the
+  question. Confirmed No continues SoD without an XP award.
+- **Use normal carried inventory; defer loose-loot recovery.** The long-running
+  pickup scan and private staging area are rejected. Keep backpacks carried on
+  Yes; preserve the native palace impound on No. Imported Imoen's existing
+  belongings remain in scope, not fresh Imoen or arbitrary palace loot.
+- A future save-persistent record of acquired import items is deferred in
+  [issue #18](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/18), not
+  added to the immediate skip.
+- Component 910 is an isolated, unreleased candidate. It is separate from the
+  shortened post-victory ending and requires native acceptance before shipping.
+  Details: [current design](design/wave1/06-optional-sod-skip.md).
+
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`
   (trash cut), `design/05` (travel ambushes) — same research base, more aggressive intent.
