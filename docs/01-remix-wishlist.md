@@ -206,7 +206,7 @@ Implemented + installed + verified on the dev install (components 185/190/195):
 ## Additions (2026-07-10, Discord announcement post — user's own wording)
 - **Boareskyr bridge-battle rework** is on the list — "at least the explosive barrels
   part." (Filed by the user under "later"; the battle itself is ch-9 content — see
-  03-roadnorth.md OPEN #3.)
+  03-roadnorth.md OPEN #3.) Expanded by the 2026-09-05 roadmap direction below.
 - **Scaling encounters generalized:** BG2-style scaling encounters **with better
   pre-buffs, for higher difficulties only** — broadens the dig-site tiered-miniboss
   idea (research 17/18) toward item 17's SCS-style-fights lever.
@@ -232,6 +232,8 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   you're warned the fight is coming, the enemy side gets real prebuffs + scripted
   sequencers. "I will think about this." (Ashatiel = Caelar's champion; the single
   combat offered during the final assault on Dragonspear Castle.)
+  **Update 2026-09-05:** now requested as a separate component for design triage;
+  the full encounter still needs a back-and-forth design discussion. See below.
 - **Caelar arc — first workshop seeds (feeds the item-13 open writing question):**
   Jester's frame: keep her motive (rescue her uncle from the Hells), but the uncle
   comes back *wrong* — soul-tortured, turned evil — and the final fight is Caelar +
@@ -261,6 +263,8 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   the **elemental/portal sequence still needs its big rework**: "They want to blow up
   the bridge with ready-made barrels and they for some reason need a portal to the
   fire plane...? Why not just throw a fireball?" The fight until then is fine.
+  **Update 2026-09-05:** remove the barrels and their mechanics entirely; the new
+  elemental-demolition proposal below supersedes the durable-barrel endpoint.
 - **Set-piece battles are KEEPS:** coalition camp, castle assault, Avernus, and the
   Boareskyr scripted battle stay mostly vanilla — "The expansion is called SIEGE of
   dragonspear, so battles like that actually make some sense"; "hell seems fun for
@@ -315,6 +319,62 @@ USER took a position). Statuses explicit — none of these are locked decisions 
   one staged standalone Dazzo-to-credits smoke. Stream/Discord testing supplements,
   but does not replace, those checks. Full design:
   `docs/plans/2026-07-16-post-victory-ending-design.md`.
+
+## Roadmap additions (2026-09-05, user direction)
+
+These are queued design/audit tasks. Requested directions and open design choices
+are separated below; the encounters have not been implemented.
+
+### Boareskyr Bridge: replace the barrel finale — [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14)
+
+- **DECIDED direction:** overhaul the bridge-destruction sequence and remove all
+  smokepowder barrels and associated objectives, staging, dialogue, and destruction
+  gimmicks. Retire the single weak unnamed wizard / Plane-of-Fire portal premise.
+  Component 255's durable barrels remain the installed stopgap until this ships.
+- **PROPOSED replacement:** as the crusaders lose the battle, multiple wizards try
+  to destroy the bridge with **fire and earth elementals**, already summoned and/or
+  being summoned during the encounter. A difficult battle scaling with difficulty.
+- **OPEN for triage/design:** wizard roster and roles, elemental mix/counts, summoning
+  presentation and timing, placement, player counterplay, bridge failure conditions,
+  difficulty tiers, dialogue, and XP/loot accounting. Preserve the wider siege battle
+  direction while designing this replacement finale.
+- **Research before implementation:** trace barrel/portal scripts, dialogue, placed
+  and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
+  determine how the replacement supersedes component 255 on both supported platforms.
+
+### Ashatiel: Chosen of Cyric-style party fight — [#15](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15)
+
+- **DECIDED scope/process:** queue a separate component for the default Ashatiel
+  encounter during the final castle assault. Triage first, then a **full back-and-forth
+  design discussion with substantial input from both the user and the agent**, before
+  implementation. This is separate from the Caelar/Avernus and post-victory passes.
+- **Requested starting brief:** a Chosen of Cyric-style party encounter, with about
+  **30 seconds for the player to buff before the opposing group spawns**. Enemies get
+  prebuffs, sequencers, and potions too. Carry forward the earlier preference to warn
+  the player and preserve their existing buffs.
+- **OPEN:** reference-fight mechanics to adopt, enemy roster/roles, Ashatiel's role,
+  dialogue and existing duel/alternate routes, preparation-window trigger and warning,
+  exact timing/spawn positions, spell/potion loadouts, difficulty tiers, and rewards.
+  Research the current encounter and reference fight, then bring alternatives to the
+  discussion; this sketch is not a signed-off encounter design.
+
+### Campaign filler and trash coverage audit — [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16)
+
+- **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
+  removed across SoD. Reconcile shipped cut lists, chapter decisions, research datasets,
+  and effective dev-copy resources, including **scripted spawns, respawns/re-arm loops,
+  travel ambushes, and quest-staged groups**, as well as placed actors.
+- **Deliverable:** a map-by-map gap list distinguishing missed approved removals,
+  intentionally retained encounters, redundant filler, and unreviewed content. Record
+  resource/spawn evidence, quest/progression hooks, unique loot/recruit dependencies,
+  and XP-ledger impact; distinguish static findings from remaining playtest work.
+- **Starting candidates:** road-north ambient respawns; temple/Ziatar filler;
+  Bloodbark Grove's purpose; Underground River density/drow; druid/corrupted-grove
+  content and scripted treant/shambler waves; Kanaglym south quest clusters; deferred
+  travel-ambush arenas. Earlier placed-actor cuts did not cover all these systems.
+- **OPEN:** further keep/cut/consolidate decisions and replacement encounters. Present
+  findings for triage, retaining the reasons for keeping story/siege set-pieces.
+  The audit is queued; its results and additional removals are not yet decided.
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

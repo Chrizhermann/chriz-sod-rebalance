@@ -71,7 +71,7 @@ BD7000 and set `csr_treasure_removed=1`. It is not one of the 30 installed compo
 | 230 | Road north: fewer, cleaner enemy camps | Main-line trash cut: BD7100 63 cuts (hobgoblin/orc camps, beetles, displacer pack, small spiders of both nests, troll thin-out 32→21 in four kept clusters; ogre camp + gargantuan/sword-spider elites + all ~24 camp NPCs + BD7110 troll lair stay), BD2000 8 (beetles/worgs/wight; siege pickets + scripted battle untouched), BD2010 27 (warren core of 8 stays). 29,025 cut kill-XP → **+23,200 party-total** once-block (≈3,870/char at 6; unit-corrected 2026-07-12) on the Boareskyr resolution (`bd_plot > 292`, both branches; the script's 6000/3000 are Dorn/patrol side quests, deliberately not ridden). | pred `bd7100/bd2000/bd2010.are` |
 | 240 | Forest of Wyrms: bugbear cave removed, temple behind the dragon | Retargets the only two BD7220-bound travel regions at each other (BD7210 `TranBD7220` → BD7230 `ExitBD7220`, BD7230 `TranBD7220` → BD7210 `ExitBD7220`; names kept so `EscapeAreaObject` still works — the temple's fleeing cultist now runs into the dragon cave). BD7220 = unreachable, file untouched, reversible; spectacles gimmick survives (bdmisc01 lives on BDZAVIAK/BD0109). Plus BD7200 28 cuts (bugbear door-guards/displacers/wolves/small spiders; wyverns+phase spiders+hill giant stay) and the 6 post-Neothelid invisible ambushers (BD7230AM goes inert; loot mundane). 28,395 ledgered (incl. 14,810 from the cave) → **+22,700 party-total** once-block (≈3,780/char at 6; unit-corrected 2026-07-12) on the Neothelid kill. | pred `bd7200/7210/7220/7230.are` |
 | 250 | Morentherene: a real dragon on Hard/Insane | Two CREATE-built stat spells applied asleep via vanilla's own ApplySpellRES delivery (EXTEND_TOP bd7210.bcs, difficulty-gated once-blocks). Hard+: +56 HP (168), AC −6, THAC0 −2, saves +3, MR 35. Insane stacks to: 230 HP, AC −9, THAC0 −4, saves +5 total, MR 50, 4 APR. Breath/wing buffet/AI untouched (SCS-safe); Core and below vanilla. Baseline verified: 112 HP, AC −1, THAC0 2, saves 5–8, MR 15. | pred `bd7210.are` + `bdmorent.cre` |
-| 255 | Boareskyr battle: durable explosive barrels | BDKEGX 25 hp / 0% fire resist → **120 hp / 75% fire** (cold stays 50): the battle's loss condition no longer pops to random mephit splash "with no counter" on higher difficulties. CRE-level patch covers placed + scripted barrels; nothing scripts BDKEGX by name; story detonations use Kill() and still work. Fast fix — the elemental/portal sequence rework stays open (04-coalition.md). | pred `bd2000.are` + `bdkegx.cre` |
+| 255 | Boareskyr battle: durable explosive barrels | BDKEGX 25 hp / 0% fire resist → **120 hp / 75% fire** (cold stays 50): the battle's loss condition no longer pops to random mephit splash "with no counter" on higher difficulties. CRE-level patch covers placed + scripted barrels; nothing scripts BDKEGX by name; story detonations use Kill() and still work. Installed stopgap; the 2026-09-05 direction removes the barrels entirely, with an elemental-demolition replacement proposed in [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14). | pred `bd2000.are` + `bdkegx.cre` |
 
 ### The coalition camp / Ch. 10–12 (GROUP @1004) — quick-win pass, shipped 2026-07-12
 
@@ -187,7 +187,9 @@ no reveal dispel, durable barrels) → **260/270/280/255**.
 substantively delivered by the prologue pass — 140/170/180 — though the wishlist text
 predates it.)*
 
-- **item 6 — Remove a lot of enemy groups** (per-chapter; Coast Way applies it).
+- **item 6 — Remove a lot of enemy groups** (cuts shipped across Coast Way, road north,
+  and coalition maps). Campaign-wide coverage audit queued in [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16),
+  including scripted spawns and respawns beyond the placed-actor cuts.
 - **item 7 — Replace enemy masses with a few fun enemies** (per-chapter; dig site is the model).
 - **item 13 — Rework Hell/Avernus + end fight; Caelar dialogue; new portrait.** Blocked on the Belhifet-placement decision.
 - **item 14 — Hephernaan not obviously the villain.**
@@ -198,6 +200,16 @@ predates it.)*
 - **Per-chapter baseline XP recount** (wave1-05 tooling).
 - **Road north (Troll Claw → Forest of Wyrms → Boareskyr):** quick wins shipped as
   230/240/250/255; a broader narrative/set-piece pass remains open.
+
+### New design and audit tasks (2026-09-05)
+
+Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, September 5 additions.
+
+| Task | Status and next step |
+|------|----------------------|
+| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Barrel removal is the new direction; multiple wizards using fire/earth elementals to destroy the bridge is the proposed replacement. Triage story, encounter mechanics, difficulty scaling, and progression before implementation. Component 255 remains the installed stopgap. |
+| [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Chosen of Cyric-style brief: roughly 30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
+| [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | Audit placed and scripted encounters, respawns, travel arenas, and quest-staged groups across SoD. Bring evidence and keep/cut/consolidate options to triage; audit not yet performed. |
 
 ---
 
