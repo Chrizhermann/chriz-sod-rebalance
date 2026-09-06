@@ -28,7 +28,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-Release v0.6.7 exposes **34 declarations in six install groups**. The existing
+Release v0.6.8 exposes **34 declarations in six install groups**. The existing
 **31-component** fresh selection is unchanged; optionally add EET-only `910`.
 Omit repair `291` and select one of the mutually exclusive `900`/`901`
 alternatives. The designated dev installation has
@@ -37,6 +37,21 @@ alternatives. The designated dev installation has
 Position: tail-install (after EET_end on EET installs — all patches are in-place edits of
 final files). Standalone BG:EE+SoD excludes EET-only `291` and `910`. Reversible via the
 standard WeiDU backups (`weidu_external/backup/chriz-sod-remix`).
+
+## Treasure compatibility (component 900)
+
+v0.6.8 preserves the camp chest's existing item records, including empty or
+mod-modified contents, and adds only the eight approved removed-content rewards.
+It no longer requires or recreates a vanilla sword. Charges, expiration, flags,
+other containers, and unrelated area data are retained. Invalid area bounds or
+missing/ambiguous target containers still fail before writing.
+
+Component 210 remains required; 900 and 901 remain mutually exclusive. The
+optional skip (910) and component order are unchanged. If a mod manager paused
+on an earlier 900 failure but subsequently installed 910, use its supervised
+recovery flow. Do not edit WeiDU.log or blindly rerun the complete selection.
+Public-installer synthetic tests cover this partial-install shape and the fix;
+no new full-stack game installation or gameplay test is claimed for this patch.
 
 ## Live-save behavior
 

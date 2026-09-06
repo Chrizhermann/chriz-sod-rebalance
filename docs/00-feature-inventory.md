@@ -6,7 +6,7 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.7, 34
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8, 34
 component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
@@ -67,7 +67,7 @@ unchosen. The live install is not the implementation target.
 | 220 | Dwarven dig site re-garrisoned | Cuts ~169 pre-placed undead (BD1100 69 / BD1200 100 + 11 moves) to a designed shape: 1 horde room, an honor guard (2 mummies + 2 elite skeleton warriors) standing on the vacated "Drowned in Blood" coords before the lich (2026-07-10 polish — literal replacement per the locked placement rule), pushover groups, umber-hulks-only dig monsters; no-save cheese hard-banned; 80% of cut kill-XP returns as one **106,700 party-total** chunk on the lich clean-kill (engine-divided like the kill XP it replaces; ≈17,783/char at 6 — unit-corrected 2026-07-12). Quest wiring (Semahl, Deepvein, Coldhearth) preserved. | pred `bd1100.are` + `bd1200.are` |
 | 225 | Scrying pool: one text-only Caelar omen | Requires all three Silver Scepters and both Essences; keeps the 3,000 party-total scepter reward, then consumes both Essences atomically, shows the approved abstract Caelar text, grants 1,000 XP once to Player1–6, and leaves the pool permanently dormant. The cut wight stays cut and its vial moves to `Sarcophagus01`; all Imoen/Caelar/Hooded picker routes and cinematics are unreachable. **Fresh no-Aura EET install verified; focused runtime/save-reload accepted 2026-09-05. Natural acquisition pending.** | REQUIRE 120+220; pred `bd1200.are` + `bdodscry.bcs` + `bdscry.dlg` |
 | 245 | Coast Way bridge: wall removal is skip-proof | Patches CUTSKIP's mirrored BDCUT14 end-state so skipping the scene cannot re-raise comp200's removed force wall or restore the vanilla three-round timer; keeps the wall gone and the timer at FIVE_ROUNDS. Establishes the rule that every BDCUT patch must audit CUTSKIP. | REQUIRE 200; pred `cutskip.bcs` |
-| 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. **Installed on dev.** | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
+| 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. v0.6.8 preserves existing chest items and metadata instead of requiring one vanilla sword; covered by synthetic public-installer tests. | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 
 Component 901 is the declared but unselected XOR alternative: remove the treasure with
 BD7000 and set `csr_treasure_removed=1`. It is not one of the 32 installed dev component rows.

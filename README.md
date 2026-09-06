@@ -1,12 +1,18 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.7**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.8**.
 
 Download the Windows installer ZIP from [Releases](https://github.com/Chrizhermann/chriz-sod-rebalance/releases/latest),
 extract it into the game directory containing `chitin.key`, close the game, and run
 `setup-chriz-sod-remix.exe`. Install as a tail mod after EET_end. Keep existing
 WeiDU history: do not uninstall or reinstall earlier components to apply this repair.
+
+v0.6.8 fixes component **900** rejecting camp chests modified by earlier mods.
+It preserves all existing items and their charges/flags, then adds the eight
+approved treasure records. Component 910 and the selection/order are unchanged.
+For a mod-manager installation paused after 900 failed, use that manager's
+recovery flow; replacing the archive alone does not reconcile its recorded step.
 
 Component **290** ends SoD after the short victory celebration. Dazzo starts the
 normal BG2 opening on EET, retaining existing import and item-placement rules.

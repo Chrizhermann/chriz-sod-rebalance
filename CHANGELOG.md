@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.6.8 - 2026-09-06
+
+- Fix component 900 failing on a camp chest containing additional or replaced
+  items. Preserve its existing raw item records and append only the eight
+  approved rewards, without recreating a sword or changing original item metadata.
+- Validate area/table bounds, every container's item run, unique target identity,
+  and 16-bit item-count capacity before writing. Other containers and unrelated
+  area bytes remain unchanged. Component 901 remains a no-op preference marker.
+- Reproduce the reported three-item chest failure and 900-fails/910-succeeds
+  partial-install shape on v0.6.7 using real WeiDU in disposable fixtures. Add
+  regressions for the fixed 900/910 suffix, empty and modified chests, metadata,
+  prerequisites, and malformed structures. No game install or gameplay test is
+  claimed; component 910, install order, and collection recipes are unchanged.
+
 ## v0.6.7 - 2026-09-06
 
 - Add experimental EET component 910: a two-confirmation bedroom choice,

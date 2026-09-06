@@ -25,63 +25,103 @@
 // DW#* randomiser injections (owned by that mod).
 //
 // Destination: Container009, the camp chest at (509,3220) beside
-// the Flaming Fist tents (dev-verified: holds one SW1H01). ARE
+// the Flaming Fist tents. Its existing contents belong to the
+// installed game and earlier mods; do not assume a vanilla sword. ARE
 // container item lists are contiguous index runs into the shared
 // items array, so the array is RELOCATED to end-of-file and grown
 // there: the only header fields touched are items count (0x76) and
 // items offset (0x78), both dev-verified; every other container's
 // indices stay valid, the old array bytes become dead padding, and
 // no other section moves. The chest's run is rebuilt as
-// [old SW1H01 + payload] at the array tail.
+// [byte-identical existing item records + eight payload records]
+// at the array tail. Its former run becomes unreferenced, not a
+// second active copy of the chest's items.
 
 ACTION_IF (csr_keep_treasure = 1) BEGIN
 
   // payload rows (resref, charges1) — index-parallel arrays
   ACTION_CLEAR_ARRAY csr_pay
   ACTION_CLEAR_ARRAY csr_chg
-  OUTER_SPRINT $csr_pay(~0~) ~SW1H01~   OUTER_SET $csr_chg(~0~) = 0
-  OUTER_SPRINT $csr_pay(~1~) ~BDDAGG03~ OUTER_SET $csr_chg(~1~) = 0
-  OUTER_SPRINT $csr_pay(~2~) ~BDSHLD02~ OUTER_SET $csr_chg(~2~) = 0
-  OUTER_SPRINT $csr_pay(~3~) ~BDBOOT04~ OUTER_SET $csr_chg(~3~) = 0
-  OUTER_SPRINT $csr_pay(~4~) ~WAND04~   OUTER_SET $csr_chg(~4~) = 5
-  OUTER_SPRINT $csr_pay(~5~) ~RING09~   OUTER_SET $csr_chg(~5~) = 0
+  OUTER_SPRINT $csr_pay(~0~) ~BDDAGG03~ OUTER_SET $csr_chg(~0~) = 0
+  OUTER_SPRINT $csr_pay(~1~) ~BDSHLD02~ OUTER_SET $csr_chg(~1~) = 0
+  OUTER_SPRINT $csr_pay(~2~) ~BDBOOT04~ OUTER_SET $csr_chg(~2~) = 0
+  OUTER_SPRINT $csr_pay(~3~) ~WAND04~   OUTER_SET $csr_chg(~3~) = 5
+  OUTER_SPRINT $csr_pay(~4~) ~RING09~   OUTER_SET $csr_chg(~4~) = 0
+  OUTER_SPRINT $csr_pay(~5~) ~SODTRE08~ OUTER_SET $csr_chg(~5~) = 0
   OUTER_SPRINT $csr_pay(~6~) ~SODTRE08~ OUTER_SET $csr_chg(~6~) = 0
-  OUTER_SPRINT $csr_pay(~7~) ~SODTRE08~ OUTER_SET $csr_chg(~7~) = 0
-  OUTER_SPRINT $csr_pay(~8~) ~SODTRE09~ OUTER_SET $csr_chg(~8~) = 0
+  OUTER_SPRINT $csr_pay(~7~) ~SODTRE09~ OUTER_SET $csr_chg(~7~) = 0
 
   COPY_EXISTING ~bd1000.are~ ~override~
+    PATCH_IF (BUFFER_LENGTH < 0x11c) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are has a truncated ARE header.~
+    END
+    READ_ASCII 0 csr_sig (8)
+    PATCH_IF NOT (~%csr_sig%~ STRING_EQUAL_CASE ~AREAV1.0~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are must be AREAV1.0.~
+    END
     READ_SHORT 0x76 csr_ic
     READ_LONG  0x78 csr_io
-    // find Container009 and sanity-check its current single item
     READ_LONG  0x70 csr_co
     READ_SHORT 0x74 csr_cc
+    // Validate before reading any records. Subtraction avoids offset overflow.
+    PATCH_IF ((csr_co < 0x11c) OR (csr_cc * 0xc0 > BUFFER_LENGTH) OR
+              (csr_co > BUFFER_LENGTH - csr_cc * 0xc0)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are container table is out of bounds.~
+    END
+    PATCH_IF ((csr_io < 0) OR ((csr_ic > 0) AND (csr_io < 0x11c)) OR
+              (csr_ic * 0x14 > BUFFER_LENGTH) OR
+              (csr_io > BUFFER_LENGTH - csr_ic * 0x14)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are item table is out of bounds.~
+    END
+    PATCH_IF ((csr_ic > 0) AND (csr_cc > 0) AND
+              (csr_io < csr_co + csr_cc * 0xc0) AND
+              (csr_co < csr_io + csr_ic * 0x14)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are container and item tables overlap.~
+    END
     SET csr_c9 = 0 - 1
+    SET csr_hits = 0
     FOR (csr_i = 0; csr_i < csr_cc; csr_i += 1) BEGIN
       SET csr_b = csr_co + csr_i * 0xc0
       READ_ASCII csr_b csr_nm (32) NULL
+      READ_LONG (csr_b + 0x40) csr_first
+      READ_LONG (csr_b + 0x44) csr_count
+      PATCH_IF ((csr_first < 0) OR (csr_count < 0) OR
+                (csr_first > csr_ic) OR (csr_count > csr_ic - csr_first)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are container %csr_i% has an invalid item run (%csr_first% + %csr_count% of %csr_ic%).~
+      END
+      // Same case/space normalization as engine object-name lookup.
+      INNER_PATCH_SAVE csr_nm ~%csr_nm%~ BEGIN
+        REPLACE_TEXTUALLY ~ ~ ~~
+      END
       PATCH_IF (~%csr_nm%~ STRING_EQUAL_CASE ~Container009~) BEGIN
         SET csr_c9 = csr_b
+        SET csr_hits += 1
       END
     END
-    PATCH_IF (csr_c9 < 0) BEGIN
-      PATCH_FAIL ~chriz-sod-remix comp900: Container009 not found in BD1000.are.~
+    PATCH_IF (csr_hits != 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: expected exactly one Container009 in BD1000.are, found %csr_hits%.~
     END
     READ_LONG (csr_c9 + 0x40) csr_c9first
     READ_LONG (csr_c9 + 0x44) csr_c9cnt
-    READ_ASCII (csr_io + csr_c9first * 0x14) csr_c9item (8) NULL
-    PATCH_IF NOT ((csr_c9cnt = 1) AND (~%csr_c9item%~ STRING_EQUAL_CASE ~SW1H01~)) BEGIN
-      PATCH_FAIL ~chriz-sod-remix comp900: Container009 does not hold exactly the verified SW1H01 (count %csr_c9cnt%, first item %csr_c9item%). Another mod re-seeded the chest - re-verify before installing.~
+    SET csr_k = csr_c9cnt + 8
+    PATCH_IF (csr_ic + csr_k > 0xffff) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp900: BD1000.are relocated item count would exceed the 16-bit limit.~
     END
-    // relocate the items array to EOF and append the payload run
+    // Relocate the shared array, then copy the target's original raw run.
+    // This preserves expiration, all charges, and flags as well as resrefs.
     SET csr_new = BUFFER_LENGTH
-    SET csr_k = 9                            // SW1H01 re-seed + 8 payload entries
     INSERT_BYTES csr_new (csr_ic * 0x14 + csr_k * 0x14)
     FOR (csr_i = 0; csr_i < csr_ic * 0x14; csr_i += 4) BEGIN
       READ_LONG (csr_io + csr_i) csr_v
       WRITE_LONG (csr_new + csr_i) csr_v
     END
     SET csr_e = csr_new + csr_ic * 0x14
-    FOR (csr_j = 0; csr_j < csr_k; csr_j += 1) BEGIN
+    FOR (csr_i = 0; csr_i < csr_c9cnt * 0x14; csr_i += 4) BEGIN
+      READ_LONG (csr_io + csr_c9first * 0x14 + csr_i) csr_v
+      WRITE_LONG (csr_e + csr_i) csr_v
+    END
+    SET csr_e += csr_c9cnt * 0x14
+    FOR (csr_j = 0; csr_j < 8; csr_j += 1) BEGIN
       TEXT_SPRINT csr_res $csr_pay(~%csr_j%~)
       WRITE_ASCIIE csr_e ~%csr_res%~ #8
       WRITE_SHORT (csr_e + 0x08) 0                       // expiration
