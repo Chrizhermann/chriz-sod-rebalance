@@ -1,5 +1,11 @@
 # 13 — Road-north / Boareskyr Bridge tier census (chapter-9 pass research)
 
+> **Current coverage correction, 2026-09-07:** the attached BDASHIRU script still
+> summons banned Shadowed Souls on HARDEST, so this historical census's clean-arc
+> claim was too broad. Ymori also has quest dependencies, and reachable Neera's
+> cave BD0114 was outside the old road cut lists. See the
+> [current road audit](22a-filler-audit-roadnorth.md) before selecting further cuts.
+
 Research data gathered by subagent 2026-07-10 from the dev install + repo decompiles.
 DATA ONLY — decisions live in `docs/design/` and `docs/01-remix-wishlist.md`.
 
