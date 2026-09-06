@@ -1,5 +1,12 @@
 # 02a — Combat Encounter Inventory: SoD Prologue + Coast Way
 
+> **Historical inventory; corrected by the [2026-09-07 audit](22-filler-audit.md).**
+> BD0113 is a river side chamber reached from BD5100, BD0114 is Neera's cave
+> reached from BD7200, and BD0115 belongs to BD7000. They are not the skipped
+> Korlasz dungeon. Current BD0066 has 35 goblins + 3 ankhegs, not 41 enemies.
+> The tables below preserve the old pre-cut snapshot and must not be used as
+> current encounter counts or as an uncorrected XP-ledger basis.
+
 Status: **complete** (objective inventory). Date: 2026-06-21.
 Scope: every loose `BD00xx`, `BD01xx`, `BD10xx`, `BD11xx`, `BD12xx` `.are` in the game `override\`.
 Read-only on the game dir. Tooling: `C:\tmp\sod_research\prologue\{parse_enc.py,are_parse.py}`

@@ -213,7 +213,7 @@ substantively delivered by the prologue pass — 140/170/180 — though the wish
 predates it.)*
 
 - **item 6 — Remove a lot of enemy groups** (cuts shipped across Coast Way, road north,
-  and coalition maps). Campaign-wide coverage audit queued in [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16),
+  and coalition maps). Campaign-wide static audit completed for [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16),
   including scripted spawns and respawns beyond the placed-actor cuts.
 - **item 7 — Replace enemy masses with a few fun enemies** (per-chapter; dig site is the model).
 - **item 13 — Rework Hell/Avernus + end fight; Caelar dialogue; new portrait.** Blocked on the Belhifet-placement decision.
@@ -234,7 +234,7 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 |------|----------------------|
 | [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Barrel removal is the new direction; multiple wizards using fire/earth elementals to destroy the bridge is the proposed replacement. Triage story, encounter mechanics, difficulty scaling, and progression before implementation. Component 255 remains the installed stopgap. |
 | [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Chosen of Cyric-style brief: roughly 30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
-| [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | Audit placed and scripted encounters, respawns, travel arenas, and quest-staged groups across SoD. Bring evidence and keep/cut/consolidate options to triage; audit not yet performed. |
+| [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 generated actor cuts verified. Found quest-carrier risks, two reachable creature-ban misses, a prologue XP scope error, and remaining ambient/travel/quest-pocket design gaps. Findings await triage; no further cuts implemented. |
 
 ---
 

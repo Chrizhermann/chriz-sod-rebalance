@@ -1,5 +1,12 @@
 # 02c — Encounter Inventory: Boareskyr Bridge → Coalition Camp → Underground River → Dragonspear Castle → Avernus → Ambush
 
+> **Historical pre-cut inventory.** The [2026-09-07 audit](22b-filler-audit-coalition.md)
+> verifies the effective post-cut resources and quest dependencies. BD5110 has a
+> scheduled Unsleeping Guardian in addition to its 16 shadow/wraith actors; the
+> companion CSV already recorded 17, whereas the old prose omitted it. Current
+> counts and reachable quest-staged groups must come from the new audit, not by
+> subtracting cut counts from approximate prose totals below.
+
 Status: **verified** against the live install's decompiled scripts (`research/data/sod_baf/*.baf`),
 pristine SoD `.are` actor/spawn-point tables, and per-CRE `EA` allegiance bytes. Date: 2026-06-21.
 Region scope: the SoD **mid/late** arc — every loose `BD2###`/`BD3###`/`BD4###`/`BD5###`/`BD6###` area.

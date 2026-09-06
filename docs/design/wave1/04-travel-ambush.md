@@ -16,6 +16,12 @@ one-shot globals (`BD_URE1–4`, never reset). **At most 4 random arenas per pla
 - URE3 → BD0066 goblin horde (38 goblins + 3 ankhegs — the worst pile-on)
 - URE4 → BD0064 hill giants
 
+**Audit correction (2026-09-07):** the eight-hour timer above is the parent-side
+value. Every direct arena initialization resets the shared timer to `1`, so it
+does not guarantee eight-hour spacing after a fired arena. Current BD0066 has
+35 goblins + 3 ankhegs, not the old 38-goblin count. See the
+[current arena/dependency audit](../../research/22c-filler-audit-early-and-travel.md).
+
 Story vignettes URE6–10 (refugees, Myrleena, Ephrik, the Lebass chase) are separate,
 fire-once-on-entry, and **stay untouched** (decided).
 

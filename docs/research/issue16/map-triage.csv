@@ -1,0 +1,77 @@
+area,audit_status,evidence,note
+BD0010,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0020,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0021,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0030,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0035,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0040,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0050,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0060,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0061,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0062,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0063,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0064,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0065,unused-slot,22c-filler-audit-early-and-travel.md,No current direct URE destination or placed actors; no speculative filler removal.
+BD0066,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0067,deferred-arena,22c-filler-audit-early-and-travel.md,Full cut versus consolidation OPEN; loot and optional-path XP need a decision.
+BD0070,unused-slot,22c-filler-audit-early-and-travel.md,No current direct URE destination or placed actors; no speculative filler removal.
+BD0071,unused-slot,22c-filler-audit-early-and-travel.md,No current direct URE destination or placed actors; no speculative filler removal.
+BD0072,unused-slot,22c-filler-audit-early-and-travel.md,No current direct URE destination or placed actors; no speculative filler removal.
+BD0100,removed-scene,22c-filler-audit-early-and-travel.md,Assassination night-set schedules zero; script sweep remains for baked saves.
+BD0101,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0102,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0103,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0104,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0105,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0106,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0107,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0108,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0109,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0110,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0111,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0112,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0113,quest-keep,22b-filler-audit-coalition.md,Wyrmling chamber reached from BD5100; belongs to retained river side content.
+BD0114,open-density,22a-filler-audit-roadnorth.md,Neera spider quest cave remains reachable from BD7200; not skipped prologue.
+BD0115,removed-parent,22c-filler-audit-early-and-travel.md,BD7000 worldmap removal; BD0115 only inbound from that parent. Saved worldmaps are separate.
+BD0116,designed-keep,22c-filler-audit-early-and-travel.md,Approved Korlasz jailbreak replacement.
+BD0117,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0118,retired-stage,22c-filler-audit-early-and-travel.md,Old vision staging retired by current scrying treatment.
+BD0120,skipped-route,22c-filler-audit-early-and-travel.md,Original Korlasz dungeon bypassed; raw actor/script presence is not reachable filler.
+BD0121,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0122,social-keep,22c-filler-audit-early-and-travel.md,Social/recruit/shop/quest staging; no broad NPC-density cut proposed.
+BD0130,skipped-route,22c-filler-audit-early-and-travel.md,Original Korlasz dungeon bypassed; raw actor/script presence is not reachable filler.
+BD1000,cut-plus-open-ambient,22c-filler-audit-early-and-travel.md,West spider cut verified; other one-day-armed spawn payloads remain.
+BD1010,open-density,22c-filler-audit-early-and-travel.md,Mimic/spider cave; preserve mimic death-gated chest if trimming support.
+BD1100,designed-keep,22c-filler-audit-early-and-travel.md,69 explicit cut keys verified; designed keepers and quest/boss closures remain.
+BD1200,designed-keep,22c-filler-audit-early-and-travel.md,100 explicit cut keys verified; designed keepers and quest/boss closures remain.
+BD2000,cut-plus-quest-risk,22a-filler-audit-roadnorth.md,Ymori schedule 0 versus staged Activate/death/item quest dependencies; bridge redesign is separate issue 14.
+BD2010,designed-keep,22a-filler-audit-roadnorth.md,Eight retained living goblins in the warren per signed-off road design; corpse prop excluded.
+BD2100,story-keep,22a-filler-audit-roadnorth.md,Bridge/fort/recruit story staging retained.
+BD3000,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4000,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4100,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4300,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4400,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4500,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4600,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4601,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD4700,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD5000,cut-plus-quest-risk,22b-filler-audit-coalition.md,Mizhena amulet creation still targets cut displacers; preserve quest before more thinning.
+BD5100,cut-plus-open-density,22b-filler-audit-coalition.md,Corrupted groves/drow/myconid staged groups require pocket-specific decisions.
+BD5110,policy-gap-plus-quest,22b-filler-audit-coalition.md,Scheduled Unsleeping Guardian violates ban; ghost quest and shadow/wraith pocket remain.
+BD5200,story-keep,22b-filler-audit-coalition.md,"Coalition siege, castle/hell story or transition staging deliberately retained; issues 14/15 are separate redesigns."
+BD5300,cut-plus-open-density,22b-filler-audit-coalition.md,Graveyard cut verified; south quest-staged group needs separate treatment.
+BD6000,retired-ending-route,22-filler-audit.md,Player epilogue route retired by component 290; BD6100 import-container resource remains required.
+BD6100,retired-ending-route,22-filler-audit.md,Player epilogue route retired by component 290; BD6100 import-container resource remains required.
+BD6200,retired-ending-route,22-filler-audit.md,Player epilogue route retired by component 290; BD6100 import-container resource remains required.
+BD7000,removed-parent,22c-filler-audit-early-and-travel.md,BD7000 worldmap removal; BD0115 only inbound from that parent. Saved worldmaps are separate.
+BD7100,cut-plus-open-ambient,22a-filler-audit-roadnorth.md,Placed cuts pass; retained camps/rest tables and script-armed spawn systems are separate.
+BD7110,designed-keep,22a-filler-audit-roadnorth.md,Retained troll lair per signed-off road design.
+BD7200,cut-plus-open-ambient,22a-filler-audit-roadnorth.md,Placed cuts pass; retained camps/rest tables and script-armed spawn systems are separate.
+BD7210,designed-keep,22a-filler-audit-roadnorth.md,Retained Morentherene encounter per signed-off road design; difficulty scaling remains intentional.
+BD7220,unreachable-cut,22a-filler-audit-roadnorth.md,No current inbound travel region after component 240 rewiring.
+BD7230,open-density-and-policy-gap,22a-filler-audit-roadnorth.md,Temple/Ziatar consolidation OPEN; Shadow Aspect summons banned shadowed souls.
+BD7300,cut-plus-open-ambient,22b-filler-audit-coalition.md,Placed cuts pass; repeat spawn points/rest payloads still exist.
+BD7310,designed-keep,22b-filler-audit-coalition.md,Shadow-vault keeper fight; explicit guardian cut passes.
+BD7400,open-purpose,22b-filler-audit-coalition.md,Bloodbark cure/loot/modded interaction hooks prevent a blind whole-map cut.
+BD7410,open-purpose,22b-filler-audit-coalition.md,Bloodbark cure/loot/modded interaction hooks prevent a blind whole-map cut.

@@ -303,6 +303,14 @@ Vanilla prologue XP removed by the dungeon skip — parsed 2026-07-10 from the d
 override (ARE actor tables + CRE 0x14; quest awards from decompiled dialogs).
 Guaranteed content, Normal difficulty, per char at party of 6:
 
+> **Audit correction, 2026-09-07:** the historical calculation below misclassifies
+> BD0113 and BD0114 as skipped prologue content. Current travel regions connect
+> them to BD5100 and BD7200 respectively, so their 53,115 party XP belongs to
+> retained side content. The explicit user decision to award 24,000 per character
+> remains unchanged. Reconcile this rationale before claiming exact XP neutrality
+> or compensating future cuts in those caves; see the
+> [filler audit](../../research/22c-filler-audit-early-and-travel.md).
+
 | Removed (vanilla) | Party total | Per char |
 |---|---:|---:|
 | Placed hostile garrison (BD0113 5,600 · BD0114 47,515 · BD0120 4,150 · BD0130 55,215) | 112,480 | 18,747 |

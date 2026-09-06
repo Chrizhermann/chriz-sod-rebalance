@@ -1,5 +1,13 @@
 # 07 — SoD Worldmap Travel-Ambush System (VERIFIED)
 
+> **Timing correction, 2026-09-07:** the minimum-eight-hour spacing claims below
+> are incorrect. All four direct arena init scripts reset `BD_TIMER_URE` to `1`,
+> overriding the parent's `EIGHT_HOURS` after a fired encounter. The four one-shot
+> gates remain; the next unused arena can become eligible after returning to a
+> parent area. The current parent/destination mapping and loot-aware arena audit
+> are in [research22c](22c-filler-audit-early-and-travel.md). This document remains
+> a historical mechanism record; use that correction before designing frequency.
+
 Status: **verified** against the live install's decompiled scripts + `worldmap.wmp`. Date: 2026-06-21.
 This is the **second** ambush system, distinct from the rest-header system in `01-rest-ambush-mechanic.md`
 / `design/01`. Read-only on the game dir; scratch in `C:\tmp\sod_research\travel\`.

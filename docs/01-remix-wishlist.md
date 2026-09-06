@@ -378,6 +378,12 @@ are separated below; the encounters have not been implemented.
 
 ### Campaign filler and trash coverage audit — [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16)
 
+- **2026-09-07 audit delivered:** [campaign report](research/22-filler-audit.md)
+  covers all 76 areas and verifies all 495 generated actor cuts. Quest-carrier
+  risks, two reachable creature-ban misses, and a prologue XP scope error are
+  recorded ahead of new density choices. This is audit evidence and triage
+  advice, not approval of further removals or a changed XP award.
+
 - **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
   removed across SoD. Reconcile shipped cut lists, chapter decisions, research datasets,
   and effective dev-copy resources, including **scripted spawns, respawns/re-arm loops,
