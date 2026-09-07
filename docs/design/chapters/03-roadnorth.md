@@ -134,8 +134,12 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
    **Updated direction 2026-09-05 — [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14):**
    remove all smokepowder barrels and related mechanics. Proposed replacement:
    losing crusaders use multiple wizards and fire/earth elementals to destroy the
-   bridge, with difficulty scaling. Exact encounter/progression design is OPEN;
-   see `docs/01-remix-wishlist.md`, September 5 additions.
+   bridge, with difficulty scaling. **First-version outline approved 2026-09-08:**
+   two wizards, two earth and two fire elementals, two veteran guards; preserve
+   siege/retreat and Bence aftermath. Actual collapse pressure is deferred to
+   version 2, with an obvious, generous timer (user proposal: roughly five turns,
+   enough even on Insane). Detailed tuning/coordinates remain OPEN. See the
+   [bridge design](../wave1/08-boareskyr-bridge.md).
 4. Temple relocation target + the cave/temple/Ziatar/Neothelid recomposition (item 15
    fight shape).
 5. Morentherene treatment (item 16 optional component; she guards the cave→temple

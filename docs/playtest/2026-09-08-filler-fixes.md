@@ -85,11 +85,12 @@ fixture resolved its missing-symbol errors. This was not a game-patch failure.
 ### Next manual session — agreed 2026-09-08
 
 The user will test the current fixes in PR #21 together with the future
-Boareskyr Bridge replacement from issue #14. The bridge has no PR or signed-off
-encounter design yet. Design discussion can proceed while PR #21's native
-acceptance waits for this combined session. Start with a small first version of
-the bridge encounter, agree its roster, positions and sequence with the user,
-then use the playtest to inform later additions.
+Boareskyr Bridge replacement from issue #14. The bridge's first-version outline
+is now approved in [its design](../design/wave1/08-boareskyr-bridge.md), with
+detailed tuning still open and no bridge PR yet. Design work can proceed while PR #21's native
+acceptance waits for this combined session. Use the approved small first-version
+roster and sequence, finish its detailed tuning and placement discussion, then
+use the playtest to inform later additions. Collapse pressure belongs to version 2.
 
 Prepare one combined dev test installation and a short set of checkpoint saves
 when both changes are ready. This is one test session, not a requirement to play
@@ -103,7 +104,7 @@ prepared yet. Record the exact tested commits from both branches at that point.
 | Underground River, before first entry | Pick up the amulet from the dead fighter and return it to Mizhena. |
 | Guardian area and Shadow Aspect | Guardian absent; hardest-difficulty encounter has no Shadowed Soul summons. |
 | Ymori, before first BD2000 entry | Brief quest-activation check if a suitable checkpoint is practical; keep this low-priority side quest bounded. |
-| Bridge, before the replacement sequence | Final checklist follows the agreed first-version design: staging, combat, victory, onward travel and any chosen failure route. |
+| Bridge, before the replacement sequence | Two wizards, four elementals and two guards: staging, combat, pathing, victory and onward travel. No collapse timer in version 1; detailed tuning remains open. |
 
 Use pre-first-entry saves for BD2000, BD5000 and BD5110 so saved area data does
 not mask the changes. Verify the bridge's own save boundary after its design is

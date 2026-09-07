@@ -353,20 +353,25 @@ are separated below; the encounters have not been implemented.
   smokepowder barrels and associated objectives, staging, dialogue, and destruction
   gimmicks. Retire the single weak unnamed wizard / Plane-of-Fire portal premise.
   Component 255's durable barrels remain the installed stopgap until this ships.
-- **PROPOSED replacement:** as the crusaders lose the battle, multiple wizards try
-  to destroy the bridge with **fire and earth elementals**, already summoned and/or
-  being summoned during the encounter. A difficult battle scaling with difficulty.
-- **OPEN for triage/design:** wizard roster and roles, elemental mix/counts, summoning
-  presentation and timing, placement, player counterplay, bridge failure conditions,
-  difficulty tiers, dialogue, and XP/loot accounting. Preserve the wider siege battle
-  direction while designing this replacement finale.
+- **DECIDED first version (2026-09-08):** two capable fire/earth-control wizards,
+  two earth and two fire elementals already summoned, and two veteran crusader
+  guards. Keep the siege/retreat, give a short warning, fight the prepared group,
+  then rejoin Bence's aftermath. Earth elementals face the party's approach;
+  separated wizards stand farther along the bridge with their escorts.
+- **DECIDED second-version direction:** defer actual collapse pressure until
+  version 2. Make its timer obvious and generous even on Insane; the user proposes
+  roughly five turns, with failure mainly for retreating or taking an exceptionally
+  long time. The fight comes first, with only mild damage-output pressure.
+- **OPEN:** exact positions, spell/AI/stat packages, difficulty tiers, dialogue,
+  XP/loot and version-2 timer mechanics. Full decisions and implementation seams:
+  [bridge design](design/wave1/08-boareskyr-bridge.md).
 - **Research before implementation:** trace barrel/portal scripts, dialogue, placed
   and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
   determine how the replacement supersedes component 255 on both supported platforms.
 - **DECIDED process (2026-09-08):** discuss the actual encounter, implementation,
   wizard positions, escorts and sequence together before coding. Begin with a
-  small first version and consider additions after testing; its roster and
-  mechanics remain OPEN. Batch native acceptance with the current filler fixes
+  small first version and consider additions after testing; the baseline above
+  is approved, with detailed tuning still OPEN. Batch native acceptance with the current filler fixes
   in PR #21 in the user's next manual test session; see the
   [combined checkpoint plan](playtest/2026-09-08-filler-fixes.md#next-manual-session--agreed-2026-09-08).
 
