@@ -398,7 +398,18 @@ are separated below; the encounters have not been implemented.
   travel-ambush arenas. Earlier placed-actor cuts did not cover all these systems.
 - **OPEN:** further keep/cut/consolidate decisions and replacement encounters. Present
   findings for triage, retaining the reasons for keeping story/siege set-pieces.
-  The audit is queued; its results and additional removals are not yet decided.
+  The static audit is delivered; additional removals remain undecided.
+
+### Assassin ambush: keep the fight without dead magic (2026-09-08)
+
+- **DECIDED default direction:** retain the URE2/BD0063 scripted assassin ambush
+  and remove its dead-magic effect. This supersedes the earlier broad full-cut
+  lean for this particular encounter. The current remix has not removed URE2.
+- Remove misleading dead-magic descriptions/companion remarks with the effect;
+  ordinary ambush warnings and the encounter's enemies, loot and staging remain.
+- **OPEN:** exact alternative installer choices. Full encounter removal and an
+  explicit original-behavior flavor are discussion options, not assumed decisions.
+- [Discussion queue and code explanation](design/wave1/07-filler-triage.md).
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

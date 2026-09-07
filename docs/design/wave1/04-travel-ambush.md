@@ -6,6 +6,11 @@ proposal `design/05`.
 **Scope:** the worldmap travel-ambush system (wishlist item 8): "kill the huge groups; fill
 with nothing or something more interesting/fun."
 
+**2026-09-08 exception decided:** the default treatment of URE2/BD0063 is now to
+**keep the assassin ambush and remove its dead-magic effect**. Alternative installer
+choices remain OPEN; no implementation has landed. See the
+[triage discussion and exact code mechanism](07-filler-triage.md).
+
 ## Mechanism recap (verified, `research/07`)
 Script-driven, not engine-random: wilderness area scripts call
 `ForceRandomEncounterEntry("BD00xx","Exit")` behind a weighted die (`RESPONSE #40` fire /
