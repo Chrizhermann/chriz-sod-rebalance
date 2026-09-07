@@ -6,6 +6,18 @@ parent repo (`docs/`); every component ships only after explicit sign-off
 
 ## Components
 
+Unreleased additions: **135** is the default treatment of the assassin ambush
+(keep the fight, remove dead magic and its misleading remarks). **235** preserves
+Ymori after an older 230 installation. **265**, after 260, puts Mizhena's amulet
+on the existing `Dead_fighter` corpse and removes the missed Guardian and Shadow
+Aspect's Shadowed Soul summons. Fresh 230 already excludes
+Ymori from its cuts. Append these components; do not reinstall earlier rows.
+
+Use saves from before entering BD2000, BD5000 and BD5110 for the area repairs.
+Visited-area saves retain their cached actors and container contents. The
+road-north award becomes 23,100 party XP and the coalition award 106,800; these
+changes affect future payouts only. The prologue award is awaiting a new decision.
+
 | # | Component | What it does |
 |---|---|---|
 | 100 | Rest-ambush 5× | Maps every active SoD rest-header day/night % through a felt-rate÷5 table (30 areas, felt 22–80% → 8–15% per rest). Composes with other mods (reads current values). BDNOREST untouched; pack size untouched (per-chapter decision). |

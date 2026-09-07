@@ -2,16 +2,16 @@
 
 Source: [issue 16 audit](../../research/22-filler-audit.md) and the user's follow-up
 discussion. **Only explicit user choices below are DECIDED.** Suggestions remain
-OPEN; this document does not implement encounter or XP changes.
+OPEN. The user approved the targeted implementation below on 2026-09-08.
 
 ## Discussion queue
 
 | Point | Current basis | Proposed treatment / remaining question |
 |---|---|---|
-| 1. Mizhena's amulet | All three scripted displacer carriers were cut. The quest remains. | **OPEN placement:** use BD5000's existing `Dead_fighter` container at (4295,1098), among the removed pack's positions. Her current dialogue says she dropped the amulet during a battle at the eastern edge of the forest. This would preserve exploration and the quest without restoring the pack. User choice pending. |
-| 2. Ymori | A quest actor was cut as a stray wight; its activation, death and item dependencies remain. | **Recommendation:** preserve the original staged quest encounter and belongings. First test the `Activate()` path against the schedule-zero actor; repair suppression if confirmed. This need not restore unrelated bridge filler. No new quest-removal decision. |
-| 3. Banned creatures | The global creature bans are already decided. Shadow Aspect still summons Shadowed Souls, and BD5110 retains an Unsleeping Guardian. | **Implementation recommendation:** remove those missed sources, keep the surrounding encounters/ghost quest, and account for the Guardian's omitted XP. A replacement monster would be a separate creative choice; none is assumed. |
-| 4. Prologue XP | The old rationale counts 53,115 party XP from two still-reachable side caves. The 24,000-per-character Liia award was explicitly approved. | **OPEN:** recount actually skipped content and the replacement jailbreak, then agree a corrected future award. Do not subtract an arbitrary rounded amount or alter the approved reward during this discussion. |
+| 1. Mizhena's amulet | All three scripted displacer carriers were cut. The quest remains. | **DECIDED:** use BD5000's existing `Dead_fighter` container at (4295,1098), among the removed pack's positions. Her current dialogue already fits. Component 265 preserves the corpse's existing contents and retires the three old scripted item grants. |
+| 2. Ymori | A quest actor was cut as a stray wight; its activation, death and item dependencies remain. | **DECIDED:** preserve his staged quest and belongings, with proportionate verification; the user considers this side quest low priority. Fresh 230 excludes him. Repair 235 restores the original all-hours schedule while requiring the CRE's native deactivated state. Quest `Activate()` still controls his appearance. Native activation remains untested; this is a source-supported staging repair. |
+| 3. Banned creatures | The global creature bans are already decided. Shadow Aspect still summons Shadowed Souls, and BD5110 retains an Unsleeping Guardian. | **DECIDED:** remove those missed sources without replacements. Component 265 preserves the surrounding encounters and ghost quest. The omitted Guardian adds 3,200 party XP under the existing 80% rule at the existing chapter-11 reward. Repeatable Shadowed Soul summons have no fixed-count compensation. |
+| 4. Prologue XP | The old rationale counts 53,115 party XP from two still-reachable side caves and combines difficulty-exclusive actors. | **DECIDED:** recount actually skipped content and the replacement jailbreak. [Recount complete](../../research/23-prologue-xp-recount.md): defined per-character scenarios span about 9,400–14,900 at DIFFLEV 3, 11,900–18,200 at 4, and 14,600–22,500 at 5. **OPEN:** choose the baseline and corrected future award. Component 175 remains at the approved 24,000 per character. |
 | 5. Assassin ambush / dead magic | URE2, BD0063, remains in the current source and effective dev copy. No shipped remix component removes it. | **DECIDED default direction (user, 2026-09-08): keep the ambush, remove only its dead-magic treatment.** Exact alternative installer choices remain OPEN. |
 
 After these, the broader density questions remain: ambient repopulation; treatment
@@ -26,13 +26,29 @@ effect** to be the default option. The prior lean toward cutting all scripted
 travel ambushes must not override this encounter-specific direction.
 
 - **DECIDED:** default treatment keeps URE2's fight and removes its dead magic.
-- **Implied consistency work:** suppress the area descriptions and companion
+- **DECIDED consistency work (explicitly approved):** suppress the area descriptions and companion
   remarks specifically claiming magic does not work. Preserve ordinary ambush
   warnings, the encounter setup, enemies, equipment, escape/outro and rest unlock.
 - **OPEN:** whether the installer also exposes full URE2 removal, an explicit
   unchanged-original flavor, or simply leaves original behavior available by
   not selecting this component. No alternative has been chosen for the user.
-- **Not yet implemented:** no TP2, BAF, ARE, SPL or installed resource changed.
+- **Implementation:** component 135 is selected by default by WeiDU and only
+  patches BD0063.BCS. Explicit component selections can omit it to retain the
+  original encounter. No full-removal alternative is being added without design.
+
+## Installation and save boundaries
+
+These changes are unreleased on the issue-16 branch. Append 135, 235 (after 230),
+and 265 (after 260); do not reinstall the old components. Component 265 also
+cleans Shadow Aspect's summons independently of optional 240. Fresh 230 already preserves
+Ymori, and 235 tolerates that corrected schedule and reward.
+
+ARE resources are cached in saves: use a save from before entering BD2000,
+BD5000 and BD5110 for the area changes. The installer does not edit saves or
+retroactively create quest items in an already visited area. Changed script
+awards apply to future payouts only. Road-north compensation becomes 23,100
+party XP (28,850 cut XP × 80%, rounded to 100); coalition compensation becomes
+106,800 party XP (103,600 + 3,200). Existing once-only quest/chapter gates remain.
 
 ## What the current code does
 

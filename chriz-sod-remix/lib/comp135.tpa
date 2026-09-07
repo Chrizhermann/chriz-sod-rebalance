@@ -1,0 +1,110 @@
+// Component 135: keep URE2's assassin encounter, remove its dead magic.
+// Decision: docs/design/wave1/07-filler-triage.md (2026-09-08).
+// Only BD0063.BCS changes. SPIN646, the ARE, assassins and parent launchers
+// remain owned by the installed game/mods. Numeric TLK references are not
+// assumed: BGEE/SoD, EET and translated installs use different string numbers.
+
+ACTION_IF NOT FILE_EXISTS_IN_GAME ~BD0063.BCS~ BEGIN
+  FAIL ~chriz-sod-remix #135: BD0063.BCS is missing; the assassin encounter is unavailable.~
+END
+
+OUTER_SPRINT csr135_nl ~%MNL%?%LNL%~
+// Comments may contain localized text, sound names and resolved object names.
+OUTER_SPRINT csr135_comment ~[^%WNL%]*~
+
+// Each original block must be unique. An entirely cleaned script is a no-op;
+// partial or reshaped original blocks are rejected before any resource write.
+DEFINE_PATCH_MACRO csr135_strip_required BEGIN
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr135_pattern%~ csr135_count
+  PATCH_IF (csr135_count > 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #135 [BD0063 %csr135_label%]: duplicate target blocks (%csr135_count%); refusing to guess.~
+  END
+  SET csr135_required += csr135_count
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr135_pattern%~ ~~
+END
+
+DEFINE_PATCH_MACRO csr135_clean_script BEGIN
+  // These are preserved encounter anchors, not replacement source text.
+  PATCH_FOR_EACH csr135_npc IN ~Minsc~ ~Corwin~ BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~DisplayStringHead("%csr135_npc%",[0-9]+)~ csr135_count
+    PATCH_IF (csr135_count != 2) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #135 [BD0063]: expected both preserved %csr135_npc% ambush warnings, found %csr135_count%.~
+    END
+  END
+  PATCH_FOR_EACH csr135_anchor IN
+    ~SetGlobal("BD_Init","MYAREA",1)~
+    ~SetGlobal("BD_URE2","GLOBAL",2)~
+    ~SetGlobal("BD_CanRest","MYAREA",1)~
+    ~RemoveAreaFlag(NOREST)~
+  BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr135_anchor%~ csr135_count
+    PATCH_IF (csr135_count != 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #135 [BD0063]: expected one preserved encounter anchor [%csr135_anchor%], found %csr135_count%.~
+    END
+  END
+
+  SET csr135_required = 0
+  SPRINT csr135_label ~recurring antimagic~
+  SPRINT csr135_pattern ~IF%csr135_nl%  !GlobalTimerNotExpired("AntimagicTimer","MYAREA")%csr135_nl%THEN%csr135_nl%  RESPONSE #100%csr135_nl%    ApplySpell(Player1,DEAD_MAGIC_AREA)%csr135_comment%%csr135_nl%    SetGlobalTimer("AntimagicTimer","MYAREA",ONE_ROUND)%csr135_nl%END~
+  LAUNCH_PATCH_MACRO csr135_strip_required
+
+  SPRINT csr135_label ~caster area description~
+  SPRINT csr135_pattern ~IF%csr135_nl%  Global("BD_String","MYAREA",0)%csr135_nl%  OR(2)%csr135_nl%    Class(Player1,MAGE_ALL)%csr135_nl%    Kit(Player1,WIZARDSLAYER)%csr135_nl%THEN%csr135_nl%  RESPONSE #100%csr135_nl%    SetGlobal("BD_String","MYAREA",1)%csr135_nl%    DisplayString(Myself,[0-9]+)%csr135_comment%%csr135_nl%END~
+  LAUNCH_PATCH_MACRO csr135_strip_required
+
+  SPRINT csr135_label ~noncaster area description~
+  SPRINT csr135_pattern ~IF%csr135_nl%  Global("BD_String","MYAREA",0)%csr135_nl%  !Class(Player1,MAGE_ALL)%csr135_nl%  !Kit(Player1,WIZARDSLAYER)%csr135_nl%THEN%csr135_nl%  RESPONSE #100%csr135_nl%    SetGlobal("BD_String","MYAREA",1)%csr135_nl%    DisplayString(Myself,[0-9]+)%csr135_comment%%csr135_nl%END~
+  LAUNCH_PATCH_MACRO csr135_strip_required
+
+  SET csr135_roll = 0
+  PATCH_FOR_EACH csr135_npc IN ~Edwin~ ~Baeloth~ ~Dynaheir~ ~Neera~ BEGIN
+    SET csr135_roll += 1
+    PATCH_FOR_EACH csr135_variant IN ~random~ ~fallback~ BEGIN
+      SPRINT csr135_random ~~
+      PATCH_IF (~%csr135_variant%~ STRING_EQUAL_CASE ~random~) BEGIN
+        SPRINT csr135_random ~  RandomNum(4,%csr135_roll%)%csr135_nl%~
+      END
+      SPRINT csr135_label ~%csr135_npc% %csr135_variant% remark~
+      SPRINT csr135_pattern ~IF%csr135_nl%  Global("BD_NPC01","MYAREA",0)%csr135_nl%  IsValidForPartyDialogue("%csr135_npc%")%csr135_comment%%csr135_nl%%csr135_random%  Delay(3)%csr135_nl%THEN%csr135_nl%  RESPONSE #100%csr135_nl%    SetGlobal("BD_NPC01","MYAREA",1)%csr135_nl%    DisplayStringHead("%csr135_npc%",[0-9]+)%csr135_comment%%csr135_nl%END~
+      LAUNCH_PATCH_MACRO csr135_strip_required
+    END
+  END
+  PATCH_IF ((csr135_required != 0) AND (csr135_required != 11)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #135 [BD0063]: expected all 11 original dead-magic blocks or an entirely cleaned script; found %csr135_required%. A target block was changed or partially removed.~
+  END
+
+  // Aura's mod-added remark is optional. Its complete known shape is required
+  // when present; no other companion additions are removed by a broad wildcard.
+  SPRINT csr135_pattern ~IF%csr135_nl%  Global("BD_NPC01","MYAREA",0)%csr135_nl%  IsValidForPartyDialogue("C0Aura")%csr135_comment%%csr135_nl%  RandomNum(4,2)%csr135_nl%  Delay(3)%csr135_nl%THEN%csr135_nl%  RESPONSE #100%csr135_nl%    SetGlobal("BD_NPC01","MYAREA",1)%csr135_nl%    DisplayStringHead("C0Aura",[0-9]+)%csr135_comment%%csr135_nl%END~
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr135_pattern%~ csr135_aura
+  PATCH_IF (csr135_aura > 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #135 [BD0063]: duplicate optional Aura dead-magic remarks.~
+  END
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr135_pattern%~ ~~
+
+  // Reject unknown or partly matched uses of these local dead-magic hooks.
+  // This also catches extra actions inside a target block without deleting them.
+  PATCH_FOR_EACH csr135_leftover IN ~AntimagicTimer~ ~DEAD_MAGIC_AREA~ ~BD_String~ ~BD_NPC01~ BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr135_leftover%~ csr135_count
+    PATCH_IF (csr135_count != 0) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #135 [BD0063]: unrecognized dead-magic hook %csr135_leftover% remains; no resources changed.~
+    END
+  END
+  SET csr135_write = (csr135_required + csr135_aura > 0)
+END
+
+// Read-only preflight: even a late mismatch must precede resource backups/writes.
+COPY_EXISTING - ~BD0063.BCS~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LAUNCH_PATCH_MACRO csr135_clean_script
+  END
+
+ACTION_IF csr135_write BEGIN
+  COPY_EXISTING ~BD0063.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LAUNCH_PATCH_MACRO csr135_clean_script
+    END
+  BUT_ONLY
+END ELSE BEGIN
+  PRINT ~The assassin encounter already has no dead-magic blocks; no resources changed.~
+END

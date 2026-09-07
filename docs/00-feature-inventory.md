@@ -6,13 +6,22 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8, 34
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8 release marker, 37
 component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
 ## 1. Implemented (built + installed on the dev install)
+
+**Unreleased branch additions (not installed on the designated dev target):**
+135 keeps URE2 without dead magic and misleading descriptions; 235 repairs older
+Ymori cuts while preserving native quest staging; 265 puts Mizhena's amulet in
+BD5000's existing corpse, removes the BD5110 Guardian and Shadow
+Aspect's Shadowed Soul summons. Fresh 230 now has 97 cuts and 23,100 party XP;
+235 corrects the older award. With 265, the coalition award is 106,800 party XP.
+The prologue's 24,000-per-character award awaits a separately agreed recount.
+See [approved scope and save boundaries](design/wave1/07-filler-triage.md).
 
 Six install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
 Prologue-city, **@1002** Coast Way, **@1003** road north, **@1004** coalition camp,

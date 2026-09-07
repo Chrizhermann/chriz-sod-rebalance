@@ -384,6 +384,12 @@ are separated below; the encounters have not been implemented.
   recorded ahead of new density choices. This is audit evidence and triage
   advice, not approval of further removals or a changed XP award.
 
+- **2026-09-08 targeted fixes approved:** Mizhena's amulet goes on the existing
+  `Dead_fighter` corpse in BD5000; preserve Ymori's staged side quest and belongings
+  with bounded testing; remove the missed Guardian and Shadowed Soul sources
+  without replacements; recount the prologue XP before choosing a new award.
+  These exceptions do not approve the remaining broader density decisions.
+
 - **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
   removed across SoD. Reconcile shipped cut lists, chapter decisions, research datasets,
   and effective dev-copy resources, including **scripted spawns, respawns/re-arm loops,

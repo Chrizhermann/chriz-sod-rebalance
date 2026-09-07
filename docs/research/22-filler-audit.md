@@ -5,6 +5,13 @@ quest changes, XP changes, or game installations were made. The existing
 generated actor-cut lists are applied correctly; the important gaps are their
 quest dependencies, omitted encounter sources, and historical map classification.
 
+**2026-09-08 follow-up:** the user approved the focused quest/creature fixes and
+the assassin encounter without dead magic. Components 135/235/265 implement that
+scope on the branch; [triage decisions](../design/wave1/07-filler-triage.md) and
+[verification record](../playtest/2026-09-08-filler-fixes.md) supersede the initial
+"ready for triage" status for those points. The snapshot below remains historical
+pre-fix evidence; broader density choices and the new prologue XP amount are OPEN.
+
 ## Recommended order
 
 | Priority | Finding | Evidence and next step |

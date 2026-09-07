@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Add component 135, selected by default: retain the scripted assassin ambush
+  while removing its recurring dead-magic spell and misleading area/companion
+  remarks. Preserve the assassins, warnings, travel hooks and shared spell.
+- Put Mizhena's amulet on the approved existing BD5000 corpse and remove the
+  obsolete grants to suppressed displacers. Component 265 preserves existing
+  container contents, removes the missed BD5110 Guardian and Shadow Aspect's
+  Shadowed Soul summons. Apply the Guardian's 3,200 party-XP
+  allowance at the existing chapter reward (106,800 total).
+- Preserve Ymori's original dormant quest actor in fresh 230 and append repair
+  235 for older cuts. Correct the future road-north reward to 23,100 party XP.
+  No saved areas or previously paid awards are modified.
+- Record the campaign filler audit, approved triage, and prologue XP recount.
+  Component 175 remains at 24,000 per character pending agreement on its revision.
+
 ## v0.6.8 - 2026-09-06
 
 - Fix component 900 failing on a camp chest containing additional or replaced

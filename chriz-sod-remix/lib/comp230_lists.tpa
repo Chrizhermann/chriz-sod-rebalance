@@ -69,8 +69,7 @@ OUTER_SPRINT $csr_cut_bd7100(~BDHOBG04@2304@1774~) ~1~   // idx171 HOBGOBLIN_PRI
 OUTER_SET csr_cutn_bd7100 = 63
 // bd7100 cut kill-XP: 27425
 
-// ---- bd2000: 8 cuts ----
-OUTER_SPRINT $csr_cut_bd2000(~BDYMORI@4089@408~) ~1~   // idx1 Wight (175 xp)
+// ---- bd2000: 7 cuts ----
 OUTER_SPRINT $csr_cut_bd2000(~BDWORG@4352@1390~) ~1~   // idx86 WARG (120 xp)
 OUTER_SPRINT $csr_cut_bd2000(~BDWORG@4523@1414~) ~1~   // idx87 WARG (120 xp)
 OUTER_SPRINT $csr_cut_bd2000(~BDBEETMH@4931@758~) ~1~   // idx135 BOMBARDIER_BEETLE (120 xp)
@@ -78,8 +77,8 @@ OUTER_SPRINT $csr_cut_bd2000(~BDBEETMH@4929@829~) ~1~   // idx136 BOMBARDIER_BEE
 OUTER_SPRINT $csr_cut_bd2000(~BDBEETMH@5038@805~) ~1~   // idx137 BOMBARDIER_BEETLE (120 xp)
 OUTER_SPRINT $csr_cut_bd2000(~BDBEETMH@5061@735~) ~1~   // idx138 BOMBARDIER_BEETLE (120 xp)
 OUTER_SPRINT $csr_cut_bd2000(~BDBEETMH@5062@901~) ~1~   // idx139 BOMBARDIER_BEETLE (120 xp)
-OUTER_SET csr_cutn_bd2000 = 8
-// bd2000 cut kill-XP: 1015
+OUTER_SET csr_cutn_bd2000 = 7
+// bd2000 cut kill-XP: 840
 
 // ---- bd2010: 27 cuts ----
 OUTER_SPRINT $csr_cut_bd2010(~BDGOB01@705@513~) ~1~   // idx3 GOBLIN_ARCHER (15 xp)
@@ -112,7 +111,7 @@ OUTER_SPRINT $csr_cut_bd2010(~BDGOB07@1028@690~) ~1~   // idx35 GOBLIN_ELITE_ARC
 OUTER_SET csr_cutn_bd2010 = 27
 // bd2010 cut kill-XP: 585
 
-// XP ledger: cut kill-XP 29025.
+// XP ledger: cut kill-XP 28850.
 // Compensation = cut * 0.8 as ONE party-total AddexperienceParty (the
-// engine divides it; ~3867/char at a party of 6) -> 23200.
-OUTER_SET csr_xp_chunk_230 = 23200
+// engine divides it; ~3850/char at a party of 6) -> 23100.
+OUTER_SET csr_xp_chunk_230 = 23100

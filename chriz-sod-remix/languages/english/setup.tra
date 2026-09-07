@@ -2,6 +2,7 @@
 @110 = ~SoD remix: keep all companions at SoD start~
 @120 = ~SoD remix: remove the hooded man from the mid-campaign~
 @130 = ~SoD remix: skip the four chapter rest-dreams~
+@135 = ~SoD remix: keep the assassin ambush without dead magic (default)~
 
 @140 = ~SoD remix: prologue - skip the Korlasz dungeon~
 @145 = ~SoD remix: prologue - no auto-granted starting party (new/imported SoD)~
@@ -24,11 +25,13 @@
 @245 = ~SoD remix: Coast Way bridge - the wall stays gone when the cutscene is skipped~
 
 @230 = ~SoD remix: the road north - fewer, cleaner enemy camps~
+@235 = ~SoD remix: preserve Ymori's staged quest after earlier enemy cuts~
 @240 = ~SoD remix: Forest of Wyrms - bugbear cave removed, temple behind the dragon~
 @250 = ~SoD remix: Morentherene - a real dragon on Hard and Insane~
 @255 = ~SoD remix: Boareskyr battle - durable explosive barrels~
 
 @260 = ~SoD remix: coalition camp arc - fewer, cleaner enemies on the scouting maps~
+@265 = ~SoD remix: preserve quest loot and remove missed banned creatures~
 @270 = ~SoD remix: Kanaglym - fewer undead~
 @280 = ~SoD remix: no party dispel at the basement reveal~
 
