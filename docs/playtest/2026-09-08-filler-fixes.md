@@ -82,6 +82,34 @@ fixture resolved its missing-symbol errors. This was not a game-patch failure.
 
 ## Remaining acceptance and triage
 
+### Next manual session — agreed 2026-09-08
+
+The user will test the current fixes in PR #21 together with the future
+Boareskyr Bridge replacement from issue #14. The bridge has no PR or signed-off
+encounter design yet. Design discussion can proceed while PR #21's native
+acceptance waits for this combined session. Start with a small first version of
+the bridge encounter, agree its roster, positions and sequence with the user,
+then use the playtest to inform later additions.
+
+Prepare one combined dev test installation and a short set of checkpoint saves
+when both changes are ready. This is one test session, not a requirement to play
+the campaign through again. No combined installation or checkpoints have been
+prepared yet. Record the exact tested commits from both branches at that point.
+
+| Checkpoint | Manual observation |
+| --- | --- |
+| Assassin ambush | Encounter still runs; buffs persist and spells work; no dead-magic descriptions or remarks. |
+| Liia reward, before payment | One 22,000-XP award per character; reloading after payment does not pay it again. One difficulty is sufficient for native payout acceptance; automated checks cover the difficulty-independent code. |
+| Underground River, before first entry | Pick up the amulet from the dead fighter and return it to Mizhena. |
+| Guardian area and Shadow Aspect | Guardian absent; hardest-difficulty encounter has no Shadowed Soul summons. |
+| Ymori, before first BD2000 entry | Brief quest-activation check if a suitable checkpoint is practical; keep this low-priority side quest bounded. |
+| Bridge, before the replacement sequence | Final checklist follows the agreed first-version design: staging, combat, victory, onward travel and any chosen failure route. |
+
+Use pre-first-entry saves for BD2000, BD5000 and BD5110 so saved area data does
+not mask the changes. Verify the bridge's own save boundary after its design is
+implemented. Installer, progression-branch and automated regression checks remain
+the agent's work; the combined user session supplies native gameplay acceptance.
+
 Native acceptance remains: encounter casting/buff retention, Ymori's staged
 activation, corpse pickup/Mizhena turn-in, absence of the Guardian, and hardest-
 difficulty Shadow Aspect combat. These are not established by installer tests.

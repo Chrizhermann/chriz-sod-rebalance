@@ -363,6 +363,12 @@ are separated below; the encounters have not been implemented.
 - **Research before implementation:** trace barrel/portal scripts, dialogue, placed
   and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
   determine how the replacement supersedes component 255 on both supported platforms.
+- **DECIDED process (2026-09-08):** discuss the actual encounter, implementation,
+  wizard positions, escorts and sequence together before coding. Begin with a
+  small first version and consider additions after testing; its roster and
+  mechanics remain OPEN. Batch native acceptance with the current filler fixes
+  in PR #21 in the user's next manual test session; see the
+  [combined checkpoint plan](playtest/2026-09-08-filler-fixes.md#next-manual-session--agreed-2026-09-08).
 
 ### Ashatiel: Chosen of Cyric-style party fight — [#15](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15)
 
