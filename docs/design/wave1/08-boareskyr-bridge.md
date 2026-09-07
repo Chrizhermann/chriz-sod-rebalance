@@ -1,8 +1,10 @@
 # Boareskyr Bridge — elemental demolition finale
 
 Issue: [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14).
-Status: first-version encounter outline approved by the user on 2026-09-08;
-implementation details below remain open. No replacement encounter is installed.
+Status: first-version encounter and combat direction approved by the user on
+2026-09-08, including stronger defensive recasting informed by comparable SCS
+mages. Remaining implementation details are listed below. No replacement
+encounter is installed.
 
 ## DECIDED — version 1
 
@@ -26,6 +28,67 @@ implementation details below remain open. No replacement encounter is installed.
   session. Prepare checkpoint saves after implementation; see the
   [combined test plan](../../playtest/2026-09-08-filler-fixes.md#next-manual-session--agreed-2026-09-08).
 
+## DECIDED — spells, AI and difficulty (2026-09-08)
+
+The user accepted the following proposal and requested more defensive recasting,
+with comparable SCS mage AI checked and adapted where useful. This supersedes the
+earlier suggestion of only one spare Mirror Image. Web is deferred for the first
+test, following the accepted recommendation to start with Slow and Grease.
+
+- Both wizards are level 13. Reserve their sixth-level summon budget for their
+  two initial elementals; no additional combat summoning is selected.
+- Fire: Flame Arrow as the main attack in mixed melee, Fireball at separated
+  targets where allies are safe, Magic Missile as an alternative, and a finite
+  Breach against meaningful defenses.
+- Control: Slow, Glitterdust, one carefully placed Grease, and a finite Breach;
+  Greater Malison is the accepted Hard/Insane tuning option.
+- Shared opening defenses: Stoneskin, Mirror Image, Shield. Fire additionally
+  uses red Fire Shield and Protection from Fire; control uses Spirit Armor and
+  Minor Spell Deflection. Any optional extra ward must fit the reserve budget.
+- Ordinary removable protections, once-only opening preparation, and finite
+  memorized copies for subsequent recasting. Combat casts are interruptible.
+- One healing potion per wizard as the initial allowance. Guards intercept
+  attackers reaching the wizards; caster movement stays local to the formation.
+- AI respects line of sight, chooses useful targets and avoids wasting spells
+  on known protections. Fireball must not rely on free blanket fire immunity
+  for the earth elementals and human guards.
+- Elementals persist as encounter actors until defeated or otherwise removed;
+  the normal summon spell's short expiry is not the encounter's completion clock.
+- Keep rewards consistent across difficulties, preserve normal elemental
+  weaknesses/control options, and add no second difficulty damage multiplier.
+
+| Difficulty | Initial elemental composition |
+| --- | --- |
+| Easy / Normal | Two lesser of each element, with their actual damage checked and softened as needed. |
+| Core | Two standard earth, two standard fire. |
+| Hard | One greater earth, one standard earth, two standard fire. |
+| Insane | One greater and one standard of each element. |
+
+Four greater elementals are not the first-test baseline. Preserve the same
+eight-enemy roster; difficulty tuning does not authorize additional waves.
+
+### Initial defensive allocation — implementation baseline for playtesting
+
+Use two total Stoneskins and three total Mirror Images per wizard: one of each
+for preparation leaves **one Stoneskin and two Mirror Images for combat**.
+The control wizard has two Minor Spell Deflections, leaving one after preparation.
+Refreshes require actual remaining copies; none of these reserves should be
+silently consumed by another preparation block.
+
+This fits the level-13 generalist budget with the selected roles. The fire mage's
+four level-4 slots are two Stoneskins, Fire Shield and Protection from Fire. The
+control mage uses two Stoneskins and Spirit Armor, with its fourth slot available
+for the selected difficulty option, such as Greater Malison on Hard/Insane.
+The earlier optional Minor Globe suggestion must not consume a nonexistent fifth
+slot or displace the requested Stoneskin reserve. On level 2, three Mirror Images
+still leave two slots for the control mage's Glitterdust. On level 3, two Minor
+Spell Deflections leave three Slow copies. Exact unused slots and lower-difficulty
+allowances can be finalized during implementation without inventing extra slots.
+
+The user approved more recasting; these copy counts are the first implementation
+allocation, not a permanently locked balance value. Revisit them using the combined
+native playtest if the mages collapse immediately or spend too long only defending.
+
 ## DECIDED — version 2 direction
 
 Add actual collapse pressure in version 2, after the first fight has been tested.
@@ -47,12 +110,11 @@ yet chosen UI or timing rules. Do not add any hidden timer to version 1.
 
 ## OPEN — details for the first implementation
 
-- Wizard levels, spell lists, protections, AI templates and display names.
-  The fire/earth roles are approved; specific new characters or backstories are
-  not required by that decision. Additional combat summon spells are not selected.
-- Elemental tiers and stat packages; guard equipment and tactics.
-- Difficulty scaling within the approved initial roster. Exact numeric tiers
-  have not been chosen; adding a third wizard or scripted waves is not approved.
+- Final spell-copy allocation beyond the defensive baseline, source adaptations,
+  and wizard display names. Specific new characters or backstories are not
+  required; additional combat summon spells are not selected.
+- Exact lower-difficulty elemental adjustments; guard equipment/stat packages.
+  The elemental tier progression above is approved.
 - Exact coordinates and pathing with two earth and two fire elementals present.
 - Short warning/dialogue text and cleanup of the old portal/barrel claims.
 - Kill XP and loot accounting. The earlier flat quest-XP decision is not approval
@@ -128,6 +190,49 @@ Local ignored evidence: `research/data/issue14-mage-audit/README.md`,
 `weapons.json`, plus `research/data/issue14-layout-audit/BD2000SR.BMP`.
 These findings do not establish native combat or standalone compatibility.
 
+## Comparable SCS mage research (2026-09-08)
+
+Current installed CRE script slots identified Davaeorn (level 11), Sunin (level
+11), and `MAGE12A` (level 12) as suitable comparisons. Their effective generated
+scripts were inspected alongside installed SCS 35.21 source. Generated filenames
+are installation-specific evidence, not portable dependencies for this component.
+
+Useful source behavior to adapt:
+
+- Initial preparation precedes renewal, which precedes ordinary offense:
+  `mage/ssl/main/dw#mage.ssl`, lines 21, 83 and 105.
+- `mage/ssl/generalblocks/renew.ssl`, lines 556–580, renews Stoneskin at fewer
+  than two skins when a visible enemy is within script range 5 and no stronger
+  weapon protection covers the mage. Mirror Image is renewed when absent and
+  skins are nearly exhausted. These are reactive defenses, not a fixed rotation.
+- `caster_shared/caster_definitions.ssl`, lines 177–188, expands the combat cast
+  into availability/spell-failure checks, a shared six-second casting timer and
+  ordinary `Spell()`. Renewal additionally uses a seven-second local timer.
+- `mage/ssl/combatblocks/renew_antimagic.ssl`, lines 8–40, lets immediate physical
+  danger take priority over renewing spell defenses. Renew an approved ward only
+  when missing and useful, with a real copy remaining.
+- `mage/ssl/combatblocks/attacks_on_PC_defences.ssl`, lines 13–66, checks meaningful
+  targets for Breach and spaces antimagic attempts with local timers.
+
+Sunin has three Mirror Images, leaving two after generic preparation. Sunin and
+the generic mage use a special already-precast Stoneskin helper that preserves
+their one memorized Stoneskin; Davaeorn's ordinary preparation consumes his.
+Our chosen baseline explicitly charges the opening copy instead of importing
+that special exception. Merely copying a CRE's spell counts is not equivalent.
+
+The generated spell-defense preparation also has overlapping difficulty paths
+that can consume multiple copies if the book is enlarged. Adapt the useful
+priority/availability logic into one owned preparation-and-combat controller;
+do not transplant a whole generated script and assume added reserves survive.
+Use installed spell identities, and keep combat renewal separate from instant
+opening preparation. Consistent renewal-timer checks should cover both physical
+defense branches in our small controller.
+
+Credit David Wallace / Sword Coast Stratagems 35.21 for any literal adaptations,
+record source paths and changes, and retain credit with the implementation.
+This is code/resource evidence; no new mage has been installed or fought.
+Ignored local evidence is under `research/data/issue14-scs-audit/`.
+
 ## Validation plan
 
 Before asking the user to play: verify both entry branches, removal of the old
@@ -135,6 +240,10 @@ failure/spawn/success paths, once-only victory, Bence/onward progression,
 save-boundary requirements, and compatibility with the existing filler fixes.
 Use isolated fixtures and copies of effective resources before installing into
 the designated dev copy. Never use the live install for these changes.
+
+AI validation must show that preparation spends exactly its allocation and leaves
+the documented reserves, intact defenses are not recast, combat renewals use
+ordinary casts/cooldowns, and exhausted books do not replenish themselves.
 
 Native acceptance should focus on actual casting/protections, challenge, elemental
 pathing, formation and progression. Version 1 has no collapse test. Version 2

@@ -362,8 +362,14 @@ are separated below; the encounters have not been implemented.
   version 2. Make its timer obvious and generous even on Insane; the user proposes
   roughly five turns, with failure mainly for retreating or taking an exceptionally
   long time. The fight comes first, with only mild damage-output pressure.
-- **OPEN:** exact positions, spell/AI/stat packages, difficulty tiers, dialogue,
-  XP/loot and version-2 timer mechanics. Full decisions and implementation seams:
+- **DECIDED combat direction (2026-09-08):** level-13 fire and control mages with
+  the discussed spell packages and removable prebuffs; stronger finite defensive
+  recasting, informed by comparable SCS mages. Start with Slow/Grease and defer
+  Web. Elementals progress from softened lesser variants on Easy/Normal, to four
+  standard on Core, one greater earth on Hard, and one greater of each element
+  on Insane. Keep rewards consistent across difficulty and preserve counterplay.
+- **OPEN:** exact positions, remaining numeric/book allocation, dialogue, XP/loot
+  and version-2 timer mechanics. Full decisions and implementation seams:
   [bridge design](design/wave1/08-boareskyr-bridge.md).
 - **Research before implementation:** trace barrel/portal scripts, dialogue, placed
   and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
