@@ -2,8 +2,14 @@
 
 **Research date:** 2026-09-08. **Scope:** effective dev EET resources, read only;
 research baseline `dbe9e1c`, before the pending issue #16 follow-up is installed.
-This document records evidence and candidate accounting scenarios. It does not
-change component 175's approved **24,000 XP per character** or choose a replacement.
+This document records evidence and candidate accounting scenarios against the
+then-installed **24,000 XP per character** baseline.
+
+**Subsequent user decision, 2026-09-08:** use a flat **22,000 XP per character on
+every difficulty**. The user explicitly rejected difficulty-scaled quest rewards.
+Fresh component 175 uses the chosen amount; tail component 176 updates older
+installations. The scenarios below remain research evidence, not an automatic
+formula for the reward. Other approved chapter compensation remains unchanged.
 
 ## 1. What the old calculation got wrong
 
@@ -160,8 +166,8 @@ adds **2,500 party XP** to that comparison. A dungeon kill route has no living
 Korlasz to fight again and does not get this addition. Skipping the original
 prison rematch also removes the addition.
 
-Component 175 currently awards six separate `AddXPObject(...,24000)` actions in
-[csr175.d:14](../../chriz-sod-remix/dlg/csr175.d#L14), confirmed in installed
+At the research baseline, component 175 awarded six separate
+`AddXPObject(...,24000)` actions, confirmed in installed
 CSRCELE state 2. Together with a full replacement fight, that is approximately
 **25,379.17 per character at DIFFLEV 1–2**, or **25,570.83 at 3–5**. This total
 must not be compared with removed content while forgetting replacement combat.
@@ -193,10 +199,10 @@ Omitting Ammon's endorsement removes 500. Other omissions follow the optional
 table divided by six. Decimal values are arithmetic equivalents, not claims
 about the engine's per-award integer rounding.
 
-The researched scenarios support a discussion around roughly **9,400–14,900 at
+The researched scenarios supported a discussion around roughly **9,400–14,900 at
 DIFFLEV 3**, **11,900–18,200 at 4**, or **14,600–22,500 at 5**. They do not select
-a new fixed award. A completion-biased amount, a core-encounter amount and a
-difficulty-scaled amount encode different design choices. The current 24,000
+a new fixed award by themselves. A completion-biased amount, a core-encounter amount and a
+difficulty-scaled amount encode different design choices. The baseline 24,000
 is above these defined scenarios, but this is not proof of a universal maximum:
 rest farming, repeated coffin openings, combat spell summons, lock/trap/scroll
 XP, XP modifiers, killing noncombatants and later mod-added content are outside
@@ -283,5 +289,5 @@ manual resource edit. The following hashes identify the principal inputs:
 | BD2000.ARE, pre-230 backup | `504c28af9b9c68d4c4d8f1bc3ae4295d549be56075d7df13cf7e624e51861c21` |
 | BDYMORI.CRE | `4b6a488aa5f63cce7a25aa5f43905cc8d627709e17a6d15d5b17fa6c2c87f4e3` |
 
-No installer, game resource, save or component 175 amount was changed by this
-research. Remaining decisions about its award belong in the design discussion.
+No installer, game resource, save or component 175 amount was changed during this
+read-only research. The later approved implementation is recorded at the top.

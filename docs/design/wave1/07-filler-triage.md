@@ -11,7 +11,7 @@ OPEN. The user approved the targeted implementation below on 2026-09-08.
 | 1. Mizhena's amulet | All three scripted displacer carriers were cut. The quest remains. | **DECIDED:** use BD5000's existing `Dead_fighter` container at (4295,1098), among the removed pack's positions. Her current dialogue already fits. Component 265 preserves the corpse's existing contents and retires the three old scripted item grants. |
 | 2. Ymori | A quest actor was cut as a stray wight; its activation, death and item dependencies remain. | **DECIDED:** preserve his staged quest and belongings, with proportionate verification; the user considers this side quest low priority. Fresh 230 excludes him. Repair 235 restores the original all-hours schedule while requiring the CRE's native deactivated state. Quest `Activate()` still controls his appearance. Native activation remains untested; this is a source-supported staging repair. |
 | 3. Banned creatures | The global creature bans are already decided. Shadow Aspect still summons Shadowed Souls, and BD5110 retains an Unsleeping Guardian. | **DECIDED:** remove those missed sources without replacements. Component 265 preserves the surrounding encounters and ghost quest. The omitted Guardian adds 3,200 party XP under the existing 80% rule at the existing chapter-11 reward. Repeatable Shadowed Soul summons have no fixed-count compensation. |
-| 4. Prologue XP | The old rationale counts 53,115 party XP from two still-reachable side caves and combines difficulty-exclusive actors. | **DECIDED:** recount actually skipped content and the replacement jailbreak. [Recount complete](../../research/23-prologue-xp-recount.md): defined per-character scenarios span about 9,400–14,900 at DIFFLEV 3, 11,900–18,200 at 4, and 14,600–22,500 at 5. **OPEN:** choose the baseline and corrected future award. Component 175 remains at the approved 24,000 per character. |
+| 4. Prologue XP | The old rationale counts retained caves and combines difficulty-exclusive actors. The [recount](../../research/23-prologue-xp-recount.md) separates difficulty and route. | **DECIDED (user, 2026-09-08): flat 22,000 XP per character on every difficulty**, paid once by Liia after the jailbreak. The user explicitly rejects difficulty-scaled quest rewards. Fresh 175 uses 22,000; append 176 to update an older 24,000 installation. Road-north 23,100 and coalition 106,800 remain party-total awards. |
 | 5. Assassin ambush / dead magic | URE2, BD0063, remains in the current source and effective dev copy. No shipped remix component removes it. | **DECIDED default direction (user, 2026-09-08): keep the ambush, remove only its dead-magic treatment.** Exact alternative installer choices remain OPEN. |
 
 After these, the broader density questions remain: ambient repopulation; treatment
@@ -49,6 +49,10 @@ retroactively create quest items in an already visited area. Changed script
 awards apply to future payouts only. Road-north compensation becomes 23,100
 party XP (28,850 cut XP × 80%, rounded to 100); coalition compensation becomes
 106,800 party XP (103,600 + 3,200). Existing once-only quest/chapter gates remain.
+
+For an older component 175, append **176** to change Liia's future reward from
+24,000 to 22,000 per character. Fresh 175 already pays the approved amount; 176
+leaves it unchanged. No difficulty checks or retroactive XP deductions are added.
 
 ## What the current code does
 

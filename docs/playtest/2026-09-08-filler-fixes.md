@@ -20,7 +20,10 @@ are unreleased on the issue-16 branch.
   suppresses the exact BD5110 Guardian and removes two BDSHSOUL summon actions
   from Shadow Aspect. Regular shadows and surrounding AI/quests remain.
   Its 3,200 party-XP allowance changes the future coalition award to 106,800.
-- Component 175 remains 24,000 per character pending a new balance decision.
+- Subsequent user decision: component 175 pays a flat 22,000 per character on
+  every difficulty. Tail component 176 updates the earlier 24,000 award without
+  reinstalling existing components or altering already-paid XP. The same return
+  dialogue, six per-character actions and one-time gate remain.
 
 Apply the ARE changes before visiting BD2000, BD5000 and BD5110. The installer
 does not edit saved areas, recover items into already visited areas, or add/subtract
@@ -30,10 +33,19 @@ that the old effect already dispelled.
 
 ## Verification
 
-WeiDU 249 validation passes: 99 tests under `tests/`, 41 research tests,
+The initial filler pass's WeiDU 249 validation passed: 99 tests under `tests/`, 41 research tests,
 14 ending-verifier self-tests, and parse checks for the TP2 plus all 40 TPA
 libraries. No tests were skipped in these runs. The counts include the
 existing regressions as well as the new filler tests.
+
+The flat-22,000 follow-up passes 110 tests under `tests/`, including 11 new
+public-installer cases for fresh 175 and append-only 176. The copied effective
+dev `CSRCELE.DLG` also passes: exactly six bytes change (the six amount digits),
+all other bytes and source hashes remain unchanged, and already-corrected data
+is a byte-exact no-op in a second disposable fixture. The reward's one-time
+gate, per-character delivery and payment before DestroySelf are preserved;
+unknown/partial awards and changed quest gates are rejected. Evidence is in
+ignored `research/data/issue16-flat-xp-176/actual-resource-smoke.json`.
 
 Real WeiDU tests run in disposable synthetic games. Component 135 is checked
 against independently compiled retained blocks, including absent/present Aura,

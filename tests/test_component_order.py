@@ -21,6 +21,7 @@ EXPECTED_COMPONENTS = {
     160,
     170,
     175,
+    176,
     180,
     185,
     187,
@@ -80,6 +81,7 @@ class ComponentOrderTests(unittest.TestCase):
 
     def test_filler_repairs_follow_their_prerequisites(self) -> None:
         components = designated_components()
+        self.assertLess(components.index(175), components.index(176))
         self.assertLess(components.index(230), components.index(235))
         for prerequisite in (240, 260):
             self.assertLess(components.index(prerequisite), components.index(265))

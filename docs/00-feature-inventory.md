@@ -6,7 +6,7 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8 release marker, 37
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8 release marker, 38
 component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
@@ -20,7 +20,8 @@ Ymori cuts while preserving native quest staging; 265 puts Mizhena's amulet in
 BD5000's existing corpse, removes the BD5110 Guardian and Shadow
 Aspect's Shadowed Soul summons. Fresh 230 now has 97 cuts and 23,100 party XP;
 235 corrects the older award. With 265, the coalition award is 106,800 party XP.
-The prologue's 24,000-per-character award awaits a separately agreed recount.
+Fresh 175 pays the approved flat 22,000 per character on every difficulty;
+append 176 to update an older 24,000 award. Previously paid XP is unchanged.
 See [approved scope and save boundaries](design/wave1/07-filler-triage.md).
 
 Six install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
@@ -52,7 +53,8 @@ unchosen. The live install is not the implementation target.
 | 150 | No assassination night, crusade council | "Strangle-by-flag" kills the first-night palace assassination; 14-day timeskip moved behind a "retire for the night" servant choice (csrserv); BD0100 night-ambush set swept; BD0102 council re-gated LT52 → exactly `bd_plot=51`, crusade-only, captured-assassin corpse dropped. **Prereq for 160/180/185/190/195.** | pred `bd0120.are` |
 | 160 | Imoen stays and is recruitable | Imports keep build/XP/gear (defused BD0120 strip → parked → swapped into bedroom); fresh starts get `csrimo` BG1-chassis clone (XP floor 64k); BDDIALOG IMOEN2 row re-pointed to `csrimoen`; adds the XP catch-up ladder vanilla omits for Imoen. | REQUIRE 140+150 |
 | 170 | The Korlasz jailbreak | Re-timed BD0116 fight on vanilla rematch scaffolding: rebuilt `csrkorl` (Mage 12, Slow+Confusion+Glitterdust sequencer) + named 6-member crew (Hasska/Vhast/Sillune/Porios/Grit/dying Fist) carrying the re-homed dungeon loot; difficulty-branched roster; HARDEST buff layer resolved by spell NAME; SCS detect-and-adapt. Stairs-top BD0102 hint beat re-times the trigger. | REQUIRE 140 |
-| 175 | XP ledger: Liia's reward after the jailbreak | The skipped dungeon carried ~24,700/char guaranteed XP; the jailbreak returns ~1,600/char in kills. Liia's return-beat close pays **24,000/char** as one quest reward (user option c, 2026-07-10; anchor-checked patch of csrcele state 2, award before DestroySelf). **Unit-corrected 2026-07-12: delivery is now `AddXPObject(Player1..6,24000)` — the original single `AddexperienceParty(24000)` divides among the party and paid only ~4,000/char (user-verified in-game).** | REQUIRE 170+180 |
+| 175 | XP ledger: Liia's reward after the jailbreak | Approved 2026-09-08: **22,000 per character on every difficulty**, as one quest reward at Liia's return-beat close. Uses six `AddXPObject` actions before DestroySelf, with the existing one-time gate. The earlier released 24,000 award is superseded; the recount is in research/23. | REQUIRE 170+180 |
+| 176 | Existing Liia reward update | Append-only update from 24,000 to 22,000 per character, preserving the dialogue and once-only delivery. Already-corrected rewards remain unchanged. Does not deduct previously paid XP. | REQUIRE 175 |
 | 180 | Celebration + Caelar's proclamation | Victory beat on first walk into BD0102 (nobles + Fist dressing w/ click-dialogs, Liia toast / Belt seconds, BG1 register, palace locked for the night); opens the jailbreak-quest journal and hands over Caelar's proclamation naming the Bhaalspawn (`csrpam`); Liia return beat + Fist march after the jailbreak. | REQUIRE 140+150 |
 | 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. Component 290 false-gates the last BDPALACE reference; the unreachable trial files stay on disk. | REQUIRE 140+150 |
 | 187 | Assassination night set never spawns | Schedule-zeroes the nine always-placed BD0100 night actors (Corwin, three assassins, two guards, three corpses), preventing the one-frame render/pop that comp150's script sweep could not stop. The sweep remains as protection for saves with BD0100 already baked. | REQUIRE 150; pred `bd0100.are` |
@@ -189,8 +191,9 @@ ending and EET carrier repair → **290/291**.
 - **Delivery rule (updated 2026-07-12):** remix XP compensation lands as one collected
   milestone award, never dripped. Party-total ledgers use `AddexperienceParty`; genuinely
   per-character amounts use one per-slot `AddXPObject` award.
-- **Prologue ledger shipped:** component 175 grants 24,000 XP to each Player slot on
-  Liia's post-jailbreak return beat.
+- **Prologue ledger:** released 175 paid 24,000 per character; the approved branch
+  revision pays a flat 22,000 on Liia's post-jailbreak return beat. Append 176 on
+  older installations; the reward does not depend on difficulty.
 - **Calibration lever**: +~10% main-quest rewards if the curve comes in low — only after
   playtesting, against a real save near the BG2 transition.
 
@@ -243,7 +246,7 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 |------|----------------------|
 | [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Barrel removal is the new direction; multiple wizards using fire/earth elementals to destroy the bridge is the proposed replacement. Triage story, encounter mechanics, difficulty scaling, and progression before implementation. Component 255 remains the installed stopgap. |
 | [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Chosen of Cyric-style brief: roughly 30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
-| [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 generated actor cuts verified. Found quest-carrier risks, two reachable creature-ban misses, a prologue XP scope error, and remaining ambient/travel/quest-pocket design gaps. Findings await triage; no further cuts implemented. |
+| [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 historical generated actor cuts verified. Approved quest/creature fixes and the assassin ambush without dead magic are implemented in PR #21; Liia's reward is now set to flat 22,000 per character. Broader density decisions and native acceptance remain. |
 
 ---
 

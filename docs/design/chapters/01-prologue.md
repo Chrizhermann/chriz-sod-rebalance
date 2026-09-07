@@ -289,6 +289,17 @@ crowd set-piece, street vignettes of crusade tension.
 
 ## 7. XP ledger entry (prologue) — VERIFIED + DECIDED + SHIPPED (component 175)
 
+**Current decision (user, 2026-09-08): flat 22,000 XP per character on every
+difficulty**, delivered once as Liia's post-jailbreak quest reward. The user
+explicitly prefers the same quest reward across difficulties. Fresh 175 uses
+the new amount; append 176 to update older 24,000 installations. The existing
+six `AddXPObject` actions and one-time return gate remain, and previously paid XP
+is untouched. The [corrected recount](../../research/23-prologue-xp-recount.md)
+informs this chosen compensation; it is not exact XP neutrality for every route.
+
+The July figures and decisions below are retained as historical context and
+superseded by this decision and the September recount.
+
 **Delivery rule (user, 2026-07-06):** any remix XP compensation is granted as ONE
 collected `AddexperienceParty` award after Korlasz's defeat — never dripped as separate
 grants at arrival. (v0.2.0 grants zero remix XP; the XP messages seen at arrival are
@@ -306,8 +317,9 @@ Guaranteed content, Normal difficulty, per char at party of 6:
 > **Audit correction, 2026-09-07:** the historical calculation below misclassifies
 > BD0113 and BD0114 as skipped prologue content. Current travel regions connect
 > them to BD5100 and BD7200 respectively, so their 53,115 party XP belongs to
-> retained side content. The explicit user decision to award 24,000 per character
-> remains unchanged. Reconcile this rationale before claiming exact XP neutrality
+> retained side content. At the time of the audit, 24,000 per character remained
+> unchanged; the subsequent user decision above sets 22,000. Do not use this old
+> rationale to claim exact XP neutrality
 > or compensating future cuts in those caves; see the
 > [filler audit](../../research/22c-filler-audit-early-and-travel.md).
 

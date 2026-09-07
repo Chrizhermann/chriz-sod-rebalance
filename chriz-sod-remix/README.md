@@ -16,7 +16,10 @@ Ymori from its cuts. Append these components; do not reinstall earlier rows.
 Use saves from before entering BD2000, BD5000 and BD5110 for the area repairs.
 Visited-area saves retain their cached actors and container contents. The
 road-north award becomes 23,100 party XP and the coalition award 106,800; these
-changes affect future payouts only. The prologue award is awaiting a new decision.
+changes affect future payouts only. Liia's prologue award is a flat **22,000 XP
+per character on every difficulty**. Fresh 175 already includes it; append **176**
+to update an older 24,000 reward, without reinstalling 175 or changing XP already
+received. The reward still occurs once, after reporting the jailbreak to Liia.
 
 | # | Component | What it does |
 |---|---|---|

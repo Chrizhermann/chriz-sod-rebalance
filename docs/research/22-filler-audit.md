@@ -10,7 +10,8 @@ the assassin encounter without dead magic. Components 135/235/265 implement that
 scope on the branch; [triage decisions](../design/wave1/07-filler-triage.md) and
 [verification record](../playtest/2026-09-08-filler-fixes.md) supersede the initial
 "ready for triage" status for those points. The snapshot below remains historical
-pre-fix evidence; broader density choices and the new prologue XP amount are OPEN.
+pre-fix evidence. Broader density choices remain OPEN; the subsequent prologue
+decision is a flat 22,000 XP per character on every difficulty.
 
 ## Recommended order
 

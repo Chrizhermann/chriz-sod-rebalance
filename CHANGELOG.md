@@ -14,7 +14,9 @@
   235 for older cuts. Correct the future road-north reward to 23,100 party XP.
   No saved areas or previously paid awards are modified.
 - Record the campaign filler audit, approved triage, and prologue XP recount.
-  Component 175 remains at 24,000 per character pending agreement on its revision.
+  Set Liia's reward to the approved flat 22,000 XP per character on every
+  difficulty. Fresh 175 uses this amount; append 176 to update an older award
+  without reinstalling 175 or deducting previously received XP.
 
 ## v0.6.8 - 2026-09-06
 

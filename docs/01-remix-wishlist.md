@@ -173,8 +173,12 @@ Implemented + installed + verified on the dev install (components 185/190/195):
     BD0035/BDCUT62 become unreachable and BDENTAR.CRE/DLG remain harmless files.
 
 ## Decisions locked (2026-07-10, triage round)
-- **Prologue XP:** option (c) **24,000/char**, delivered as **Liia's quest reward** on
-  the jailbreak return beat (component 175, installed). Numbers: 01-prologue.md §7.
+- **Prologue XP:** the July decision was 24,000/char. **Superseded by the user on
+  2026-09-08: flat 22,000 XP per character on every difficulty**, delivered once
+  as Liia's quest reward on the jailbreak return beat. The user prefers a stable
+  quest reward over difficulty scaling. Fresh 175 implements this; 176 updates
+  an older installation. Road-north 23,100 and coalition 106,800 party XP are
+  accepted unchanged. Recount: `research/23-prologue-xp-recount.md`.
 - **Dig-site polish executed:** the six "Drowned in Blood" are cut; the honor guard
   **literally replaces them** on their vacated coords; no backfill bodies; the XP
   returns via the **106,700 party-total** lich chunk (≈17,783/char at six).
@@ -387,7 +391,8 @@ are separated below; the encounters have not been implemented.
 - **2026-09-08 targeted fixes approved:** Mizhena's amulet goes on the existing
   `Dead_fighter` corpse in BD5000; preserve Ymori's staged side quest and belongings
   with bounded testing; remove the missed Guardian and Shadowed Soul sources
-  without replacements; recount the prologue XP before choosing a new award.
+  without replacements; recount the prologue XP. The subsequent decision fixes
+  Liia's reward at 22,000 per character on every difficulty.
   These exceptions do not approve the remaining broader density decisions.
 
 - **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
