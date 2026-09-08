@@ -370,16 +370,18 @@ are separated below; the encounters have not been implemented.
   variants on Easy/Normal, to four
   standard on Core, one greater earth on Hard, and one greater of each element
   on Insane. Keep rewards consistent across difficulty and preserve counterplay.
-- **OPEN:** exact positions, remaining numeric/book allocation, dialogue, XP/loot
-  and version-2 timer mechanics. Full decisions and implementation seams:
+- **IMPLEMENTED for native testing (component 256):** the approved first version,
+  including finite spellbooks/Haste, a statically reachable formation, cleaned
+  bridge artwork and the old fixed roster's 4,520 kill XP on every difficulty.
+  Native tuning/acceptance and version-2 timer mechanics remain open. Details:
   [bridge design](design/wave1/08-boareskyr-bridge.md).
-- **Research before implementation:** trace barrel/portal scripts, dialogue, placed
-  and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
-  determine how the replacement supersedes component 255 on both supported platforms.
+- **Research completed:** both spawn routes, old failure/summon controllers,
+  dialogue/painted barrels, onward-passage dependencies and CUTSKIP were audited.
+  Component 256 is independent and can be appended after installed 255.
 - **DECIDED process (2026-09-08):** discuss the actual encounter, implementation,
   wizard positions, escorts and sequence together before coding. Begin with a
   small first version and consider additions after testing; the baseline above
-  is approved, with detailed tuning still OPEN. Batch native acceptance with the current filler fixes
+  is implemented, with native tuning still OPEN. Batch native acceptance with the current filler fixes
   in PR #21 in the user's next manual test session; see the
   [combined checkpoint plan](playtest/2026-09-08-filler-fixes.md#next-manual-session--agreed-2026-09-08).
 

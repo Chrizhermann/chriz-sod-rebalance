@@ -639,6 +639,12 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdkegx.cre~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp255.tpa~
 
+// 256 supersedes the barrel finale, with or without the older 255 stopgap.
+// Append to existing installs; never uninstall an installed 255 to use this.
+BEGIN @256 DESIGNATED 256 GROUP @1003 LABEL ~csr_elemental_bridge_finale~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~ AND FILE_EXISTS_IN_GAME ~bd2000.bcs~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp256.tpa~
+
 // ============================================================
 // 260 — coalition camp arc: fewer, cleaner enemies
 // ============================================================

@@ -3,8 +3,9 @@
 Issue: [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14).
 Status: first-version encounter and combat direction approved by the user on
 2026-09-08, including stronger defensive recasting informed by comparable SCS
-mages. Remaining implementation details are listed below. No replacement
-encounter is installed.
+mages. The user then authorized implementation. Component 256 is implemented
+on its separate branch; native acceptance remains pending with the filler PR.
+No live or designated dev game installation has been modified for this work.
 
 ## DECIDED — version 1
 
@@ -129,18 +130,61 @@ still need a version-2 design pass. A visible remaining-time display and a clock
 that starts after the warning returns control are implementation proposals, not
 yet chosen UI or timing rules. Do not add any hidden timer to version 1.
 
-## OPEN — details for the first implementation
+## Implemented details for the first playtest
 
-- Final spell-copy allocation beyond the defensive baseline, source adaptations,
-  and wizard display names. Specific new characters or backstories are not
-  required; additional combat summon spells are not selected.
-- Exact lower-difficulty elemental adjustments; guard equipment/stat packages.
-  The elemental tier progression above is approved.
-- Exact coordinates and pathing with two earth and two fire elementals present.
-- Short warning/dialogue text and cleanup of the old portal/barrel claims.
-- Kill XP and loot accounting. The earlier flat quest-XP decision is not approval
-  of a new bridge reward or difficulty-dependent quest payouts.
-- Component number, old-255 coexistence, and the supported installation paths.
+- Component **256**, independently selectable or appended after installed 255.
+  Both use the existing mod's tail-install process; no old row is uninstalled.
+- **Crusader Fire Mage** and **Crusader Earth Mage**, level 13 with 52 HP. Opening
+  preparation casts the original spells at actual caster level and spends one
+  memorized copy each. The planned Stoneskin/Mirror Image/Deflection reserves
+  remain for ordinary interruptible casts. Each has three Magic Missiles as a
+  finite fallback and one Potion of Superior Healing.
+- Vanilla Protection from Fire is level 3, unlike SR's level 4. On that spell
+  layout the fire mage trades one Fireball copy for Protection from Fire, keeping
+  Haste, both Flame Arrows and every defensive reserve within the same slot caps.
+- Two level-9 veterans with plate and +1 two-handed swords, retaining the installed
+  donor's HP (108 on the target EET copy; 80 on the standalone reference). Their armor
+  and swords remain undroppable; duplicate named/random loot helpers are removed.
+- Lesser earth attacks use a private +2, 2d6 fist; lesser fire attacks use a
+  private +2, 1d6 physical fist retaining its installed fire/on-hit effects.
+  Shared creature resources, weapons and animation definitions are unchanged.
+- Standalone SoD lacks the preferred BG2 lesser/standard earth templates. Its
+  replacement clones use the native summoned lesser and greater earth resources,
+  normalized to the approved lesser/standard earth HP, THAC0 and saves. Their
+  small/large footprints and elemental weaknesses remain. The EET templates
+  remain preferred wherever present; lesser fire keeps its installed donor HP.
+- Fixed group kill XP remains **4,520**: 1,000 per mage and 420 per guard/elemental,
+  on every tier. This preserves the old fixed mage-and-six-guard budget; old
+  variable portal reinforcements did not have one reproducible total.
+- Haste gets one normal cast attempt at a cluster of at least two owned living
+  melee allies, after urgent self-defense. Its local guard prevents repetition
+  even after interruption. It does not infer arbitrary foreign Haste from SR's
+  shared spell-state marker. Fireball checks ally distance; persistent Grease
+  must also lie beyond the melee pursuit boundary and may therefore be rare.
+- Two native finale spawn lists request the owned group at retreat completion.
+  A short warning replaces the old cutscene. Victory requires all eight actors
+  dead, absent or petrified, then retains Bence, Khalid, journal and rest actions.
+  The old portal region keeps its army escape destination but loses its script.
+- The four barrel actors are suppressed before rendering. Eight old animations,
+  the portal ambient and obsolete map-note addition are disabled. A small art
+  patch cleans both day/night TIS resources while retaining WED/door geometry.
+  Phossey's later explanation and the Bwoosh description refer to captured
+  crusader supplies; the Bwoosh quest and mod-added interjections remain intact.
+
+| Actor | Position |
+| --- | --- |
+| Fire mage | 1504,1872 |
+| Earth/control mage | 1392,1944 |
+| Veterans | 1560,1990 and 1608,1920 |
+| Earth elementals | 1615,2035 and 1680,1965 |
+| Fire elementals | 1544,1944 and 1440,1990 |
+
+The formation passes static search-map checks with the native passage still
+closed: 3x3 humanoid/fire and 5x5 earth footprints are walkable, nonoverlapping
+and reachable from the party approach. This does not establish native crowding
+or combat pathing. Combat uses a common center at 1500,1950 and a local pursuit
+radius of 18 script units. Native challenge, visuals and movement are the next
+acceptance questions; the collapse design remains version-2 work.
 
 ## Existing sequence — implementation seams
 
@@ -182,7 +226,7 @@ Read-only inspection of the current dev EET resources on 2026-09-08 found:
 | Stronger control chassis | `BDOLONEI`, level 13 / 52 HP | Slow, Hold spells and defenses; do not copy the named actor's identity or unique loot. |
 | Veteran guard | `BDCRUE45`, level 9 / 108 HP | Plate, two-handed sword +1, two extra-healing charges; remove its Alachi encounter handler. |
 | Standard elementals | `BDELFIRM` fire + `ELEAR01` earth | Both 96 HP / 6,000 kill XP. Normal combat donors with no portal sequence. |
-| Greater elementals | `BDELFIRG` fire + `ELEARG01` earth | Both 128 HP / 10,000 kill XP. Possible tuning options, not approved additions or difficulty tiers. |
+| Greater elementals | `BDELFIRG` fire + `ELEARG01` earth | Both 128 HP / 10,000 original kill XP. Later selected for the approved Hard/Insane tiers, with owned XP overrides. |
 
 The mage/guard candidates use Beamdog combat scripts on this install, with
 native difficulty-gated prebuffs and consumable use. Tail-added clones will not
@@ -203,8 +247,8 @@ accounting rather than accidentally inheriting different donor rewards.
 Use unique clone identities and explicit script slots. Remove inherited siege,
 retreat and unrelated death-count handlers; keep only audited combat behavior.
 Added spells must be supported by the chosen AI and resolved against installed
-spell identities. Fire spell targeting/protection for the earth elementals and
-guards is another detail to settle before the first implementation.
+spell identities. The implementation above resolves fire targeting through
+conservative ally-distance checks, without granting blanket fire immunity.
 
 Local ignored evidence: `research/data/issue14-mage-audit/README.md`,
 `research/data/issue14-elemental-audit/current-dev-20260908/result.json` and

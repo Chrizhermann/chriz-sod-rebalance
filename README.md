@@ -10,6 +10,12 @@ See the [approved scope and save boundaries](docs/design/wave1/07-filler-triage.
 Liia's prologue reward is a flat **22,000 XP per character** on every difficulty;
 fresh 175 includes it, while **176** updates older 24,000 installations.
 
+Unreleased **256** replaces the Boareskyr barrel/portal finale with two wizards,
+four fire/earth elementals and two veteran guards. It includes finite defensive
+recasting, regular Haste, difficulty tiers and cleaned day/night bridge artwork.
+Install before first entering BD2000; an installed 255 can stay in place.
+Native combat acceptance is pending in the [combined playtest](docs/playtest/2026-09-08-bridge-finale.md).
+
 Download the Windows installer ZIP from [Releases](https://github.com/Chrizhermann/chriz-sod-rebalance/releases/latest),
 extract it into the game directory containing `chitin.key`, close the game, and run
 `setup-chriz-sod-remix.exe`. Install as a tail mod after EET_end. Keep existing

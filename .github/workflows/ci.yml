@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
+    # Also validate a stacked feature PR before its prerequisite reaches master.
 
 permissions:
   contents: read

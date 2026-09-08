@@ -1,0 +1,344 @@
+// Component 256: authored, finite spellbook AI for the owned bridge encounter.
+// Renewal priorities/timers adapted from David Wallace's Sword Coast Stratagems
+// 35.21: mage/ssl/generalblocks/renew.ssl (556-580),
+// mage/ssl/combatblocks/renew_antimagic.ssl, attacks_on_PC_defences.ssl,
+// caster_shared/caster_definitions.ssl (177-188). Full credit to David Wallace.
+// This deliberately small adaptation uses no SCS helpers, free combat casts,
+// probabilistic skips or SCS's special free already-precast Stoneskin exception.
+
+<<<<<<<< .../csr26fma.baf
+%csr256_fire_baf%
+>>>>>>>>
+<<<<<<<< .../csr26cma.baf
+%csr256_control_baf%
+>>>>>>>>
+<<<<<<<< .../csr26mel.baf
+%csr256_melee_baf%
+>>>>>>>>
+
+DEFINE_ACTION_FUNCTION csr256_build_mage_ai
+  STR_VAR role=~fire~
+  RET script
+BEGIN
+  OUTER_SPRINT script ~~
+  OUTER_SPRINT prep_checks ~~
+  OUTER_SPRINT prep_actions ~~
+  ACTION_FOR_EACH key IN stoneskin mirrorimage shield BEGIN
+    OUTER_SPRINT res EVAL ~%csr256_%key%_res%~
+    OUTER_SPRINT prep_checks ~%prep_checks%  HaveSpellRES("%res%")
+~
+    OUTER_SPRINT prep_actions ~%prep_actions%    ReallyForceSpellRES("%res%",Myself)
+    RemoveSpellRES("%res%")
+~
+  END
+  ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
+    OUTER_SPRINT extra1 ~%csr256_fireshield_res%~
+    OUTER_SPRINT extra2 ~%csr256_protfire_res%~
+  END ELSE BEGIN
+    OUTER_SPRINT extra1 ~%csr256_spiritarmor_res%~
+    OUTER_SPRINT extra2 ~%csr256_minordeflect_res%~
+  END
+  // Opening casts retain caster level and explicitly spend one original each.
+  // IESDP actions 181/147: ReallyForceSpell is instant; RemoveSpell removes
+  // one memorized instance. ApplySpell would wrongly use the lowest ability.
+  // https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#147
+  // SetInterrupt is restored in this same action list; ordinary combat uses Spell.
+  OUTER_SPRINT script ~IF
+  AreaCheck("BD2000")
+  Allegiance(Myself,ENEMY)
+  OR(2)
+    Global("CSR256_STAGE","BD2000",1)
+    Global("CSR256_STAGE","BD2000",2)
+  Global("CSR256_PREP","LOCALS",0)
+%prep_checks%  HaveSpellRES("%extra1%")
+  HaveSpellRES("%extra2%")
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("CSR256_PREP","LOCALS",1)
+    SaveObjectLocation("LOCALS","CSR256_HOME",Myself)
+%prep_actions%    ReallyForceSpellRES("%extra1%",Myself)
+    RemoveSpellRES("%extra1%")
+    ReallyForceSpellRES("%extra2%",Myself)
+    RemoveSpellRES("%extra2%")
+    SetInterrupt(TRUE)
+    Continue()
+END
+
+~
+  OUTER_SPRINT combat ~  AreaCheck("BD2000")
+  Allegiance(Myself,ENEMY)
+  Global("CSR256_STAGE","BD2000",2)
+  Global("CSR256_PREP","LOCALS",1)
+~
+  OUTER_SPRINT casting ~%combat%  !GlobalTimerNotExpired("CSR256_CAST","LOCALS")
+  CheckStatLT(Myself,60,SPELLFAILUREMAGE)
+  !StateCheck(Myself,STATE_SILENCED)
+~
+  // One real potion, even when silenced. It shares the casting action interval.
+  OUTER_SPRINT script ~%script%IF
+%combat%  HPPercentLT(Myself,25)
+  HasItem("POTN52",Myself)
+  Global("CSR256_HEAL","LOCALS",0)
+  !GlobalTimerNotExpired("CSR256_CAST","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_HEAL","LOCALS",1)
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+    UseItem("POTN52",Myself)
+END
+
+~
+  ACTION_FOR_EACH key IN stoneskin mirrorimage BEGIN
+    OUTER_SPRINT res EVAL ~%csr256_%key%_res%~
+    OUTER_SPRINT missing ~~
+    ACTION_IF (~%key%~ STRING_EQUAL ~mirrorimage~) BEGIN
+      OUTER_SPRINT missing ~  !StateCheck(Myself,STATE_MIRRORIMAGE)
+~
+    END
+    OUTER_SPRINT script ~%script%IF
+%casting%  HaveSpellRES("%res%")
+  !GlobalTimerNotExpired("CSR256_REDEFEND","LOCALS")
+  See(NearestEnemyOf(Myself))
+  Range(NearestEnemyOf(Myself),5)
+  CheckStatLT(Myself,2,STONESKINS)
+  !CheckStatGT(Myself,0,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+%missing%THEN
+  RESPONSE #100
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+    SetGlobalTimer("CSR256_REDEFEND","LOCALS",7)
+    SpellRES("%res%",Myself)
+END
+
+~
+  END
+  ACTION_IF (~%role%~ STRING_EQUAL ~control~) BEGIN
+    OUTER_SPRINT script ~%script%IF
+%casting%  HaveSpellRES("%csr256_minordeflect_res%")
+  !GlobalTimerNotExpired("CSR256_REDEFEND","LOCALS")
+  !CheckStatGT(Myself,0,WIZARD_SPELL_DEFLECTION)
+  See(NearestEnemyOf(Myself))
+  OR(2)
+    !Range(NearestEnemyOf(Myself),5)
+    CheckStatGT(Myself,1,STONESKINS)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+    SetGlobalTimer("CSR256_REDEFEND","LOCALS",7)
+    SpellRES("%csr256_minordeflect_res%",Myself)
+END
+
+~
+  END
+  // After urgent defense, return from displacement before ordinary offense.
+  // Capture the actual spawn position so revised formation/engine placement
+  // needs no duplicate hard-coded wizard coordinates in this script.
+  OUTER_SPRINT script ~%script%IF
+%combat%  !NearLocation(Myself,%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
+THEN
+  RESPONSE #100
+    MoveToSavedLocation("CSR256_HOME","LOCALS")
+END
+
+~
+  ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
+    // Explicit pairs: the chosen target plus one other live hostile melee actor.
+    // Range 5 is a conservative cluster inside vanilla/SR Haste's area. Using
+    // the owned fresh group plus this one-attempt guard avoids SR's absent
+    // STATE_HASTED and its non-unique PRIORITY_DISPEL spell-state marker.
+    ACTION_FOR_EACH ally IN CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
+      ACTION_FOR_EACH buddy IN CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
+        ACTION_IF NOT (~%ally%~ STRING_EQUAL ~%buddy%~) BEGIN
+          OUTER_SPRINT script ~%script%IF
+%casting%  Global("CSR256_HASTE","LOCALS",0)
+  HaveSpellRES("%csr256_haste_res%")
+  See(NearestEnemyOf(Myself))
+  Exists("%ally%")
+  HPGT("%ally%",0)
+  Allegiance("%ally%",ENEMY)
+  InMyArea("%ally%")
+  See("%ally%")
+  Range("%ally%",%csr256_haste_range%)
+  Exists("%buddy%")
+  HPGT("%buddy%",0)
+  Allegiance("%buddy%",ENEMY)
+  InMyArea("%buddy%")
+  TriggerOverride("%ally%",Range("%buddy%",%csr256_haste_cluster%))
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_HASTE","LOCALS",1)
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+    SpellRES("%csr256_haste_res%","%ally%")
+END
+
+~
+        END
+      END
+    END
+  END
+
+  // Breach is reactive, spaced, and checks actual physical/spell protections.
+  // Numbered party candidates prevent an unsuitable first PC from starving all
+  // other targets; later See()/TriggerOverride() calls cannot redirect the cast.
+  OUTER_FOR (pc=1; pc<=6; ++pc) BEGIN
+    OUTER_SPRINT script ~%script%IF
+%casting%  HaveSpellRES("%csr256_breach_res%")
+  !GlobalTimerNotExpired("CSR256_BREACH","LOCALS")
+  See(Player%pc%)
+  Allegiance(Player%pc%,PC)
+  HPGT(Player%pc%,0)
+  Range(Player%pc%,%csr256_breach_range%)
+  !StateCheck(Player%pc%,0x00400010)
+  !CheckStatGT(Player%pc%,0,SANCTUARY)
+  !CheckStatGT(Player%pc%,0,WIZARD_SPELL_DEFLECTION)
+  OR(2)
+    CheckStatGT(Player%pc%,0,STONESKINS)
+    CheckStatGT(Player%pc%,0,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+    SetGlobalTimer("CSR256_BREACH","LOCALS",12)
+    SpellRES("%csr256_breach_res%",Player%pc%)
+END
+
+~
+  END
+  ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
+    ACTION_DEFINE_ARRAY offense BEGIN fireball flamearrow magicmissile END
+  END ELSE BEGIN
+    ACTION_DEFINE_ARRAY offense BEGIN malison slow glitterdust grease magicmissile END
+  END
+  ACTION_PHP_EACH offense AS unused => key BEGIN
+    OUTER_SPRINT res EVAL ~%csr256_%key%_res%~
+    OUTER_SPRINT cast_range EVAL ~%csr256_%key%_range%~
+    OUTER_FOR (pc=1; pc<=6; ++pc) BEGIN
+      OUTER_SPRINT conditions ~~
+      OUTER_SPRINT extra_actions ~~
+      ACTION_IF (~%key%~ STRING_EQUAL ~malison~) BEGIN
+        OUTER_SPRINT conditions ~  DifficultyGT(NORMAL)
+  Global("CSR256_MALISON","LOCALS",0)
+~
+        OUTER_SPRINT extra_actions ~    SetGlobal("CSR256_MALISON","LOCALS",1)
+~
+      END
+      ACTION_IF (~%key%~ STRING_EQUAL ~slow~) BEGIN
+        OUTER_SPRINT conditions ~  !StateCheck(Player%pc%,STATE_SLOWED)
+~
+      END
+      ACTION_IF (~%key%~ STRING_EQUAL ~glitterdust~) BEGIN
+        OUTER_SPRINT conditions ~  !StateCheck(Player%pc%,STATE_BLIND)
+  Global("CSR256_DUST%pc%","LOCALS",0)
+~
+        // SR's effective SPWI224E sets GLITTERDUST, not STATE_BLIND. Resolve
+        // the installed symbol when available; the per-PC attempt guard also
+        // avoids repeat spending on profiles without that marker.
+        ACTION_IF (csr256_glitter_state >= 0) BEGIN
+          OUTER_SPRINT conditions ~%conditions%  !CheckSpellState(Player%pc%,%csr256_glitter_state%)
+~
+        END
+        OUTER_SPRINT extra_actions ~    SetGlobal("CSR256_DUST%pc%","LOCALS",1)
+~
+      END
+      ACTION_IF (~%key%~ STRING_EQUAL ~fireball~ OR ~%key%~ STRING_EQUAL ~flamearrow~) BEGIN
+        OUTER_SPRINT conditions ~%conditions%  CheckStatLT(Player%pc%,100,RESISTFIRE)
+~
+      END
+      ACTION_IF (~%key%~ STRING_EQUAL ~fireball~ OR ~%key%~ STRING_EQUAL ~grease~) BEGIN
+        // Conservative live-position safety: include both mages even when the
+        // fire mage's protection is currently active. Fire elementals alone are
+        // fire-immune; Grease must keep all eight actors outside its placement.
+        OUTER_SET safety = csr256_fireball_safety
+        ACTION_IF (~%key%~ STRING_EQUAL ~grease~) BEGIN
+          OUTER_SET safety = csr256_grease_safety
+        END
+        ACTION_IF (~%key%~ STRING_EQUAL ~grease~) BEGIN
+          OUTER_SET outside_leash = csr256_leash + safety
+          // A persistent patch must also stay outside the region our melee AI
+          // pursues into, not merely miss allies at the instant of casting.
+          OUTER_SPRINT conditions ~%conditions%  !NearLocation(Player%pc%,%csr256_home_x%,%csr256_home_y%,%outside_leash%)
+~
+        END
+        ACTION_FOR_EACH friend IN CSR256FM CSR256CM CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
+          ACTION_IF (~%key%~ STRING_EQUAL ~grease~ OR
+            (NOT (~%friend%~ STRING_EQUAL ~CSR256F1~) AND NOT (~%friend%~ STRING_EQUAL ~CSR256F2~))) BEGIN
+            OUTER_SPRINT conditions ~%conditions%  OR(3)
+    !Exists("%friend%")
+    !HPGT("%friend%",0)
+    !TriggerOverride("%friend%",Range(Player%pc%,%safety%))
+~
+          END
+        END
+      END
+      OUTER_SPRINT script ~%script%IF
+%casting%  HaveSpellRES("%res%")
+  See(Player%pc%)
+  Allegiance(Player%pc%,PC)
+  HPGT(Player%pc%,0)
+  Range(Player%pc%,%cast_range%)
+  !StateCheck(Player%pc%,0x00400010)
+  !CheckStatGT(Player%pc%,0,SANCTUARY)
+  CheckStatLT(Player%pc%,100,RESISTMAGIC)
+%conditions%THEN
+  RESPONSE #100
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+%extra_actions%    SpellRES("%res%",Player%pc%)
+END
+
+~
+    END
+  END
+  // Cast candidates are already in the installed SPL range when selected.
+  // Melee fallback only engages nearby foes; native QA covers moving targets.
+  OUTER_SPRINT script ~%script%IF
+%combat%  See(NearestEnemyOf(Myself))
+  Range(NearestEnemyOf(Myself),5)
+  NearLocation(NearestEnemyOf(Myself),%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
+THEN
+  RESPONSE #100
+    AttackReevaluate(NearestEnemyOf(Myself),15)
+END
+~
+END
+
+DEFINE_ACTION_FUNCTION csr256_ai_install BEGIN
+  LAF csr256_build_mage_ai STR_VAR role=~fire~ RET csr256_fire_baf=script END
+  LAF csr256_build_mage_ai STR_VAR role=~control~ RET csr256_control_baf=script END
+  OUTER_SPRINT combat ~  AreaCheck("BD2000")
+  Allegiance(Myself,ENEMY)
+  Global("CSR256_STAGE","BD2000",2)
+~
+  OUTER_SPRINT csr256_melee_baf ~IF
+%combat%  !NearLocation(Myself,%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
+THEN
+  RESPONSE #100
+    MoveToPoint([%csr256_home_x%.%csr256_home_y%])
+END
+
+~
+  ACTION_FOR_EACH mage IN CSR256FM CSR256CM BEGIN
+    OUTER_SPRINT csr256_melee_baf ~%csr256_melee_baf%IF
+%combat%  General(Myself,HUMANOID)
+  Exists("%mage%")
+  HPGT("%mage%",0)
+  Allegiance("%mage%",ENEMY)
+  See(LastAttackerOf("%mage%"))
+  !Allegiance(LastAttackerOf("%mage%"),ENEMY)
+  TriggerOverride("%mage%",Range(LastAttackerOf("%mage%"),5))
+  NearLocation(LastAttackerOf("%mage%"),%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
+THEN
+  RESPONSE #100
+    AttackReevaluate(LastAttackerOf("%mage%"),15)
+END
+
+~
+  END
+  OUTER_SPRINT csr256_melee_baf ~%csr256_melee_baf%IF
+%combat%  See(NearestEnemyOf(Myself))
+  NearLocation(NearestEnemyOf(Myself),%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
+THEN
+  RESPONSE #100
+    AttackReevaluate(NearestEnemyOf(Myself),15)
+END
+~
+  COMPILE EVALUATE_BUFFER ~.../csr26fma.baf~ ~.../csr26cma.baf~ ~.../csr26mel.baf~
+END
