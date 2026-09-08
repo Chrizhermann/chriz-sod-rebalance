@@ -1,5 +1,11 @@
 # Chapter pass — the coalition camp (Ch. 10–12: Dead Man's Pass → Bloodbark Grove → Underground River → Kanaglym → camp/castle)
 
+**2026-09-08 approved correction:** component 265 puts Mizhena's amulet on the
+existing BD5000 `Dead_fighter` corpse and removes the missed BD5110 Guardian.
+The latter adds 3,200 party XP to the existing chapter payout (106,800 total).
+The global Shadowed Soul ban also removes Shadow Aspect's summons. See
+[triage and installation boundaries](../wave1/07-filler-triage.md).
+
 **Status: QUICK-WIN PASS EXECUTED (2026-07-12, components 260/270/280 + 255, v0.6.0,
 installed on dev).** The user approved the proposed cuts wholesale to get "a more
 smooth game now and available for playtesters" — with everything below the quick-win

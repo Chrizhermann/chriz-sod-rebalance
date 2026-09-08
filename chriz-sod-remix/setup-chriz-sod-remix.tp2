@@ -17,6 +17,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   110 keep all companions at SoD start
 //   120 hooded man removed from the mid-campaign
 //   130 skip the four chapter rest-dreams
+//   135 keep the assassin ambush without dead magic (default)
 // 140-189: Prologue chapter pass
 //   140 skip the Korlasz dungeon (instant exit)
 //   145 no auto-granted starting party      (requires 140)
@@ -24,6 +25,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   160 Imoen stays / recruitable          (requires 140+150)
 //   170 the Korlasz jailbreak              (requires 140)
 //   175 XP ledger: Liia's reward after the jailbreak (requires 170+180)
+//   176 update an existing Liia reward to flat 22,000/character (requires 175)
 //   180 celebration + Caelar's proclamation (requires 140+150)
 //   185 Entar Silvershield removed          (requires 140+150)
 //   187 the assassination night-set never spawns (render-proof;
@@ -45,6 +47,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 // 230-259: road-north chapter pass (Ch. 9)
 //   230 Troll Claw Woods / Boareskyr trash cut (+XP chunk on the
 //       bridge resolution)
+//   235 preserve Ymori's staged quest after an older 230 install
 //   240 Forest of Wyrms: bugbear cave removed, dragon cave opens
 //       into the temple (+XP chunk on the Neothelid)
 //   250 Morentherene stat tiers on Hard / Insane
@@ -52,6 +55,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 // 260-289: coalition-camp chapter pass (Ch. 10-12)
 //   260 scouting maps + shadow vault trash cut (+XP chunk on the
 //       chapter-11 transition)
+//   265 repair quest loot and remaining banned creatures after 260
 //   270 Kanaglym: fewer undead (+XP chunk on the Kherriun award)
 //   280 no party dispel at the basement reveal
 // 290-299: ending and campaign handoff
@@ -249,6 +253,12 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbaldur.bcs~) @9000
 
 EXTEND_TOP ~bdbaldur.bcs~ ~chriz-sod-remix/baf/skipdrm.baf~
 
+// 135 — Default URE2 treatment: preserve the fight, remove dead magic.
+BEGIN @135 DESIGNATED 135 GROUP @1000 LABEL ~csr_assassins_without_dead_magic~ INSTALL_BY_DEFAULT
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0063.bcs~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
+
 // ============================================================
 // 140 — Prologue: skip the Korlasz dungeon (instant exit)
 // ============================================================
@@ -362,10 +372,9 @@ INCLUDE ~chriz-sod-remix/lib/comp180.tpa~
 // ============================================================
 // 175 — Prologue: the XP ledger — Liia's reward after the jailbreak
 // ============================================================
-// The skipped dungeon carried ~24,700/char guaranteed XP (garrison kills +
-// Imoen wrap-up + Ammon turn-in); the jailbreak returns ~1,600/char in kills.
-// Liia's return-beat close pays the difference as ONE 24,000/char quest
-// reward (verified numbers: docs/design/chapters/01-prologue.md §7).
+// User decision, 2026-09-08: Liia pays ONE flat 22,000/character quest
+// reward on every difficulty. The recount is in docs/research/23; this is
+// the approved fixed compensation, in addition to the jailbreak's kill XP.
 // Declared after 180 because it patches 180's return-beat dialog.
 
 BEGIN @175 DESIGNATED 175 GROUP @1001 LABEL ~csr_prologue_xp_ledger~
@@ -374,6 +383,13 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~170~ ~Component 1
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~180~ ~Component 175 (the jailbreak XP reward) requires component 180 (celebration + return beat - the dialog that pays the reward).~
 
 INCLUDE ~chriz-sod-remix/lib/comp175.tpa~
+
+// 176 — Append-only update for the older 24,000-per-character quest award.
+BEGIN @176 DESIGNATED 176 GROUP @1001 LABEL ~csr_prologue_flat_xp~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~175~ ~Component 176 updates Liia's existing quest reward; install 175 first.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~csrcele.dlg~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp176.tpa~
 
 // ============================================================
 // 185 — Prologue: Entar Silvershield removed (stays dead)
@@ -570,6 +586,12 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2010.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp230.tpa~
 
+BEGIN @235 DESIGNATED 235 GROUP @1003 LABEL ~csr_ymori_quest_repair~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~230~ ~Component 235 preserves Ymori's quest after component 230; install 230 first.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~ AND FILE_EXISTS_IN_GAME ~bd2000.bcs~ AND FILE_EXISTS_IN_GAME ~bdymori.cre~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp235.tpa~
+
 // ============================================================
 // 240 — Forest of Wyrms: cave out, temple behind the dragon
 // ============================================================
@@ -637,13 +659,24 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4000.bcs~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp260.tpa~
 
+// 265 — Approved filler-audit corrections for existing chapter cuts.
+BEGIN @265 DESIGNATED 265 GROUP @1004 LABEL ~csr_filler_corrections~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~260~ ~Component 265 repairs quest loot and missed creature cuts after component 260; install 260 first.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5000.are~ AND FILE_EXISTS_IN_GAME ~bd5000.bcs~ AND FILE_EXISTS_IN_GAME ~bd5110.are~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdashiru.bcs~ AND FILE_EXISTS_IN_GAME ~bd4000.bcs~) @9000
+
+OUTER_SET csr265_repair260 = 1
+// The Shadowed Soul ban is global; it does not depend on the optional cave cut.
+OUTER_SET csr265_repair240 = 1
+INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp265_xp.tpa~
+
 // ============================================================
 // 270 — Kanaglym: fewer undead
 // ============================================================
 // The NE skeleton graveyard 19->8 (shadowed souls hard-banned);
 // the south quest cluster is neutral-until-quest and untouched.
 // Cut kill-XP returns on the Kherriun/Dark-Magicians award.
-
 BEGIN @270 DESIGNATED 270 GROUP @1004 LABEL ~csr_kanaglym_trim~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5300.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5300.bcs~) @9000

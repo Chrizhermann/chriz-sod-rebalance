@@ -14,12 +14,14 @@ EXPECTED_COMPONENTS = {
     110,
     120,
     130,
+    135,
     140,
     145,
     150,
     160,
     170,
     175,
+    176,
     180,
     185,
     187,
@@ -32,11 +34,13 @@ EXPECTED_COMPONENTS = {
     220,
     225,
     230,
+    235,
     240,
     245,
     250,
     255,
     260,
+    265,
     270,
     280,
     290,
@@ -75,10 +79,17 @@ class ComponentOrderTests(unittest.TestCase):
             self.assertLess(components.index(prerequisite), components.index(290))
         self.assertLess(components.index(290), components.index(291))
 
-    def test_all_34_component_declarations_remain_unique(self) -> None:
+    def test_filler_repairs_follow_their_prerequisites(self) -> None:
+        components = designated_components()
+        self.assertLess(components.index(175), components.index(176))
+        self.assertLess(components.index(230), components.index(235))
+        for prerequisite in (240, 260):
+            self.assertLess(components.index(prerequisite), components.index(265))
+
+    def test_component_declarations_remain_unique(self) -> None:
         components = designated_components()
 
-        self.assertEqual(34, len(components))
+        self.assertEqual(len(EXPECTED_COMPONENTS), len(components))
         self.assertEqual(EXPECTED_COMPONENTS, set(components))
 
 

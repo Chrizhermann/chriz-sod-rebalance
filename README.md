@@ -3,6 +3,13 @@
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
 standalone BG:EE + SoD also in scope. Current release: **v0.6.8**.
 
+Unreleased issue-16 changes add **135** (default: keep the assassin ambush without
+dead magic), **235** (preserve Ymori's staged quest after older cuts), and **265**
+(Mizhena's amulet on the existing corpse and the missed creature-ban fixes).
+See the [approved scope and save boundaries](docs/design/wave1/07-filler-triage.md).
+Liia's prologue reward is a flat **22,000 XP per character** on every difficulty;
+fresh 175 includes it, while **176** updates older 24,000 installations.
+
 Download the Windows installer ZIP from [Releases](https://github.com/Chrizhermann/chriz-sod-rebalance/releases/latest),
 extract it into the game directory containing `chitin.key`, close the game, and run
 `setup-chriz-sod-remix.exe`. Install as a tail mod after EET_end. Keep existing

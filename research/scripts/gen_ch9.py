@@ -8,8 +8,9 @@ Design: docs/design/chapters/03-roadnorth.md "Quick-win pass" (CONFIRMED
     BD7100: hobgoblins x16, orcs x14, beetles x8, displacer pack x6,
       small spiders x8 (both nests keep their gargantuan+sword elites),
       troll thin-out x11 (clusters: C 11->4, D 6->4, B 8->6, A untouched).
-    BD2000: bombardier beetles x5, worgs x2, stray wight x1 (siege
-      pickets and the whole scripted crusader battle untouched).
+    BD2000: bombardier beetles x5, worgs x2 (Ymori is a staged quest
+      actor, preserved after the 2026-09-08 audit; siege pickets and the
+      whole scripted crusader battle untouched).
     BD2010: goblin chaff x27 (keeps chieftain, shaman, 3 elite warriors,
       3 warriors around the chieftain).
   comp240 (optional Forest-of-Wyrms loop):
@@ -25,12 +26,14 @@ ARE SOURCE: WeiDU backups of the component (pre-patch pristine files) when
 present, else override (valid only while 230/240 are NOT installed).
 """
 import struct, os, glob
+from pathlib import Path
 
 GAME = r"C:\Games\Baldur's Gate II Enhanced Edition modded - dev eet install"
 OVR = os.path.join(GAME, "override")
 BAKROOT = os.path.join(GAME, r"weidu_external\backup\chriz-sod-remix")
-OUT230 = r"C:\src\private\chriz-sod-rebalance\chriz-sod-remix\lib\comp230_lists.tpa"
-OUT240 = r"C:\src\private\chriz-sod-rebalance\chriz-sod-remix\lib\comp240_lists.tpa"
+ROOT = Path(__file__).resolve().parents[2]
+OUT230 = ROOT / "chriz-sod-remix/lib/comp230_lists.tpa"
+OUT240 = ROOT / "chriz-sod-remix/lib/comp240_lists.tpa"
 
 def cstr(b):
     z = b.find(b'\x00')
@@ -82,7 +85,7 @@ CUTS = {
                 121,122,123,124,125,126,                                           # displacers
                 87,88,89,90,127,128,129,130,                                       # small spiders
                 35,36,37,38,45,46,144,145,146,147,148}, 255),                      # troll thin-out
-    'bd2000': ({135,136,137,138,139, 86,87, 1}, 255),
+    'bd2000': ({135,136,137,138,139, 86,87}, 255),
     'bd2010': ({3,4,5,6,7,8,9,10,19, 12,13,14,15,17,18,
                 24,25,26,27,28,29,30,31,32,33,34,35}, 255),
     # comp240

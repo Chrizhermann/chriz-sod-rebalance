@@ -1,15 +1,13 @@
 // ============================================================
 // Component 175 body — prologue XP ledger: Liia's reward
 // ============================================================
-// Playtest 5 (2026-07-10): "didn't really get much XP for killing Korlasz or
-// reporting to Liia." Verified ledger (docs/design/chapters/01-prologue.md §7):
-// the skipped dungeon carried ~24,663/char guaranteed (garrison 18,747 +
-// Korlasz 417 + Imoen wrap-up 5,000 + Ammon moss ~500 — the per-char TOTAL
-// holds under corrected engine units); the remix jailbreak returns
-// ~1,600/char in kills and no quest award. User decision 2026-07-10:
-// option (c) 24,000/char, delivered as Liia's quest reward on the return
+// User decision 2026-09-08: 22,000 XP per character on every difficulty.
+// The corrected recount excludes still-accessible caves and deducts the
+// replacement jailbreak combat XP (docs/research/23-prologue-xp-recount.md).
+// This replaces the older 24,000 award, whose justification overcounted the
+// removed content. Delivered as Liia's quest reward on the return
 // beat (locked delivery rule 2026-07-06: ONE collected award after Korlasz's
-// defeat, never dripped). Delivery is AddXPObject(Player1..6,24000) —
+// defeat, never dripped). Delivery is AddXPObject(Player1..6,22000) —
 // AddexperienceParty DIVIDES among the party (user-verified in-game
 // 2026-07-12), so the original single-action form paid only ~4,000/char.
 //

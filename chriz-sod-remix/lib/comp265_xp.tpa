@@ -1,0 +1,20 @@
+// The previously omitted BD5110 Guardian carries 4,000 kill XP.
+// Apply the existing 80% ledger policy at component 260's original chapter
+// transition anchor. This changes a future payout, never adds a catch-up payout
+// to a save that has already received it. Recurring Shadowed Soul summons have
+// no fixed encounter count and therefore do not receive a fixed XP estimate.
+COPY_EXISTING ~bd4000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    SPRINT csr265_xp_anchor ~AddXPObject(Player1,20000)[ %TAB%%LNL%%MNL%%WNL%]+AddexperienceParty(103600)~
+    COUNT_REGEXP_INSTANCES ~%csr265_xp_anchor%~ csr265_xp_hits
+    COUNT_REGEXP_INSTANCES ~AddXPObject(Player1,20000)~ csr265_chapter_hits
+    COUNT_REGEXP_INSTANCES ~AddexperienceParty(103600)~ csr265_old_awards
+    COUNT_REGEXP_INSTANCES ~AddexperienceParty(106800)~ csr265_new_awards
+    PATCH_IF ((csr265_xp_hits != 1) OR (csr265_chapter_hits != 1) OR (csr265_old_awards != 1) OR (csr265_new_awards != 0)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp265: expected component 260's single 103600 party-XP award after the chapter-11 Player1 award; refusing an unknown or already-corrected payout.~
+    END
+    REPLACE_TEXTUALLY ~%csr265_xp_anchor%~
+~AddXPObject(Player1,20000)
+    AddexperienceParty(106800)~
+  END
+BUT_ONLY

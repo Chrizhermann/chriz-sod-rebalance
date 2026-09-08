@@ -173,8 +173,12 @@ Implemented + installed + verified on the dev install (components 185/190/195):
     BD0035/BDCUT62 become unreachable and BDENTAR.CRE/DLG remain harmless files.
 
 ## Decisions locked (2026-07-10, triage round)
-- **Prologue XP:** option (c) **24,000/char**, delivered as **Liia's quest reward** on
-  the jailbreak return beat (component 175, installed). Numbers: 01-prologue.md §7.
+- **Prologue XP:** the July decision was 24,000/char. **Superseded by the user on
+  2026-09-08: flat 22,000 XP per character on every difficulty**, delivered once
+  as Liia's quest reward on the jailbreak return beat. The user prefers a stable
+  quest reward over difficulty scaling. Fresh 175 implements this; 176 updates
+  an older installation. Road-north 23,100 and coalition 106,800 party XP are
+  accepted unchanged. Recount: `research/23-prologue-xp-recount.md`.
 - **Dig-site polish executed:** the six "Drowned in Blood" are cut; the honor guard
   **literally replaces them** on their vacated coords; no backfill bodies; the XP
   returns via the **106,700 party-total** lich chunk (≈17,783/char at six).
@@ -349,16 +353,35 @@ are separated below; the encounters have not been implemented.
   smokepowder barrels and associated objectives, staging, dialogue, and destruction
   gimmicks. Retire the single weak unnamed wizard / Plane-of-Fire portal premise.
   Component 255's durable barrels remain the installed stopgap until this ships.
-- **PROPOSED replacement:** as the crusaders lose the battle, multiple wizards try
-  to destroy the bridge with **fire and earth elementals**, already summoned and/or
-  being summoned during the encounter. A difficult battle scaling with difficulty.
-- **OPEN for triage/design:** wizard roster and roles, elemental mix/counts, summoning
-  presentation and timing, placement, player counterplay, bridge failure conditions,
-  difficulty tiers, dialogue, and XP/loot accounting. Preserve the wider siege battle
-  direction while designing this replacement finale.
+- **DECIDED first version (2026-09-08):** two capable fire/earth-control wizards,
+  two earth and two fire elementals already summoned, and two veteran crusader
+  guards. Keep the siege/retreat, give a short warning, fight the prepared group,
+  then rejoin Bence's aftermath. Earth elementals face the party's approach;
+  separated wizards stand farther along the bridge with their escorts.
+- **DECIDED second-version direction:** defer actual collapse pressure until
+  version 2. Make its timer obvious and generous even on Insane; the user proposes
+  roughly five turns, with failure mainly for retreating or taking an exceptionally
+  long time. The fight comes first, with only mild damage-output pressure.
+- **DECIDED combat direction (2026-09-08):** level-13 fire and control mages with
+  the discussed spell packages and removable prebuffs; stronger finite defensive
+  recasting, informed by comparable SCS mages. Start with Slow/Grease and defer
+  Web. The fire mage also gets one regular Haste with useful-group targeting and
+  ordinary interruptible combat casting. Elementals progress from softened lesser
+  variants on Easy/Normal, to four
+  standard on Core, one greater earth on Hard, and one greater of each element
+  on Insane. Keep rewards consistent across difficulty and preserve counterplay.
+- **OPEN:** exact positions, remaining numeric/book allocation, dialogue, XP/loot
+  and version-2 timer mechanics. Full decisions and implementation seams:
+  [bridge design](design/wave1/08-boareskyr-bridge.md).
 - **Research before implementation:** trace barrel/portal scripts, dialogue, placed
   and spawned objects, bridge-opening/progression dependencies, and CUTSKIP mirrors;
   determine how the replacement supersedes component 255 on both supported platforms.
+- **DECIDED process (2026-09-08):** discuss the actual encounter, implementation,
+  wizard positions, escorts and sequence together before coding. Begin with a
+  small first version and consider additions after testing; the baseline above
+  is approved, with detailed tuning still OPEN. Batch native acceptance with the current filler fixes
+  in PR #21 in the user's next manual test session; see the
+  [combined checkpoint plan](playtest/2026-09-08-filler-fixes.md#next-manual-session--agreed-2026-09-08).
 
 ### Ashatiel: Chosen of Cyric-style party fight — [#15](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15)
 
@@ -378,6 +401,19 @@ are separated below; the encounters have not been implemented.
 
 ### Campaign filler and trash coverage audit — [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16)
 
+- **2026-09-07 audit delivered:** [campaign report](research/22-filler-audit.md)
+  covers all 76 areas and verifies all 495 generated actor cuts. Quest-carrier
+  risks, two reachable creature-ban misses, and a prologue XP scope error are
+  recorded ahead of new density choices. This is audit evidence and triage
+  advice, not approval of further removals or a changed XP award.
+
+- **2026-09-08 targeted fixes approved:** Mizhena's amulet goes on the existing
+  `Dead_fighter` corpse in BD5000; preserve Ymori's staged side quest and belongings
+  with bounded testing; remove the missed Guardian and Shadowed Soul sources
+  without replacements; recount the prologue XP. The subsequent decision fixes
+  Liia's reward at 22,000 per character on every difficulty.
+  These exceptions do not approve the remaining broader density decisions.
+
 - **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
   removed across SoD. Reconcile shipped cut lists, chapter decisions, research datasets,
   and effective dev-copy resources, including **scripted spawns, respawns/re-arm loops,
@@ -392,7 +428,18 @@ are separated below; the encounters have not been implemented.
   travel-ambush arenas. Earlier placed-actor cuts did not cover all these systems.
 - **OPEN:** further keep/cut/consolidate decisions and replacement encounters. Present
   findings for triage, retaining the reasons for keeping story/siege set-pieces.
-  The audit is queued; its results and additional removals are not yet decided.
+  The static audit is delivered; additional removals remain undecided.
+
+### Assassin ambush: keep the fight without dead magic (2026-09-08)
+
+- **DECIDED default direction:** retain the URE2/BD0063 scripted assassin ambush
+  and remove its dead-magic effect. This supersedes the earlier broad full-cut
+  lean for this particular encounter. The current remix has not removed URE2.
+- Remove misleading dead-magic descriptions/companion remarks with the effect;
+  ordinary ambush warnings and the encounter's enemies, loot and staging remain.
+- **OPEN:** exact alternative installer choices. Full encounter removal and an
+  explicit original-behavior flavor are discussion options, not assumed decisions.
+- [Discussion queue and code explanation](design/wave1/07-filler-triage.md).
 
 ## Relationship to existing design docs
 - Items 5–8 supersede/absorb the rebalance levers in `design/01` (rest rates), `design/02a–c`

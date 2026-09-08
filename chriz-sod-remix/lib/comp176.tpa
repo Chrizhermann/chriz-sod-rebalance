@@ -1,0 +1,106 @@
+// Component 176: append-only update of an installed component 175 reward.
+// A same-length edit changes only six XP numbers in CSRCELE's terminal action.
+// The native once gate, both reply routes, complete action order and original
+// 24,000/current 22,000 amounts must match before any write. No save/global is
+// changed: an already-collected reward stays collected, with no XP clawback.
+
+OUTER_SPRINT csr176_old ~SetGlobal("CSR_KORL_RET","GLOBAL",2)AddXPObject(Player1,24000)AddXPObject(Player2,24000)AddXPObject(Player3,24000)AddXPObject(Player4,24000)AddXPObject(Player5,24000)AddXPObject(Player6,24000)DestroySelf()~
+OUTER_SPRINT csr176_new ~SetGlobal("CSR_KORL_RET","GLOBAL",2)AddXPObject(Player1,22000)AddXPObject(Player2,22000)AddXPObject(Player3,22000)AddXPObject(Player4,22000)AddXPObject(Player5,22000)AddXPObject(Player6,22000)DestroySelf()~
+
+COPY_EXISTING ~csrcele.dlg~ ~override~
+  PATCH_IF (SOURCE_SIZE < 0x34) BEGIN
+    PATCH_FAIL ~comp176: truncated CSRCELE DLG header.~
+  END
+  READ_ASCII 0 csr176_signature (8)
+  PATCH_IF NOT (~%csr176_signature%~ STRING_EQUAL_CASE ~DLG V1.0~) BEGIN
+    PATCH_FAIL ~comp176: expected CSRCELE DLG V1.0.~
+  END
+  READ_LONG 0x08 csr176_states
+  READ_LONG 0x0c csr176_so
+  READ_LONG 0x10 csr176_transitions
+  READ_LONG 0x14 csr176_to
+  READ_LONG 0x18 csr176_go
+  READ_LONG 0x1c csr176_gates
+  READ_LONG 0x28 csr176_ao
+  READ_LONG 0x2c csr176_actions
+  PATCH_IF ((csr176_states != 4) OR (csr176_so < 0x34) OR
+            (csr176_so + 4 * 0x10 > SOURCE_SIZE) OR
+            (csr176_transitions < 3) OR (csr176_to < 0x34) OR
+            (csr176_to + csr176_transitions * 0x20 > SOURCE_SIZE) OR
+            (csr176_gates < 1) OR (csr176_go < 0x34) OR
+            (csr176_go + csr176_gates * 8 > SOURCE_SIZE) OR
+            (csr176_actions < 1) OR (csr176_ao < 0x34) OR
+            (csr176_ao + csr176_actions * 8 > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~comp176: invalid or unexpected CSRCELE tables.~
+  END
+
+  // State 1 is the sole authored return entry; state 2 is transition-only.
+  READ_LONG (csr176_so + 0x10 + 0x0c) csr176_gate_index
+  READ_LONG (csr176_so + 0x20 + 0x0c) csr176_close_gate
+  PATCH_IF ((csr176_gate_index < 0) OR (csr176_gate_index >= csr176_gates) OR
+            (csr176_close_gate != 0xffffffff)) BEGIN
+    PATCH_FAIL ~comp176: return entry or terminal state gate changed.~
+  END
+  READ_LONG (csr176_go + csr176_gate_index * 8) csr176_string_off
+  READ_LONG (csr176_go + csr176_gate_index * 8 + 4) csr176_string_len
+  PATCH_IF ((csr176_string_off < 0x34) OR (csr176_string_len < 1) OR
+            (csr176_string_off + csr176_string_len > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~comp176: invalid return gate string.~
+  END
+  READ_ASCII csr176_string_off csr176_gate (csr176_string_len)
+  INNER_PATCH_SAVE csr176_gate ~%csr176_gate%~ BEGIN
+    REPLACE_TEXTUALLY ~[%MNL%%LNL%]~ ~~
+  END
+  PATCH_IF NOT (~%csr176_gate%~ STRING_EQUAL_CASE ~  Global("CSR_KORL_RET","GLOBAL",1)~) BEGIN
+    PATCH_FAIL ~comp176: expected the original CSR_KORL_RET=1 once gate.~
+  END
+
+  READ_LONG (csr176_so + 0x10 + 4) csr176_first
+  READ_LONG (csr176_so + 0x10 + 8) csr176_count
+  PATCH_IF ((csr176_count != 2) OR (csr176_first < 0) OR
+            (csr176_first + 2 > csr176_transitions)) BEGIN
+    PATCH_FAIL ~comp176: expected both original return replies.~
+  END
+  FOR (csr176_i = 0; csr176_i < 2; ++csr176_i) BEGIN
+    SET csr176_t = csr176_to + (csr176_first + csr176_i) * 0x20
+    READ_LONG csr176_t csr176_flags
+    READ_ASCII (csr176_t + 0x14) csr176_destination (8) NULL
+    READ_LONG (csr176_t + 0x1c) csr176_next
+    PATCH_IF ((csr176_flags != 1) OR (csr176_next != 2) OR
+              NOT (~%csr176_destination%~ STRING_EQUAL_CASE ~csrcele~)) BEGIN
+      PATCH_FAIL ~comp176: a return reply no longer leads directly to the reward.~
+    END
+  END
+
+  READ_LONG (csr176_so + 0x20 + 4) csr176_first
+  READ_LONG (csr176_so + 0x20 + 8) csr176_count
+  PATCH_IF ((csr176_count != 1) OR (csr176_first < 0) OR
+            (csr176_first >= csr176_transitions)) BEGIN
+    PATCH_FAIL ~comp176: expected one terminal reward transition.~
+  END
+  SET csr176_t = csr176_to + csr176_first * 0x20
+  READ_LONG csr176_t csr176_flags
+  READ_LONG (csr176_t + 0x10) csr176_index
+  PATCH_IF ((csr176_flags != 12) OR (csr176_index < 0) OR
+            (csr176_index >= csr176_actions)) BEGIN
+    PATCH_FAIL ~comp176: expected the original unconditional reward EXIT action.~
+  END
+  READ_LONG (csr176_ao + csr176_index * 8) csr176_string_off
+  READ_LONG (csr176_ao + csr176_index * 8 + 4) csr176_string_len
+  PATCH_IF ((csr176_string_off < 0x34) OR (csr176_string_len < 1) OR
+            (csr176_string_off + csr176_string_len > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~comp176: invalid reward action string.~
+  END
+  READ_ASCII csr176_string_off csr176_action (csr176_string_len)
+  INNER_PATCH_SAVE csr176_normalized ~%csr176_action%~ BEGIN
+    REPLACE_TEXTUALLY ~[%MNL%%LNL%]~ ~~
+  END
+  PATCH_IF (~%csr176_normalized%~ STRING_EQUAL_CASE ~%csr176_old%~) BEGIN
+    INNER_PATCH_SAVE csr176_action ~%csr176_action%~ BEGIN
+      REPLACE_TEXTUALLY EXACT_MATCH ~,24000)~ ~,22000)~
+    END
+    WRITE_ASCIIE csr176_string_off ~%csr176_action%~
+  END ELSE PATCH_IF NOT (~%csr176_normalized%~ STRING_EQUAL_CASE ~%csr176_new%~) BEGIN
+    PATCH_FAIL ~comp176: reward differs from the complete original 24,000 or approved 22,000 per-character action list.~
+  END
+BUT_ONLY
