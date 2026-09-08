@@ -1,0 +1,195 @@
+// Component 256: replace only the two bridge-finale entry seams and victory gates.
+// All preflight macros operate on read-only COPY_EXISTING - buffers first.
+OUTER_SPRINT csr256_nl ~%MNL%?%LNL%~
+OUTER_SPRINT csr256_comment ~[^%WNL%]*~
+
+DEFINE_PATCH_MACRO csr256_world_exact BEGIN
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_pattern%~ csr256_hits
+  PATCH_IF (csr256_hits != csr256_expected) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #256 [BD2000 %csr256_label%]: expected %csr256_expected% known seams, found %csr256_hits%. No encounter resources changed.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr256_world_script BEGIN
+  SPRINT csr256_pattern ~    CreateCreature("bdcrubbm",\[1465.1910\],SE)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1605.1900\],S)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1540.1935\],SE)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1480.1985\],SE)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1430.2030\],E)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb2",\[1530.1865\],S)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb2",\[1400.1960\],E)%csr256_comment%~
+  SPRINT csr256_label ~fixed demolition roster~ SET csr256_expected = 2
+  LPM csr256_world_exact
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_pattern%~ ~    NoAction()~
+  // Queue our group at the end of the main retreat scene, not at the old
+  // early spawn point while that scene still has waits and scripted orders.
+  SPRINT csr256_pattern ~SetGlobal("bd_bridge_plot","bd2000",2)~
+  SPRINT csr256_label ~retreat completion~ SET csr256_expected = 2
+  LPM csr256_world_exact
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_pattern%~ ~SetGlobal("bd_bridge_plot","bd2000",2)
+    SetGlobal("CSR256_REQUEST","BD2000",1)~
+
+  SPRINT csr256_success_body ~THEN%csr256_nl%  RESPONSE #100%csr256_nl%    SetGlobal("bd_plot","global",293)%csr256_nl%    CreateCreature("bdbence",\[2425.2660\],NW)%csr256_comment%%csr256_nl%\(    CreateCreature("bdskie",\[2485.2655\],NW)%csr256_comment%%csr256_nl%\)?    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",\[2425.2485\]))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))%csr256_nl%    AddJournalEntry([0-9]+,QUEST)%csr256_nl%    SetGlobal("bd_cant_rest","myarea",0)%csr256_nl%    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)%csr256_nl%END~
+  SPRINT csr256_portal_guard ~IF%csr256_nl%  GlobalLT("bd_plot","global",293)%csr256_nl%  OR(2)%csr256_nl%    GlobalGT("bd_elemental","bd2000",0)%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%  OR(2)%csr256_nl%    Dead("bdelefir")%csr256_comment%%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%~
+  SPRINT csr256_fixed_guard ~IF%csr256_nl%  GlobalLT("bd_plot","global",293)%csr256_nl%  Global("bd_elemental","bd2000",0)%csr256_nl%  Global("bdsumfir","global",0)%csr256_nl%  !NumDeadLT("bdcrubb",6)%csr256_nl%  Dead("bdcrubbm")%csr256_comment%%csr256_nl%~
+  SET csr256_expected = 1
+  SPRINT csr256_label ~portal victory~
+  SPRINT csr256_pattern ~%csr256_portal_guard%%csr256_success_body%~ LPM csr256_world_exact
+  SPRINT csr256_label ~fixed-roster victory~
+  SPRINT csr256_pattern ~%csr256_fixed_guard%%csr256_success_body%~ LPM csr256_world_exact
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_pattern%~ ~~
+  SPRINT csr256_guard ~IF
+  Global("CSR256_STAGE","BD2000",2)
+  GlobalLT("bd_plot","GLOBAL",293)
+~
+  PATCH_FOR_EACH csr256_dv IN ~CSR256FM~ ~CSR256CM~ ~CSR256G1~ ~CSR256G2~ ~CSR256E1~ ~CSR256E2~ ~CSR256F1~ ~CSR256F2~ BEGIN
+    SPRINT csr256_guard ~%csr256_guard%  OR(3)
+    Dead("%csr256_dv%")
+    !Exists("%csr256_dv%")
+    StateCheck("%csr256_dv%",STATE_STONE_DEATH)
+~
+  END
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_portal_guard%~ ~%csr256_guard%~
+  SPRINT csr256_pattern ~SetGlobal("bd_plot","global",293)~
+  SPRINT csr256_label ~single retained aftermath~ LPM csr256_world_exact
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_pattern%~ ~SetGlobal("CSR256_STAGE","BD2000",3)
+    SetGlobal("bd_plot","global",293)~
+  // Keep native cleanup of the old map note; never add the obsolete label.
+  SPRINT csr256_pattern ~AddMapNoteColor(\[1384.1862\],[0-9]+,RED)~
+  SPRINT csr256_label ~barrel map note~ LPM csr256_world_exact
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_pattern%~ ~NoAction()~
+  PATCH_FOR_EACH csr256_old IN ~"bdcrubbm"~ ~"bdcrubb1"~ ~"bdcrubb2"~ ~"bd_elemental"~ ~"bdsumfir"~ BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_old%~ csr256_hits
+    PATCH_IF csr256_hits BEGIN PATCH_FAIL ~chriz-sod-remix #256: unrecognized old finale reference %csr256_old% remains in BD2000.~ END
+  END
+END
+
+DEFINE_PATCH_MACRO csr256_are_table BEGIN
+  PATCH_IF ((csr256_offset < 0xf4) OR (csr256_offset > SOURCE_SIZE) OR (csr256_count < 1) OR (csr256_count > (SOURCE_SIZE - csr256_offset) / csr256_stride)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #256: unsafe BD2000 %csr256_label% table.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr256_world_area BEGIN
+  PATCH_IF SOURCE_SIZE < 0xf4 BEGIN PATCH_FAIL ~chriz-sod-remix #256: truncated BD2000 ARE.~ END
+  READ_ASCII 0 csr256_signature (8)
+  PATCH_IF NOT (~%csr256_signature%~ STRING_EQUAL_CASE ~AREAV1.0~) BEGIN PATCH_FAIL ~chriz-sod-remix #256: unsupported BD2000 ARE.~ END
+  READ_LONG 0x54 csr256_offset READ_SHORT 0x58 csr256_count
+  SET csr256_stride = 0x110 SPRINT csr256_label ~actors~ LPM csr256_are_table
+  SET csr256_hits = 0
+  FOR (csr256_i = 0; csr256_i < csr256_count; csr256_i += 1) BEGIN
+    SET csr256_b = csr256_offset + csr256_i * csr256_stride
+    READ_ASCII (csr256_b + 0x80) csr256_ref (8) NULL
+    PATCH_IF (~%csr256_ref%~ STRING_EQUAL ~BDKEGX~) BEGIN
+      READ_ASCII csr256_b csr256_name (32) NULL
+      READ_SHORT (csr256_b + 0x20) csr256_x READ_SHORT (csr256_b + 0x22) csr256_y
+      READ_LONG (csr256_b + 0x28) csr256_flags
+      PATCH_IF NOT ((~%csr256_name%~ STRING_EQUAL ~BD_BARREL_HE~) AND (csr256_flags BAND 1) AND
+        (((csr256_x = 1328) AND (csr256_y = 1947)) OR ((csr256_x = 1329) AND (csr256_y = 1897)) OR
+         ((csr256_x = 1475) AND (csr256_y = 1836)) OR ((csr256_x = 1540) AND (csr256_y = 1820)))) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #256: unexpected bridge barrel actor; refusing partial removal.~
+      END
+      SET csr256_hits += 1
+      WRITE_LONG (csr256_b + 0x40) 0
+    END
+  END
+  PATCH_IF csr256_hits != 4 BEGIN PATCH_FAIL ~chriz-sod-remix #256: expected four bridge barrel actors.~ END
+  READ_LONG 0x5c csr256_offset READ_SHORT 0x5a csr256_count
+  SET csr256_stride = 0xc4 SPRINT csr256_label ~regions~ LPM csr256_are_table
+  SET csr256_hits = 0
+  FOR (csr256_i = 0; csr256_i < csr256_count; csr256_i += 1) BEGIN
+    SET csr256_b = csr256_offset + csr256_i * csr256_stride
+    READ_ASCII csr256_b csr256_name (32) NULL
+    READ_ASCII (csr256_b + 0x7c) csr256_ref (8) NULL
+    PATCH_IF (~%csr256_name%~ STRING_EQUAL ~Barrel_spot~) BEGIN
+      PATCH_IF NOT (~%csr256_ref%~ STRING_EQUAL ~BDBOARB2~) BEGIN PATCH_FAIL ~chriz-sod-remix #256: the old finale region script was changed.~ END
+      SET csr256_hits += 1
+      // Other crusaders still use this region as their escape destination.
+      WRITE_ASCII (csr256_b + 0x7c) ~~ #8
+    END ELSE PATCH_IF (~%csr256_ref%~ STRING_EQUAL ~BDBOARB2~) BEGIN PATCH_FAIL ~chriz-sod-remix #256: extra portal controller region.~ END
+  END
+  PATCH_IF csr256_hits != 1 BEGIN PATCH_FAIL ~chriz-sod-remix #256: expected one finale region.~ END
+  READ_LONG 0xb0 csr256_offset READ_LONG 0xac csr256_count
+  SET csr256_stride = 0x4c SPRINT csr256_label ~animations~ LPM csr256_are_table
+  SET csr256_hits = 0
+  FOR (csr256_i = 0; csr256_i < csr256_count; csr256_i += 1) BEGIN
+    SET csr256_b = csr256_offset + csr256_i * csr256_stride
+    READ_ASCII csr256_b csr256_name (32) NULL
+    PATCH_IF (~%csr256_name%~ STRING_MATCHES_REGEXP ~^\(Barrel_ignited_[123]\|Fire_portal_1[abc]?\|Big_explosion\)$~ = 0) BEGIN
+      SET csr256_hits += 1
+      WRITE_LONG (csr256_b + 0x24) 0
+      READ_LONG (csr256_b + 0x34) csr256_flags
+      WRITE_LONG (csr256_b + 0x34) (csr256_flags BAND 0xfffffffe)
+    END
+  END
+  PATCH_IF csr256_hits != 8 BEGIN PATCH_FAIL ~chriz-sod-remix #256: expected eight obsolete finale animations.~ END
+  READ_LONG 0x84 csr256_offset READ_SHORT 0x82 csr256_count
+  SET csr256_stride = 0xd4 SPRINT csr256_label ~ambients~ LPM csr256_are_table
+  SET csr256_hits = 0
+  FOR (csr256_i = 0; csr256_i < csr256_count; csr256_i += 1) BEGIN
+    SET csr256_b = csr256_offset + csr256_i * csr256_stride
+    READ_ASCII csr256_b csr256_name (32) NULL
+    PATCH_IF (~%csr256_name%~ STRING_EQUAL ~Amb_fire_portal_1~) BEGIN
+      SET csr256_hits += 1
+      WRITE_LONG (csr256_b + 0x8c) 0
+      READ_LONG (csr256_b + 0x90) csr256_flags
+      WRITE_LONG (csr256_b + 0x90) (csr256_flags BAND 0xfffffffe)
+    END
+  END
+  PATCH_IF csr256_hits != 1 BEGIN PATCH_FAIL ~chriz-sod-remix #256: expected one portal ambient.~ END
+END
+
+DEFINE_ACTION_FUNCTION csr256_world_preflight BEGIN
+  COPY_EXISTING - ~BD2000.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN LPM csr256_world_script END
+  COPY_EXISTING - ~BD2000.ARE~ ~override~ LPM csr256_world_area
+END
+
+DEFINE_ACTION_FUNCTION csr256_world_install BEGIN
+  COPY_EXISTING ~BD2000.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN LPM csr256_world_script END BUT_ONLY
+  COPY_EXISTING ~BD2000.ARE~ ~override~ LPM csr256_world_area BUT_ONLY
+  OUTER_SPRINT csr256_controller ~~
+  ACTION_FOR_EACH csr256_tier IN ~low~ ~core~ ~hard~ ~insane~ BEGIN
+    OUTER_SPRINT csr256_difficulty ~DifficultyLT(NORMAL)~
+    OUTER_SPRINT csr256_e1 ~CSR26E1L~ OUTER_SPRINT csr256_e2 ~CSR26E2L~
+    OUTER_SPRINT csr256_f1 ~CSR26F1L~ OUTER_SPRINT csr256_f2 ~CSR26F2L~
+    ACTION_IF NOT (~%csr256_tier%~ STRING_EQUAL_CASE ~low~) BEGIN
+      OUTER_SPRINT csr256_difficulty ~Difficulty(NORMAL)~
+      OUTER_SPRINT csr256_e1 ~CSR26E1S~ OUTER_SPRINT csr256_e2 ~CSR26E2S~
+      OUTER_SPRINT csr256_f1 ~CSR26F1S~ OUTER_SPRINT csr256_f2 ~CSR26F2S~
+    END
+    ACTION_IF (~%csr256_tier%~ STRING_EQUAL_CASE ~hard~) BEGIN
+      OUTER_SPRINT csr256_difficulty ~Difficulty(HARD)~ OUTER_SPRINT csr256_e1 ~CSR26E1G~
+    END
+    ACTION_IF (~%csr256_tier%~ STRING_EQUAL_CASE ~insane~) BEGIN
+      OUTER_SPRINT csr256_difficulty ~DifficultyGT(HARD)~ OUTER_SPRINT csr256_e1 ~CSR26E1G~ OUTER_SPRINT csr256_f1 ~CSR26F1G~
+    END
+    OUTER_SPRINT csr256_controller ~%csr256_controller%
+IF
+  Global("CSR256_REQUEST","BD2000",1)
+  Global("CSR256_STAGE","BD2000",0)
+  Global("bd_plot","GLOBAL",280)
+  Global("bd_bridge_plot","BD2000",2)
+  %csr256_difficulty%
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_REQUEST","BD2000",2)
+    SetGlobal("CSR256_STAGE","BD2000",1)
+    CreateCreature("CSR256FM",[1504.1872],SE)
+    CreateCreature("CSR256CM",[1392.1944],SE)
+    CreateCreature("CSR256G1",[1560.1990],SE)
+    CreateCreature("CSR256G2",[1608.1920],SE)
+    CreateCreature("%csr256_e1%",[1615.2035],SE)
+    CreateCreature("%csr256_e2%",[1680.1965],SE)
+    CreateCreature("%csr256_f1%",[1544.1944],SE)
+    CreateCreature("%csr256_f2%",[1440.1990],SE)
+END
+~
+  END
+  OUTER_SPRINT csr256_controller ~%csr256_controller%
+IF
+  Global("CSR256_STAGE","BD2000",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_STAGE","BD2000",2)
+    DisplayStringNoName(Player1,%csr256_warning%)
+END
+~
+  <<<<<<<< .../csr256_controller.baf
+%csr256_controller%
+>>>>>>>>
+  EXTEND_TOP ~BD2000.BCS~ ~.../csr256_controller.baf~ EVALUATE_BUFFER
+END

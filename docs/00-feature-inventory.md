@@ -6,7 +6,7 @@ mod: code/component reality drives status; design detail is folded into the matc
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8 release marker, 38
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8 release marker, 39
 component declarations), `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
@@ -91,6 +91,7 @@ BD7000 and set `csr_treasure_removed=1`. It is not one of the 32 installed dev c
 | 240 | Forest of Wyrms: bugbear cave removed, temple behind the dragon | Retargets the only two BD7220-bound travel regions at each other (BD7210 `TranBD7220` → BD7230 `ExitBD7220`, BD7230 `TranBD7220` → BD7210 `ExitBD7220`; names kept so `EscapeAreaObject` still works — the temple's fleeing cultist now runs into the dragon cave). BD7220 = unreachable, file untouched, reversible; spectacles gimmick survives (bdmisc01 lives on BDZAVIAK/BD0109). Plus BD7200 28 cuts (bugbear door-guards/displacers/wolves/small spiders; wyverns+phase spiders+hill giant stay) and the 6 post-Neothelid invisible ambushers (BD7230AM goes inert; loot mundane). 28,395 ledgered (incl. 14,810 from the cave) → **+22,700 party-total** once-block (≈3,780/char at 6; unit-corrected 2026-07-12) on the Neothelid kill. | pred `bd7200/7210/7220/7230.are` |
 | 250 | Morentherene: a real dragon on Hard/Insane | Two CREATE-built stat spells applied asleep via vanilla's own ApplySpellRES delivery (EXTEND_TOP bd7210.bcs, difficulty-gated once-blocks). Hard+: +56 HP (168), AC −6, THAC0 −2, saves +3, MR 35. Insane stacks to: 230 HP, AC −9, THAC0 −4, saves +5 total, MR 50, 4 APR. Breath/wing buffet/AI untouched (SCS-safe); Core and below vanilla. Baseline verified: 112 HP, AC −1, THAC0 2, saves 5–8, MR 15. | pred `bd7210.are` + `bdmorent.cre` |
 | 255 | Boareskyr battle: durable explosive barrels | BDKEGX 25 hp / 0% fire resist → **120 hp / 75% fire** (cold stays 50): the battle's loss condition no longer pops to random mephit splash "with no counter" on higher difficulties. CRE-level patch covers placed + scripted barrels; nothing scripts BDKEGX by name; story detonations use Kill() and still work. Installed stopgap; the 2026-09-05 direction removes the barrels entirely, with an elemental-demolition replacement proposed in [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14). | pred `bd2000.are` + `bdkegx.cre` |
+| 256 | Boareskyr elemental finale (unreleased) | Two level-13 wizards, two veterans and four tiered fire/earth elementals replace both old finale routes. Finite defensive recasts and regular Haste; all barrel/portal mechanics and day/night artwork removed. Preserve aftermath and 4,520 fixed-roster XP. No v1 collapse timer; native acceptance pending. | before first BD2000 entry; independent or append after 255 |
 
 ### The coalition camp / Ch. 10–12 (GROUP @1004) — quick-win pass, shipped 2026-07-12
 
@@ -244,7 +245,7 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 
 | Task | Status and next step |
 |------|----------------------|
-| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Barrel removal is the new direction; multiple wizards using fire/earth elementals to destroy the bridge is the proposed replacement. Triage story, encounter mechanics, difficulty scaling, and progression before implementation. Component 255 remains the installed stopgap. |
+| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Approved first version implemented as 256; native combat/rendering/progression acceptance pending with PR #21. Collapse timer deferred to version 2. |
 | [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Chosen of Cyric-style brief: roughly 30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
 | [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 historical generated actor cuts verified. Approved quest/creature fixes and the assassin ambush without dead magic are implemented in PR #21; Liia's reward is now set to flat 22,000 per character. Broader density decisions and native acceptance remain. |
 

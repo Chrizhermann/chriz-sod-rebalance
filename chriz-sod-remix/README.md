@@ -13,6 +13,14 @@ on the existing `Dead_fighter` corpse and removes the missed Guardian and Shadow
 Aspect's Shadowed Soul summons. Fresh 230 already excludes
 Ymori from its cuts. Append these components; do not reinstall earlier rows.
 
+**256** replaces the Boareskyr Bridge barrel/portal finale. Two level-13 mages,
+two veterans and four fire/earth elementals form one finite encounter. The fire
+mage has regular Haste; both have limited defensive recasts. Difficulty changes
+the elemental tiers while the fixed encounter XP stays 4,520. The day/night
+barrel artwork and obsolete descriptions are removed. No collapse timer is
+included in this version. Install before first entering BD2000, either alone
+or appended after an existing 255. The old 255 need not be removed.
+
 Use saves from before entering BD2000, BD5000 and BD5110 for the area repairs.
 Visited-area saves retain their cached actors and container contents. The
 road-north award becomes 23,100 party XP and the coalition award 106,800; these

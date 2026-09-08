@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Add component 256: replace both Boareskyr finale entry routes with two level-13
+  wizards, two veteran guards and four difficulty-scaled fire/earth elementals.
+  Use finite prebuffs and defensive recasts, ordinary interruptible combat spells,
+  one useful-group Haste attempt and conservative area-spell placement. Credit
+  Sword Coast Stratagems for the adapted defensive priorities.
+- Remove the bridge's explosive actors, portal controller, obsolete warning and
+  map note, animated effects and painted barrel piles in both day/night art.
+  Preserve army retreat, Bence's aftermath and onward-passage controls. Reword
+  the later Bwoosh provenance without changing that quest. Keep the old fixed
+  roster's 4,520 kill XP across difficulties. No collapse timer in version 1.
+  Append after existing 255 if present; use a pre-first-BD2000 save. Native
+  combat/rendering acceptance remains pending with PR #21's filler checks.
 - Add component 135, selected by default: retain the scripted assassin ambush
   while removing its recurring dead-magic spell and misleading area/companion
   remarks. Preserve the assassins, warnings, travel hooks and shared spell.

@@ -30,6 +30,14 @@
 @240 = ~SoD remix: Forest of Wyrms - bugbear cave removed, temple behind the dragon~
 @250 = ~SoD remix: Morentherene - a real dragon on Hard and Insane~
 @255 = ~SoD remix: Boareskyr battle - durable explosive barrels~
+@256 = ~SoD remix: Boareskyr Bridge - elemental demolition battle~
+@25601 = ~The retreating crusaders have left two wizards and their elementals on the bridge. Defeat the demolition party before pressing onward!~
+@25602 = ~It's not a barrel of potion of explosion, it WAS a barrel of potion of explosion - a dozen barrels actually, taken from captured crusader supplies, <CHARNAME>. NOW it's a barrel of Bwoosh! BWOOSH! It's fun and easier to say. What's not to love?~
+@25603 = ~Explosive material taken from captured crusader supplies was refined by Phossey Dugdeep. Where before there were multiple barrels of potion of explosion, now there is a single so-called barrel of Bwoosh! The destructive capacity of the material has yet to be determined, but it would be wise to be well away from the Bwoosh! when it is.
+
+STATISTICS:
+
+Weight: %csr256_bwoosh_weight%~
 
 @260 = ~SoD remix: coalition camp arc - fewer, cleaner enemies on the scouting maps~
 @265 = ~SoD remix: preserve quest loot and remove missed banned creatures~

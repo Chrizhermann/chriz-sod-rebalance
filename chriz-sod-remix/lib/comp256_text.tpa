@@ -1,0 +1,49 @@
+// Keep the later Bwoosh quest; stop attributing its supplies to bridge barrels.
+// Change only the two resource-owned string references, never shared TLK entries.
+DEFINE_PATCH_MACRO csr256_phossey_check BEGIN
+  PATCH_IF SOURCE_SIZE < 0x34 BEGIN PATCH_FAIL ~#256: truncated BDPHOSSE dialogue.~ END
+  READ_ASCII 0 csr256_sig (8)
+  READ_LONG 8 csr256_sc READ_LONG 0xc csr256_so
+  READ_LONG 0x10 csr256_tc READ_LONG 0x14 csr256_to
+  PATCH_IF ((NOT (~%csr256_sig%~ STRING_EQUAL_CASE ~DLG V1.0~)) OR
+    (csr256_sc < 5) OR (csr256_so < 0x34) OR (csr256_so > SOURCE_SIZE) OR
+    (csr256_sc > (SOURCE_SIZE - csr256_so) / 16) OR
+    (csr256_tc < 1) OR (csr256_to < 0x34) OR (csr256_to > SOURCE_SIZE) OR
+    (csr256_tc > (SOURCE_SIZE - csr256_to) / 32)) BEGIN
+    PATCH_FAIL ~#256: unsafe BDPHOSSE dialogue tables.~
+  END
+  SET csr256_state = csr256_so + 3 * 16
+  READ_LONG (csr256_state + 4) csr256_first
+  READ_LONG (csr256_state + 8) csr256_count
+  PATCH_IF ((csr256_first < 0) OR (csr256_count < 1) OR (csr256_first >= csr256_tc) OR
+    (csr256_count > csr256_tc - csr256_first)) BEGIN PATCH_FAIL ~#256: invalid BDPHOSSE state 3 transitions.~ END
+  SET csr256_transition = csr256_to + csr256_first * 32
+  READ_ASCII (csr256_transition + 0x14) csr256_next (8) NULL
+  PATCH_IF ((NOT (~%csr256_next%~ STRING_EQUAL ~BDPHOSSE~)) OR
+    (LONG_AT (csr256_transition + 0x1c) != 4) OR
+    ((LONG_AT csr256_transition BAND 15) != 0)) BEGIN
+    PATCH_FAIL ~#256: Phossey's Bwoosh explanation moved; refusing to change another scene.~
+  END
+END
+DEFINE_PATCH_MACRO csr256_bwoosh_check BEGIN
+  PATCH_IF SOURCE_SIZE < 0x72 BEGIN PATCH_FAIL ~#256: truncated BDBWOOSH item.~ END
+  READ_ASCII 0 csr256_sig (8)
+  PATCH_IF NOT (~%csr256_sig%~ STRING_EQUAL_CASE ~ITM V1  ~) BEGIN PATCH_FAIL ~#256: unsupported BDBWOOSH item.~ END
+END
+DEFINE_ACTION_FUNCTION csr256_text_preflight BEGIN
+  COPY_EXISTING - ~BDPHOSSE.DLG~ ~override~ LPM csr256_phossey_check
+  COPY_EXISTING - ~BDBWOOSH.ITM~ ~override~ LPM csr256_bwoosh_check
+END
+DEFINE_ACTION_FUNCTION csr256_text_install BEGIN
+  COPY_EXISTING ~BDPHOSSE.DLG~ ~override~
+    LPM csr256_phossey_check
+    WRITE_LONG csr256_state (RESOLVE_STR_REF(@25602))
+  BUT_ONLY
+  COPY_EXISTING ~BDBWOOSH.ITM~ ~override~
+    LPM csr256_bwoosh_check
+    // Preserve the installed weight, including item-mod changes.
+    READ_LONG 0x4c csr256_bwoosh_weight
+    SPRINT csr256_bwoosh_description @25603
+    SAY_EVALUATED 0x54 ~%csr256_bwoosh_description%~
+  BUT_ONLY
+END

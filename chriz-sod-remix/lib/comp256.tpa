@@ -1,0 +1,30 @@
+// Version 1 of the approved elemental bridge finale. No collapse timer.
+INCLUDE ~chriz-sod-remix/lib/comp256_spells.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_creatures.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_ai.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_text.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_visuals.tpa~
+
+// The old fixed mage + six guards total 4520 XP; keep that fixed-roster budget
+// on every difficulty. Old variable portal reinforcements had no fixed budget.
+OUTER_SET csr256_xp_mage = 1000
+OUTER_SET csr256_xp_guard = 420
+OUTER_SET csr256_xp_elemental = 420
+OUTER_SET csr256_home_x = 1500
+OUTER_SET csr256_home_y = 1950
+OUTER_SET csr256_leash = 18
+
+// Every resource-shape, spell, donor and art check precedes resource mutation.
+LAM csr256_spells_preflight
+LAF csr256_creatures_preflight END
+LAF csr256_world_preflight END
+LAF csr256_text_preflight END
+LAF csr256_visuals_preflight END
+
+OUTER_SET csr256_warning = RESOLVE_STR_REF(@25601)
+LAF csr256_ai_install END
+LAF csr256_creatures_install END
+LAF csr256_world_install END
+LAF csr256_text_install END
+LAF csr256_visuals_install END

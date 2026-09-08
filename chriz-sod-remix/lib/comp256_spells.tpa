@@ -1,0 +1,143 @@
+// Component 256 spell identities come from the installed SPELL.IDS, not vanilla
+// resource numbers or SCS-generated helpers. This library makes no game writes.
+DEFINE_ACTION_FUNCTION csr256_resolve_spell
+  STR_VAR symbol = ~~
+  RET res level id cast_range
+BEGIN
+  OUTER_SET id = IDS_OF_SYMBOL (~SPELL~ ~%symbol%~)
+  ACTION_IF (id < 2100 OR id > 2999) BEGIN
+    FAIL ~Component 256: missing or non-wizard SPELL.IDS identity %symbol% (%id%).~
+  END
+  OUTER_SET suffix = id - 2000
+  OUTER_SPRINT res ~SPWI%suffix%~
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%res%.spl~ BEGIN
+    FAIL ~Component 256: %symbol% resolves to missing %res%.SPL.~
+  END
+  COPY_EXISTING - ~%res%.spl~ ~override~
+    PATCH_IF (SOURCE_SIZE < 0x72) BEGIN
+      PATCH_FAIL ~Component 256: truncated %res%.SPL header.~
+    END
+    READ_ASCII 0 signature (8)
+    READ_SHORT 0x1c spell_type
+    READ_LONG 0x34 level
+    READ_LONG 0x64 ability_offset
+    READ_SHORT 0x68 ability_count
+    READ_LONG 0x6a effect_offset
+    READ_SHORT 0x6e casting_index
+    READ_SHORT 0x70 casting_count
+    PATCH_IF (NOT (~%signature%~ STRING_EQUAL ~SPL V1  ~)
+      OR spell_type != 1 OR level < 1 OR level > 9
+      OR ability_count < 1 OR ability_offset < 0x72
+      OR ability_offset + ability_count * 0x28 > SOURCE_SIZE
+      OR effect_offset < ability_offset + ability_count * 0x28
+      OR effect_offset + (casting_index + casting_count) * 0x30 > SOURCE_SIZE) BEGIN
+      PATCH_FAIL ~Component 256: invalid wizard spell/header in %res%.SPL (%symbol%).~
+    END
+    SET cast_range = 0
+    SET selected_level = 0
+    FOR (ability = 0; ability < ability_count; ++ability) BEGIN
+      READ_SHORT (ability_offset + ability * 0x28 + 0x10) minimum_level
+      PATCH_IF (minimum_level > 0 AND minimum_level <= 13 AND minimum_level >= selected_level) BEGIN
+        READ_SHORT (ability_offset + ability * 0x28 + 0x0e) cast_range
+        SET selected_level = minimum_level
+      END
+      READ_SHORT (ability_offset + ability * 0x28 + 0x1e) effect_count
+      READ_SHORT (ability_offset + ability * 0x28 + 0x20) effect_index
+      PATCH_IF (effect_offset + (effect_index + effect_count) * 0x30 > SOURCE_SIZE) BEGIN
+        PATCH_FAIL ~Component 256: invalid ability effects in %res%.SPL.~
+      END
+    END
+    PATCH_IF selected_level = 0 BEGIN
+      PATCH_FAIL ~Component 256: %res%.SPL has no ability usable by the level-13 mage.~
+    END
+  BUT_ONLY
+END
+
+// Resolve the level-13 projectile too: SR changes Grease's area, and a guessed
+// vanilla radius either risks allies or makes the spell impossible to place.
+// PRO 0x206 is horizontal pixel radius; Range uses 16 horizontal pixels/foot.
+// Reference: https://gibberlings3.github.io/iesdp/file_formats/ie_formats/pro_v1.htm
+DEFINE_ACTION_FUNCTION csr256_resolve_aoe
+  STR_VAR res=~~
+  RET radius
+BEGIN
+  OUTER_SPRINT projectile_res ~~
+  COPY_EXISTING - ~%res%.spl~ ~override~
+    READ_LONG 0x64 ability_offset
+    READ_SHORT 0x68 ability_count
+    SET selected_level = 0
+    FOR (ability=0; ability<ability_count; ++ability) BEGIN
+      READ_SHORT (ability_offset + ability * 0x28 + 0x10) minimum_level
+      PATCH_IF (minimum_level > 0 AND minimum_level <= 13 AND minimum_level >= selected_level) BEGIN
+        READ_SHORT (ability_offset + ability * 0x28 + 0x26) projectile
+        LOOKUP_IDS_SYMBOL_OF_INT projectile_res ~PROJECTL~ (projectile - 1)
+        SET selected_level = minimum_level
+      END
+    END
+  BUT_ONLY
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%projectile_res%.pro~ BEGIN
+    FAIL ~Component 256: cannot resolve %res%'s area projectile (%projectile_res%).~
+  END
+  COPY_EXISTING - ~%projectile_res%.pro~ ~override~
+    PATCH_IF (SOURCE_SIZE < 0x300) BEGIN
+      PATCH_FAIL ~Component 256: %res% does not use a supported area projectile.~
+    END
+    READ_ASCII 0 signature (8)
+    READ_SHORT 8 projectile_type
+    READ_LONG 0x2c extended_flags
+    READ_LONG 0x200 area_flags
+    READ_SSHORT 0x206 radius_pixels
+    // Cone, ray, rectangular and lined-up areas need different placement logic.
+    PATCH_IF (NOT (~%signature%~ STRING_EQUAL ~PRO V1.0~)
+      OR projectile_type != 3 OR (extended_flags BAND 0xc002) != 0
+      OR (area_flags BAND 0x4800) != 0 OR radius_pixels = 0) BEGIN
+      PATCH_FAIL ~Component 256: unsupported area shape for %res% (%projectile_res%).~
+    END
+    SET radius = ((ABS radius_pixels) + 15) / 16
+  BUT_ONLY
+END
+
+// A macro deliberately exports these named variables to the installer scope.
+// A function would require every caller to repeat the 64-result RET list.
+DEFINE_ACTION_MACRO csr256_spells_preflight BEGIN
+  OUTER_SET csr256_glitter_state = (0 - 1)
+  ACTION_IF FILE_EXISTS_IN_GAME ~SPLSTATE.IDS~ BEGIN
+    OUTER_SET csr256_glitter_state = IDS_OF_SYMBOL (~SPLSTATE~ ~GLITTERDUST~)
+  END
+  ACTION_FOR_EACH csr256_script IN ~CSR26FMA~ ~CSR26CMA~ ~CSR26MEL~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%csr256_script%.BCS~ BEGIN
+      FAIL ~Component 256: owned script name %csr256_script%.BCS already exists.~
+    END
+  END
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~SPELL.IDS~ BEGIN
+    FAIL ~Component 256 requires the installed SPELL.IDS.~
+  END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_STONE_SKIN~ RET csr256_stoneskin_res=res csr256_stoneskin_level=level csr256_stoneskin_id=id csr256_stoneskin_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_MIRROR_IMAGE~ RET csr256_mirrorimage_res=res csr256_mirrorimage_level=level csr256_mirrorimage_id=id csr256_mirrorimage_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_SHIELD~ RET csr256_shield_res=res csr256_shield_level=level csr256_shield_id=id csr256_shield_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_FIRE_SHIELD_RED~ RET csr256_fireshield_res=res csr256_fireshield_level=level csr256_fireshield_id=id csr256_fireshield_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_PROTECTION_FROM_FIRE~ RET csr256_protfire_res=res csr256_protfire_level=level csr256_protfire_id=id csr256_protfire_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_SPIRIT_ARMOR~ RET csr256_spiritarmor_res=res csr256_spiritarmor_level=level csr256_spiritarmor_id=id csr256_spiritarmor_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_MINOR_SPELL_DEFLECTION~ RET csr256_minordeflect_res=res csr256_minordeflect_level=level csr256_minordeflect_id=id csr256_minordeflect_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_HASTE~ RET csr256_haste_res=res csr256_haste_level=level csr256_haste_id=id csr256_haste_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_FIREBALL~ RET csr256_fireball_res=res csr256_fireball_level=level csr256_fireball_id=id csr256_fireball_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_FLAME_ARROW~ RET csr256_flamearrow_res=res csr256_flamearrow_level=level csr256_flamearrow_id=id csr256_flamearrow_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_SLOW~ RET csr256_slow_res=res csr256_slow_level=level csr256_slow_id=id csr256_slow_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_GLITTERDUST~ RET csr256_glitterdust_res=res csr256_glitterdust_level=level csr256_glitterdust_id=id csr256_glitterdust_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_GREASE~ RET csr256_grease_res=res csr256_grease_level=level csr256_grease_id=id csr256_grease_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_BREACH~ RET csr256_breach_res=res csr256_breach_level=level csr256_breach_id=id csr256_breach_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_GREATER_MALISON~ RET csr256_malison_res=res csr256_malison_level=level csr256_malison_id=id csr256_malison_range=cast_range END
+  LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_MAGIC_MISSILE~ RET csr256_magicmissile_res=res csr256_magicmissile_level=level csr256_magicmissile_id=id csr256_magicmissile_range=cast_range END
+  LAF csr256_resolve_aoe STR_VAR res=~%csr256_fireball_res%~ RET csr256_fireball_radius=radius END
+  LAF csr256_resolve_aoe STR_VAR res=~%csr256_grease_res%~ RET csr256_grease_radius=radius END
+  LAF csr256_resolve_aoe STR_VAR res=~%csr256_haste_res%~ RET csr256_haste_radius=radius END
+  OUTER_SET csr256_fireball_safety = csr256_fireball_radius + 4
+  OUTER_SET csr256_grease_safety = csr256_grease_radius + 2
+  OUTER_SET csr256_haste_cluster = 5
+  ACTION_IF (csr256_haste_radius < 7) BEGIN
+    OUTER_SET csr256_haste_cluster = csr256_haste_radius - 2
+  END
+  ACTION_IF (csr256_haste_cluster < 1) BEGIN
+    FAIL ~Component 256: installed Haste area is too small for group targeting.~
+  END
+END
