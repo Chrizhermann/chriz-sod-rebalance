@@ -365,7 +365,9 @@ are separated below; the encounters have not been implemented.
 - **DECIDED combat direction (2026-09-08):** level-13 fire and control mages with
   the discussed spell packages and removable prebuffs; stronger finite defensive
   recasting, informed by comparable SCS mages. Start with Slow/Grease and defer
-  Web. Elementals progress from softened lesser variants on Easy/Normal, to four
+  Web. The fire mage also gets one regular Haste with useful-group targeting and
+  ordinary interruptible combat casting. Elementals progress from softened lesser
+  variants on Easy/Normal, to four
   standard on Core, one greater earth on Hard, and one greater of each element
   on Insane. Keep rewards consistent across difficulty and preserve counterplay.
 - **OPEN:** exact positions, remaining numeric/book allocation, dialogue, XP/loot

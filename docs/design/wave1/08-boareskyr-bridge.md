@@ -40,6 +40,12 @@ test, following the accepted recommendation to start with Slow and Grease.
 - Fire: Flame Arrow as the main attack in mixed melee, Fireball at separated
   targets where allies are safe, Magic Missile as an alternative, and a finite
   Breach against meaningful defenses.
+- **Added by the user:** one prepared regular Haste for the fire mage, with
+  explicit combat AI. Use an ordinary interruptible cast after urgent defensive
+  renewal and before routine damage when at least two nearby living elemental/
+  guard allies can benefit. Choose an ally that places the useful group inside
+  the installed spell's area; avoid redundant Haste and exclude unrelated
+  retreating crusaders. Haste is not part of instant preparation.
 - Control: Slow, Glitterdust, one carefully placed Grease, and a finite Breach;
   Greater Malison is the accepted Hard/Insane tuning option.
 - Shared opening defenses: Stoneskin, Mirror Image, Shield. Fire additionally
@@ -84,6 +90,21 @@ slot or displace the requested Stoneskin reserve. On level 2, three Mirror Image
 still leave two slots for the control mage's Glitterdust. On level 3, two Minor
 Spell Deflections leave three Slow copies. Exact unused slots and lower-difficulty
 allowances can be finalized during implementation without inventing extra slots.
+
+The fire mage's five level-3 slots are now **Haste x1, Flame Arrow x2, Fireball x2**.
+This accommodates the requested support spell without using defensive reserves
+or adding slots. Apply the same ordinary availability, casting-failure and shared
+casting-timer checks as other combat spells. Resolve the installed original Haste,
+use normal `Spell()` spending, and do not attach another `RemoveSpell` or use an
+SCS instant-preparation helper for this combat cast.
+
+The current SR Haste does not set ordinary `STATE_HASTED`; its spell-state marker
+188 is the shared `PRIORITY_DISPEL`, not a Haste identifier. Use the owned fresh
+group's preparation contract and single reserved cast to prevent repeats. Do not
+infer foreign/equivalent Haste from those flags; any such detection needs a
+resource-specific compatible check. Existing `BDMAGE01` already provides normal
+ally-targeted Haste casting and cooldown patterns. The source comparison also
+found SCS uses a local one-shot guard for its SR Haste path.
 
 The user approved more recasting; these copy counts are the first implementation
 allocation, not a permanently locked balance value. Revisit them using the combined
@@ -244,6 +265,10 @@ the designated dev copy. Never use the live install for these changes.
 AI validation must show that preparation spends exactly its allocation and leaves
 the documented reserves, intact defenses are not recast, combat renewals use
 ordinary casts/cooldowns, and exhausted books do not replenish themselves.
+For Haste, cover useful group targeting, an already hasted group, insufficient
+eligible allies, the last memorized copy being spent, interruption and higher-
+priority self-defense. Native playtesting must verify the frontline receives the
+installed Haste effects; merely queuing the cast is not delivery evidence.
 
 Native acceptance should focus on actual casting/protections, challenge, elemental
 pathing, formation and progression. Version 1 has no collapse test. Version 2
