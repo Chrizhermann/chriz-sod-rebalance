@@ -16,7 +16,12 @@ Append 256 to the designated dev copy after its existing rows, along with the
 applicable filler corrections from PR #21. An installed 255 stays installed;
 256 supersedes its encounter. Do not reinstall earlier components. Record the
 exact commits and appended WeiDU rows when preparing the combined test copy.
-That combined copy and its checkpoint saves have not yet been prepared.
+The collection's combined installation reached this component on September 9
+and exposed a donor-compatibility guard failure. The source correction and
+copied-resource rehearsal are recorded in the
+[full-stack compatibility note](../research/2026-09-09-bridge-fullstack-compatibility.md).
+Recovery of that retained installation belongs to the collection task; a
+successful rehearsal does not clear its failed receipt or establish checkpoints.
 
 ## Agent verification
 

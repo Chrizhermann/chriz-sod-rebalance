@@ -3,7 +3,9 @@
 // csr256_xp_guard, csr256_xp_elemental; each slot has the same XP in every tier.
 // Fresh resource clones only: this never changes the donors or existing actors.
 
-DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0 BEGIN
+DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0
+  RET csr256_has_monk_policy BEGIN
+  SET csr256_has_monk_policy = 0
   PATCH_IF (SOURCE_SIZE < 0x2d4) BEGIN
     PATCH_FAIL ~#256: truncated creature donor.~
   END
@@ -70,8 +72,42 @@ DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0 BEGIN
       READ_SHORT csr256_b csr256_op
       READ_ASCII (csr256_b + 20) csr256_resource (8) NULL
     END
+    SET csr256_monk_policy = 0
+    PATCH_IF ((csr256_op = 326) AND
+              (~%csr256_resource%~ STRING_EQUAL_CASE ~C0PR#MO1~)) BEGIN
+      // Artisan's Mystic Monk equipment policy, not a combat spell grant.
+      // Retain only the reviewed class-filtered, permanent delivery shape.
+      PATCH_IF csr256_ev BEGIN
+        READ_LONG (csr256_b + 12) csr256_target
+        READ_LONG (csr256_b + 16) csr256_power
+        READ_LONG (csr256_b + 20) csr256_p1
+        READ_LONG (csr256_b + 24) csr256_p2
+        READ_LONG (csr256_b + 28) csr256_timing
+        READ_LONG (csr256_b + 32) csr256_duration
+        READ_SHORT (csr256_b + 36) csr256_prob1
+        READ_SHORT (csr256_b + 38) csr256_prob2
+        READ_LONG (csr256_b + 64) csr256_special
+      END ELSE BEGIN
+        READ_BYTE (csr256_b + 2) csr256_target
+        READ_BYTE (csr256_b + 3) csr256_power
+        READ_LONG (csr256_b + 4) csr256_p1
+        READ_LONG (csr256_b + 8) csr256_p2
+        READ_BYTE (csr256_b + 12) csr256_timing
+        READ_LONG (csr256_b + 14) csr256_duration
+        READ_BYTE (csr256_b + 18) csr256_prob1
+        READ_BYTE (csr256_b + 19) csr256_prob2
+        READ_LONG (csr256_b + 44) csr256_special
+      END
+      SET csr256_monk_policy =
+        ((BYTE_AT 0x273 = 1 OR BYTE_AT 0x273 = 19) AND
+         csr256_target = 0 AND csr256_power = 0 AND
+         (csr256_p1 = 1 OR csr256_p1 = 19) AND csr256_p2 = 105 AND
+         csr256_timing = 1 AND csr256_duration = 0 AND
+         csr256_prob1 = 100 AND csr256_prob2 = 0 AND csr256_special = 0)
+      PATCH_IF csr256_monk_policy BEGIN SET csr256_has_monk_policy = 1 END
+    END
     PATCH_IF NOT ((csr256_op = 233) OR (csr256_op = 293) OR
-      (csr256_op = 187) OR
+      (csr256_op = 187) OR csr256_monk_policy OR
       ((csr256_op = 326) AND
         ((~%csr256_resource%~ STRING_EQUAL_CASE ~C0PR#AT1~) OR
          (~%csr256_resource%~ STRING_EQUAL_CASE ~C0PR#MF1~) OR
@@ -85,6 +121,29 @@ DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0 BEGIN
       PATCH_FAIL ~#256: unreviewed donor effect %csr256_op% (%csr256_resource%); refusing to duplicate encounter effects.~
     END
   END
+END
+
+DEFINE_ACTION_FUNCTION csr256_check_monk_policy BEGIN
+  ACTION_FOR_EACH csr256_helper IN ~C0PR#MO1.SPL~ ~C0PR#MO2.SPL~ ~SPLPROT.2DA~ BEGIN
+    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr256_helper%~ BEGIN
+      FAIL ~#256: monk equipment policy is missing %csr256_helper%.~
+    END
+  END
+  // Opcode 326 row 105 must still mean CLASS equals effect parameter1.
+  // Only installations that carry this helper need the extra compatibility check.
+  COPY_EXISTING ~SPLPROT.2DA~ ~override~
+    COUNT_2DA_ROWS 4 csr256_policy_rows
+    PATCH_IF (csr256_policy_rows <= 105) BEGIN
+      PATCH_FAIL ~#256: monk equipment policy requires SPLPROT row 105.~
+    END
+    READ_2DA_ENTRY 105 1 4 csr256_policy_stat
+    READ_2DA_ENTRY 105 2 4 csr256_policy_value
+    READ_2DA_ENTRY 105 3 4 csr256_policy_relation
+    PATCH_IF (csr256_policy_stat != 0x10d OR csr256_policy_value != (0 - 1) OR
+              csr256_policy_relation != 1) BEGIN
+      PATCH_FAIL ~#256: monk equipment policy SPLPROT row 105 changed semantics.~
+    END
+  BUT_ONLY
 END
 
 DEFINE_PATCH_FUNCTION csr256_check_fist BEGIN
@@ -149,8 +208,10 @@ DEFINE_ACTION_FUNCTION csr256_creatures_preflight BEGIN
     ACTION_IF (~%csr256_donor%~ STRING_EQUAL ~BDOLONEI~) BEGIN OUTER_SET csr256_expected = 1 END
     ACTION_IF (~%csr256_donor%~ STRING_EQUAL ~BDCRUE45~) BEGIN OUTER_SET csr256_expected = 2 END
     COPY_EXISTING ~%csr256_donor%.CRE~ ~override~
-      LPF csr256_check_cre INT_VAR expected_class = csr256_expected END
+      LPF csr256_check_cre INT_VAR expected_class = csr256_expected
+        RET csr256_has_monk_policy END
     BUT_ONLY
+    ACTION_IF csr256_has_monk_policy BEGIN LAF csr256_check_monk_policy END END
   END
   ACTION_FOR_EACH csr256_fist IN ~FIREELEL~ ~%csr256_earth_weapon%~ BEGIN
     COPY_EXISTING ~%csr256_fist%.ITM~ ~override~ LPF csr256_check_fist END BUT_ONLY

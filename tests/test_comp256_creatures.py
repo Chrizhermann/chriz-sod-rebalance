@@ -95,6 +95,39 @@ def item(fire=False):
     return bytes(b)
 
 
+def monk_policy_creature(version=1, **changes):
+    """Artisan's reviewed class-filtered equipment helpers in either CRE format."""
+    b = bytearray(creature(version=version))
+    fields = dict(target=0, power=0, param2=105, timing=1, duration=0,
+                  prob1=100, prob2=0, special=0)
+    fields.update(changes)
+    layouts = ({'target': (2, 'B'), 'power': (3, 'B'), 'param1': (4, 'I'),
+                'param2': (8, 'I'), 'timing': (12, 'B'), 'duration': (14, 'I'),
+                'prob1': (18, 'B'), 'prob2': (19, 'B'), 'special': (44, 'I')},
+               {'target': (12, 'I'), 'power': (16, 'I'), 'param1': (20, 'I'),
+                'param2': (24, 'I'), 'timing': (28, 'I'), 'duration': (32, 'I'),
+                'prob1': (36, 'H'), 'prob2': (38, 'H'), 'special': (64, 'I')})
+    for cls in (19, 1):
+        effect = bytearray(264 if version else 48)
+        if version:
+            effect[:8] = b'EFF V2.0'
+        struct.pack_into('<I' if version else '<H', effect, 8 if version else 0, 326)
+        for key, value in {'param1': cls, **fields}.items():
+            off, fmt = layouts[version][key]
+            struct.pack_into('<' + fmt, effect, off, value)
+        off = 40 if version else 20
+        effect[off:off+8] = b'C0PR#MO1'
+        b += effect
+    struct.pack_into('<I', b, 0x2c8, 4)
+    return bytes(b)
+
+
+def effects(b):
+    off, count = u(b, 0x2c4), u(b, 0x2c8)
+    size = 264 if b[0x33] else 48
+    return [b[off+i*size:off+(i+1)*size] for i in range(count)]
+
+
 def book(b):
     return collections.Counter(s(b, u(b, 0x2b0)+i*12) for i in range(u(b, 0x2b4)))
 
@@ -320,6 +353,93 @@ LAF csr256_creatures_preflight END
         self.resource('BDOLONEI.CRE').write_bytes(b)
         self.assertNotEqual(self.run_install(), 0)
         self.assertIn('unreviewed donor effect', self.output)
+        self.assertFalse(self.owned_resources())
+
+    def seed_monk_policy(self, row='0x10d -1 1', count=106):
+        for ref in ('C0PR#MO1.SPL', 'C0PR#MO2.SPL'):
+            self.resource(ref).write_bytes(b'unchanged external helper')
+        table = '2DA V1.0\n0xffff\nSTAT VALUE RELATION\n'
+        table += ''.join(f'{i} {row if i == 105 else "0 0 0"}\n' for i in range(count))
+        self.resource('SPLPROT.2DA').write_text(table)
+
+    def assert_monk_policy_preserved(self, version):
+        self.seed_monk_policy()
+        donor = monk_policy_creature(version)
+        self.resource('BDOLONEI.CRE').write_bytes(donor)
+        helpers = {ref: self.resource(ref).read_bytes() for ref in
+                   ('C0PR#MO1.SPL', 'C0PR#MO2.SPL', 'SPLPROT.2DA')}
+        self.assert_success()
+        for ref in ('CSR256FM', 'CSR256CM'):
+            b = self.read(ref)
+            self.assertEqual(effects(b), [effects(donor)[i] for i in (0, 2, 3)])
+            self.assertEqual(book(b)['SPWI408'], 2)
+            self.assertEqual((u(b, 0x24, 'H'), b[0x234]), (52, 13))
+        self.assertEqual(self.resource('BDOLONEI.CRE').read_bytes(), donor)
+        for ref, payload in helpers.items():
+            self.assertEqual(self.resource(ref).read_bytes(), payload, ref)
+
+    def test_v1_monk_policy_is_preserved_byte_exact_in_both_mages(self):
+        self.assert_monk_policy_preserved(0)
+
+    def test_v2_monk_policy_is_preserved_byte_exact_in_both_mages(self):
+        self.assert_monk_policy_preserved(1)
+
+    def test_monk_policy_signature_drift_fails_before_owned_writes(self):
+        self.seed_monk_policy()
+        for version in (0, 1):
+            for key, value in dict(target=1, power=1, param1=2, param2=104,
+                                   timing=9, duration=1, prob1=99, prob2=1,
+                                   special=1).items():
+                with self.subTest(version=version, field=key):
+                    b = monk_policy_creature(version, **{key: value})
+                    self.resource('BDOLONEI.CRE').write_bytes(b)
+                    self.assertNotEqual(self.run_install(), 0)
+                    self.assertIn('unreviewed donor effect', self.output)
+                    self.assertFalse(self.owned_resources())
+
+    def test_monk_policy_rejects_non_caster_and_unknown_helper(self):
+        self.seed_monk_policy()
+        b = bytearray(monk_policy_creature())
+        b[0x273] = 2
+        self.resource('BDCRUE45.CRE').write_bytes(b)
+        self.assertNotEqual(self.run_install(), 0)
+        self.assertIn('unreviewed donor effect', self.output)
+        self.assertFalse(self.owned_resources())
+        self.resource('BDCRUE45.CRE').write_bytes(self.donors['BDCRUE45.CRE'])
+        self.resource('BDOLONEI.CRE').write_bytes(monk_policy_creature().replace(b'C0PR#MO1', b'C0PR#MOX'))
+        self.assertNotEqual(self.run_install(), 0)
+        self.assertIn('unreviewed donor effect', self.output)
+        self.assertFalse(self.owned_resources())
+
+    def test_v2_monk_policy_checks_special_after_the_save_bonus(self):
+        self.seed_monk_policy()
+        b = bytearray(monk_policy_creature())
+        # Independent mutation: embedded EFF V2 special is at +0x40,
+        # after save type (+0x38) and save bonus (+0x3c).
+        struct.pack_into('<I', b, u(b, 0x2c4) + 2*264 + 0x40, 1)
+        self.resource('BDOLONEI.CRE').write_bytes(b)
+        self.assertNotEqual(self.run_install(), 0)
+        self.assertIn('unreviewed donor effect', self.output)
+        self.assertFalse(self.owned_resources())
+
+    def test_monk_policy_requires_its_helpers_and_class_filter(self):
+        self.resource('BDOLONEI.CRE').write_bytes(monk_policy_creature())
+        for missing in ('C0PR#MO1.SPL', 'C0PR#MO2.SPL', 'SPLPROT.2DA'):
+            with self.subTest(missing=missing):
+                self.seed_monk_policy()
+                self.resource(missing).unlink()
+                self.assertNotEqual(self.run_install(), 0)
+                self.assertIn('monk equipment policy is missing', self.output)
+                self.assertFalse(self.owned_resources())
+        for row in ('0x10c -1 1', '0x10d 1 1', '0x10d -1 5'):
+            with self.subTest(row=row):
+                self.seed_monk_policy(row)
+                self.assertNotEqual(self.run_install(), 0)
+                self.assertIn('changed semantics', self.output)
+                self.assertFalse(self.owned_resources())
+        self.seed_monk_policy(count=105)
+        self.assertNotEqual(self.run_install(), 0)
+        self.assertIn('requires SPLPROT row 105', self.output)
         self.assertFalse(self.owned_resources())
 
     def test_malformed_tables_fail_before_any_owned_resource(self):

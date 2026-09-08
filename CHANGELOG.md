@@ -14,6 +14,11 @@
   roster's 4,520 kill XP across difficulties. No collapse timer in version 1.
   Append after existing 255 if present; use a pre-first-BD2000 save. Native
   combat/rendering acceptance remains pending with PR #21's filler checks.
+- Fix component 256 rejecting Artisan's Mystic Monk equipment-policy effects
+  on its mage donor. Preserve the reviewed helper effects, validate their
+  class filter and dependencies, and continue rejecting unknown donor effects.
+  Rehearse against copied resources from the combined Kitpack/SR/SCS stack;
+  no upstream Kitpack change or native combat acceptance is implied.
 - Add component 135, selected by default: retain the scripted assassin ambush
   while removing its recurring dead-magic spell and misleading area/companion
   remarks. Preserve the assassins, warnings, travel hooks and shared spell.
