@@ -4,12 +4,11 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-This source is the **v0.6.9 release candidate**. The latest published release is
-still v0.6.8; the component overview below describes the candidate.
+Current release: **v0.6.9**. The component overview below describes this version.
 
 ## Components
 
-Candidate additions: **135** is the default treatment of the assassin ambush
+v0.6.9 additions: **135** is the default treatment of the assassin ambush
 (keep the fight, remove dead magic and its misleading remarks). **235** preserves
 Ymori after an older 230 installation. **265**, after 260, puts Mizhena's amulet
 on the existing `Dead_fighter` corpse and removes the missed Guardian and Shadow
@@ -73,7 +72,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-The v0.6.9 candidate exposes **41 declarations in seven install groups**, including
+v0.6.9 exposes **41 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
@@ -106,7 +105,7 @@ Already-spawned creatures retain their saved AI assignments, so 257 requires new
 bridge spawns. Existing area snapshots also retain actors and container contents;
 use the pre-entry saves specified above for those changes.
 
-## Candidate verification boundary
+## Verification boundary
 
 The user accepted the harder bridge build, prompt Bence arrival, save/reload and
 onward crossing. Liia's 22,000 reward/reload, Skie's XP/condolence route, the native
@@ -114,7 +113,7 @@ amulet reward and Guardian removal also have recorded checks. These do not mean
 every component or spell has been tested in a complete campaign. The final 256/257
 split and finite Mislead correction have no new native acceptance; Shadow Aspect
 testing is deferred. The reported unequipped appearance after palace rest remains
-unresolved. The [candidate report](../docs/releases/v0.6.9.md) records the passing
+unresolved. The [release report](../docs/releases/v0.6.9.md) records the passing
 offline checks, including 101 bridge and 13 Mislead tests. Native observations
 remain in the [test record](../docs/playtest/2026-09-09-fast-sod-test-plan.md).
 

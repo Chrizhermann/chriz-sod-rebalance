@@ -452,7 +452,7 @@ are separated below; the encounters have not been implemented.
 - **2026-09-13 Shadow Aspect decision:** the unfinished native summon sample is
   deprioritized and **does not block the current release**. Prioritize removing
   the repeat Mislead chain; default-selected component266's one-use Insane Mislead correction is
-  implemented and offline-verified. See the [candidate report](releases/v0.6.9.md);
+  implemented and offline-verified. See the [release report](releases/v0.6.9.md);
   no new native pass is claimed. The user wants the whole encounter made trivial eventually, as
   deferred work; its exact treatment is still open. Preserve the unfinished
   native result rather than recording a pass or requiring another fight now.

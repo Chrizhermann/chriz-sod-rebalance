@@ -1,10 +1,9 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Latest published release: **v0.6.8**.
-This branch is the **v0.6.9 release candidate**; publication is still pending.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.9**.
 
-The candidate adds **135** (default: keep the assassin ambush without
+v0.6.9 adds **135** (default: keep the assassin ambush without
 dead magic), **235** (preserve Ymori's staged quest after older cuts), and **265**
 (Mizhena's amulet on the existing corpse and the missed creature-ban fixes).
 See the [approved scope and save boundaries](docs/design/wave1/07-filler-triage.md).
@@ -50,7 +49,7 @@ arrival. Confirming Yes uses normal carried-inventory import rules and adds
 included. Requires EET_end and components 110, 140, 150, and 160; install before
 the first palace arrival. It adds no EEex dependency.
 
-The candidate has **41 component declarations in seven install groups**.
+The release has **41 component declarations in seven install groups**.
 Selection depends on installed prerequisites and earlier versions: 176, 235 and
 291 update older components; fresh versions already include those corrections.
 Choose one of 900/901, add 257 only for Extra Challenge, and select 910 only on
@@ -68,9 +67,9 @@ The harder bridge build, prompt Bence arrival, save/reload and onward crossing
 passed the user's [combined playtest](docs/playtest/2026-09-08-bridge-finale.md).
 The final 256/257 split and finite Mislead correction have not received new native
 acceptance; Shadow Aspect testing is deferred. The companion appearance issue
-after palace rest remains unresolved. The [candidate report](docs/releases/v0.6.9.md)
+after palace rest remains unresolved. The [release report](docs/releases/v0.6.9.md)
 records 273 main tests, 41 research tests, 14 ending self-tests, and successful
-WeiDU249 parsing of the TP2 and 56 libraries. These are offline checks; no
-published v0.6.9 package is claimed yet.
+WeiDU249 parsing of the TP2 and 56 libraries. These are offline checks and do
+not extend the native observations above.
 Research and approved designs remain in `docs/`; new encounter designs require
 discussion before implementation.

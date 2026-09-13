@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6.9 - Release candidate
+## v0.6.9 - 2026-09-13
 
 - Add component 256: replace both Boareskyr finale entry routes with two
   wizards, two veteran guards and four difficulty-scaled fire/earth elementals.

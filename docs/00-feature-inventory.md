@@ -1,25 +1,25 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; candidate inventory updated 2026-09-13).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-09-13).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
 Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**41 component
-declarations in seven groups** in the v0.6.9 release candidate),
+declarations in seven groups** in v0.6.9),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.9 release candidate
+## 1. Implemented in source — v0.6.9
 
-The latest published release remains **v0.6.8**. This section describes candidate
-source, not a claim that every component is installed or natively accepted.
+Current release: **v0.6.9**. This section describes release source, not a claim
+that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
 
-**Candidate additions and corrections:**
+**v0.6.9 additions and corrections:**
 135 keeps URE2 without dead magic and misleading descriptions; 235 repairs older
 Ymori cuts while preserving native quest staging; 265 puts Mizhena's amulet in
 BD5000's existing corpse, removes the BD5110 Guardian and Shadow
@@ -139,8 +139,8 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.9 candidate, tail-installable WeiDU mod: **41 declarations
-in seven install groups**. Published release remains v0.6.8 until publication.
+`chriz-sod-remix` v0.6.9, tail-installable WeiDU mod: **41 declarations
+in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
 scope.
@@ -152,11 +152,11 @@ XP/condolence route, the amulet reward and Guardian removal have recorded checks
 The assassin test was a limited spellcasting/persistence sample. Shadow Aspect's
 summon test is unfinished and deprioritized; finite Mislead has no native pass.
 The companion appearance defect remains unresolved. These observations do not
-replace the candidate's separate installer and automated verification evidence:
+replace the release's separate installer and automated verification evidence:
 273 main tests (101 bridge and13 Mislead),41 research tests,14 ending self-tests,
 and WeiDU249 parsing of the TP2 and56 libraries passed. The 256/257 split's common
 AI equivalence and two-pointer-only install/disposable restore passed. See the
-[candidate report](releases/v0.6.9.md).
+[release report](releases/v0.6.9.md).
 
 **Locked decisions already shipped as components (traceability):** item 1 / wave1-02
 keep-party → **110**; item 5 / wave1-01 rest-ambush 5× → **100**; item 10 / wave1-03
@@ -279,7 +279,7 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 
 | Task | Status and next step |
 |------|----------------------|
-| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Regular256 and optional257 implemented in the candidate. The accepted challenge build passed combat/Bence/save-reload/onward playtesting; the final component split has no separate native pass. Collapse timer deferred to version2. |
+| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Regular256 and optional257 included in v0.6.9. The accepted challenge build passed combat/Bence/save-reload/onward playtesting; the final component split has no separate native pass. Collapse timer deferred to version2. |
 | [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Next-version priority after the current release. Chosen of Cyric-style brief: roughly30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
 | [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 historical generated actor cuts verified. Approved quest/creature fixes and the assassin ambush without dead magic are implemented in PR #21; Liia's reward is now set to flat 22,000 per character. Broader density decisions and native acceptance remain. |
 

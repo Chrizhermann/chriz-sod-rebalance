@@ -35,7 +35,7 @@ payload spells as ordinary casts. No installation of this split in the test game
 is claimed.
 All 101 bridge tests passed, including compiled common-AI equivalence and the
 two-pointer-only install/disposable restore contract; see the
-[candidate report](../../releases/v0.6.9.md). This adds no new native acceptance.
+[release report](../../releases/v0.6.9.md). This adds no new native acceptance.
 Preserve both local manifests:
 `bridge-tuning-install-20260913/installed.json` (row 424, preceding balance) and
 `bridge-correction-20260913/installed.json` (row 425, newly accepted challenge),
@@ -233,8 +233,9 @@ yet chosen UI or timing rules. Do not add any hidden timer to version 1.
 These details describe the accepted challenge build. The component257 extraction
 above moves only sequencer preparation/release out of regular component256.
 
-The latest Flame Arrow/Haste/Bence corrections below are installed in Combined
-and await native replay from checkpoint 945. The first native playtest used the earlier formation, level-13 mages,
+The latest Flame Arrow/Haste/Bence build below passed the user's Combined fight
+and progression test. Individual spell delivery was not independently recorded.
+The first native playtest used the earlier formation, level-13 mages,
 mid-combat Haste and no sequencers; the second used Fireball in the sequencer and
 Bence's long approach.
 
