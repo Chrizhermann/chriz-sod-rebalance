@@ -44,9 +44,17 @@ September 14 verification:
 - Read-only remote inspection confirms the failed session remains paused, with
   Khalid at `[2900,1310]` and route/carry markers unset. Direct party-slot identity
   works in that session. This does not prove fresh-entry timing or acceptance.
-- The real Combined game has not yet received the patch. Close it before the
-  prepared installation; reload a clean pre-entry checkpoint afterward. Do not
-  repair the current neutralized Khalid by hand and count that as a product pass.
+- After the user closed the game and authorized installation, public 115 was
+  appended to the real Combined copy as entry 426. All 425 previous entries remain
+  in order; all 37 outputs and the resulting TLK match the rehearsal byte for byte.
+  Input resources outside the change set remain unchanged. Backups and the
+  installation receipt are under the test copy's `khalid-continuity-20260914/`.
+- Reload **CSR TEST 14 - Fully rested** for native acceptance. Direct save parsing
+  confirms no cached BD2000/BD2100, a living party-controlled Khalid, and unset fort
+  progression/continuity markers. GAM/SAV hashes remain unchanged after installation.
+  Enter BD2000 and check control before using the wardstone; then exercise the
+  normal circle and briefing. Do not count a manual repair of the neutralized
+  session as a product pass. Fresh entry and quest-route acceptance remain pending.
 
 ## Decided
 
