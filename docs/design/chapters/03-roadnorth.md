@@ -1,5 +1,11 @@
 # Chapter pass — the road north (Ch. 9: Troll Claw Woods → Forest of Wyrms → Boareskyr Bridge)
 
+**2026-09-08 approved correction:** Ymori is a staged quest actor, not expendable
+filler. Fresh 230 excludes him; tail repair 235 restores his original schedule
+without changing the CRE's native deactivated state. The revised 97 cuts total
+28,850 kill XP and pay 23,100 party XP (80%, rounded to 100). These values supersede
+the older Ymori cut and road-north ledger below. See [triage](../wave1/07-filler-triage.md).
+
 **Status: EARLY DIRECTIONS ONLY (user, 2026-07-10).** Census done —
 `docs/research/13-roadnorth-census.md` (areas verified: BD7100 Troll Claw Woods →
 *optional* BD7200 Forest of Wyrms + BD7210 dragon cave / BD7220 / BD7230 temple →
@@ -128,8 +134,12 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
    **Updated direction 2026-09-05 — [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14):**
    remove all smokepowder barrels and related mechanics. Proposed replacement:
    losing crusaders use multiple wizards and fire/earth elementals to destroy the
-   bridge, with difficulty scaling. Exact encounter/progression design is OPEN;
-   see `docs/01-remix-wishlist.md`, September 5 additions.
+   bridge, with difficulty scaling. **First-version outline approved 2026-09-08:**
+   two wizards, two earth and two fire elementals, two veteran guards; preserve
+   siege/retreat and Bence aftermath. Actual collapse pressure is deferred to
+   version 2, with an obvious, generous timer (user proposal: roughly five turns,
+   enough even on Insane). Detailed tuning/coordinates remain OPEN. See the
+   [bridge design](../wave1/08-boareskyr-bridge.md).
 4. Temple relocation target + the cave/temple/Ziatar/Neothelid recomposition (item 15
    fight shape).
 5. Morentherene treatment (item 16 optional component; she guards the cave→temple

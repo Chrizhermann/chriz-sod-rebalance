@@ -1,0 +1,229 @@
+// Append-only correction for the approved 240/260 filler cuts.
+// The caller sets csr265_repair260 / csr265_repair240 from MOD_IS_INSTALLED.
+// Preflight every selected resource before any resource write. Existing saves
+// cache visited AREs: these ARE repairs apply to fresh/unvisited areas only.
+// No XP changes here; integration owns the new, once-only ledger delta.
+
+ACTION_IF NOT (((csr265_repair260 = 0) OR (csr265_repair260 = 1)) AND
+               ((csr265_repair240 = 0) OR (csr265_repair240 = 1))) BEGIN
+  FAIL ~chriz-sod-remix #265: invalid dependency flags.~
+END
+OUTER_SPRINT csr265_nl ~%MNL%?%LNL%~
+OUTER_SET csr265_old_item = 0
+OUTER_SET csr265_old_ash = 0
+OUTER_SPRINT csr265_item_head ~IF%csr265_nl%  Global("bd_add_mizhena_amulet","bd5000",0)%csr265_nl%THEN%csr265_nl%~
+OUTER_SPRINT csr265_item_response ~  RESPONSE #33%csr265_nl%    SetGlobal("bd_add_mizhena_amulet","bd5000",1)%csr265_nl%~
+OUTER_SPRINT csr265_item_old ~%csr265_item_head%%csr265_item_response%    GiveItemCreate("bdmisc68","Displacer Beast 1",0,0,0)[^%WNL%]*%csr265_nl%%csr265_item_response%    GiveItemCreate("bdmisc68","Displacer Beast 2",0,0,0)[^%WNL%]*%csr265_nl%%csr265_item_response%    GiveItemCreate("bdmisc68","Displacer Beast 3",0,0,0)[^%WNL%]*%csr265_nl%END~
+OUTER_SPRINT csr265_item_current ~%csr265_item_head%%csr265_item_response%%csr265_item_response%%csr265_item_response%END~
+OUTER_SPRINT csr265_ash_head ~IF%csr265_nl%  !StateCheck(Myself,STATE_INVISIBLE)%csr265_nl%  Difficulty(HARDEST)%csr265_nl%  !GlobalTimerNotExpired("bd_summons","locals")%csr265_nl%  See(NearestEnemyOf(Myself))%csr265_nl%THEN%csr265_nl%  RESPONSE #100%csr265_nl%    SetGlobalTimer("bd_summons","locals",TEN_ROUNDS)%csr265_nl%    ApplySpell(Myself,WIZARD_SHADOW_DOOR)%csr265_nl%    ApplySpell(Myself,WIZARD_DARKNESS_15_FOOT)%csr265_nl%    CreateCreatureObject("bdshad04",Myself,1,0,0)[^%WNL%]*%csr265_nl%    CreateCreatureObject("bdshad04",Myself,1,0,0)[^%WNL%]*%csr265_nl%~
+OUTER_SPRINT csr265_soul ~    CreateCreatureObject("bdshsoul",Myself,1,0,0)[^%WNL%]*%csr265_nl%~
+OUTER_SPRINT csr265_ash_tail ~    Continue()%csr265_nl%END~
+
+DEFINE_PATCH_MACRO csr265_are_header BEGIN
+  PATCH_IF (SOURCE_SIZE < 0xf4) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265: truncated ARE header.~
+  END
+  READ_ASCII 0 csr265_sig (8)
+  PATCH_IF NOT (~%csr265_sig%~ STRING_EQUAL_CASE ~AREAV1.0~) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265: expected AREAV1.0.~
+  END
+  READ_LONG 0x54 csr265_ao
+  READ_SHORT 0x58 csr265_ac
+  PATCH_IF ((csr265_ao < 0xf4) OR (csr265_ao > SOURCE_SIZE) OR
+            (csr265_ac > (SOURCE_SIZE - csr265_ao) / 0x110)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265: actor table is out of bounds.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr265_check5000 BEGIN
+  LAUNCH_PATCH_MACRO csr265_are_header
+  // The three old script recipients must really be suppressed, not merely
+  // assumed absent because an earlier component appears in WeiDU.log.
+  PATCH_FOR_EACH csr265_number IN 1 2 3 BEGIN
+    SET csr265_hits = 0
+    FOR (csr265_i = 0; csr265_i < csr265_ac; csr265_i += 1) BEGIN
+      SET csr265_b = csr265_ao + csr265_i * 0x110
+      READ_ASCII csr265_b csr265_name (32) NULL
+      PATCH_IF (~%csr265_name%~ STRING_EQUAL ~Displacer Beast %csr265_number%~) BEGIN
+        SET csr265_hits += 1
+        READ_ASCII (csr265_b + 0x80) csr265_cre (8) NULL
+        READ_LONG (csr265_b + 0x40) csr265_schedule
+        PATCH_IF NOT ((~%csr265_cre%~ STRING_EQUAL ~BDDISPBE~) AND
+                      ((csr265_schedule BAND 0xffffff) = 0)) BEGIN
+          PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: an amulet recipient is not a suppressed displacer beast.~
+        END
+      END
+    END
+    PATCH_IF (csr265_hits != 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: expected one Displacer Beast %csr265_number% actor.~
+    END
+  END
+  READ_LONG 0x70 csr265_co
+  READ_SHORT 0x74 csr265_cc
+  READ_SHORT 0x76 csr265_ic
+  READ_LONG 0x78 csr265_io
+  PATCH_IF ((csr265_cc < 1) OR (csr265_co < 0xf4) OR (csr265_co > SOURCE_SIZE) OR
+            (csr265_cc > (SOURCE_SIZE - csr265_co) / 0xc0) OR
+            (csr265_ic = 0xffff) OR (csr265_io < 0) OR (csr265_io > SOURCE_SIZE) OR
+            ((csr265_ic > 0) AND (csr265_io < 0xf4)) OR
+            (csr265_ic > (SOURCE_SIZE - csr265_io) / 0x14)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: unsafe container/item table.~
+  END
+  PATCH_IF ((csr265_ic > 0) AND
+            (csr265_io < csr265_co + csr265_cc * 0xc0) AND
+            (csr265_co < csr265_io + csr265_ic * 0x14)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: container/item tables overlap.~
+  END
+  SET csr265_hits = 0
+  FOR (csr265_i = 0; csr265_i < csr265_cc; csr265_i += 1) BEGIN
+    SET csr265_b = csr265_co + csr265_i * 0xc0
+    READ_ASCII csr265_b csr265_name (32) NULL
+    READ_LONG (csr265_b + 0x40) csr265_first
+    READ_LONG (csr265_b + 0x44) csr265_count
+    PATCH_IF ((csr265_first < 0) OR (csr265_first > csr265_ic) OR
+              (csr265_count < 0) OR (csr265_count > csr265_ic - csr265_first)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: container item run is out of bounds.~
+    END
+    FOR (csr265_j = 0; csr265_j < csr265_i; csr265_j += 1) BEGIN
+      READ_LONG (csr265_co + csr265_j * 0xc0 + 0x40) csr265_other_first
+      READ_LONG (csr265_co + csr265_j * 0xc0 + 0x44) csr265_other_count
+      PATCH_IF ((csr265_count > 0) AND (csr265_other_count > 0) AND
+                (csr265_first < csr265_other_first + csr265_other_count) AND
+                (csr265_other_first < csr265_first + csr265_count)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: container item runs overlap.~
+      END
+    END
+    PATCH_IF (~%csr265_name%~ STRING_EQUAL ~Dead_fighter~) BEGIN
+      SET csr265_hits += 1
+      READ_SHORT (csr265_b + 0x20) csr265_x
+      READ_SHORT (csr265_b + 0x22) csr265_y
+      PATCH_IF ((csr265_x != 4295) OR (csr265_y != 1098)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: Dead_fighter moved from the audited location.~
+      END
+      SET csr265_target = csr265_b
+      SET csr265_target_first = csr265_first
+      SET csr265_target_count = csr265_count
+    END
+  END
+  PATCH_IF (csr265_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: expected exactly one Dead_fighter container.~
+  END
+  SET csr265_amulets = 0
+  FOR (csr265_i = 0; csr265_i < csr265_ic; csr265_i += 1) BEGIN
+    READ_ASCII (csr265_io + csr265_i * 0x14) csr265_item (8) NULL
+    PATCH_IF (~%csr265_item%~ STRING_EQUAL ~BDMISC68~) BEGIN
+      SET csr265_amulets += 1
+      PATCH_IF ((csr265_i < csr265_target_first) OR
+                (csr265_i >= csr265_target_first + csr265_target_count)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: existing amulet is outside Dead_fighter; refusing duplicate placement.~
+      END
+    END
+  END
+  PATCH_IF (csr265_amulets > 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BD5000]: duplicate amulets already exist.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr265_check5110 BEGIN
+  LAUNCH_PATCH_MACRO csr265_are_header
+  SET csr265_hits = 0
+  FOR (csr265_i = 0; csr265_i < csr265_ac; csr265_i += 1) BEGIN
+    SET csr265_b = csr265_ao + csr265_i * 0x110
+    READ_ASCII (csr265_b + 0x80) csr265_cre (8) NULL
+    READ_SHORT (csr265_b + 0x20) csr265_x
+    READ_SHORT (csr265_b + 0x22) csr265_y
+    PATCH_IF ((~%csr265_cre%~ STRING_EQUAL ~BDUNSLGU~) AND
+              (csr265_x = 681) AND (csr265_y = 924)) BEGIN
+      SET csr265_hits += 1
+      SET csr265_guardian = csr265_b
+    END
+  END
+  PATCH_IF (csr265_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BD5110]: expected one Guardian at 681,924.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr265_check_item_script BEGIN
+  COUNT_REGEXP_INSTANCES ~%csr265_item_old%~ csr265_old_item
+  COUNT_REGEXP_INSTANCES ~%csr265_item_current%~ csr265_current_item
+  COUNT_REGEXP_INSTANCES ~"bdmisc68"~ csr265_item_refs
+  PATCH_IF NOT (((csr265_old_item = 1) AND (csr265_current_item = 0) AND (csr265_item_refs = 3)) OR
+                ((csr265_old_item = 0) AND (csr265_current_item = 1) AND (csr265_item_refs = 0))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BD5000 script]: amulet grant branches differ from the original/corrected contract.~
+  END
+END
+DEFINE_PATCH_MACRO csr265_check_ashiruk BEGIN
+  COUNT_REGEXP_INSTANCES ~%csr265_ash_head%%csr265_soul%%csr265_soul%%csr265_ash_tail%~ csr265_old_ash
+  COUNT_REGEXP_INSTANCES ~%csr265_ash_head%%csr265_ash_tail%~ csr265_current_ash
+  COUNT_REGEXP_INSTANCES ~"bdshsoul"~ csr265_soul_refs
+  PATCH_IF NOT (((csr265_old_ash = 1) AND (csr265_current_ash = 0) AND (csr265_soul_refs = 2)) OR
+                ((csr265_old_ash = 0) AND (csr265_current_ash = 1) AND (csr265_soul_refs = 0))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #265 [BDASHIRU]: HARDEST summon block differs from the original/corrected contract.~
+  END
+END
+
+// Read-only preflight phase. COPY_EXISTING - cannot create resource backups.
+ACTION_IF (csr265_repair260 = 1) BEGIN
+  COPY_EXISTING - ~BD5000.ARE~ ~override~ LAUNCH_PATCH_MACRO csr265_check5000
+  COPY_EXISTING - ~BD5110.ARE~ ~override~ LAUNCH_PATCH_MACRO csr265_check5110
+  COPY_EXISTING - ~BD5000.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN LAUNCH_PATCH_MACRO csr265_check_item_script END
+END
+ACTION_IF (csr265_repair240 = 1) BEGIN
+  COPY_EXISTING - ~BDASHIRU.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN LAUNCH_PATCH_MACRO csr265_check_ashiruk END
+END
+
+ACTION_IF (csr265_repair260 = 1) BEGIN
+  COPY_EXISTING ~BD5000.ARE~ ~override~
+    LAUNCH_PATCH_MACRO csr265_check5000
+    PATCH_IF (csr265_amulets = 0) BEGIN
+      // Relocate the full raw item table to EOF, inserting one record after
+      // the target run. Other tables/payloads do not move; preserve all charges,
+      // flags, expired fields, randomiser tokens, and unrelated container bytes.
+      SET csr265_insert = csr265_target_first + csr265_target_count
+      SET csr265_new_io = BUFFER_LENGTH
+      INSERT_BYTES csr265_new_io ((csr265_ic + 1) * 0x14)
+      FOR (csr265_i = 0; csr265_i < csr265_ic; csr265_i += 1) BEGIN
+        SET csr265_dest = csr265_i
+        PATCH_IF (csr265_i >= csr265_insert) BEGIN SET csr265_dest += 1 END
+        FOR (csr265_j = 0; csr265_j < 0x14; csr265_j += 4) BEGIN
+          READ_LONG (csr265_io + csr265_i * 0x14 + csr265_j) csr265_value
+          WRITE_LONG (csr265_new_io + csr265_dest * 0x14 + csr265_j) csr265_value
+        END
+      END
+      WRITE_ASCIIE (csr265_new_io + csr265_insert * 0x14) ~BDMISC68~ #8
+      WRITE_LONG 0x78 csr265_new_io
+      WRITE_SHORT 0x76 (csr265_ic + 1)
+      FOR (csr265_i = 0; csr265_i < csr265_cc; csr265_i += 1) BEGIN
+        SET csr265_b = csr265_co + csr265_i * 0xc0
+        READ_LONG (csr265_b + 0x40) csr265_first
+        PATCH_IF (csr265_b = csr265_target) BEGIN
+          WRITE_LONG (csr265_b + 0x44) (csr265_target_count + 1)
+        END ELSE PATCH_IF (csr265_first >= csr265_insert) BEGIN
+          WRITE_LONG (csr265_b + 0x40) (csr265_first + 1)
+        END
+      END
+    END
+  BUT_ONLY
+  COPY_EXISTING ~BD5110.ARE~ ~override~
+    LAUNCH_PATCH_MACRO csr265_check5110
+    WRITE_LONG (csr265_guardian + 0x40) 0
+  BUT_ONLY
+  ACTION_IF (csr265_old_item = 1) BEGIN
+    COPY_EXISTING ~BD5000.BCS~ ~override~
+      DECOMPILE_AND_PATCH BEGIN
+        LAUNCH_PATCH_MACRO csr265_check_item_script
+        REPLACE_TEXTUALLY ~    GiveItemCreate("bdmisc68","Displacer Beast [123]",0,0,0)[^%WNL%]*%csr265_nl%~ ~~
+      END
+    BUT_ONLY
+  END
+END
+ACTION_IF ((csr265_repair240 = 1) AND (csr265_old_ash = 1)) BEGIN
+  COPY_EXISTING ~BDASHIRU.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LAUNCH_PATCH_MACRO csr265_check_ashiruk
+      REPLACE_TEXTUALLY ~%csr265_soul%~ ~~
+    END
+  BUT_ONLY
+END

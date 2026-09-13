@@ -1,0 +1,28 @@
+{
+  "world_rectangle": [
+    1152,
+    1728,
+    1600,
+    1984
+  ],
+  "tile_columns_inclusive": [
+    18,
+    24
+  ],
+  "tile_rows_inclusive": [
+    27,
+    30
+  ],
+  "day": {
+    "source_sha256": "6b36f854f8be533b03e471d4f28d4d0f53b347cc0724f1d2278e49987f5fc758",
+    "edit_sha256": "3f2442f51b39de7962581290e33a5e30e98d6a7be02ceb167d103cc799164151",
+    "pvrz_sha256": "c8bf64125b8af5ca744eef19103a6ac0b34829e7bd3341707fe647ccdd48d7cc",
+    "palette_sha256": "2f9d0462be0235cdf0690f5e78c04e8c2248c3eb262c5c7cc34d09312f043f82"
+  },
+  "night": {
+    "source_sha256": "f27e810e06e1a125878b4ddc3a2d2125f5eb910f871aa410574587226140baf4",
+    "edit_sha256": "2478ecccd6275446848519032f800bed1147c6786318ee9d6c493c8af770727c",
+    "pvrz_sha256": "652e61a46e68ebfdc167dc8e7c472f866ad0e3d6100f01ff79f579e240634d1c",
+    "palette_sha256": "785d5f083651d21feb260b7fff55e5490367a9ce9ce32bcdcfa98f4431e55575"
+  }
+}

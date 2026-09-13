@@ -1,5 +1,73 @@
 # Changelog
 
+## v0.6.9 - 2026-09-13
+
+- Add component 256: replace both Boareskyr finale entry routes with two
+  wizards, two veteran guards and four difficulty-scaled fire/earth elementals.
+  Use finite prebuffs and defensive recasts, ordinary interruptible combat spells,
+  one group Haste on enemy sighting, targeting an elemental, and conservative
+  area-spell placement. Credit
+  Sword Coast Stratagems for the adapted defensive priorities.
+- Remove the bridge's explosive actors, portal controller, obsolete warning and
+  map note, animated effects and painted barrel piles in both day/night art.
+  Preserve army retreat, Bence's aftermath and onward-passage controls. Reword
+  the later Bwoosh provenance without changing that quest. Keep the old fixed
+  roster's 4,520 kill XP across difficulties. No collapse timer in version 1.
+  Append after existing 255 if present; use a pre-first-BD2000 save. The user
+  accepted the stronger bridge fight, prompt Bence arrival, save/reload and
+  onward crossing during the combined playtest.
+- Strengthen the bridge opening after playtest: move the mages back, share actual
+  enemy sightings, and use level-14 Insane variants. Optional component **257**
+  adds one finite full sequencer to each Insane mage. Earth uses Greater Malison
+  then Slow; fire uses Spell Revisions Dispel Magic
+  (Remove Magic otherwise) then Flame Arrow, replacing the Fireball payload that
+  never released in the stronger replay. Other tiers retain level-13 mages.
+  After victory and combat clearance, Bence appears beside the party to initiate
+  his existing wrap and open the passage, replacing the slow walk from his old
+  spawn. Eight enemies, total XP and defensive reserves remain unchanged.
+  Regular component **256** keeps Haste and all other improvements, without
+  sequencer preparation or release. The optional component switches only the
+  two Insane mages' AI; no additional enemies, statistics or XP changes.
+  Haste now waits for the fire mage's own enemy sighting and targets an elemental,
+  while nearby guards can benefit. The final optional split is verified through
+  compiled-script and installer tests; individual native spell delivery was not
+  independently recorded during the accepted fight.
+- Fix component 256 rejecting Artisan's Mystic Monk equipment-policy effects
+  on its mage donor. Preserve the reviewed helper effects, validate their
+  class filter and dependencies, and continue rejecting unknown donor effects.
+  Rehearse against copied resources from the combined Kitpack/SR/SCS stack;
+  no upstream Kitpack change or native combat acceptance is implied.
+- Add component 135, selected by default: retain the scripted assassin ambush
+  while removing its recurring dead-magic spell and misleading area/companion
+  remarks. Preserve the assassins, warnings, travel hooks and shared spell.
+- Put Mizhena's amulet on the approved existing BD5000 corpse and remove the
+  obsolete grants to suppressed displacers. Component 265 preserves existing
+  container contents, removes the missed BD5110 Guardian and Shadow Aspect's
+  Shadowed Soul summons. Apply the Guardian's 3,200 party-XP
+  allowance at the existing chapter reward (106,800 total).
+- Preserve Ymori's original dormant quest actor in fresh 230 and append repair
+  235 for older cuts. Correct the future road-north reward to 23,100 party XP.
+  No saved areas or previously paid awards are modified.
+- Record the campaign filler audit, approved triage, and prologue XP recount.
+  Set Liia's reward to the approved flat 22,000 XP per character on every
+  difficulty. Fresh 175 uses this amount; append 176 to update an older award
+  without reinstalling 175 or deducting previously received XP.
+- Add default component **266**: limit Shadow Aspect's Insane Mislead to one
+  use per actor. Preserve its first cast, ordinary invisibility, other AI and
+  remaining summons. The repeated chain is removed; broader encounter
+  trivialization and the unfinished native summon check are deferred.
+- Fix restored Skie's recruitment XP to follow the native SoD companion tiers
+  based on protagonist XP, without lowering higher XP or changing her class/kit.
+  Give the condolence reply an appropriate response, retain her rejoin dialogue,
+  and convert matching locked SCS potions to their ordinary movable versions
+  after recruitment. Preserve installed potion mechanics.
+- Preserve the verified Xan/Yeslick companion aliases through the palace strip
+  and keep Shar-Teel's field rejoin route usable. These changes do not resolve
+  the reported equipment-appearance issue after resting; that remains open.
+- Next version: design the Ashatiel Chosen-of-Cyric-style fight with the user,
+  including a preparation window and enemy prebuffs. No new encounter design is
+  silently selected as part of this release.
+
 ## v0.6.8 - 2026-09-06
 
 - Fix component 900 failing on a camp chest containing additional or replaced

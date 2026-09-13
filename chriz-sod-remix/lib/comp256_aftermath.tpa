@@ -1,0 +1,70 @@
+// Bence must complete his existing wrap before the door opens and the Bhaal
+// crossing advances the story. Bring him to the party after victory.
+DEFINE_ACTION_FUNCTION csr256_aftermath_preflight BEGIN
+  COPY_EXISTING - ~BDBENCE.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CSR256_BENCE_TRY~ csr256_bence_hits
+    // WeiDU reports -1 for an empty decompiled script; only real hits conflict.
+    PATCH_IF csr256_bence_hits > 0 BEGIN
+      PATCH_FAIL ~#256: the owned Bence approach is already installed.~
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr256_aftermath_install BEGIN
+  // Our pending-wrap wait suppresses lower script blocks. Preserve the native
+  // one-time AI initialization first, copying its existing block only when the
+  // reviewed shape is present; do not impose these settings on foreign scripts.
+  OUTER_SPRINT csr256_bence_init ~~
+  COPY_EXISTING - ~BDBENCE.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN
+    REPLACE_EVALUATE CASE_INSENSITIVE ~IF[%WNL% ]+Global("bd_ai_controls","locals",0)[%WNL% ]+OR(2)[%WNL% ]+AreaCheck("bd2000")[%WNL% ]+AreaCheck("bd4300")[%WNL% ]+THEN[%WNL% ]+RESPONSE #100[%WNL% ]+SetGlobal("bd_ai_controls","locals",1)[%WNL% ]+SetGlobal("bd_no_assist","locals",2)[%WNL% ]+SetGlobal("bd_no_combat","locals",1)[%WNL% ]+SetGlobal("bd_no_search","locals",1)[%WNL% ]+END~ BEGIN
+      SPRINT csr256_bence_init ~%MATCH0%~
+    END ~%MATCH0%~
+  END
+  <<<<<<<< .../csr256_bence.baf
+%csr256_bence_init%
+
+IF
+  AreaCheck("BD2000")
+  Global("CSR256_STAGE","BD2000",3)
+  Global("bd_plot","GLOBAL",293)
+  CombatCounter(0)
+  InMyArea(Player1)
+  HPGT(Player1,0)
+  Allegiance(Player1,PC)
+  IsValidForPartyDialogue(Player1)
+  See(Player1)
+  Range(Player1,7)
+  !GlobalTimerNotExpired("CSR256_BENCE_TRY","LOCALS")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("CSR256_BENCE_TRY","LOCALS",2)
+    StartDialogueNoSet(Player1)
+END
+
+IF
+  AreaCheck("BD2000")
+  Global("CSR256_STAGE","BD2000",3)
+  Global("bd_plot","GLOBAL",293)
+  CombatCounter(0)
+  InMyArea(Player1)
+  HPGT(Player1,0)
+  Allegiance(Player1,PC)
+  !Range(Player1,7)
+THEN
+  RESPONSE #100
+    MoveToObject(Player1)
+END
+
+// Suppress older starters only during this exact pending wrap. An unavailable
+// or interrupted conversation is retried; no permanent attempt latch is set.
+IF
+  AreaCheck("BD2000")
+  Global("CSR256_STAGE","BD2000",3)
+  Global("bd_plot","GLOBAL",293)
+THEN
+  RESPONSE #100
+    NoAction()
+END
+>>>>>>>>
+  EXTEND_TOP ~BDBENCE.BCS~ ~.../csr256_bence.baf~ EVALUATE_BUFFER
+END

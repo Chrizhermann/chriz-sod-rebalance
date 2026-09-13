@@ -6,6 +6,11 @@ proposal `design/05`.
 **Scope:** the worldmap travel-ambush system (wishlist item 8): "kill the huge groups; fill
 with nothing or something more interesting/fun."
 
+**2026-09-08 exception decided:** the default treatment of URE2/BD0063 is now to
+**keep the assassin ambush and remove its dead-magic effect**. Alternative installer
+choices remain OPEN; no implementation has landed. See the
+[triage discussion and exact code mechanism](07-filler-triage.md).
+
 ## Mechanism recap (verified, `research/07`)
 Script-driven, not engine-random: wilderness area scripts call
 `ForceRandomEncounterEntry("BD00xx","Exit")` behind a weighted die (`RESPONSE #40` fire /
@@ -15,6 +20,12 @@ one-shot globals (`BD_URE1–4`, never reset). **At most 4 random arenas per pla
 - URE2 → BD0063 dead-magic-zone ambush
 - URE3 → BD0066 goblin horde (38 goblins + 3 ankhegs — the worst pile-on)
 - URE4 → BD0064 hill giants
+
+**Audit correction (2026-09-07):** the eight-hour timer above is the parent-side
+value. Every direct arena initialization resets the shared timer to `1`, so it
+does not guarantee eight-hour spacing after a fired arena. Current BD0066 has
+35 goblins + 3 ankhegs, not the old 38-goblin count. See the
+[current arena/dependency audit](../../research/22c-filler-audit-early-and-travel.md).
 
 Story vignettes URE6–10 (refugees, Myrleena, Ephrik, the Lebass chase) are separate,
 fire-once-on-entry, and **stay untouched** (decided).

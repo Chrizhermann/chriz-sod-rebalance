@@ -1,0 +1,67 @@
+// Repair the older component 230 cut that mistook Ymori for a stray wight.
+// The original ARE record has an all-hours schedule; the CRE's deactivated
+// state keeps him dormant until BD2000YM's native quest Activate() action.
+COPY_EXISTING ~bdymori.cre~ ~override~
+  PATCH_IF (SOURCE_SIZE < 0x2d4) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp235: truncated Ymori creature.~
+  END
+  READ_ASCII 0 csr235_sig (8)
+  READ_LONG 0x20 csr235_state
+  PATCH_IF ((NOT (~%csr235_sig%~ STRING_EQUAL ~CRE V1.0~)) OR ((csr235_state BAND 0x80000) = 0)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp235: Ymori no longer has the native deactivated creature state; refusing to enable an unstaged encounter.~
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bd2000.are~ ~override~
+  READ_ASCII 0 csr235_sig (8)
+  PATCH_IF ((SOURCE_SIZE < 0x11c) OR (NOT (~%csr235_sig%~ STRING_EQUAL ~AREAV1.0~))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp235: expected BD2000 ARE V1.0.~
+  END
+  READ_LONG 0x54 csr235_actors
+  READ_SHORT 0x58 csr235_count
+  PATCH_IF ((csr235_actors < 0x11c) OR (csr235_actors + csr235_count * 0x110 > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp235: invalid BD2000 actor table.~
+  END
+  SET csr235_hits = 0
+  FOR (csr235_i = 0; csr235_i < csr235_count; csr235_i += 1) BEGIN
+    SET csr235_b = csr235_actors + csr235_i * 0x110
+    READ_ASCII (csr235_b + 0x80) csr235_cre (8) NULL
+    READ_SHORT (csr235_b + 0x20) csr235_x
+    READ_SHORT (csr235_b + 0x22) csr235_y
+    PATCH_IF ((~%csr235_cre%~ STRING_EQUAL ~BDYMORI~) AND (csr235_x = 4089) AND (csr235_y = 408)) BEGIN
+      SET csr235_hits += 1
+      READ_LONG (csr235_b + 0x88) csr235_embedded_offset
+      READ_LONG (csr235_b + 0x8c) csr235_embedded
+      PATCH_IF ((csr235_embedded != 0) OR (csr235_embedded_offset != 0)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix comp235: embedded Ymori creature differs from the verified staged resource.~
+      END
+      READ_LONG (csr235_b + 0x40) csr235_schedule
+      PATCH_IF (csr235_schedule = 0) BEGIN
+        WRITE_LONG (csr235_b + 0x40) 0x00ffffff
+      END
+    END
+  END
+  PATCH_IF (csr235_hits != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix comp235: expected one Ymori at (4089,408), found %csr235_hits%.~
+  END
+BUT_ONLY
+
+// Old cuts: 29,025 kill XP -> rounded 80% = 23,200 party XP.
+// Preserve Ymori's 175 XP: 28,850 * .8 = 23,080 -> 23,100.
+// Fresh 230 already pays 23,100. Update the old once-only reward in place;
+// never withdraw or re-award XP in a save that has already received it.
+COPY_EXISTING ~bd2000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    SPRINT csr235_nl ~%MNL%?%LNL%~
+    SPRINT csr235_xp ~SetGlobal("CSR_RN_CHUNK","GLOBAL",1)[ %TAB%%LNL%%MNL%%WNL%]+AddexperienceParty(23\(200\|100\))~
+    SPRINT csr235_block ~IF%csr235_nl%  GlobalGT("bd_plot","global",292)%csr235_nl%  Global("CSR_RN_CHUNK","GLOBAL",0)%csr235_nl%THEN%csr235_nl%  RESPONSE #100%csr235_nl%    %csr235_xp%%csr235_nl%    Continue()%csr235_nl%END~
+    COUNT_REGEXP_INSTANCES ~%csr235_block%~ csr235_hits
+    COUNT_REGEXP_INSTANCES ~%csr235_xp%~ csr235_action_hits
+    PATCH_IF ((csr235_hits != 1) OR (csr235_action_hits != 1)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix comp235: expected one known component 230 XP ledger block.~
+    END
+    REPLACE_TEXTUALLY ~%csr235_xp%~
+~SetGlobal("CSR_RN_CHUNK","GLOBAL",1)
+    AddexperienceParty(23100)~
+  END
+BUT_ONLY

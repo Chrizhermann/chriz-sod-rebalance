@@ -1,0 +1,225 @@
+// The barrels are baked into BD2000's base tiles, as well as its four
+// DOOR07 closed tiles. Replace only those tile records; leave WED doors,
+// wall polygons, water overlays and ARE passage geometry byte-for-byte intact.
+// Art provenance and the exact tile rectangle are in art/bridge/README.md.
+
+DEFINE_PATCH_MACRO csr256_visuals_wed_check BEGIN
+  PATCH_IF (SOURCE_SIZE < 0x20) BEGIN PATCH_FAIL ~#256 art: truncated WED.~ END
+  READ_ASCII 0 csr256_vsig (8)
+  PATCH_IF NOT (~%csr256_vsig%~ STRING_EQUAL_CASE ~WED V1.3~) BEGIN
+    PATCH_FAIL ~#256 art: expected WED V1.3.~
+  END
+  READ_LONG 8 csr256_voc
+  READ_LONG 0xc csr256_vdc
+  READ_LONG 0x10 csr256_vo
+  READ_LONG 0x18 csr256_vdo
+  READ_LONG 0x1c csr256_vdl
+  PATCH_IF ((csr256_voc < 1) OR (csr256_vo < 0x20) OR
+            (csr256_vo > SOURCE_SIZE - 24) OR
+            (csr256_voc > (SOURCE_SIZE - csr256_vo) / 24) OR
+            (csr256_vdc < 1) OR (csr256_vdo < 0x20) OR
+            (csr256_vdo > SOURCE_SIZE) OR
+            (csr256_vdc > (SOURCE_SIZE - csr256_vdo) / 26) OR
+            (csr256_vdl < 0x20) OR (csr256_vdl > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~#256 art: unsafe WED tables.~
+  END
+  READ_SHORT csr256_vo csr256_vw
+  READ_SHORT (csr256_vo + 2) csr256_vh
+  READ_ASCII (csr256_vo + 4) csr256_vtis (8) NULL
+  READ_LONG (csr256_vo + 16) csr256_vtm
+  READ_LONG (csr256_vo + 20) csr256_vlut
+  PATCH_IF ((csr256_vw != 80) OR (csr256_vh != 60) OR
+            NOT (~%csr256_vtis%~ STRING_EQUAL ~%csr256_varea%~) OR
+            (csr256_vtm < 0x20) OR (csr256_vtm > SOURCE_SIZE - 48000) OR
+            (csr256_vlut < 0x20) OR (csr256_vlut > SOURCE_SIZE)) BEGIN
+    PATCH_FAIL ~#256 art: remapped bridge tileset; expected the audited 80 by 60 layout.~
+  END
+  SET csr256_vhits = 0
+  FOR (csr256_vi = 0; csr256_vi < csr256_vdc; csr256_vi += 1) BEGIN
+    SET csr256_vb = csr256_vdo + csr256_vi * 26
+    READ_ASCII csr256_vb csr256_vdoor (8) NULL
+    PATCH_IF (~%csr256_vdoor%~ STRING_EQUAL ~DOOR07~) BEGIN
+      SET csr256_vhits += 1
+      READ_SHORT (csr256_vb + 10) csr256_vfirst
+      READ_SHORT (csr256_vb + 12) csr256_vcount
+      PATCH_IF ((csr256_vcount != 4) OR
+                (csr256_vfirst > (SOURCE_SIZE - csr256_vdl) / 2 - 4)) BEGIN
+        PATCH_FAIL ~#256 art: changed DOOR07 tile run.~
+      END
+      FOR (csr256_vj = 0; csr256_vj < 4; csr256_vj += 1) BEGIN
+        READ_SHORT (csr256_vdl + (csr256_vfirst + csr256_vj) * 2) csr256_vcell
+        SET csr256_vexpect = 2261 + (csr256_vj MODULO 2) + (csr256_vj / 2) * 80
+        PATCH_IF (csr256_vcell != csr256_vexpect) BEGIN
+          PATCH_FAIL ~#256 art: changed DOOR07 tile cells.~
+        END
+      END
+    END
+  END
+  PATCH_IF (csr256_vhits != 1) BEGIN PATCH_FAIL ~#256 art: expected one DOOR07.~ END
+  // A selected tile must never be shared with an unrelated cell. Validate all
+  // primary and alternate references before replacing the existing TIS records.
+  FOR (csr256_vcell = 0; csr256_vcell < 4800; csr256_vcell += 1) BEGIN
+    SET csr256_vb = csr256_vtm + csr256_vcell * 10
+    READ_SHORT csr256_vb csr256_vindex
+    READ_SHORT (csr256_vb + 2) csr256_vcount
+    READ_SHORT (csr256_vb + 4) csr256_valt
+    PATCH_IF ((csr256_vcount < 1) OR
+              (csr256_vindex > (SOURCE_SIZE - csr256_vlut) / 2 - csr256_vcount)) BEGIN
+      PATCH_FAIL ~#256 art: unsafe WED tile lookup.~
+    END
+    SET csr256_vx = csr256_vcell MODULO 80
+    SET csr256_vy = csr256_vcell / 80
+    SET csr256_vselected = (csr256_vx >= 18) AND (csr256_vx <= 24) AND
+                          (csr256_vy >= 27) AND (csr256_vy <= 30)
+    PATCH_IF csr256_vselected BEGIN
+      READ_SHORT (csr256_vlut + csr256_vindex * 2) csr256_vtile
+      PATCH_IF ((csr256_vcount != 1) OR (csr256_vtile != csr256_vcell)) BEGIN
+        PATCH_FAIL ~#256 art: changed primary bridge tile mapping.~
+      END
+      PATCH_IF ((csr256_vcell = 2261) OR (csr256_vcell = 2262) OR
+                (csr256_vcell = 2341) OR (csr256_vcell = 2342)) BEGIN
+        SET csr256_vexpect = 4882 + (csr256_vx - 21) + (csr256_vy - 28) * 2
+        PATCH_IF (csr256_valt != csr256_vexpect) BEGIN
+          PATCH_FAIL ~#256 art: changed closed barrel tile mapping.~
+        END
+      END
+    END
+    FOR (csr256_vj = (0 - 1); csr256_vj < csr256_vcount; csr256_vj += 1) BEGIN
+      SET csr256_vtile = csr256_valt
+      PATCH_IF (csr256_vj >= 0) BEGIN
+        READ_SHORT (csr256_vlut + (csr256_vindex + csr256_vj) * 2) csr256_vtile
+      END
+      SET csr256_vtx = csr256_vtile MODULO 80
+      SET csr256_vty = csr256_vtile / 80
+      PATCH_IF ((csr256_vtx >= 18) AND (csr256_vtx <= 24) AND
+                (csr256_vty >= 27) AND (csr256_vty <= 30)) BEGIN
+        PATCH_IF NOT ((csr256_vcell = csr256_vtile) AND (csr256_vj = 0)) BEGIN
+          PATCH_FAIL ~#256 art: a bridge art tile is shared outside its owned cell.~
+        END
+      END
+      PATCH_IF ((csr256_vtile >= 4882) AND (csr256_vtile <= 4885)) BEGIN
+        SET csr256_vexpect = 2261 + ((csr256_vtile - 4882) MODULO 2) +
+                            ((csr256_vtile - 4882) / 2) * 80
+        PATCH_IF NOT ((csr256_vcell = csr256_vexpect) AND (csr256_vj = (0 - 1))) BEGIN
+          PATCH_FAIL ~#256 art: a closed barrel tile is shared outside DOOR07.~
+        END
+      END
+    END
+  END
+  FOR (csr256_vi = 1; csr256_vi < csr256_voc; csr256_vi += 1) BEGIN
+    READ_ASCII (csr256_vo + csr256_vi * 24 + 4) csr256_vother (8) NULL
+    PATCH_IF (~%csr256_vother%~ STRING_EQUAL ~%csr256_varea%~) BEGIN
+      PATCH_FAIL ~#256 art: another overlay reuses the edited base tileset.~
+    END
+  END
+END
+
+DEFINE_PATCH_MACRO csr256_visuals_tis_check BEGIN
+  PATCH_IF (SOURCE_SIZE < 24) BEGIN PATCH_FAIL ~#256 art: truncated TIS.~ END
+  READ_ASCII 0 csr256_vsig (8)
+  READ_LONG 8 csr256_vtiles
+  READ_LONG 12 csr256_vstride
+  READ_LONG 16 csr256_vheader
+  READ_LONG 20 csr256_vdimension
+  PATCH_IF (NOT (~%csr256_vsig%~ STRING_EQUAL_CASE ~TIS V1  ~) OR
+            ((csr256_vstride != 12) AND (csr256_vstride != 5120)) OR
+            (csr256_vheader != 24) OR (csr256_vdimension != 64) OR
+            (csr256_vtiles < 4886)) BEGIN
+    PATCH_FAIL ~#256 art: unsupported or remapped TIS layout.~
+  END
+  PATCH_IF (csr256_vtiles > (SOURCE_SIZE - 24) / csr256_vstride) BEGIN
+    PATCH_FAIL ~#256 art: truncated TIS tile table.~
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr256_visuals_preflight BEGIN
+  ACTION_FOR_EACH csr256_vtag IN ~D~ ~N~ BEGIN
+    OUTER_SPRINT csr256_varea ~BD2000~
+    OUTER_SPRINT csr256_vpage ~B200090~
+    ACTION_IF (~%csr256_vtag%~ STRING_EQUAL ~N~) BEGIN
+      OUTER_SPRINT csr256_varea ~BD2000N~
+      OUTER_SPRINT csr256_vpage ~B2000N90~
+    END
+    ACTION_IF NOT ((FILE_EXISTS_IN_GAME ~%csr256_varea%.WED~) AND
+                   (FILE_EXISTS_IN_GAME ~%csr256_varea%.TIS~)) BEGIN
+      FAIL ~#256 art: missing day or night bridge resource.~
+    END
+    COPY_EXISTING - ~%csr256_varea%.WED~ ~override~
+      LAUNCH_PATCH_MACRO csr256_visuals_wed_check
+    COPY_EXISTING - ~%csr256_varea%.TIS~ ~override~
+      LAUNCH_PATCH_MACRO csr256_visuals_tis_check
+      PATCH_IF (csr256_vstride = 12) BEGIN
+        PATCH_IF FILE_EXISTS_IN_GAME ~%csr256_vpage%.PVRZ~ BEGIN
+          PATCH_FAIL ~#256 art: reserved bridge texture page already exists; refusing to overwrite it.~
+        END
+        FOR (csr256_vi = 0; csr256_vi < csr256_vtiles; csr256_vi += 1) BEGIN
+          READ_LONG (24 + csr256_vi * 12) csr256_voldpage
+          PATCH_IF (csr256_voldpage = 90) BEGIN
+            PATCH_FAIL ~#256 art: the existing TIS already references reserved page 90.~
+          END
+        END
+      END
+    ACTION_IF NOT ((FILE_EXISTS ~chriz-sod-remix/art/bridge/CSR256%csr256_vtag%.PAL~) AND
+                   (FILE_EXISTS ~chriz-sod-remix/art/bridge/CSR256%csr256_vtag%.PVRZ~)) BEGIN
+      FAIL ~#256 art: packaged bridge art is missing.~
+    END
+    COPY - ~chriz-sod-remix/art/bridge/CSR256%csr256_vtag%.PAL~ ~override~
+      PATCH_IF (SOURCE_SIZE != 143360) BEGIN PATCH_FAIL ~#256 art: corrupt palette tile pack.~ END
+    COPY - ~chriz-sod-remix/art/bridge/CSR256%csr256_vtag%.PVRZ~ ~override~
+      PATCH_IF (SOURCE_SIZE < 16) BEGIN PATCH_FAIL ~#256 art: corrupt texture page.~ END
+      READ_LONG 0 csr256_vuncompressed
+      PATCH_IF (csr256_vuncompressed != 65588) BEGIN
+        PATCH_FAIL ~#256 art: expected a 512 by 256 DXT1 texture page.~
+      END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr256_visuals_install BEGIN
+  LAF csr256_visuals_preflight END
+  ACTION_FOR_EACH csr256_vtag IN ~D~ ~N~ BEGIN
+    OUTER_SPRINT csr256_varea ~BD2000~
+    OUTER_SPRINT csr256_vpage ~B200090~
+    ACTION_IF (~%csr256_vtag%~ STRING_EQUAL ~N~) BEGIN
+      OUTER_SPRINT csr256_varea ~BD2000N~
+      OUTER_SPRINT csr256_vpage ~B2000N90~
+    END
+    COPY - ~chriz-sod-remix/art/bridge/CSR256%csr256_vtag%.PAL~ ~override~
+      FOR (csr256_vslot = 0; csr256_vslot < 28; csr256_vslot += 1) BEGIN
+        READ_ASCII (csr256_vslot * 5120) $csr256_vpalette(~%csr256_vslot%~) (5120)
+      END
+    COPY_EXISTING ~%csr256_varea%.TIS~ ~override~
+      LAUNCH_PATCH_MACRO csr256_visuals_tis_check
+      PATCH_IF (csr256_vstride = 12) BEGIN
+        INNER_ACTION BEGIN
+          COPY ~chriz-sod-remix/art/bridge/CSR256%csr256_vtag%.PVRZ~ ~override/%csr256_vpage%.PVRZ~
+        END
+      END
+      FOR (csr256_vslot = 0; csr256_vslot < 28; csr256_vslot += 1) BEGIN
+        SET csr256_vx = csr256_vslot MODULO 7
+        SET csr256_vy = csr256_vslot / 7
+        SET csr256_vtile = (csr256_vy + 27) * 80 + csr256_vx + 18
+        SET csr256_vb = 24 + csr256_vtile * csr256_vstride
+        PATCH_IF (csr256_vstride = 12) BEGIN
+          WRITE_LONG csr256_vb 90
+          WRITE_LONG (csr256_vb + 4) (csr256_vx * 64)
+          WRITE_LONG (csr256_vb + 8) (csr256_vy * 64)
+        END ELSE BEGIN
+          SPRINT csr256_vbytes $csr256_vpalette(~%csr256_vslot%~)
+          WRITE_ASCIIE csr256_vb ~%csr256_vbytes%~ (5120)
+        END
+        PATCH_IF ((csr256_vtile = 2261) OR (csr256_vtile = 2262) OR
+                  (csr256_vtile = 2341) OR (csr256_vtile = 2342)) BEGIN
+          SET csr256_valt = 4882 + (csr256_vx - 3) + (csr256_vy - 1) * 2
+          SET csr256_vb = 24 + csr256_valt * csr256_vstride
+          PATCH_IF (csr256_vstride = 12) BEGIN
+            WRITE_LONG csr256_vb 90
+            WRITE_LONG (csr256_vb + 4) (csr256_vx * 64)
+            WRITE_LONG (csr256_vb + 8) (csr256_vy * 64)
+          END ELSE BEGIN
+            SPRINT csr256_vbytes $csr256_vpalette(~%csr256_vslot%~)
+            WRITE_ASCIIE csr256_vb ~%csr256_vbytes%~ (5120)
+          END
+        END
+      END
+  END
+END
