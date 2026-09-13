@@ -106,11 +106,14 @@ class BridgeWorldTests(unittest.TestCase):
 173 AddJournalEntry(I:Entry*,I:Type*JourType)
 244 SaveLocation(S:Area*,S:Global*,P:Point*)
 308 AddMapNoteColor(P:Position*,I:StringRef*,I:Color*Mapnotes)
-''', 'trigger': '''0x4034 GlobalGT(S:Name*,S:Area*,I:Value*)
+''', 'trigger': '''0x4011 HPGT(O:Object*,I:HitPoints*)
+0x4034 GlobalGT(S:Name*,S:Area*,I:Value*)
 0x4035 GlobalLT(S:Name*,S:Area*,I:Value*)
 0x4037 StateCheck(O:Object*,I:State*State)
 0x4051 Dead(S:Name*)
 0x4073 NumDeadLT(S:Name*,I:Num*)
+0x4083 CombatCounter(I:Number*)
+0x40CB InMyArea(O:Object*)
 0x40D0 Difficulty(I:Amount*DIFFLEV)
 0x40D1 DifficultyGT(I:Amount*DIFFLEV)
 0x40D2 DifficultyLT(I:Amount*DIFFLEV)
@@ -159,7 +162,8 @@ LAF csr256_world_install END
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         script=compact(self.decompile())
         self.assertEqual(script.count('SETGLOBAL("CSR256_REQUEST","BD2000",1)'),2)
-        self.assertEqual(script.count('CREATECREATURE("BDBENCE"'),1)
+        self.assertEqual(script.count('CREATECREATUREOBJECT("BDBENCE",PLAYER1,6,0,0)'),1)
+        self.assertNotIn('CREATECREATURE("BDBENCE"',script)
         for route in (1,2): self.assertIn(f'SETGLOBAL("NATIVE_PRESERVED_{route}","GLOBAL",1)',script)
         self.assertIn('SETGLOBAL("FOREIGN_TAIL","GLOBAL",7)',script)
         self.assertIn('ADDJOURNALENTRY(123,QUEST)',script)
@@ -169,11 +173,27 @@ LAF csr256_world_install END
         for dv in ('FM','CM','G1','G2','E1','E2','F1','F2'):
             self.assertIn(f'!EXISTS("CSR256{dv}")',script)
         blocks=re.findall(r'IF\s+(.*?)\s+THEN\s+RESPONSE #100\s+(.*?)\s+END',self.decompile(),re.S)
+        victory=[(guard,actions) for guard,actions in blocks if 'CreateCreatureObject("bdbence"' in actions]
+        self.assertEqual(len(victory),1)
+        victory_guard, victory_actions = map(compact,victory[0])
+        for guard in ('GLOBAL("CSR256_STAGE","BD2000",2)', 'COMBATCOUNTER(0)',
+                      'INMYAREA(PLAYER1)', 'HPGT(PLAYER1,0)'):
+            self.assertIn(guard,victory_guard)
+        expected_aftermath=compact(BODY).removeprefix('THENRESPONSE#100').removesuffix('END')
+        expected_aftermath=expected_aftermath.replace('SETGLOBAL("BD_PLOT","GLOBAL",293)',
+            'SETGLOBAL("CSR256_STAGE","BD2000",3)SETGLOBAL("BD_PLOT","GLOBAL",293)').replace(
+            'CREATECREATURE("BDBENCE",[2425.2660],NW)',
+            'CREATECREATUREOBJECT("BDBENCE",PLAYER1,6,0,0)')
+        self.assertEqual(victory_actions,expected_aftermath)
         spawns=[(guard,actions) for guard,actions in blocks if 'CSR256_REQUEST' in guard]
         self.assertEqual(len(spawns),4)
         for guard,actions in spawns:
             self.assertIn('CSR256_STAGE',guard)
             self.assertEqual(actions.count('CreateCreature('),8)
+            compact_actions = compact(actions)
+            insane = 'DIFFICULTYGT(HARD)' in compact(guard)
+            self.assertIn('CREATECREATURE("' + ('CSR26FMI' if insane else 'CSR256FM') + '",[1456.1860],SE)', compact_actions)
+            self.assertIn('CREATECREATURE("' + ('CSR26CMI' if insane else 'CSR256CM') + '",[1344.1920],SE)', compact_actions)
         self.assertEqual(script.count('CREATECREATURE("CSR26E1G"'),2)
         self.assertEqual(script.count('CREATECREATURE("CSR26F1G"'),1)
 
@@ -204,7 +224,23 @@ LAF csr256_world_install END
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         text=compact(self.decompile())
         self.assertEqual(text.count('CREATECREATURE("BDSKIE",[2485.2655],NW)'),1)
-        self.assertEqual(text.count('CREATECREATURE("BDBENCE"'),1)
+        self.assertEqual(text.count('CREATECREATUREOBJECT("BDBENCE",PLAYER1,6,0,0)'),1)
+
+    def test_unrelated_bence_creation_is_preserved(self):
+        foreign='''IF
+  Global("FOREIGN_BENCE","GLOBAL",1)
+THEN
+  RESPONSE #100
+    CreateCreature("bdbence",[2425.2660],NW)
+END
+'''
+        self.fixture(SCRIPT+foreign)
+        result=self.install()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        text=compact(self.decompile())
+        self.assertTrue(text.endswith(compact(foreign)))
+        self.assertEqual(text.count('CREATECREATUREOBJECT("BDBENCE",PLAYER1,6,0,0)'),1)
+        self.assertEqual(text.count('CREATECREATURE("BDBENCE",[2425.2660],NW)'),1)
 
     def test_changed_roster_fails_before_any_override_write(self):
         self.fixture(SCRIPT.replace('[1465.1910]','[1466.1910]',1))

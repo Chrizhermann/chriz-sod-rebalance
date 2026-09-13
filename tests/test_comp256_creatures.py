@@ -21,6 +21,7 @@ SPELLS = {
     'slow': ('SPWI312', 3), 'glitterdust': ('SPWI224', 2),
     'grease': ('SPWI101', 1), 'breach': ('SPWI513', 5),
     'malison': ('SPWI412', 4), 'magicmissile': ('SPWI112', 1),
+    'dispel': ('SPWI302', 3), 'sequencer': ('SPWI710', 7),
 }
 ITEMS = ('STAF01 DART01 CLCK12 POTN52 HELM01 PLAT01 SW2H02 '
          'IMMUNE2 FIREELEL FIREELEM ELEARL ELEAR').split()
@@ -132,6 +133,24 @@ def book(b):
     return collections.Counter(s(b, u(b, 0x2b0)+i*12) for i in range(u(b, 0x2b4)))
 
 
+def spell_slots(b):
+    off = u(b, 0x2a8)
+    return [struct.unpack_from('<HHHHII', b, off+i*16)
+            for i in range(u(b, 0x2ac))]
+
+
+BASE_FIRE_BOOK = collections.Counter({
+    'SPWI408': 2, 'SPWI212': 3, 'SPWI114': 1, 'SPWI513': 1,
+    'SPWI112': 3, 'SPWI418': 1, 'SPWI319': 1, 'SPWI305': 1,
+    'SPWI303': 2, 'SPWI304': 2,
+})
+BASE_EARTH_BOOK = collections.Counter({
+    'SPWI408': 2, 'SPWI212': 3, 'SPWI114': 1, 'SPWI513': 1,
+    'SPWI112': 3, 'SPWI414': 1, 'SPWI318': 2, 'SPWI224': 2,
+    'SPWI312': 3, 'SPWI101': 1, 'SPWI412': 1,
+})
+
+
 def inventory(b):
     return {s(b, u(b, 0x2bc)+i*20):
             (u(b, u(b, 0x2bc)+i*20+10, 'H'), u(b, u(b, 0x2bc)+i*20+16))
@@ -225,6 +244,8 @@ LAF csr256_creatures_preflight END
         self.assertEqual(book(control)['SPWI318'], 2)
         self.assertEqual(book(control)['SPWI312'], 3)
         self.assertEqual(book(control)['SPWI224'], 2)
+        self.assertEqual(book(fire), BASE_FIRE_BOOK)
+        self.assertEqual(book(control), BASE_EARTH_BOOK)
 
     def test_vanilla_protection_level_preserves_haste_and_reserves(self):
         self.assert_success(protfire=3)
@@ -233,6 +254,64 @@ LAF csr256_creatures_preflight END
         self.assertEqual(book(b)['SPWI303'], 2)
         self.assertEqual(book(b)['SPWI305'], 1)
         self.assertEqual(book(b)['SPWI408'], 2)
+        self.assertEqual(book(b), BASE_FIRE_BOOK - collections.Counter({'SPWI304': 1}))
+        self.assertEqual(book(self.read('CSR256CM')), BASE_EARTH_BOOK)
+
+    def assert_insane_books(self, protfire):
+        self.assert_success(protfire=protfire)
+        fire, earth = self.read('CSR26FMI'), self.read('CSR26CMI')
+        expected_fire = BASE_FIRE_BOOK.copy()
+        expected_fire['SPWI303'] = 2
+        if protfire == 4:
+            expected_fire['SPWI304'] = 1
+        else:
+            del expected_fire['SPWI304']
+        expected_fire.update({'SPWI302': 1, 'SPWI710': 1})
+        self.assertEqual(book(fire), expected_fire)
+        self.assertEqual(book(earth), BASE_EARTH_BOOK + collections.Counter({'SPWI710': 1}))
+        for b, base_ref, ai in ((fire, 'CSR256FM', 'CSR26FMA'),
+                                (earth, 'CSR256CM', 'CSR26CMA')):
+            base = self.read(base_ref)
+            self.assertEqual((u(b, 0x24, 'H'), u(b, 0x26, 'H'), b[0x234]), (52, 52, 14))
+            self.assertEqual((u(b, 0x14), u(base, 0x14)), (1000, 1000))
+            self.assertEqual(s(b, 0x280, 32), s(base, 0x280, 32))
+            self.assertEqual(s(b, 0x280, 32), base_ref)
+            self.assertEqual(s(b, 0x248), ai)
+            self.assertEqual(inventory(b), inventory(base))
+            self.assertEqual(effects(b), effects(base))
+            self.assertEqual(b[0x270:0x280], base[0x270:0x280])
+            self.assertTrue(all(s(b, o) == '' for o in (0x250, 0x258, 0x260, 0x268, 0x2cc)))
+            self.assertNotIn('OLDMAGIC', book(b))
+            slots = spell_slots(b)
+            self.assertEqual([row[:4] for row in slots],
+                             [(level, cap, cap, 1) for level, cap in enumerate((5, 5, 5, 4, 4, 2, 1))])
+            self.assertEqual(slots[2][5], 5)
+            self.assertEqual(slots[6][5], 1)
+            self.assertTrue(all(row[5] <= row[1] for row in slots))
+            # The seventh-level slot owns the one prepared full sequencer;
+            # the payload spells remain in their ordinary lower-level slots.
+            mem = u(b, 0x2b0)
+            self.assertEqual(s(b, mem + slots[6][4]*12), 'SPWI710')
+            self.assertEqual(u(b, mem + slots[6][4]*12 + 8), 1)
+            known = u(b, 0x2a0)
+            sequencers = [(u(b, known+i*12+8, 'H'), u(b, known+i*12+10, 'H'))
+                          for i in range(u(b, 0x2a4)) if s(b, known+i*12) == 'SPWI710']
+            self.assertEqual(sequencers, [(6, 1)])
+            self.assertEqual(b[0x235:0x237], bytes(2))
+            self.assertEqual(base[0x234], 13)
+            self.assertEqual(len(spell_slots(base)), 6)
+            self.assertNotIn('SPWI710', book(base))
+            self.assertNotIn('SPWI302', book(base))
+        expected_base_fire = BASE_FIRE_BOOK.copy()
+        expected_base_fire['SPWI304'] = 2 if protfire == 4 else 1
+        self.assertEqual(book(self.read('CSR256FM')), expected_base_fire)
+        self.assertEqual(book(self.read('CSR256CM')), BASE_EARTH_BOOK)
+
+    def test_insane_sr_books_add_one_full_sequencer_without_more_level_three_slots(self):
+        self.assert_insane_books(protfire=4)
+
+    def test_insane_vanilla_books_keep_haste_defenses_and_one_full_sequencer(self):
+        self.assert_insane_books(protfire=3)
 
     def test_standalone_earth_fallbacks_match_the_approved_tiers(self):
         for name in ('ELEARL01.CRE', 'ELEAR01.CRE', 'ELEARL.ITM'):
@@ -339,6 +418,27 @@ LAF csr256_creatures_preflight END
         self.assertEqual(path.read_bytes(), collision)
         self.assertEqual(self.owned_resources(), [path])
 
+    def test_insane_namespace_collisions_fail_before_any_owned_write(self):
+        for ref in ('CSR26FMI', 'CSR26CMI'):
+            with self.subTest(ref=ref):
+                path = self.resource(ref+'.CRE')
+                collision = b'existing foreign Insane resource'
+                path.write_bytes(collision)
+                self.assertNotEqual(self.run_install(), 0)
+                self.assertIn('already exists', self.output)
+                self.assertEqual(path.read_bytes(), collision)
+                self.assertEqual(self.owned_resources(), [path])
+                for name, original in self.donors.items():
+                    self.assertEqual(self.resource(name).read_bytes(), original, name)
+                path.unlink()
+
+    def test_insane_payload_level_drift_fails_before_any_owned_write(self):
+        for key, level in (('dispel', 4), ('sequencer', 6)):
+            with self.subTest(spell=key):
+                self.assertNotEqual(self.run_install(levels={key: level}), 0)
+                self.assertIn('changed spell level', self.output)
+                self.assertFalse(self.owned_resources())
+
     def test_overlapping_tables_fail_before_any_owned_resource(self):
         b = bytearray(self.donors['BDOLONEI.CRE'])
         struct.pack_into('<I', b, 0x2a0, u(b, 0x2b0))
@@ -369,11 +469,12 @@ LAF csr256_creatures_preflight END
         helpers = {ref: self.resource(ref).read_bytes() for ref in
                    ('C0PR#MO1.SPL', 'C0PR#MO2.SPL', 'SPLPROT.2DA')}
         self.assert_success()
-        for ref in ('CSR256FM', 'CSR256CM'):
+        for ref, level in (('CSR256FM', 13), ('CSR256CM', 13),
+                           ('CSR26FMI', 14), ('CSR26CMI', 14)):
             b = self.read(ref)
             self.assertEqual(effects(b), [effects(donor)[i] for i in (0, 2, 3)])
             self.assertEqual(book(b)['SPWI408'], 2)
-            self.assertEqual((u(b, 0x24, 'H'), b[0x234]), (52, 13))
+            self.assertEqual((u(b, 0x24, 'H'), b[0x234]), (52, level))
         self.assertEqual(self.resource('BDOLONEI.CRE').read_bytes(), donor)
         for ref, payload in helpers.items():
             self.assertEqual(self.resource(ref).read_bytes(), payload, ref)

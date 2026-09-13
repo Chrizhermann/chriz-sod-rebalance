@@ -216,7 +216,7 @@ DEFINE_ACTION_FUNCTION csr256_creatures_preflight BEGIN
   ACTION_FOR_EACH csr256_fist IN ~FIREELEL~ ~%csr256_earth_weapon%~ BEGIN
     COPY_EXISTING ~%csr256_fist%.ITM~ ~override~ LPF csr256_check_fist END BUT_ONLY
   END
-  ACTION_FOR_EACH csr256_new IN ~CSR256FM~ ~CSR256CM~ ~CSR256G1~ ~CSR256G2~
+  ACTION_FOR_EACH csr256_new IN ~CSR256FM~ ~CSR256CM~ ~CSR26FMI~ ~CSR26CMI~ ~CSR256G1~ ~CSR256G2~
     ~CSR26E1L~ ~CSR26E1S~ ~CSR26E1G~ ~CSR26E2L~ ~CSR26E2S~
     ~CSR26F1L~ ~CSR26F1S~ ~CSR26F1G~ ~CSR26F2L~ ~CSR26F2S~ BEGIN
     ACTION_IF FILE_EXISTS_IN_GAME ~%csr256_new%.CRE~ BEGIN
@@ -241,7 +241,7 @@ DEFINE_ACTION_FUNCTION csr256_creatures_preflight BEGIN
     stoneskin => 4 mirrorimage => 2 shield => 1 fireshield => 4
     spiritarmor => 4 minordeflect => 3 haste => 3 fireball => 3
     flamearrow => 3 slow => 3 glitterdust => 2 grease => 1
-    breach => 5 malison => 4 magicmissile => 1
+    breach => 5 malison => 4 magicmissile => 1 dispel => 3 sequencer => 7
   END
   ACTION_PHP_EACH csr256_expected_levels AS csr256_key => csr256_expected_level BEGIN
     OUTER_SET csr256_actual_level = EVAL ~csr256_%csr256_key%_level~
@@ -279,7 +279,7 @@ END
 
 // ADD_MEMORIZED_SPELL requires an existing slot record for that spell level.
 // Donors can have sparse books, so create every wizard level explicitly.
-DEFINE_PATCH_FUNCTION csr256_wizard_slots BEGIN
+DEFINE_PATCH_FUNCTION csr256_wizard_slots INT_VAR csr256_book_levels = 6 BEGIN
   READ_LONG 0x2a8 csr256_old_off
   READ_LONG 0x2ac csr256_old_n
   SET csr256_old_size = csr256_old_n * 16
@@ -291,17 +291,17 @@ DEFINE_PATCH_FUNCTION csr256_wizard_slots BEGIN
     END
   END
   SET csr256_new_off = BUFFER_LENGTH
-  INSERT_BYTES csr256_new_off 96
+  INSERT_BYTES csr256_new_off (16 * csr256_book_levels)
   WRITE_LONG 0x2a8 csr256_new_off
-  WRITE_LONG 0x2ac 6
-  FOR (csr256_l = 0; csr256_l < 6; csr256_l += 1) BEGIN
+  WRITE_LONG 0x2ac csr256_book_levels
+  FOR (csr256_l = 0; csr256_l < csr256_book_levels; csr256_l += 1) BEGIN
     WRITE_SHORT (csr256_new_off + csr256_l * 16) csr256_l
     WRITE_SHORT (csr256_new_off + csr256_l * 16 + 6) 1
   END
 END
 
-DEFINE_PATCH_FUNCTION csr256_verify_book BEGIN
-  DEFINE_ASSOCIATIVE_ARRAY csr256_caps BEGIN 0 => 5 1 => 5 2 => 5 3 => 4 4 => 4 5 => 2 END
+DEFINE_PATCH_FUNCTION csr256_verify_book INT_VAR csr256_book_levels = 6 BEGIN
+  DEFINE_ASSOCIATIVE_ARRAY csr256_caps BEGIN 0 => 5 1 => 5 2 => 5 3 => 4 4 => 4 5 => 2 6 => 1 END
   READ_LONG 0x2a8 csr256_mio
   READ_LONG 0x2ac csr256_mic
   FOR (csr256_i = 0; csr256_i < csr256_mic; csr256_i += 1) BEGIN
@@ -309,13 +309,13 @@ DEFINE_PATCH_FUNCTION csr256_verify_book BEGIN
     READ_SHORT csr256_b csr256_l
     READ_SHORT (csr256_b + 6) csr256_type
     READ_LONG (csr256_b + 12) csr256_n
-    PATCH_IF ((csr256_type != 1) OR (csr256_l > 5)) BEGIN
+    PATCH_IF ((csr256_type != 1) OR (csr256_l >= csr256_book_levels)) BEGIN
       PATCH_IF (csr256_n != 0) BEGIN PATCH_FAIL ~#256: unexpected innate/divine/high-level combat spell.~ END
       WRITE_SHORT (csr256_b + 2) 0
       WRITE_SHORT (csr256_b + 4) 0
     END ELSE BEGIN
       SET csr256_cap = $csr256_caps(~%csr256_l%~)
-      PATCH_IF (csr256_n > csr256_cap) BEGIN PATCH_FAIL ~#256: rebuilt wizard book exceeds the level-13 budget.~ END
+      PATCH_IF (csr256_n > csr256_cap) BEGIN PATCH_FAIL ~#256: rebuilt wizard book exceeds the level-13/14 budget.~ END
       WRITE_SHORT (csr256_b + 2) csr256_cap
       WRITE_SHORT (csr256_b + 4) csr256_cap
     END
@@ -340,16 +340,25 @@ DEFINE_ACTION_FUNCTION csr256_creatures_install BEGIN
     WRITE_SHORT (csr256_ao + 0x18) 1
     WRITE_SHORT (csr256_ao + 0x1a) 0
 
+  ACTION_FOR_EACH csr256_mage_tier IN ~base~ ~insane~ BEGIN
   ACTION_FOR_EACH csr256_role IN ~F~ ~C~ BEGIN
+    OUTER_SET csr256_mage_level = 13
+    OUTER_SET csr256_book_levels = 6
+    OUTER_SPRINT csr256_mage_ref ~CSR256%csr256_role%M~
+    ACTION_IF (~%csr256_mage_tier%~ STRING_EQUAL_CASE ~insane~) BEGIN
+      OUTER_SET csr256_mage_level = 14
+      OUTER_SET csr256_book_levels = 7
+      OUTER_SPRINT csr256_mage_ref ~CSR26%csr256_role%MI~
+    END
     OUTER_SPRINT csr256_ai ~CSR26FMA~
     OUTER_SPRINT csr256_name ~Crusader Fire Mage~
     ACTION_IF (~%csr256_role%~ STRING_EQUAL ~C~) BEGIN
       OUTER_SPRINT csr256_ai ~CSR26CMA~
       OUTER_SPRINT csr256_name ~Crusader Earth Mage~
     END
-    COPY_EXISTING ~BDOLONEI.CRE~ ~override/CSR256%csr256_role%M.CRE~
+    COPY_EXISTING ~BDOLONEI.CRE~ ~override/%csr256_mage_ref%.CRE~
       LPF csr256_identity STR_VAR dv = EVAL ~CSR256%csr256_role%M~ ai = EVAL ~%csr256_ai%~ END
-      LPF csr256_wizard_slots END
+      LPF csr256_wizard_slots INT_VAR csr256_book_levels END
       SAY NAME1 ~%csr256_name%~
       SAY NAME2 ~%csr256_name%~
       // The donor is a named story mage; discard her personal voice lines.
@@ -359,7 +368,7 @@ DEFINE_ACTION_FUNCTION csr256_creatures_install BEGIN
       WRITE_LONG 0x14 csr256_xp_mage
       WRITE_SHORT 0x24 52
       WRITE_SHORT 0x26 52
-      WRITE_BYTE 0x234 13
+      WRITE_BYTE 0x234 csr256_mage_level
       WRITE_BYTE 0x235 0
       WRITE_BYTE 0x236 0
       WRITE_LONG 0x244 0x40000000
@@ -383,10 +392,15 @@ DEFINE_ACTION_FUNCTION csr256_creatures_install BEGIN
         LPF csr256_add_spell INT_VAR spell_level = csr256_fireshield_level STR_VAR spell_res = EVAL ~%csr256_fireshield_res%~ END
         LPF csr256_add_spell INT_VAR spell_level = csr256_protfire_level STR_VAR spell_res = EVAL ~%csr256_protfire_res%~ END
         LPF csr256_add_spell INT_VAR spell_level = csr256_haste_level STR_VAR spell_res = EVAL ~%csr256_haste_res%~ END
+        // Insane reserves one Flame Arrow for the sequencer and keeps one for
+        // normal combat. Its dispel slot displaces a Fireball instead.
         LPF csr256_add_spell INT_VAR spell_level = csr256_flamearrow_level copies = 2 STR_VAR spell_res = EVAL ~%csr256_flamearrow_res%~ END
         SET csr256_fireballs = 2
         PATCH_IF (csr256_protfire_level = 3) BEGIN SET csr256_fireballs = 1 END
-        LPF csr256_add_spell INT_VAR spell_level = csr256_fireball_level copies = csr256_fireballs STR_VAR spell_res = EVAL ~%csr256_fireball_res%~ END
+        PATCH_IF csr256_mage_level = 14 BEGIN SET csr256_fireballs -= 1 END
+        PATCH_IF csr256_fireballs > 0 BEGIN
+          LPF csr256_add_spell INT_VAR spell_level = csr256_fireball_level copies = csr256_fireballs STR_VAR spell_res = EVAL ~%csr256_fireball_res%~ END
+        END
       END ELSE BEGIN
         LPF csr256_add_spell INT_VAR spell_level = csr256_spiritarmor_level STR_VAR spell_res = EVAL ~%csr256_spiritarmor_res%~ END
         LPF csr256_add_spell INT_VAR spell_level = csr256_minordeflect_level copies = 2 STR_VAR spell_res = EVAL ~%csr256_minordeflect_res%~ END
@@ -395,7 +409,14 @@ DEFINE_ACTION_FUNCTION csr256_creatures_install BEGIN
         LPF csr256_add_spell INT_VAR spell_level = csr256_grease_level STR_VAR spell_res = EVAL ~%csr256_grease_res%~ END
         LPF csr256_add_spell INT_VAR spell_level = csr256_malison_level STR_VAR spell_res = EVAL ~%csr256_malison_res%~ END
       END
-      LPF csr256_verify_book END
+      PATCH_IF csr256_mage_level = 14 BEGIN
+        LPF csr256_add_spell INT_VAR spell_level = 7 STR_VAR spell_res = EVAL ~%csr256_sequencer_res%~ END
+        PATCH_IF (~%csr256_role%~ STRING_EQUAL ~F~) BEGIN
+          LPF csr256_add_spell INT_VAR spell_level = csr256_dispel_level STR_VAR spell_res = EVAL ~%csr256_dispel_res%~ END
+        END
+      END
+      LPF csr256_verify_book INT_VAR csr256_book_levels END
+  END
   END
   ACTION_FOR_EACH csr256_slot IN ~1~ ~2~ BEGIN
     COPY_EXISTING ~BDCRUE45.CRE~ ~override/CSR256G%csr256_slot%.CRE~

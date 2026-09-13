@@ -1,0 +1,42 @@
+// Limit the Shadow Aspect's existing Insane Mislead action to one use per actor.
+// Preserve its initial invisibility check, difficulty, timer, visual and spell.
+// Other invisibility, offensive AI and ordinary Shadow summons stay untouched.
+// This may be appended after an existing installation; do not reinstall #240/265.
+
+ACTION_IF NOT FILE_EXISTS_IN_GAME ~BDASHIRU.BCS~ BEGIN
+  FAIL ~chriz-sod-remix #266: BDASHIRU.BCS is missing; the Shadow Aspect is unavailable.~
+END
+
+OUTER_SPRINT csr266_nl ~%MNL%?%LNL%~
+OUTER_SPRINT csr266_head ~IF%csr266_nl%  !StateCheck(Myself,STATE_INVISIBLE)%csr266_nl%  Difficulty(HARDEST)%csr266_nl%  !GlobalTimerNotExpired("bd_invis","locals")%csr266_nl%~
+OUTER_SPRINT csr266_response ~THEN%csr266_nl%  RESPONSE #100%csr266_nl%~
+OUTER_SPRINT csr266_actions ~    SetGlobalTimer("bd_invis","locals",TWO_ROUNDS)%csr266_nl%    CreateVisualEffectObject("shair",Myself)%csr266_nl%    ApplySpell(Myself,WIZARD_MISLEAD)%csr266_nl%END~
+OUTER_SPRINT csr266_guard ~  Global("CSR266_MISLEAD","LOCALS",0)%csr266_nl%~
+OUTER_SPRINT csr266_used ~    SetGlobal("CSR266_MISLEAD","LOCALS",1)%csr266_nl%~
+OUTER_SPRINT csr266_original ~%csr266_head%%csr266_response%%csr266_actions%~
+OUTER_SPRINT csr266_current ~%csr266_head%%csr266_guard%%csr266_response%%csr266_used%%csr266_actions%~
+
+DEFINE_PATCH_MACRO csr266_preflight BEGIN
+  COUNT_REGEXP_INSTANCES ~%csr266_original%~ csr266_old
+  COUNT_REGEXP_INSTANCES ~%csr266_current%~ csr266_new
+  COUNT_REGEXP_INSTANCES ~"CSR266_MISLEAD"~ csr266_flags
+  COUNT_REGEXP_INSTANCES ~ApplySpell(Myself,WIZARD_MISLEAD)~ csr266_casts
+  PATCH_IF NOT (((csr266_old = 1) AND (csr266_new = 0) AND (csr266_flags = 0) AND (csr266_casts = 1)) OR
+                ((csr266_old = 0) AND (csr266_new = 1) AND (csr266_flags = 2) AND (csr266_casts = 1))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #266 [BDASHIRU]: expected one original or one complete capped Insane Mislead block; changed, duplicate or partial blocks are not safe to patch.~
+  END
+END
+
+// Validate the complete contract without creating a resource backup or override.
+COPY_EXISTING - ~BDASHIRU.BCS~ ~override~
+  DECOMPILE_AND_PATCH BEGIN LAUNCH_PATCH_MACRO csr266_preflight END
+
+ACTION_IF (csr266_old = 1) BEGIN
+  COPY_EXISTING ~BDASHIRU.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LAUNCH_PATCH_MACRO csr266_preflight
+      // Retain the matched source sections verbatim; insert only the local flag.
+      REPLACE_TEXTUALLY ~\(%csr266_head%\)\(%csr266_response%\)\(%csr266_actions%\)~ ~\1  Global("CSR266_MISLEAD","LOCALS",0)%LNL%\2    SetGlobal("CSR266_MISLEAD","LOCALS",1)%LNL%\3~
+    END
+  BUT_ONLY
+END

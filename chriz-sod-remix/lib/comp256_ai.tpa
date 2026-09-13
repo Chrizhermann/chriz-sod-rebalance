@@ -3,7 +3,7 @@
 // 35.21: mage/ssl/generalblocks/renew.ssl (556-580),
 // mage/ssl/combatblocks/renew_antimagic.ssl, attacks_on_PC_defences.ssl,
 // caster_shared/caster_definitions.ssl (177-188). Full credit to David Wallace.
-// This deliberately small adaptation uses no SCS helpers, free combat casts,
+// This deliberately small adaptation uses no SCS helpers or unbudgeted casts,
 // probabilistic skips or SCS's special free already-precast Stoneskin exception.
 
 <<<<<<<< .../csr26fma.baf
@@ -15,8 +15,36 @@
 <<<<<<<< .../csr26mel.baf
 %csr256_melee_baf%
 >>>>>>>>
+<<<<<<<< .../csr26fmx.baf
+%csr256_fire_baf%
+>>>>>>>>
+<<<<<<<< .../csr26cmx.baf
+%csr256_control_baf%
+>>>>>>>>
+
+// Share only a real sighting inside the encounter's pursuit boundary.
+// Other actors can move toward that last-seen point but must obtain their own
+// sight/range before attacking or casting. This preserves stealth and cover.
+DEFINE_ACTION_FUNCTION csr256_group_awareness RET awareness BEGIN
+  OUTER_SPRINT awareness ~IF
+  AreaCheck("BD2000")
+  Allegiance(Myself,ENEMY)
+  Global("CSR256_STAGE","BD2000",2)
+  Global("CSR256_ALERT","BD2000",0)
+  See(NearestEnemyOf(Myself))
+  NearLocation(NearestEnemyOf(Myself),%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
+THEN
+  RESPONSE #100
+    SaveObjectLocation("BD2000","CSR256_SEEN",NearestEnemyOf(Myself))
+    SetGlobal("CSR256_ALERT","BD2000",1)
+    Continue()
+END
+
+~
+END
 
 DEFINE_ACTION_FUNCTION csr256_build_mage_ai
+  INT_VAR challenge=0
   STR_VAR role=~fire~
   RET script
 BEGIN
@@ -75,6 +103,80 @@ END
   CheckStatLT(Myself,60,SPELLFAILUREMAGE)
   !StateCheck(Myself,STATE_SILENCED)
 ~
+  ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
+    // Cast on first enemy sight, not at spawn while the party is preparing.
+    // Prefer the central fire elemental, then another surviving owned elemental.
+    // Range 5 is a conservative cluster inside vanilla/SR Haste's area. Using
+    // the owned fresh group plus this one-attempt guard avoids SR's absent
+    // STATE_HASTED and its non-unique PRIORITY_DISPEL spell-state marker.
+    ACTION_FOR_EACH ally IN CSR256F1 CSR256F2 CSR256E1 CSR256E2 BEGIN
+      ACTION_FOR_EACH buddy IN CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
+        ACTION_IF NOT (~%ally%~ STRING_EQUAL ~%buddy%~) BEGIN
+          OUTER_SPRINT script ~%script%IF
+%combat%  Global("CSR256_HASTE","LOCALS",0)
+  See(NearestEnemyOf(Myself))
+  HaveSpellRES("%csr256_haste_res%")
+  Exists("%ally%")
+  HPGT("%ally%",0)
+  Allegiance("%ally%",ENEMY)
+  InMyArea("%ally%")
+  Range("%ally%",%csr256_haste_range%)
+  Exists("%buddy%")
+  HPGT("%buddy%",0)
+  Allegiance("%buddy%",ENEMY)
+  InMyArea("%buddy%")
+  TriggerOverride("%ally%",Range("%buddy%",%csr256_haste_cluster%))
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("CSR256_HASTE","LOCALS",1)
+    ReallyForceSpellRES("%csr256_haste_res%","%ally%")
+    RemoveSpellRES("%csr256_haste_res%")
+    SetInterrupt(TRUE)
+    Continue()
+END
+
+~
+        END
+      END
+    END
+  END
+
+  // The optional challenge owns sequencers; regular Insane keeps all other AI.
+  ACTION_IF challenge BEGIN
+  // Insane variants are level14 and have one seventh-level preparation slot.
+  // Reserve the complete two-spell payload before any ordinary offense can use
+  // those copies. Stored charges survive save/reload in a local variable.
+  OUTER_SPRINT seq_first ~%csr256_malison_res%~
+  OUTER_SPRINT seq_second ~%csr256_slow_res%~
+  OUTER_SET seq_range = csr256_malison_range
+  ACTION_IF (csr256_slow_range < seq_range) BEGIN OUTER_SET seq_range = csr256_slow_range END
+  ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
+    OUTER_SPRINT seq_first ~%csr256_dispel_res%~
+    OUTER_SPRINT seq_second ~%csr256_flamearrow_res%~
+    OUTER_SET seq_range = csr256_dispel_range
+    ACTION_IF (csr256_flamearrow_range < seq_range) BEGIN OUTER_SET seq_range = csr256_flamearrow_range END
+  END
+  OUTER_SPRINT script ~%script%IF
+%combat%  DifficultyGT(HARD)
+  Global("CSR256_SEQUENCE","LOCALS",0)
+  HaveSpellRES("%csr256_sequencer_res%")
+  HaveSpellRES("%seq_first%")
+  HaveSpellRES("%seq_second%")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_SEQUENCE","LOCALS",1)
+    RemoveSpellRES("%csr256_sequencer_res%")
+    RemoveSpellRES("%seq_first%")
+    RemoveSpellRES("%seq_second%")
+    Continue()
+END
+
+~
+  END
+  LAF csr256_group_awareness RET awareness END
+  OUTER_SPRINT script ~%script%%awareness%~
+
   // One real potion, even when silenced. It shares the casting action interval.
   OUTER_SPRINT script ~%script%IF
 %combat%  HPPercentLT(Myself,25)
@@ -141,40 +243,53 @@ THEN
 END
 
 ~
-  ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
-    // Explicit pairs: the chosen target plus one other live hostile melee actor.
-    // Range 5 is a conservative cluster inside vanilla/SR Haste's area. Using
-    // the owned fresh group plus this one-attempt guard avoids SR's absent
-    // STATE_HASTED and its non-unique PRIORITY_DISPEL spell-state marker.
-    ACTION_FOR_EACH ally IN CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
-      ACTION_FOR_EACH buddy IN CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
-        ACTION_IF NOT (~%ally%~ STRING_EQUAL ~%buddy%~) BEGIN
-          OUTER_SPRINT script ~%script%IF
-%casting%  Global("CSR256_HASTE","LOCALS",0)
-  HaveSpellRES("%csr256_haste_res%")
-  See(NearestEnemyOf(Myself))
-  Exists("%ally%")
-  HPGT("%ally%",0)
-  Allegiance("%ally%",ENEMY)
-  InMyArea("%ally%")
-  See("%ally%")
-  Range("%ally%",%csr256_haste_range%)
-  Exists("%buddy%")
-  HPGT("%buddy%",0)
-  Allegiance("%buddy%",ENEMY)
-  InMyArea("%buddy%")
-  TriggerOverride("%ally%",Range("%buddy%",%csr256_haste_cluster%))
-THEN
-  RESPONSE #100
-    SetGlobal("CSR256_HASTE","LOCALS",1)
-    SetGlobalTimer("CSR256_CAST","LOCALS",6)
-    SpellRES("%csr256_haste_res%","%ally%")
-END
-
+  // SCS 35.21 SequencerManual (caster_definitions.ssl1244-1265) delivers
+  // the original spells separately with SmallWait(1), preserving independent
+  // saves and spell-specific defenses. No SCS-generated resource is required.
+  ACTION_IF challenge BEGIN
+  OUTER_FOR (pc=1; pc<=6; ++pc) BEGIN
+    OUTER_SPRINT sequence_safety ~~
+    ACTION_IF (~%role%~ STRING_EQUAL ~fire~) BEGIN
+      // Flame Arrow targets one opponent, so friendly melee no longer blocks
+      // the opening sequence. Preserve any installed dispel friendly-fire guard.
+      OUTER_SPRINT sequence_safety ~  CheckStatLT(Player%pc%,100,RESISTFIRE)
+~
+      ACTION_IF csr256_dispel_friends BEGIN
+        OUTER_SET dispel_safety = csr256_dispel_radius + 4
+        ACTION_FOR_EACH friend IN CSR256FM CSR256CM CSR256G1 CSR256G2 CSR256E1 CSR256E2 CSR256F1 CSR256F2 BEGIN
+          OUTER_SPRINT sequence_safety ~%sequence_safety%  OR(3)
+    !Exists("%friend%")
+    !HPGT("%friend%",0)
+    !TriggerOverride("%friend%",Range(Player%pc%,%dispel_safety%))
 ~
         END
       END
     END
+    OUTER_SPRINT script ~%script%IF
+%casting%  DifficultyGT(HARD)
+  Global("CSR256_SEQUENCE","LOCALS",1)
+  HPGT(Myself,0)
+  !StateCheck(Myself,-2146426835)
+  See(Player%pc%)
+  Allegiance(Player%pc%,PC)
+  HPGT(Player%pc%,0)
+  Range(Player%pc%,%seq_range%)
+  !StateCheck(Player%pc%,0x00400010)
+  !CheckStatGT(Player%pc%,0,SANCTUARY)
+  CheckStatLT(Player%pc%,100,RESISTMAGIC)
+%sequence_safety%THEN
+  RESPONSE #100
+    SetGlobal("CSR256_SEQUENCE","LOCALS",2)
+    SetGlobalTimer("CSR256_CAST","LOCALS",6)
+    SetInterrupt(FALSE)
+    ReallyForceSpellRES("%seq_first%",Player%pc%)
+    SmallWait(1)
+    ReallyForceSpellRES("%seq_second%",Player%pc%)
+    SetInterrupt(TRUE)
+END
+
+~
+  END
   END
 
   // Breach is reactive, spaced, and checks actual physical/spell protections.
@@ -287,6 +402,15 @@ END
 ~
     END
   END
+  OUTER_SPRINT script ~%script%IF
+%combat%  Global("CSR256_ALERT","BD2000",1)
+  !See(NearestEnemyOf(Myself))
+THEN
+  RESPONSE #100
+    MoveToSavedLocation("CSR256_SEEN","BD2000")
+END
+
+~
   // Cast candidates are already in the installed SPL range when selected.
   // Melee fallback only engages nearby foes; native QA covers moving targets.
   OUTER_SPRINT script ~%script%IF
@@ -300,14 +424,15 @@ END
 ~
 END
 
-DEFINE_ACTION_FUNCTION csr256_ai_install BEGIN
-  LAF csr256_build_mage_ai STR_VAR role=~fire~ RET csr256_fire_baf=script END
-  LAF csr256_build_mage_ai STR_VAR role=~control~ RET csr256_control_baf=script END
+DEFINE_ACTION_FUNCTION csr256_ai_install INT_VAR challenge=0 BEGIN
+  LAF csr256_build_mage_ai INT_VAR challenge STR_VAR role=~fire~ RET csr256_fire_baf=script END
+  LAF csr256_build_mage_ai INT_VAR challenge STR_VAR role=~control~ RET csr256_control_baf=script END
   OUTER_SPRINT combat ~  AreaCheck("BD2000")
   Allegiance(Myself,ENEMY)
   Global("CSR256_STAGE","BD2000",2)
 ~
-  OUTER_SPRINT csr256_melee_baf ~IF
+  LAF csr256_group_awareness RET awareness END
+  OUTER_SPRINT csr256_melee_baf ~%awareness%IF
 %combat%  !NearLocation(Myself,%csr256_home_x%,%csr256_home_y%,%csr256_leash%)
 THEN
   RESPONSE #100
@@ -340,5 +465,18 @@ THEN
     AttackReevaluate(NearestEnemyOf(Myself),15)
 END
 ~
+  OUTER_SPRINT csr256_melee_baf ~%csr256_melee_baf%IF
+%combat%  Global("CSR256_ALERT","BD2000",1)
+  !See(NearestEnemyOf(Myself))
+THEN
+  RESPONSE #100
+    MoveToSavedLocation("CSR256_SEEN","BD2000")
+END
+~
   COMPILE EVALUATE_BUFFER ~.../csr26fma.baf~ ~.../csr26cma.baf~ ~.../csr26mel.baf~
+  // Compile the opt-in scripts from the same builder so every other behavior
+  // stays identical. Component257 attaches these only to the Insane mage CREs.
+  LAF csr256_build_mage_ai INT_VAR challenge=1 STR_VAR role=~fire~ RET csr256_fire_baf=script END
+  LAF csr256_build_mage_ai INT_VAR challenge=1 STR_VAR role=~control~ RET csr256_control_baf=script END
+  COMPILE EVALUATE_BUFFER ~.../csr26fmx.baf~ ~.../csr26cmx.baf~
 END

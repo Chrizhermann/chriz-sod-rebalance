@@ -3,6 +3,7 @@ INCLUDE ~chriz-sod-remix/lib/comp256_spells.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_creatures.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_ai.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_aftermath.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_text.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_visuals.tpa~
 
@@ -19,6 +20,7 @@ OUTER_SET csr256_leash = 18
 LAM csr256_spells_preflight
 LAF csr256_creatures_preflight END
 LAF csr256_world_preflight END
+LAF csr256_aftermath_preflight END
 LAF csr256_text_preflight END
 LAF csr256_visuals_preflight END
 
@@ -26,5 +28,6 @@ OUTER_SET csr256_warning = RESOLVE_STR_REF(@25601)
 LAF csr256_ai_install END
 LAF csr256_creatures_install END
 LAF csr256_world_install END
+LAF csr256_aftermath_install END
 LAF csr256_text_install END
 LAF csr256_visuals_install END

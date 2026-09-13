@@ -366,15 +366,45 @@ are separated below; the encounters have not been implemented.
   the discussed spell packages and removable prebuffs; stronger finite defensive
   recasting, informed by comparable SCS mages. Start with Slow/Grease and defer
   Web. The fire mage also gets one regular Haste with useful-group targeting and
-  ordinary interruptible combat casting. Elementals progress from softened lesser
+  ordinary interruptible combat casting (superseded by the later Haste revision below). Elementals progress from softened lesser
   variants on Easy/Normal, to four
   standard on Core, one greater earth on Hard, and one greater of each element
   on Insane. Keep rewards consistent across difficulty and preserve counterplay.
 - **IMPLEMENTED for native testing (component 256):** the approved first version,
   including finite spellbooks/Haste, a statically reachable formation, cleaned
   bridge artwork and the old fixed roster's 4,520 kill XP on every difficulty.
-  Native tuning/acceptance and version-2 timer mechanics remain open. Details:
+  The first native fight and Bence wrap passed; stronger tuning and version-2
+  timer mechanics remain open. Details:
   [bridge design](design/wave1/08-boareskyr-bridge.md).
+- **DECIDED post-playtest tuning (2026-09-13), implemented in source:** group
+  Haste when the fire mage sees an enemy, targeting an elemental rather than
+  casting at spawn; mages slightly farther back, and coordinated engagement after a
+  real sighting. Insane alone uses level-14 mages with one full sequencer each:
+  Greater Malison + Slow for earth; Dispel Magic with Spell Revisions or Remove
+  Magic without it, plus **Flame Arrow**, for fire. Flame Arrow supersedes Fireball
+  after save 947 showed the fire sequence still charged and unreleased. Retain
+  eight enemies and 4,520 XP. Bence must wait until combat clears, then appear
+  beside the party and initiate the existing wrap; his earlier long approach
+  was too slow. These latest corrections are installed in Combined as row 425,
+  superseding row 424's Fireball/approach/spawn-Haste build. Haste was not observed
+  despite its saved attempt flag; its cause is unconfirmed, and the newly directed
+  timing/targeting still needs native delivery verification. Cleric
+  support and extra mages remain deferred.
+- **DECIDED optional Extra Challenge split (2026-09-13):** the user won the
+  row-425 replay, approved its much harder combat and confirmed prompt Bence
+  arrival. The user clarified the exact boundary: regular Insane retains the
+  current encounter, including Haste and all other changes, but omits both mage
+  sequencers. The separate optional Extra Challenge component adds only the
+  fire dispel/Flame Arrow and earth Malison/Slow sequencers. Extraction into
+  optional component257 is implemented and offline-verified for this release; regular component256
+  cannot prepare or release either sequence. The user will reference this
+  decision in another task. Both modes retain identical Insane mage levels,
+  spellbooks, stats and world setup; regular AI can use those spells normally.
+  The split has not been installed in the test copy.
+  Pack integration remains open; the gameplay split is decided. See the bridge
+  design's Extra Challenge decision and preserved row-424/425 manifests.
+  Post-victory save/reload and onward crossing subsequently passed by user report;
+  the remote snapshot confirmed plot295 and the living party beyond the bridge.
 - **Research completed:** both spawn routes, old failure/summon controllers,
   dialogue/painted barrels, onward-passage dependencies and CUTSKIP were audited.
   Component 256 is independent and can be appended after installed 255.
@@ -391,6 +421,9 @@ are separated below; the encounters have not been implemented.
   encounter during the final castle assault. Triage first, then a **full back-and-forth
   design discussion with substantial input from both the user and the agent**, before
   implementation. This is separate from the Caelar/Avernus and post-victory passes.
+- **Current roadmap priority (2026-09-13):** finish the current release first;
+  this encounter is next-version work. The Chosen of Cyric-style brief still
+  requires that full user/agent discussion before implementation.
 - **Requested starting brief:** a Chosen of Cyric-style party encounter, with about
   **30 seconds for the player to buff before the opposing group spawns**. Enemies get
   prebuffs, sequencers, and potions too. Carry forward the earlier preference to warn
@@ -415,6 +448,14 @@ are separated below; the encounters have not been implemented.
   without replacements; recount the prologue XP. The subsequent decision fixes
   Liia's reward at 22,000 per character on every difficulty.
   These exceptions do not approve the remaining broader density decisions.
+
+- **2026-09-13 Shadow Aspect decision:** the unfinished native summon sample is
+  deprioritized and **does not block the current release**. Prioritize removing
+  the repeat Mislead chain; default-selected component266's one-use Insane Mislead correction is
+  implemented and offline-verified. See the [candidate report](releases/v0.6.9.md);
+  no new native pass is claimed. The user wants the whole encounter made trivial eventually, as
+  deferred work; its exact treatment is still open. Preserve the unfinished
+  native result rather than recording a pass or requiring another fight now.
 
 - **DECIDED task:** double-check whether unnecessary map filler and trash mobs were
   removed across SoD. Reconcile shipped cut lists, chapter decisions, research datasets,

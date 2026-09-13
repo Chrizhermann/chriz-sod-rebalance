@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -15,7 +16,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from test_comp256_ai import write_ai_fixture
+from test_comp256_ai import write_ai_fixture, run_weidu
 from test_comp256_creatures import creature, item, ITEMS, book, u
 import test_comp256_world as world_fixtures
 from test_comp256_text import dialogue, item as bwoosh_item
@@ -52,6 +53,7 @@ class PublicBridgeInstallerTests(unittest.TestCase):
             target.write_text(current+'\n'+'\n'.join(additions)+'\n')
         for name in ('bd2000.are', 'bd2000.bcs'):
             shutil.copy2(world.override/name, self.override/name)
+        (self.override/'bdbence.bcs').write_bytes(b'SC\nSC\n')
         # Public controller stage 1 displays its warning in the log.
         action = self.override/'action.ids'
         action.write_text(action.read_text()+'262 DisplayStringNoName(O:Object*,I:StrRef*)\n')
@@ -82,6 +84,78 @@ class PublicBridgeInstallerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
         self.assertIn('SUCCESSFULLY INSTALLED', result.stdout)
         self.assertFalse((self.game/'-').exists(), 'Preflight must not write a literal dash file')
+
+    def script_blocks(self, ref):
+        result = run_weidu(self.game, str(self.override/(ref+'.bcs')))
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        source = (self.game/(ref+'.baf')).read_text().upper()
+        return re.findall(r'IF\n.*?\nEND', source, re.S)
+
+    def test_default_scripts_only_differ_from_challenge_by_sequencer_blocks(self):
+        self.success(self.run_public('--force-install-list', '256'))
+        self.assertNotIn('#257', (self.game/'weidu.log').read_text())
+        for role in ('f', 'c'):
+            standard = self.script_blocks(f'csr26{role}ma')
+            challenge = self.script_blocks(f'csr26{role}mx')
+            sequence = [b for b in challenge if 'CSR256_SEQUENCE' in b]
+            self.assertEqual(len(sequence), 7, 'one preparation plus six PC targets')
+            self.assertFalse(any('CSR256_SEQUENCE' in b for b in standard))
+            self.assertEqual(standard, [b for b in challenge if b not in sequence])
+            mage = (self.override/f'csr26{role}mi.cre').read_bytes()
+            self.assertEqual(mage[0x248:0x250], f'CSR26{role.upper()}MA'.encode())
+        fire = '\n'.join(self.script_blocks('csr26fma'))
+        self.assertIn('SPELLRES("SPWI305","CSR256F1")', fire)
+        self.assertIn('SEE(NEARESTENEMYOF(MYSELF))', fire)
+
+    def test_challenge_changes_only_two_insane_script_pointers_and_uninstalls_exactly(self):
+        self.success(self.run_public('--force-install-list', '256'))
+        before = tree(self.override)
+        original = {role: (self.override/f'csr26{role}mi.cre').read_bytes()
+                    for role in ('f', 'c')}
+        self.success(self.run_public('--force-install-list', '257'))
+        changed = {key for key in before if before[key] != tree(self.override)[key]}
+        self.assertEqual(changed, {'CSR26FMI.CRE', 'CSR26CMI.CRE'})
+        self.assertEqual(set(tree(self.override)), set(before))
+        for role in ('f', 'c'):
+            expected = bytearray(original[role])
+            expected[0x248:0x250] = f'CSR26{role.upper()}MX'.encode()
+            self.assertEqual((self.override/f'csr26{role}mi.cre').read_bytes(), expected)
+        result = self.run_public('--force-uninstall-list', '257')
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertEqual(tree(self.override), before)
+        self.assertIn('#256', (self.game/'weidu.log').read_text())
+
+    def test_challenge_requires_base_component_before_any_write(self):
+        before = tree(self.override)
+        result = self.run_public('--force-install-list', '257')
+        # WeiDU reports an unmet REQUIRE_COMPONENT as a successful skip.
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertIn('SKIPPING:', result.stdout)
+        self.assertIn('Install component 256', result.stdout)
+        self.assertNotIn('#257', (self.game/'weidu.log').read_text())
+        self.assertEqual(tree(self.override), before)
+
+    def test_challenge_rejects_changed_second_mage_before_either_write(self):
+        self.success(self.run_public('--force-install-list', '256'))
+        path = self.override/'csr26cmi.cre'
+        mage = bytearray(path.read_bytes())
+        mage[0x248:0x250] = b'FOREIGNX'
+        path.write_bytes(mage)
+        before = tree(self.override)
+        tlk = (self.game/'lang/en_us/dialog.tlk').read_bytes()
+        result = self.run_public('--force-install-list', '257')
+        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertIn('unrecognized Insane bridge mage', result.stdout+result.stderr)
+        self.assertEqual(tree(self.override), before)
+        self.assertEqual((self.game/'lang/en_us/dialog.tlk').read_bytes(), tlk)
+
+    def test_foreign_challenge_script_prevents_base_install_writes(self):
+        (self.override/'csr26cmx.bcs').write_bytes(b'FOREIGN AI')
+        before = tree(self.override)
+        result = self.run_public('--force-install-list', '256')
+        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertIn('owned script name CSR26CMX.BCS already exists', result.stdout+result.stderr)
+        self.assertEqual(tree(self.override), before)
 
     def test_public_install_and_uninstall_restore_all_original_resources(self):
         original = tree(self.override)

@@ -1,0 +1,6 @@
+// Skie's restored join route needs the same XP floor as native SoD recruits.
+// Extend the existing personal script: saved actors pick up the fix, while
+// their equipment, class, kit and other script slots remain untouched.
+DEFINE_ACTION_FUNCTION csr197_install_xp BEGIN
+  EXTEND_TOP ~bdskie.bcs~ ~chriz-sod-remix/baf/csrskixp.baf~
+END

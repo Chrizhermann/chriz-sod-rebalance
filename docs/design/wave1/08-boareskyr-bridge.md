@@ -4,8 +4,95 @@ Issue: [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14).
 Status: first-version encounter and combat direction approved by the user on
 2026-09-08, including stronger defensive recasting informed by comparable SCS
 mages. The user then authorized implementation. Component 256 is implemented
-on its separate branch; native acceptance remains pending with the filler PR.
-No live or designated dev game installation has been modified for this work.
+on its separate branch. The user completed the first native fight and Bence's
+wrap in the isolated Combined test copy on September 13. The stronger version-1
+revision was replayed in Combined and saved as native save 947 (`CSR TEST 17`).
+Bence arrived late, the fire sequencer did not release, and Haste was not observed.
+The latest Flame Arrow, Haste and nearby-Bence corrections below are installed
+in Combined as row 425, superseding the earlier row-424 build. The user won its
+replay, liked the much harder fight and confirmed Bence arrived promptly after
+combat. The subsequent save/reload and onward crossing passed by user report;
+a remote check confirmed plot295 and the living party beyond the bridge.
+Individual spell delivery has not been independently verified. The live install
+was not modified.
+
+## DECIDED — optional Extra Challenge split, September 13
+
+After playing row 425, the user requested a separate optional Extra Challenge
+component for their planned challenge pack, then specified the exact split:
+**regular Insane keeps the current encounter but omits both mage sequencers;
+Extra Challenge adds only those sequencers**. Haste on enemy sight, elemental
+targeting, formation, shared engagement, current stats, ordinary spellcasting,
+defensive reserves and prompt Bence arrival all remain in the regular version.
+The user will reference this decision in another task handling that pack.
+
+The source extraction into optional **component257** is **implemented and
+offline-verified** for the current release. Component256 keeps the current regular
+encounter and cannot prepare or release either sequencer; 257 adds only the
+Insane sequencers by selecting their challenge AI. Both modes preserve the same
+level-14 Insane mages, spellbooks, stats and world setup. Regular AI may use the
+payload spells as ordinary casts. No installation of this split in the test game
+is claimed.
+All 101 bridge tests passed, including compiled common-AI equivalence and the
+two-pointer-only install/disposable restore contract; see the
+[candidate report](../../releases/v0.6.9.md). This adds no new native acceptance.
+Preserve both local manifests:
+`bridge-tuning-install-20260913/installed.json` (row 424, preceding balance) and
+`bridge-correction-20260913/installed.json` (row 425, newly accepted challenge),
+under `C:/Users/chris/CEBG-Tests/Combined-20260908/`. These are historical evidence,
+not instructions to revert row 425. The installed test copy still contains
+row 425's combat behavior. The optional Insane-only payloads are fire:
+Dispel Magic with SR / Remove Magic without SR + Flame Arrow; earth: Greater
+Malison + Slow. Regular mode must not prepare or release either sequencer.
+External pack integration remains for the challenge-pack task; the component
+numbering and gameplay boundary are decided. Release preparation is the current
+priority; no additional native fight is requested by this record.
+
+## DECIDED — stronger version 1 after the first native fight, September 13
+
+The user liked the encounter's functioning but found it too easy. They observed
+the invisible `Bridge_Barrels` barrier until speaking to Bence and suggested
+automatic dialogue on victory. Bence already has a proximity-gated automatic
+starter, but spawns behind the fight. The first correction's long approach was
+still too slow in the replay. The latest approved correction waits for combat to
+clear, then creates Bence beside the party to initiate his existing wrap. Preserve
+dialogue before the door opens and the onward vision starts. The user confirmed
+prompt arrival after winning the row-425 replay, then passed save/reload and
+onward crossing.
+
+The user approved keeping the same eight enemies and strengthening their opening:
+
+- One group Haste on every difficulty **when the fire mage sees an enemy**, not
+  at spawn, spending his single prepared copy. Target an owned elemental, with
+  the central fire elemental preferred; guards may benefit but are never the
+  Haste target. Move both mages slightly farther back and let a real sighting
+  alert the whole group; each actor still needs its own sight/range to attack.
+- Insane-only full sequencers: earth releases **Greater Malison then Slow**;
+  fire releases **Dispel Magic with Spell Revisions, or Remove Magic without it,
+  then Flame Arrow**. Flame Arrow replaces Fireball following the replay, where
+  the fire sequence remained charged without releasing. Each wizard gets one
+  preparation slot and spends the payload copies once.
+- Insane mages are level 14 to support that seventh-level preparation slot;
+  other tiers remain level 13. HP, defensive reserves, roster and total kill XP
+  remain unchanged.
+
+Haste remains under investigation. Save 947 has fire-mage locals `PREP=1`,
+`HASTE=1`, `SEQUENCE=1`; these establish a preparation/Haste attempt and a reserved,
+unreleased sequence, not delivery of Haste. The earth mage has `SEQUENCE=2`.
+Haste expiring between spawn and the party's approach is an unconfirmed hypothesis.
+The user has now explicitly directed the enemy-sighting timing above; that source
+change is installed in Combined row 425; native effect delivery remains unverified.
+
+Additional mages and a cleric with area buffs are **deferred**. The retired
+`8e68/chriz-bg-script-engine` worktree is gone, but its surviving
+`codex/aoe-prebuff-design` branch contains a callable helper that was tested
+applying Haste to its caster and an ally while spending a copy. This is real
+prior work; it is not evidence of completed automatic hostile-AI integration or
+an installed component that supplies these bridge actors with group buffs.
+Cleric integration can build on that work in a later design pass.
+
+The completed first encounter is recorded in the
+[native acceptance notes](../../playtest/2026-09-08-bridge-finale.md#september-13-native-feedback).
 
 ## DECIDED — version 1
 
@@ -19,7 +106,8 @@ No live or designated dev game installation has been modified for this work.
 - Two veteran crusader guards protect the casters.
 - Relative formation: earth elementals toward the party's approach; wizards
   farther along the bridge and separated; fire elementals and guards around them.
-  Exact coordinates require space/pathing verification for the actual creatures.
+  Current coordinates pass static footprint/path checks; native movement in the
+  revised formation still needs verification.
 - Sequence: siege ends -> crusaders retreat -> short demolition warning -> player
   approaches and fights the prepared group -> defeat leads into Bence's existing
   aftermath and onward passage.
@@ -29,31 +117,33 @@ No live or designated dev game installation has been modified for this work.
   session. Prepare checkpoint saves after implementation; see the
   [combined test plan](../../playtest/2026-09-08-filler-fixes.md#next-manual-session--agreed-2026-09-08).
 
-## DECIDED — spells, AI and difficulty (2026-09-08)
+## DECIDED — spells, AI and difficulty (September 8, revised September 13)
 
 The user accepted the following proposal and requested more defensive recasting,
 with comparable SCS mage AI checked and adapted where useful. This supersedes the
 earlier suggestion of only one spare Mirror Image. Web is deferred for the first
 test, following the accepted recommendation to start with Slow and Grease.
 
-- Both wizards are level 13. Reserve their sixth-level summon budget for their
-  two initial elementals; no additional combat summoning is selected.
+- Both wizards are level 13 below Insane and level 14 on Insane. Reserve their
+  sixth-level summon budget for their two initial elementals; no additional
+  combat summoning is selected.
 - Fire: Flame Arrow as the main attack in mixed melee, Fireball at separated
   targets where allies are safe, Magic Missile as an alternative, and a finite
   Breach against meaningful defenses.
-- **Added by the user:** one prepared regular Haste for the fire mage, with
-  explicit combat AI. Use an ordinary interruptible cast after urgent defensive
-  renewal and before routine damage when at least two nearby living elemental/
-  guard allies can benefit. Choose an ally that places the useful group inside
-  the installed spell's area; avoid redundant Haste and exclude unrelated
-  retreating crusaders. Haste is not part of instant preparation.
+- **Revised after the second playtest:** one prepared regular Haste for the fire
+  mage on every difficulty, triggered only when he sees an enemy. Target a living
+  owned elemental, preferring the central fire elemental so the installed spell's
+  area covers the group. Guards can benefit but are never its target. Require at least
+  two nearby living owned allies and exclude unrelated retreating crusaders.
+  This supersedes the prior spawn-time Haste preparation.
 - Control: Slow, Glitterdust, one carefully placed Grease, and a finite Breach;
   Greater Malison is the accepted Hard/Insane tuning option.
 - Shared opening defenses: Stoneskin, Mirror Image, Shield. Fire additionally
   uses red Fire Shield and Protection from Fire; control uses Spirit Armor and
   Minor Spell Deflection. Any optional extra ward must fit the reserve budget.
 - Ordinary removable protections, once-only opening preparation, and finite
-  memorized copies for subsequent recasting. Combat casts are interruptible.
+  memorized copies for subsequent recasting. Ordinary combat casts are
+  interruptible; the Insane sequencers release their reserved payloads together.
 - One healing potion per wizard as the initial allowance. Guards intercept
   attackers reaching the wizards; caster movement stays local to the formation.
 - AI respects line of sight, chooses useful targets and avoids wasting spells
@@ -92,12 +182,20 @@ still leave two slots for the control mage's Glitterdust. On level 3, two Minor
 Spell Deflections leave three Slow copies. Exact unused slots and lower-difficulty
 allowances can be finalized during implementation without inventing extra slots.
 
-The fire mage's five level-3 slots are now **Haste x1, Flame Arrow x2, Fireball x2**.
-This accommodates the requested support spell without using defensive reserves
-or adding slots. Apply the same ordinary availability, casting-failure and shared
-casting-timer checks as other combat spells. Resolve the installed original Haste,
-use normal `Spell()` spending, and do not attach another `RemoveSpell` or use an
-SCS instant-preparation helper for this combat cast.
+Below Insane, the SR fire mage's five level-3 slots are **Haste x1, Flame Arrow
+x2, Fireball x2**. Where Protection from Fire is level 3, it replaces one
+Fireball. On Insane, use Haste x1, Flame Arrow x2, the selected dispel x1 and
+Fireball x1 on SR; where Protection from Fire is level 3 it replaces that last
+Fireball. The sequencer reserves the dispel and one Flame Arrow, leaving one
+Flame Arrow for ordinary offense.
+The earth sequencer similarly reserves its one Greater Malison and one of its
+three Slow copies. Each Insane mage has one full Spell Sequencer preparation
+slot; neither the payloads nor the stored sequence replenish after use or reload.
+
+Haste uses the installed original spell at the caster's actual level and
+explicitly spends one copy, matching the preparation spending contract. It now
+requires the fire mage's own enemy sighting and an eligible elemental target;
+the remaining defensive preparation still runs at spawn.
 
 The current SR Haste does not set ordinary `STATE_HASTED`; its spell-state marker
 188 is the shared `PRIORITY_DISPEL`, not a Haste identifier. Use the owned fresh
@@ -130,18 +228,27 @@ still need a version-2 design pass. A visible remaining-time display and a clock
 that starts after the warning returns control are implementation proposals, not
 yet chosen UI or timing rules. Do not add any hidden timer to version 1.
 
-## Implemented details for the first playtest
+## Accepted row-425 challenge-build details
+
+These details describe the accepted challenge build. The component257 extraction
+above moves only sequencer preparation/release out of regular component256.
+
+The latest Flame Arrow/Haste/Bence corrections below are installed in Combined
+and await native replay from checkpoint 945. The first native playtest used the earlier formation, level-13 mages,
+mid-combat Haste and no sequencers; the second used Fireball in the sequencer and
+Bence's long approach.
 
 - Component **256**, independently selectable or appended after installed 255.
   Both use the existing mod's tail-install process; no old row is uninstalled.
-- **Crusader Fire Mage** and **Crusader Earth Mage**, level 13 with 52 HP. Opening
+- **Crusader Fire Mage** and **Crusader Earth Mage**, level 13 (14 on Insane) with 52 HP. Opening
   preparation casts the original spells at actual caster level and spends one
   memorized copy each. The planned Stoneskin/Mirror Image/Deflection reserves
   remain for ordinary interruptible casts. Each has three Magic Missiles as a
   finite fallback and one Potion of Superior Healing.
 - Vanilla Protection from Fire is level 3, unlike SR's level 4. On that spell
   layout the fire mage trades one Fireball copy for Protection from Fire, keeping
-  Haste, both Flame Arrows and every defensive reserve within the same slot caps.
+  Haste and every defensive reserve within the same slot caps. Insane keeps two
+  Flame Arrows and replaces one Fireball with the selected dispel as above.
 - Two level-9 veterans with plate and +1 two-handed swords, retaining the installed
   donor's HP (108 on the target EET copy; 80 on the standalone reference). Their armor
   and swords remain undroppable; duplicate named/random loot helpers are removed.
@@ -156,14 +263,26 @@ yet chosen UI or timing rules. Do not add any hidden timer to version 1.
 - Fixed group kill XP remains **4,520**: 1,000 per mage and 420 per guard/elemental,
   on every tier. This preserves the old fixed mage-and-six-guard budget; old
   variable portal reinforcements did not have one reproducible total.
-- Haste gets one normal cast attempt at a cluster of at least two owned living
-  melee allies, after urgent self-defense. Its local guard prevents repetition
-  even after interruption. It does not infer arbitrary foreign Haste from SR's
-  shared spell-state marker. Fireball checks ally distance; persistent Grease
-  must also lie beyond the melee pursuit boundary and may therefore be rare.
+- Haste fires once on enemy sighting, targeting an owned elemental. Static
+  geometry places all eight actors inside its current installed radius when
+  centered on the preferred fire elemental. Its local guard prevents repetition;
+  it does not infer arbitrary foreign Haste from SR's shared spell-state marker.
+- A real enemy sighting within the encounter boundary records a last-seen
+  location and alerts the group. Allies without sight can move there; attacks
+  and spells still require their own valid visible target. Existing local
+  pursuit limits remain.
+- Insane sequencers are finite and once-only. Disabled/silenced casters retain
+  their charge until they can release it. Ordinary Fireball checks ally distance;
+  the fire sequencer now uses targeted Flame Arrow. A dispel variant that can
+  affect allies receives its own
+  distance check. Persistent Grease must lie beyond the melee pursuit boundary
+  and may therefore be rare.
 - Two native finale spawn lists request the owned group at retreat completion.
   A short warning replaces the old cutscene. Victory requires all eight actors
   dead, absent or petrified, then retains Bence, Khalid, journal and rest actions.
+  After combat clears, Bence appears beside the party and retries his existing
+  wrap when dialogue is possible. His dialogue still opens the passage; victory
+  does not open it early.
   The old portal region keeps its army escape destination but loses its script.
 - The four barrel actors are suppressed before rendering. Eight old animations,
   the portal ambient and obsolete map-note addition are disabled. A small art
@@ -173,8 +292,8 @@ yet chosen UI or timing rules. Do not add any hidden timer to version 1.
 
 | Actor | Position |
 | --- | --- |
-| Fire mage | 1504,1872 |
-| Earth/control mage | 1392,1944 |
+| Fire mage | 1456,1860 |
+| Earth/control mage | 1344,1920 |
 | Veterans | 1560,1990 and 1608,1920 |
 | Earth elementals | 1615,2035 and 1680,1965 |
 | Fire elementals | 1544,1944 and 1440,1990 |
@@ -184,7 +303,7 @@ closed: 3x3 humanoid/fire and 5x5 earth footprints are walkable, nonoverlapping
 and reachable from the party approach. This does not establish native crowding
 or combat pathing. Combat uses a common center at 1500,1950 and a local pursuit
 radius of 18 script units. Native challenge, visuals and movement are the next
-acceptance questions; the collapse design remains version-2 work.
+acceptance questions for this revision; the collapse design remains version-2 work.
 
 ## Existing sequence — implementation seams
 
@@ -295,7 +414,8 @@ defense branches in our small controller.
 
 Credit David Wallace / Sword Coast Stratagems 35.21 for any literal adaptations,
 record source paths and changes, and retain credit with the implementation.
-This is code/resource evidence; no new mage has been installed or fought.
+This September 8 comparison is code/resource evidence, not native verification
+of the later tuning.
 Ignored local evidence is under `research/data/issue14-scs-audit/`.
 
 ## Validation plan
@@ -309,9 +429,13 @@ the designated dev copy. Never use the live install for these changes.
 AI validation must show that preparation spends exactly its allocation and leaves
 the documented reserves, intact defenses are not recast, combat renewals use
 ordinary casts/cooldowns, and exhausted books do not replenish themselves.
-For Haste, cover useful group targeting, an already hasted group, insufficient
-eligible allies, the last memorized copy being spent, interruption and higher-
-priority self-defense. Native playtesting must verify the frontline receives the
+For Haste, cover waiting without enemy sight, elemental-only targeting, insufficient
+eligible allies, the last memorized copy being spent and the once-only guard.
+For sequencers, cover Insane gating, complete finite payload reservation, disabled
+casters, safe target selection, release order and persistence after spending.
+Check shared awareness preserves sight requirements for actual attacks and
+Bence retries without skipping the retained dialogue. Native playtesting must
+verify the frontline receives the
 installed Haste effects; merely queuing the cast is not delivery evidence.
 
 Native acceptance should focus on actual casting/protections, challenge, elemental

@@ -1,6 +1,7 @@
 // Component 256 spell identities come from the installed SPELL.IDS, not vanilla
 // resource numbers or SCS-generated helpers. This library makes no game writes.
 DEFINE_ACTION_FUNCTION csr256_resolve_spell
+  INT_VAR caster_level = 13 allow_innate = 0
   STR_VAR symbol = ~~
   RET res level id cast_range
 BEGIN
@@ -26,7 +27,8 @@ BEGIN
     READ_SHORT 0x6e casting_index
     READ_SHORT 0x70 casting_count
     PATCH_IF (NOT (~%signature%~ STRING_EQUAL ~SPL V1  ~)
-      OR spell_type != 1 OR level < 1 OR level > 9
+      OR ((spell_type != 1) AND NOT (allow_innate AND spell_type = 4))
+      OR level < 1 OR level > 9
       OR ability_count < 1 OR ability_offset < 0x72
       OR ability_offset + ability_count * 0x28 > SOURCE_SIZE
       OR effect_offset < ability_offset + ability_count * 0x28
@@ -37,7 +39,7 @@ BEGIN
     SET selected_level = 0
     FOR (ability = 0; ability < ability_count; ++ability) BEGIN
       READ_SHORT (ability_offset + ability * 0x28 + 0x10) minimum_level
-      PATCH_IF (minimum_level > 0 AND minimum_level <= 13 AND minimum_level >= selected_level) BEGIN
+      PATCH_IF (minimum_level > 0 AND minimum_level <= caster_level AND minimum_level >= selected_level) BEGIN
         READ_SHORT (ability_offset + ability * 0x28 + 0x0e) cast_range
         SET selected_level = minimum_level
       END
@@ -48,7 +50,7 @@ BEGIN
       END
     END
     PATCH_IF selected_level = 0 BEGIN
-      PATCH_FAIL ~Component 256: %res%.SPL has no ability usable by the level-13 mage.~
+      PATCH_FAIL ~Component 256: %res%.SPL has no ability usable at mage level %caster_level%.~
     END
   BUT_ONLY
 END
@@ -59,7 +61,7 @@ END
 // Reference: https://gibberlings3.github.io/iesdp/file_formats/ie_formats/pro_v1.htm
 DEFINE_ACTION_FUNCTION csr256_resolve_aoe
   STR_VAR res=~~
-  RET radius
+  RET radius friends_affected
 BEGIN
   OUTER_SPRINT projectile_res ~~
   COPY_EXISTING - ~%res%.spl~ ~override~
@@ -94,6 +96,7 @@ BEGIN
       PATCH_FAIL ~Component 256: unsupported area shape for %res% (%projectile_res%).~
     END
     SET radius = ((ABS radius_pixels) + 15) / 16
+    SET friends_affected = ((area_flags BAND 0xc0) != 0x40)
   BUT_ONLY
 END
 
@@ -104,7 +107,7 @@ DEFINE_ACTION_MACRO csr256_spells_preflight BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~SPLSTATE.IDS~ BEGIN
     OUTER_SET csr256_glitter_state = IDS_OF_SYMBOL (~SPLSTATE~ ~GLITTERDUST~)
   END
-  ACTION_FOR_EACH csr256_script IN ~CSR26FMA~ ~CSR26CMA~ ~CSR26MEL~ BEGIN
+  ACTION_FOR_EACH csr256_script IN ~CSR26FMA~ ~CSR26CMA~ ~CSR26MEL~ ~CSR26FMX~ ~CSR26CMX~ BEGIN
     ACTION_IF FILE_EXISTS_IN_GAME ~%csr256_script%.BCS~ BEGIN
       FAIL ~Component 256: owned script name %csr256_script%.BCS already exists.~
     END
@@ -128,9 +131,21 @@ DEFINE_ACTION_MACRO csr256_spells_preflight BEGIN
   LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_BREACH~ RET csr256_breach_res=res csr256_breach_level=level csr256_breach_id=id csr256_breach_range=cast_range END
   LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_GREATER_MALISON~ RET csr256_malison_res=res csr256_malison_level=level csr256_malison_id=id csr256_malison_range=cast_range END
   LAF csr256_resolve_spell STR_VAR symbol=~WIZARD_MAGIC_MISSILE~ RET csr256_magicmissile_res=res csr256_magicmissile_level=level csr256_magicmissile_id=id csr256_magicmissile_range=cast_range END
+  // SR aliases Remove Magic to its revised Dispel Magic. Without SR use the
+  // enemy-only Remove Magic identity, never a hard-coded install-local resref.
+  OUTER_SPRINT csr256_dispel_symbol ~WIZARD_REMOVE_MAGIC~
+  ACTION_IF MOD_IS_INSTALLED ~spell_rev/setup-spell_rev.tp2~ 0 BEGIN
+    OUTER_SPRINT csr256_dispel_symbol ~WIZARD_DISPEL_MAGIC~
+  END
+  LAF csr256_resolve_spell STR_VAR symbol=EVAL ~%csr256_dispel_symbol%~ RET csr256_dispel_res=res csr256_dispel_level=level csr256_dispel_id=id csr256_dispel_range=cast_range END
+  LAF csr256_resolve_spell INT_VAR caster_level=14 allow_innate=1 STR_VAR symbol=~WIZARD_SPELL_SEQUENCER~ RET csr256_sequencer_res=res csr256_sequencer_level=level END
+  ACTION_IF (csr256_sequencer_level != 7) BEGIN
+    FAIL ~#256: full Spell Sequencer has an unreviewed spell level.~
+  END
   LAF csr256_resolve_aoe STR_VAR res=~%csr256_fireball_res%~ RET csr256_fireball_radius=radius END
   LAF csr256_resolve_aoe STR_VAR res=~%csr256_grease_res%~ RET csr256_grease_radius=radius END
   LAF csr256_resolve_aoe STR_VAR res=~%csr256_haste_res%~ RET csr256_haste_radius=radius END
+  LAF csr256_resolve_aoe STR_VAR res=~%csr256_dispel_res%~ RET csr256_dispel_radius=radius csr256_dispel_friends=friends_affected END
   OUTER_SET csr256_fireball_safety = csr256_fireball_radius + 4
   OUTER_SET csr256_grease_safety = csr256_grease_radius + 2
   OUTER_SET csr256_haste_cluster = 5

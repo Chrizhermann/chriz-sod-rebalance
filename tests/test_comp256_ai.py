@@ -38,9 +38,15 @@ SPELLS = {
     'breach': ('WIZARD_BREACH', 2513, 5),
     'malison': ('WIZARD_GREATER_MALISON', 2412, 4),
     'magicmissile': ('WIZARD_MAGIC_MISSILE', 2112, 1),
+    'dispel': ('WIZARD_DISPEL_MAGIC', 2302, 3),
+    'sequencer': ('WIZARD_SPELL_SEQUENCER', 2710, 7),
 }
 
 ACTION_IDS = '''IDS V1.0
+0 NoAction()
+22 MoveToObject(O:Target*)
+63 SmallWait(I:Time*)
+198 StartDialogueNoSet(O:Target*)
 23 MoveToPoint(P:Point*)
 30 SetGlobal(S:Name*,S:Area*,I:Value*)
 31 SpellRES(S:RES*,O:Target*)
@@ -64,6 +70,8 @@ TRIGGER_IDS = '''IDS V1.0
 0x401C See(O:Object*)
 0x402D HPPercentLT(O:Object*,I:HitPoints*)
 0x4031 HaveSpellRES(S:Spell*)
+0x4083 CombatCounter(I:Number*)
+0x4043 IsValidForPartyDialogue(O:Object*)
 0x4037 StateCheck(O:Object*,I:State*STATE)
 0x4041 GlobalTimerNotExpired(S:Name*,S:Area*)
 0x4045 CheckStatGT(O:Object*,I:Value*,I:StatNum*STATS)
@@ -106,7 +114,7 @@ def write_ai_fixture(game: Path, *, vanilla: bool = False) -> None:
            'state': 'IDS V1.0\n' + ''.join(f'{v} {k}\n' for k, v in STATE.items()),
            'stats': 'IDS V1.0\n' + ''.join(f'{v} {k}\n' for k, v in STATS.items()),
            'difflev': 'IDS V1.0\n1 EASIEST\n2 EASY\n3 NORMAL\n4 HARD\n5 HARDEST\n',
-           'projectl': 'IDS V1.0\n37 FIREBALL\n100 GREASE\n157 INAREAPA\n',
+           'projectl': 'IDS V1.0\n37 FIREBALL\n100 GREASE\n157 INAREAPA\n158 DISPELAO\n',
            'splstate': 'IDS V1.0\n71 GLITTERDUST\n',
            'gtimes': 'IDS V1.0\n6 ONE_ROUND\n', 'spell': 'IDS V1.0\n'}
     for short, (symbol, number, level) in SPELLS.items():
@@ -117,12 +125,17 @@ def write_ai_fixture(game: Path, *, vanilla: bool = False) -> None:
         ids['spell'] += f'{number} {symbol}\n'
         (game / 'override' / f'spwi{number-2000}.spl').write_bytes(
             spell_bytes(level, 20 if short in ('grease', 'haste') else 30,
-                        {'fireball': 38, 'grease': 101, 'haste': 158}.get(short, 0)))
-    for name, radius in [('fireball', 256), ('grease', 110), ('inareapa', 256)]:
+                        {'fireball': 38, 'grease': 101, 'haste': 158, 'dispel': 159}.get(short, 0)))
+    ids['spell'] += '2302 WIZARD_REMOVE_MAGIC\n'
+    for name, radius in [('fireball', 256), ('grease', 110), ('inareapa', 256), ('dispelao', 190)]:
         pro = bytearray(0x300)
         pro[:8] = b'PRO V1.0'
         struct.pack_into('<H', pro, 8, 3)
         struct.pack_into('<H', pro, 0x206, radius)
+        if name == 'inareapa':
+            struct.pack_into('<H', pro, 0x200, 0xc0)
+        if name == 'dispelao':
+            struct.pack_into('<H', pro, 0x200, 0x40)
         (game / 'override' / f'{name}.pro').write_bytes(pro)
     for name, contents in ids.items():
         (game / 'override' / f'{name}.ids').write_text(contents, encoding='ascii')
@@ -134,8 +147,11 @@ LAM csr256_spells_preflight
 OUTER_SET csr256_home_x=1500
 OUTER_SET csr256_home_y=1950
 OUTER_SET csr256_leash=18
-LAF csr256_ai_install END
+// This decision fixture exercises the optional challenge's full spell policy.
+// Public installer tests separately prove the default has no sequencer blocks.
+LAF csr256_ai_install INT_VAR challenge=1 END
 PRINT ~RESOLVED %csr256_stoneskin_res% %csr256_protfire_level%~
+PRINT ~DISPEL %csr256_dispel_symbol% %csr256_dispel_res% FRIENDS %csr256_dispel_friends%~
 ''', encoding='ascii')
 
 
@@ -148,6 +164,53 @@ def run_weidu(game: Path, *args: str) -> subprocess.CompletedProcess:
 
 @unittest.skipUnless(WEIDU.is_file(), 'real WeiDU unavailable; set WEIDU_EXE')
 class SpellAndCompilationTests(unittest.TestCase):
+    def test_dispel_policy_selects_distinct_installed_symbols_with_or_without_sr(self):
+        for sr in (False, True):
+            with self.subTest(sr=sr), tempfile.TemporaryDirectory() as d:
+                game = Path(d)
+                write_ai_fixture(game)
+                ids = game / 'override/spell.ids'
+                ids.write_text(ids.read_text().replace('2302 WIZARD_REMOVE_MAGIC',
+                                                      '2326 WIZARD_REMOVE_MAGIC'))
+                # Deliberately divergent identities prove the branch, even when
+                # real installs alias both names to the same resource.
+                (game / 'override/spwi326.spl').write_bytes(spell_bytes(3, 30, 159))
+                if sr:
+                    (game / 'weidu.log').write_text('~SPELL_REV/SETUP-SPELL_REV.TP2~ #0 #0 // fixture marker\n')
+                result = run_weidu(game, 'test.tp2', '--force-install-list', '0')
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                expected = 'WIZARD_DISPEL_MAGIC SPWI302' if sr else 'WIZARD_REMOVE_MAGIC SPWI326'
+                self.assertIn(f'DISPEL {expected} FRIENDS 0', result.stdout)
+                self.assertEqual(0, run_weidu(game, str(game/'override/csr26fma.bcs')).returncode)
+                script = (game/'csr26fma.baf').read_text().upper()
+                self.assertIn(f'REALLYFORCESPELLRES("{expected.split()[-1]}"', script)
+
+    def test_innate_sequencer_header_and_ally_affecting_dispel_are_supported(self):
+        with tempfile.TemporaryDirectory() as d:
+            game = Path(d)
+            write_ai_fixture(game)
+            seq = game / 'override/spwi710.spl'
+            data = bytearray(seq.read_bytes())
+            struct.pack_into('<H', data, 0x1c, 4)
+            seq.write_bytes(data)
+            pro = game / 'override/dispelao.pro'
+            data = bytearray(pro.read_bytes())
+            struct.pack_into('<I', data, 0x200, 0)
+            pro.write_bytes(data)
+            result = run_weidu(game, 'test.tp2', '--force-install-list', '0')
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn('FRIENDS 1', result.stdout)
+            self.assertEqual(0, run_weidu(game, str(game/'override/csr26fma.bcs')).returncode)
+            script = (game/'csr26fma.baf').read_text()
+            release = [block for block in Decisions(script).blocks
+                       if any('CSR256_SEQUENCE' in a and ',2)' in a for a in block[1])]
+            self.assertEqual(6, len(release))
+            for conditions, actions in release:
+                # Even the fire-immune elementals must be protected from a
+                # friendly dispel, independently of Fireball's safety checks.
+                self.assertTrue(any('CSR256F1' in c for c in conditions))
+                self.assertTrue(any('CSR256F2' in c for c in conditions))
+
     def test_installed_and_vanilla_spell_identities_compile_without_scs(self):
         for vanilla in (False, True):
             with self.subTest(vanilla=vanilla), tempfile.TemporaryDirectory() as d:
@@ -225,7 +288,7 @@ def atom(text: str):
     if text.startswith('"'):
         return text[1:-1].upper()
     constants = dict(STATE, **STATS, ENEMY=255, PC=2, HUMANOID=1,
-                     NORMAL=3, TRUE=1, FALSE=0, ONE_ROUND=6, GLITTERDUST=71)
+                     NORMAL=3, HARD=4, TRUE=1, FALSE=0, ONE_ROUND=6, GLITTERDUST=71)
     if text in constants:
         return constants[text]
     try:
@@ -398,7 +461,7 @@ class Decisions:
             self.saved[(values[0], values[1])] = self.actor(args[2]).position
         elif fn == 'UseItem':
             self.items[values[0]] -= 1
-        elif fn not in ('Continue', 'AttackReevaluate', 'MoveToPoint', 'MoveToSavedLocation'):
+        elif fn not in ('Continue', 'AttackReevaluate', 'MoveToPoint', 'MoveToSavedLocation', 'SmallWait'):
             raise AssertionError(f'Unsupported action: {text}')
 
     def step(self) -> list[tuple]:
@@ -514,7 +577,7 @@ class CompiledDecisionTests(unittest.TestCase):
         m.actors['CSR256E2'] = Actor(position=at(100))
         m.actors['CSR256F1'] = Actor(position=at(7))
         m.actors['CSR256F2'] = Actor(position=at(8))
-        self.assertEqual([('SPWI305', 'CSR256F1')], m.casts())
+        self.assertIn(('ReallyForceSpellRES', 'SPWI305', 'CSR256F1'), m.step())
         self.assertEqual(0, m.book['SPWI305'])
         m.time = 10
         m.book['SPWI305'] = 1  # even an unintended extra copy cannot rebuff
@@ -563,11 +626,11 @@ class CompiledDecisionTests(unittest.TestCase):
         m.actors['CSR256E1'] = Actor(position=at(6))
         m.actors['CSR256E2'] = Actor(position=at(7))
         m.interrupted = True
-        self.assertEqual([('SPWI305', 'CSR256E1')], m.casts())
+        self.assertIn(('ReallyForceSpellRES', 'SPWI305', 'CSR256E1'), m.step())
         m.time = 10
         self.assertEqual([], m.casts())
         self.assertEqual(0, m.book['SPWI305'])
-        self.assertFalse(any(a[:2] == ('RemoveSpellRES', 'SPWI305') for a in m.actions))
+        self.assertEqual(1, sum(a[:2] == ('RemoveSpellRES', 'SPWI305') for a in m.actions))
 
     def test_fireball_skips_unsafe_pc_then_selects_safe_pc_ignoring_fire_elemental(self):
         m = self.fire()
@@ -652,7 +715,128 @@ class CompiledDecisionTests(unittest.TestCase):
         m.me.position = at(0)
         m.actors['CSR256CM'] = Actor(position=at(8))
         m.actors['LASTATTACKER'] = Actor(position=at(9), ea=2)
-        self.assertEqual('AttackReevaluate', m.step()[0][0])
+        self.assertEqual('AttackReevaluate', m.step()[-1][0])
+
+    def test_opening_haste_waits_for_enemy_sight_then_targets_central_elemental(self):
+        m = self.fire()
+        m.me.position = (1456, 1860)
+        m.actors['PLAYER1'].visible = False
+        m.book['SPWI305'] = 1
+        for name, pos in {'CSR256G1': (1560,1990), 'CSR256G2': (1608,1920),
+                          'CSR256E1': (1615,2035), 'CSR256E2': (1680,1965),
+                          'CSR256F1': (1544,1944), 'CSR256F2': (1440,1990)}.items():
+            m.actors[name] = Actor(position=pos)
+        actions = m.step()
+        self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in actions))
+        self.assertEqual(1, m.book['SPWI305'])
+
+        self.assertEqual(0, m.variables.get(('LOCALS','CSR256_HASTE'),0))
+        m.actors['PLAYER1'].visible = True
+        actions = m.step()
+        self.assertIn(('ReallyForceSpellRES','SPWI305','CSR256F1'), actions)
+        self.assertEqual(1, actions.count(('RemoveSpellRES','SPWI305')))
+        self.assertTrue(m.interruptible)
+        # Reload-style reconstruction preserves the saved one-shot local.
+        loaded = self.fire()
+        loaded.variables.update(m.variables)
+        loaded.actors = m.actors
+        loaded.book['SPWI305'] = 1
+        self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in loaded.step()))
+
+    def test_haste_targets_an_elemental_never_a_guard(self):
+        m = self.fire()
+        m.book['SPWI305'] = 1
+        m.actors['CSR256G1'] = Actor(position=at(4))
+        m.actors['CSR256G2'] = Actor(position=at(5))
+        self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in m.step()))
+        self.assertEqual(1, m.book['SPWI305'])
+        m.actors['CSR256E1'] = Actor(position=at(4))
+        self.assertIn(('ReallyForceSpellRES','SPWI305','CSR256E1'),m.step())
+
+    def test_actual_sighting_alerts_blind_mage_without_revealing_target(self):
+        guard = Decisions(self.baf['csr26mel'])
+        self.assertIn(('SetGlobal','CSR256_ALERT','BD2000',1), guard.step())
+        self.assertEqual(guard.actors['PLAYER1'].position,
+                         guard.saved[('BD2000','CSR256_SEEN')])
+        mage = self.fire()
+        mage.variables.update({k:v for k,v in guard.variables.items() if k[0]=='BD2000'})
+        mage.actors['PLAYER1'].visible = False
+        mage.book['SPWI112'] = 1
+        actions = mage.step()
+        self.assertIn(('MoveToSavedLocation','CSR256_SEEN','BD2000'), actions)
+        self.assertEqual(1, mage.book['SPWI112'])
+        self.assertFalse(any(a[0] in ('SpellRES','ReallyForceSpellRES') for a in actions))
+
+    def test_no_shared_alert_for_unseen_or_outside_encounter_target(self):
+        for visible, pos in ((False,at(10)), (True,at(30))):
+            m = Decisions(self.baf['csr26mel'])
+            m.actors['PLAYER1'].visible = visible
+            m.actors['PLAYER1'].position = pos
+            self.assertEqual([], m.step())
+            self.assertNotIn(('BD2000','CSR256_ALERT'), m.variables)
+
+    def test_insane_control_sequence_reserves_and_releases_exactly_once(self):
+        m = self.control()
+        m.difficulty = 5
+        m.book.update(SPWI710=1,SPWI412=1,SPWI312=3)
+        actions = m.step()
+        self.assertEqual([('SPWI412','PLAYER1'),('SPWI312','PLAYER1')],
+                         [a[1:] for a in actions if a[0]=='ReallyForceSpellRES'])
+        self.assertEqual([('SPWI710',),('SPWI412',),('SPWI312',)],
+                         [a[1:] for a in actions if a[0]=='RemoveSpellRES'])
+        self.assertEqual(2,m.book['SPWI312'])
+        self.assertEqual(2,m.variables[('LOCALS','CSR256_SEQUENCE')])
+        self.assertIn(('SmallWait',1),actions)
+        self.assertTrue(m.interruptible)
+        for t in (0,7,14):
+            m.time=t
+            self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in m.step()))
+
+    def test_insane_fire_sequence_releases_in_mixed_melee_without_fireball(self):
+        m = self.fire()
+        m.difficulty=5
+        m.book.update(SPWI710=1,SPWI302=1,SPWI303=2,SPWI304=1)
+        m.actors['PLAYER1'].position=at(24)
+        m.actors['CSR256G1']=Actor(position=at(24))
+        actions=m.step()
+        self.assertEqual(2,m.variables[('LOCALS','CSR256_SEQUENCE')])
+        self.assertEqual([('SPWI302','PLAYER1'),('SPWI303','PLAYER1')],
+                         [a[1:] for a in actions if a[0]=='ReallyForceSpellRES'])
+        self.assertEqual(1,m.book['SPWI303'])
+        self.assertEqual(1,m.book['SPWI304'])
+        self.assertEqual(0,m.book['SPWI302'])
+        m.time=7
+        self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in m.step()))
+
+    def test_sequence_requires_insane_and_complete_payload(self):
+        for difficulty, seq, malison, slow in ((4,1,1,3),(5,0,1,3),(5,1,0,3),(5,1,1,0)):
+            m=self.control()
+            m.difficulty=difficulty
+            m.book.update(SPWI710=seq,SPWI412=malison,SPWI312=slow)
+            actions=m.step()
+            self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in actions))
+            self.assertFalse(any(a[0]=='RemoveSpellRES' for a in actions))
+            self.assertEqual(seq,m.book['SPWI710'])
+
+    def test_disabled_or_silenced_caster_keeps_stored_sequence_until_available(self):
+        for state in (1,8,0x20,STATE['STATE_SILENCED']):
+            m=self.control()
+            m.difficulty=5
+            m.book.update(SPWI710=1,SPWI412=1,SPWI312=1)
+            m.me.state=state
+            self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in m.step()))
+            self.assertEqual(1,m.variables[('LOCALS','CSR256_SEQUENCE')])
+            m.me.state=0
+            self.assertEqual(2,sum(a[0]=='ReallyForceSpellRES' for a in m.step()))
+
+    def test_loaded_spent_sequence_does_not_rearm(self):
+        m=self.control()
+        m.difficulty=5
+        m.variables[('LOCALS','CSR256_SEQUENCE')]=2
+        m.book.update(SPWI710=1,SPWI412=1,SPWI312=1)
+        actions=m.step()
+        self.assertFalse(any(a[0]=='ReallyForceSpellRES' for a in actions))
+        self.assertEqual(1,m.book['SPWI710'])
 
 
 if __name__ == '__main__':

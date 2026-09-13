@@ -233,3 +233,17 @@ BUT_ONLY
 // BDNEDERL (the Marshal never asks after her).
 // ------------------------------------------------------------
 COMPILE ~chriz-sod-remix/dlg/csr197skie.d~
+
+// Native Skie was not recruitable and has no companion XP catch-up ladder.
+// Keep her installed class/kit and saved build; add only the normal XP floor.
+INCLUDE ~chriz-sod-remix/lib/comp197_xp.tpa~
+LAF csr197_install_xp END
+
+// Dismissed palace Skie uses her existing rejoin dialogue, not MULTIG's
+// generic farewell. Preserve the separate imported SKIE campaign row.
+INCLUDE ~chriz-sod-remix/lib/comp197_dialogue.tpa~
+LAF csr197_install_dialogue_route END
+
+// Unlock SCS's stock NPC potions only after the restored palace Skie joins.
+INCLUDE ~chriz-sod-remix/lib/comp197_potions.tpa~
+LAF csr197_install_potion_cleanup END

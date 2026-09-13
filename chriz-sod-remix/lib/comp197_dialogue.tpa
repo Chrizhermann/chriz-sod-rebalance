@@ -1,0 +1,70 @@
+// Palace Skie's distinct BDSKIE identity has no vanilla campaign-table row.
+// On dismissal the engine consequently selects generic MULTIG. Connect only
+// POST to her existing field rejoin states; retain the current joined dialogue
+// and do not enable imported SKIE's BG1 dialogue or dream scripts.
+// Also callable independently by a tail repair after an older component 197.
+DEFINE_ACTION_FUNCTION csr197_install_dialogue_route BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~bddialog.2da~ BEGIN
+    FAIL ~chriz-sod-remix #197: the SoD campaign dialogue table BDDIALOG.2DA is missing.~
+  END
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~bdskie.dlg~ OR NOT FILE_EXISTS_IN_GAME ~multig.dlg~ BEGIN
+    FAIL ~chriz-sod-remix #197: Skie's existing dialogue resources are missing.~
+  END
+  COPY_EXISTING ~bddialog.2da~ ~override~
+    // Read with minimum width 1, so a short existing mod row cannot disappear
+    // from the scan when another mod appends optional columns to the header.
+    READ_2DA_ENTRY 2 0 1 csr197_post_header
+    READ_2DA_ENTRY 2 1 1 csr197_join_header
+    READ_2DA_ENTRY 2 2 1 csr197_dream_header
+    PATCH_IF NOT (~%csr197_post_header%~ STRING_EQUAL_CASE ~POST_DIALOG_FILE~)
+      OR NOT (~%csr197_join_header%~ STRING_EQUAL_CASE ~JOIN_DIALOG_FILE~)
+      OR NOT (~%csr197_dream_header%~ STRING_EQUAL_CASE ~DREAM_SCRIPT_FILE~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #197: BDDIALOG.2DA has an unfamiliar column layout; no Skie route was written.~
+    END
+    SPRINT csr197_header_pattern ~^\([ %TAB%]*POST_DIALOG_FILE[ %TAB%]+JOIN_DIALOG_FILE[ %TAB%]+DREAM_SCRIPT_FILE[^%WNL%]*\)~
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr197_header_pattern%~ csr197_headers
+    PATCH_IF csr197_headers != 1 BEGIN
+      PATCH_FAIL ~chriz-sod-remix #197: BDDIALOG.2DA has an ambiguous header; no Skie route was written.~
+    END
+    // Capture and return the exact original header. Its width, rather than
+    // the longest existing row, determines the new row's optional columns.
+    REPLACE_EVALUATE CASE_INSENSITIVE ~%csr197_header_pattern%~ BEGIN
+      INNER_PATCH ~%MATCH1%~ BEGIN
+        COUNT_2DA_COLS csr197_data_columns
+      END
+    END ~%MATCH1%~
+    SET csr197_skie_rows = 0
+    COUNT_2DA_ROWS 1 csr197_rows
+    FOR (csr197_row = 3; csr197_row < csr197_rows; ++csr197_row) BEGIN
+      READ_2DA_ENTRY csr197_row 0 1 csr197_name
+      PATCH_IF (~%csr197_name%~ STRING_EQUAL_CASE ~BDSKIE~) BEGIN
+        SET csr197_skie_rows += 1
+        READ_2DA_ENTRY csr197_row 1 1 csr197_post
+        READ_2DA_ENTRY csr197_row 2 1 csr197_join
+        READ_2DA_ENTRY csr197_row 3 1 csr197_dream
+        PATCH_IF NOT (~%csr197_post%~ STRING_EQUAL_CASE ~BDSKIE~)
+          OR NOT (~%csr197_join%~ STRING_EQUAL_CASE ~MULTIG~)
+          OR NOT (~%csr197_dream%~ STRING_EQUAL_CASE ~***~) BEGIN
+          PATCH_FAIL ~chriz-sod-remix #197: another BDSKIE dialogue route is already present; preserving it without overwrite.~
+        END
+      END
+    END
+    PATCH_IF csr197_skie_rows > 1 BEGIN
+      PATCH_FAIL ~chriz-sod-remix #197: duplicate BDSKIE dialogue rows; no Skie route was written.~
+    END
+    PATCH_IF csr197_skie_rows = 0 BEGIN
+      SPRINT csr197_new_row ~BDSKIE BDSKIE MULTIG ***~
+      FOR (csr197_column = 3; csr197_column < csr197_data_columns; ++csr197_column) BEGIN
+        SPRINT csr197_new_row ~%csr197_new_row% ***~
+      END
+      READ_BYTE (BUFFER_LENGTH - 1) csr197_last_byte
+      PATCH_IF csr197_last_byte != 10 BEGIN
+        SPRINT csr197_new_row ~%LNL%%csr197_new_row%~
+      END
+      SPRINT csr197_new_row ~%csr197_new_row%%LNL%~
+      SET csr197_end = BUFFER_LENGTH
+      INSERT_BYTES csr197_end (STRING_LENGTH ~%csr197_new_row%~)
+      WRITE_ASCIIE csr197_end ~%csr197_new_row%~
+    END
+  BUT_ONLY
+END

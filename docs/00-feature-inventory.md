@@ -1,20 +1,25 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (generated 2026-07-10, from the tp2/lib components, the dev
-WeiDU.log, and the design docs; keep updated per pass). Single deduplicated view of the
+**Living reference doc** (started 2026-07-10; candidate inventory updated 2026-09-13).
+Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (v0.6.8 release marker, 39
-component declarations), `docs/01-remix-wishlist.md` (scope anchor),
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**41 component
+declarations in seven groups** in the v0.6.9 release candidate),
+`docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented (built + installed on the dev install)
+## 1. Implemented in source — v0.6.9 release candidate
 
-**Unreleased branch additions (not installed on the designated dev target):**
+The latest published release remains **v0.6.8**. This section describes candidate
+source, not a claim that every component is installed or natively accepted.
+Isolated Combined playtest results are recorded separately below.
+
+**Candidate additions and corrections:**
 135 keeps URE2 without dead magic and misleading descriptions; 235 repairs older
 Ymori cuts while preserving native quest staging; 265 puts Mizhena's amulet in
 BD5000's existing corpse, removes the BD5110 Guardian and Shadow
@@ -24,16 +29,22 @@ Fresh 175 pays the approved flat 22,000 per character on every difficulty;
 append 176 to update an older 24,000 award. Previously paid XP is unchanged.
 See [approved scope and save boundaries](design/wave1/07-filler-triage.md).
 
-Six install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
+Regular bridge component256 retains Haste, current difficulty tiers and prompt
+Bence arrival without sequencers. Optional257 adds only the two Insane sequencers.
+Default-selected266 makes Shadow Aspect's Insane Mislead finite. Component197
+includes native-tier XP catch-up, dialogue routing and movable-potion corrections
+for Skie. The live appearance issue after palace rest remains unresolved.
+
+Seven install GROUPs in the WeiDU UI: **@1000** Wave-1 global levers, **@1001**
 Prologue-city, **@1002** Coast Way, **@1003** road north, **@1004** coalition camp,
-and **@1005** ending. Components patch installed resources and add guarded private
+**@1005** ending, and **@1006** Extra Challenge. Components patch installed resources and add guarded private
 resources where needed; nothing is uninstalled. Resource and dependency checks
 require the appropriate SoD content; repair 291 and optional skip 910 require EET.
-A normal fresh selection installs **31 components**, excluding repair 291 and one
-of the exclusive 900/901 alternatives, with optional 910 available in addition.
-The designated dev target has **32 installed
-component rows**, including its existing 290 plus appended repair 291; 901 remains
-unchosen. The live install is not the implementation target.
+Selection depends on prerequisites and installed history. Fresh versions include
+the corrections offered by older-install updates176/235/291; choose one of 900/901
+and add optional257 or supported EET-only910 as desired. Earlier 31-selection and
+32-dev-row figures were historical snapshots, not the current inventory or a
+recommended universal selection. The live install is not the implementation target.
 
 ### Global levers (Wave 1 — GROUP @1000)
 
@@ -43,6 +54,7 @@ unchosen. The live install is not the implementation target.
 | 110 | Keep all companions at SoD start | Strips the 28 BD0103 `LeaveParty()+DestroySelf` dismiss blocks (29 names) so the whole BG1 party carries into SoD; +9 recruiter-site EXTEND_TOP skip-blocks (BD0101/0108/0110/0111/1000/2000/2100/7000/7100) suppress duplicate recruit-spawns / Dorn gear-grab for kept members. | pred `bd0103.bcs` |
 | 120 | Remove the hooded man (mid-campaign) | Excises Irenicus from his 5 mid-campaign scenes (BD0103 bedside, BDCUT10/11 interrogation vision, BDCUT28 Bhaal-vision, BD5100 cameo, BDSCRY/BDIMOEN dangling options). Sets nothing the endgame reads; component 290 removes the endgame chain. | pred `bd0103.bcs` |
 | 130 | Skip the four chapter rest-dreams | EXTEND_TOP on BDBALDUR.bcs pre-sets `bd_ddd=4` (natural post-all-dreams value) so PLAYER1D's dream launchers never fire; the four nights become ordinary rests. PLAYER1D.BCS left untouched (EET-compat). | pred `bdbaldur.bcs` |
+| 135 | Assassin ambush without dead magic (default selected) | Retains the scripted encounter while removing repeated dead-magic effects and misleading descriptions/companion remarks. The user's spellcasting/persistence sample passed; this was not a full travel/combat/rest test. | pred `bd0063.are` and guarded encounter resources |
 
 ### Prologue — city (GROUP @1001)
 
@@ -60,7 +72,7 @@ unchosen. The live install is not the implementation target.
 | 187 | Assassination night set never spawns | Schedule-zeroes the nine always-placed BD0100 night actors (Corwin, three assassins, two guards, three corpses), preventing the one-frame render/pop that comp150's script sweep could not stop. The sweep remains as protection for saves with BD0100 already baked. | REQUIRE 150; pred `bd0100.are` |
 | 190 | Skie's second-night bedroom visit removed | A Skie-free dawn wake mirrors the two BD0103 night blocks and pre-sets `BD_MDD005=1` so they can never fire (party sleeps to dawn, `bd_plot` 54→55 as before); BDSKIE night root (state 16) sealed with False(). | REQUIRE 150 |
 | 195 | Assassination/poison references scrubbed | Zero-new-text cleanup after 150: reply/state False() gates + 2 ALTER_TRANS re-routes (BDSCHAEL 227 retire-commit moves onto the "ready to march" reply + EXIT; BDLIIA 13 "how fares Imoen?" → training advice) across Corwin/Eltan/Edwin/Liia/Fist/debug. de Lancie supply-poison quest explicitly out of scope. | REQUIRE 150 |
-| 197 | Skie: talk-to-join recruit at the palace | Replaces the contradictory "talking to Daddy" opener with the signed-off short Entar-death exchange, restores Beamdog's cut `JoinParty()` scaffold, retires Skie's remaining SoD plot surface, and guards every remaining script target for an in-party Skie. Estate/gear inheritance remains deferred. | REQUIRE 150+185+210 |
+| 197 | Skie: talk-to-join recruit at the palace | Entar-death recruitment, native SoD companion XP tiers based on protagonist XP, corrected condolence/rejoin routes, and movable stock SCS invisibility/Freedom potions with unchanged mechanics. No unconditional 250k floor or lowering existing XP. Retires her incompatible SoD plot handlers while preserving the joined actor. Estate/gear inheritance remains deferred. | REQUIRE 150+185+210 |
 
 ### Optional full SoD skip (GROUP @1001)
 
@@ -80,24 +92,33 @@ unchosen. The live install is not the implementation target.
 | 245 | Coast Way bridge: wall removal is skip-proof | Patches CUTSKIP's mirrored BDCUT14 end-state so skipping the scene cannot re-raise comp200's removed force wall or restore the vanilla three-round timer; keeps the wall gone and the timer at FIVE_ROUNDS. Establishes the rule that every BDCUT patch must audit CUTSKIP. | REQUIRE 200; pred `cutskip.bcs` |
 | 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. v0.6.8 preserves existing chest items and metadata instead of requiring one vanilla sword; covered by synthetic public-installer tests. | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 
-Component 901 is the declared but unselected XOR alternative: remove the treasure with
-BD7000 and set `csr_treasure_removed=1`. It is not one of the 32 installed dev component rows.
+Component 901 is the mutually exclusive alternative: remove the treasure with
+BD7000 and set `csr_treasure_removed=1`. Its selection depends on the player's preference.
 
 ### The road north / Ch. 9 (GROUP @1003) — quick-win pass, shipped 2026-07-11
 
 | # | Feature | What it does | Deps |
 |---|---------|--------------|------|
-| 230 | Road north: fewer, cleaner enemy camps | Main-line trash cut: BD7100 63 cuts (hobgoblin/orc camps, beetles, displacer pack, small spiders of both nests, troll thin-out 32→21 in four kept clusters; ogre camp + gargantuan/sword-spider elites + all ~24 camp NPCs + BD7110 troll lair stay), BD2000 8 (beetles/worgs/wight; siege pickets + scripted battle untouched), BD2010 27 (warren core of 8 stays). 29,025 cut kill-XP → **+23,200 party-total** once-block (≈3,870/char at 6; unit-corrected 2026-07-12) on the Boareskyr resolution (`bd_plot > 292`, both branches; the script's 6000/3000 are Dorn/patrol side quests, deliberately not ridden). | pred `bd7100/bd2000/bd2010.are` |
+| 230 | Road north: fewer, cleaner enemy camps | 97 main-line trash cuts across BD7100/BD2000/BD2010, preserving siege/story actors and Ymori's native quest staging. The corrected cut ledger is 28,850 kill XP; compensation is **23,100 party XP** once on Boareskyr resolution. Earlier versions cut Ymori and awarded 23,200; append235 to correct that older installation. | pred `bd7100/bd2000/bd2010.are` |
 | 240 | Forest of Wyrms: bugbear cave removed, temple behind the dragon | Retargets the only two BD7220-bound travel regions at each other (BD7210 `TranBD7220` → BD7230 `ExitBD7220`, BD7230 `TranBD7220` → BD7210 `ExitBD7220`; names kept so `EscapeAreaObject` still works — the temple's fleeing cultist now runs into the dragon cave). BD7220 = unreachable, file untouched, reversible; spectacles gimmick survives (bdmisc01 lives on BDZAVIAK/BD0109). Plus BD7200 28 cuts (bugbear door-guards/displacers/wolves/small spiders; wyverns+phase spiders+hill giant stay) and the 6 post-Neothelid invisible ambushers (BD7230AM goes inert; loot mundane). 28,395 ledgered (incl. 14,810 from the cave) → **+22,700 party-total** once-block (≈3,780/char at 6; unit-corrected 2026-07-12) on the Neothelid kill. | pred `bd7200/7210/7220/7230.are` |
 | 250 | Morentherene: a real dragon on Hard/Insane | Two CREATE-built stat spells applied asleep via vanilla's own ApplySpellRES delivery (EXTEND_TOP bd7210.bcs, difficulty-gated once-blocks). Hard+: +56 HP (168), AC −6, THAC0 −2, saves +3, MR 35. Insane stacks to: 230 HP, AC −9, THAC0 −4, saves +5 total, MR 50, 4 APR. Breath/wing buffet/AI untouched (SCS-safe); Core and below vanilla. Baseline verified: 112 HP, AC −1, THAC0 2, saves 5–8, MR 15. | pred `bd7210.are` + `bdmorent.cre` |
-| 255 | Boareskyr battle: durable explosive barrels | BDKEGX 25 hp / 0% fire resist → **120 hp / 75% fire** (cold stays 50): the battle's loss condition no longer pops to random mephit splash "with no counter" on higher difficulties. CRE-level patch covers placed + scripted barrels; nothing scripts BDKEGX by name; story detonations use Kill() and still work. Installed stopgap; the 2026-09-05 direction removes the barrels entirely, with an elemental-demolition replacement proposed in [#14](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14). | pred `bd2000.are` + `bdkegx.cre` |
-| 256 | Boareskyr elemental finale (unreleased) | Two level-13 wizards, two veterans and four tiered fire/earth elementals replace both old finale routes. Finite defensive recasts and regular Haste; all barrel/portal mechanics and day/night artwork removed. Preserve aftermath and 4,520 fixed-roster XP. No v1 collapse timer; native acceptance pending. | before first BD2000 entry; independent or append after 255 |
+| 255 | Boareskyr battle: durable explosive barrels (legacy) | Raises BDKEGX from 25 to120 HP and from0% to75% fire resistance; scripted story destruction remains possible. This older stopgap is superseded by256's elemental finale. Existing255 installations can retain the row and append256. | pred `bd2000.are` + `bdkegx.cre` |
+| 235 | Preserve Ymori after older road cuts | Restores only the quest actor/staging lost to an older 230 cut and corrects future road-north payouts to 23,100 party XP. Fresh 230 already preserves that actor and uses the corrected award. | REQUIRE 230 |
+| 256 | Boareskyr elemental finale | Two mages (level13 below Insane, level14 on Insane), two veterans and four tiered elementals replace both old finale routes. Haste on enemy sight, finite defensive recasts, shared engagement and prompt Bence aftermath; no sequencers in regular mode. Cleaned day/night art, fixed 4,520 XP, no v1 collapse timer. | before first BD2000 entry; independent or append after 255 |
+
+### Extra Challenge (GROUP @1006)
+
+| # | Feature | What it does | Deps |
+|---|---------|--------------|------|
+| 257 | Insane bridge sequencers (optional) | Adds fire Dispel Magic with SR / Remove Magic without SR then Flame Arrow, and earth Greater Malison then Slow. Changes only the two Insane mage AI pointers; stats, spellbooks, roster, Haste and world setup stay identical. Regular AI can use the spells as ordinary casts. | REQUIRE current256 resources; before new bridge actors spawn |
 
 ### The coalition camp / Ch. 10–12 (GROUP @1004) — quick-win pass, shipped 2026-07-12
 
 | # | Feature | What it does | Deps |
 |---|---------|--------------|------|
 | 260 | Coalition camp arc: fewer, cleaner enemies | 183 cuts / 129,495 XP across the scouting maps: BD7300 119 of 139 hostiles (beetles/boars/displacers/hobgoblins/orogs/wolves/ogre camp; hill giants 10→3+leader, phase spiders 7→4; the nymph pocket + its dead-orog field, ettins, elite spiders, all neutrals stay), BD7400 21 (beetles, banned bone bats + shadowed soul, burning skeletons 9→4), BD7310 1 (banned Unsleeping Guardian), BD5000 32 (displacer pack, orc camp, greater wyverns 4→1; crusader camp + Murs' 12k ogre quest untouched), BD5100 10 (corrupted-grove pockets B/C thinned, pocket A intact; myconids + all neutrals stay). **+103,600 party-total** (≈17,270/char at 6; unit-corrected 2026-07-12) riding the guaranteed ch-11 transition 20k in BD4000.bcs. | pred 5×`.are` + `bd4000.bcs` |
+| 265 | Quest loot and missed creature-ban corrections | Places Mizhena's amulet in BD5000's existing `Dead_fighter`, removes the missed BD5110 Guardian and two scripted Shadowed Soul summons, and corrects the future coalition award to 106,800 party XP. | REQUIRE 260; fresh area snapshots for actor/container changes |
+| 266 | Finite Shadow Aspect Mislead (default selected) | Limits its existing Insane Mislead action to one use per actor, preserving the original invisibility/difficulty/timer checks and other spells/summons. Broader simplification is deferred; no native Mislead acceptance is claimed. | pred `bdashiru.bcs`; append without reinstalling240/265 |
 | 270 | Kanaglym: fewer undead | NE graveyard 19→8 (3 banned shadowed souls; archers 9→3, armored 3→2, bladed 2→1; the 4k skeleton-warrior mini-boss anchors the rest). South quest cluster neutral-until-quest = untouched by construction; C0MNEV01 (foreign mod) never touched. **+5,200 party-total** (≈870/char at 6; unit-corrected 2026-07-12) riding the Kherriun 12,000 award (both branches, one fires). | pred `bd5300.are` + `.bcs` |
 | 280 | No party dispel at the basement reveal | BOTH reveal variants strip the party (6× bddispel on Player1–6 in BDCUT45A **and** BDCUT45B) and CUTSKIP mirrors both (12 more) — all 24 removed; ward flare, bdglowgr glow and every enemy-side dispel stay. Corrects the earlier "45B only dispels enemies" note. | pred `bdcut45a/b.bcs` + `cutskip.bcs` |
 
@@ -118,12 +139,24 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.6, tail-installable WeiDU mod; 33 component declarations in 6
-install GROUPs; 31 components in a normal fresh selection (omit repair 291 and one
-900/901 alternative); 32 installed dev rows include existing 290 and repair 291.
+`chriz-sod-remix` v0.6.9 candidate, tail-installable WeiDU mod: **41 declarations
+in seven install groups**. Published release remains v0.6.8 until publication.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
 scope.
+
+**Current native boundary:** the row-425 challenge bridge, Bence arrival,
+save/reload and onward crossing passed by user report; the later 256/257 split
+has no separate native acceptance. Liia's exact 22,000 payment/reload, Skie's
+XP/condolence route, the amulet reward and Guardian removal have recorded checks.
+The assassin test was a limited spellcasting/persistence sample. Shadow Aspect's
+summon test is unfinished and deprioritized; finite Mislead has no native pass.
+The companion appearance defect remains unresolved. These observations do not
+replace the candidate's separate installer and automated verification evidence:
+273 main tests (101 bridge and13 Mislead),41 research tests,14 ending self-tests,
+and WeiDU249 parsing of the TP2 and56 libraries passed. The 256/257 split's common
+AI equivalence and two-pointer-only install/disposable restore passed. See the
+[candidate report](releases/v0.6.9.md).
 
 **Locked decisions already shipped as components (traceability):** item 1 / wave1-02
 keep-party → **110**; item 5 / wave1-01 rest-ambush 5× → **100**; item 10 / wave1-03
@@ -211,6 +244,7 @@ ending and EET carrier repair → **290/291**.
 | Coldhearth Lich fight rework (Coast Way §3) | A dedicated lich pass (phylactery telegraph / power-down / SCS brain) |
 | Skie estate/gear inheritance | Optional follow-up only; the talk-to-join core and BG1 soundset are already shipped by 197 |
 | Full Corwin dialogue rewrite | Surface census prepped (docs/research/16); a later rewrite pass |
+| Make the whole Shadow Aspect encounter trivial | Deferred user direction;266 only caps repeat Mislead. Its unfinished native summon check is not a release blocker. |
 | Per-playthrough sequencer randomization (Korlasz) | Cheap roadmap note |
 | Rioters-instead-of-assassins street vignettes (prologue §4) | Roadmap |
 | Imoen BG1-death detection | Intentionally skipped — unconditionally present by design |
@@ -245,8 +279,8 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 
 | Task | Status and next step |
 |------|----------------------|
-| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Approved first version implemented as 256; native combat/rendering/progression acceptance pending with PR #21. Collapse timer deferred to version 2. |
-| [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Chosen of Cyric-style brief: roughly 30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
+| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Regular256 and optional257 implemented in the candidate. The accepted challenge build passed combat/Bence/save-reload/onward playtesting; the final component split has no separate native pass. Collapse timer deferred to version2. |
+| [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Next-version priority after the current release. Chosen of Cyric-style brief: roughly30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
 | [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 historical generated actor cuts verified. Approved quest/creature fixes and the assassin ambush without dead magic are implemented in PR #21; Liia's reward is now set to flat 22,000 per character. Broader density decisions and native acceptance remain. |
 
 ---
