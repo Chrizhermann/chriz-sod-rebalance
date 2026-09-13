@@ -1,0 +1,129 @@
+// Confirmed retained Shar-Teel defect: her SoD POST dialogue has no field
+// entry outside the opening crypt. Add only an entry to its existing, neutral
+// rejoin conversation. Neither the original states nor her actor are rewritten.
+
+DEFINE_PATCH_MACRO csr110_field_trigger BEGIN
+  READ_LONG (csr110_states + csr110_state * 16 + 12) csr110_trigger_index
+  SPRINT csr110_trigger ~~
+  PATCH_IF csr110_trigger_index != 0xffffffff BEGIN
+    PATCH_IF csr110_trigger_index >= csr110_trigger_count BEGIN
+      PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE has an invalid state trigger.~
+    END
+    READ_LONG (csr110_triggers + csr110_trigger_index * 8) csr110_text_offset
+    READ_LONG (csr110_triggers + csr110_trigger_index * 8 + 4) csr110_text_length
+    READ_ASCII csr110_text_offset csr110_trigger (csr110_text_length)
+    INNER_PATCH_SAVE csr110_trigger ~%csr110_trigger%~ BEGIN
+      REPLACE_TEXTUALLY ~[%WNL% %TAB%]+~ ~~
+    END
+  END
+END
+
+DEFINE_PATCH_MACRO csr110_field_route BEGIN
+  READ_LONG (csr110_states + csr110_state * 16) csr110_say
+  READ_LONG (csr110_states + csr110_state * 16 + 4) csr110_first
+  READ_LONG (csr110_states + csr110_state * 16 + 8) csr110_count
+  PATCH_IF (csr110_count != 2) OR (csr110_first + 2 > csr110_transition_count) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE's reviewed rejoin replies have changed.~
+  END
+  FOR (csr110_i = 0; csr110_i < 2; ++csr110_i) BEGIN
+    SET csr110_transition = csr110_transitions + (csr110_first + csr110_i) * 32
+    READ_LONG csr110_transition csr110_flags
+    READ_LONG (csr110_transition + 4) csr110_reply
+    READ_ASCII (csr110_transition + 20) csr110_destination (8) NULL
+    READ_LONG (csr110_transition + 28) csr110_next
+    PATCH_IF (csr110_flags != 1) OR (csr110_next != csr110_i + 5) OR
+             NOT (~%csr110_destination%~ STRING_EQUAL_CASE ~BDSHARTE~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE's reviewed rejoin transition has changed.~
+    END
+    PATCH_IF csr110_state = 4 BEGIN
+      SET $csr110_replies(~%csr110_i%~) = csr110_reply
+    END ELSE PATCH_IF csr110_reply != $csr110_replies(~%csr110_i%~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #110: the existing field route has different replies.~
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr110_sharteel_field_rejoin
+  STR_VAR dialogue_source = ~chriz-sod-remix/dlg/csr110sh.d~
+BEGIN
+  // Chapter 7-13 is SoD on both supported games. bd_joined is deliberately
+  // not a gate: native dismissal was observed to leave it at 2, not 0.
+  OUTER_SPRINT csr110_field_condition ~Name("sharteel",Myself)
+BeenInParty("sharteel")
+!InPartyAllowDead(Myself)
+!AreaCheck("BD0120")
+!AreaCheck("BD0130")
+GlobalGT("chapter","GLOBAL",6)
+GlobalLT("chapter","GLOBAL",14)~
+  OUTER_SPRINT csr110_field_compact ~Name("sharteel",Myself)BeenInParty("sharteel")!InPartyAllowDead(Myself)!AreaCheck("BD0120")!AreaCheck("BD0130")GlobalGT("chapter","GLOBAL",6)GlobalLT("chapter","GLOBAL",14)~
+  OUTER_SET csr110_field_found = 0
+  ACTION_IF FILE_EXISTS_IN_GAME ~BDSHARTE.dlg~ BEGIN
+    COPY_EXISTING - ~BDSHARTE.dlg~ ~override~
+      READ_ASCII 0 csr110_signature (8)
+      PATCH_IF (BUFFER_LENGTH < 0x34) OR NOT (~%csr110_signature%~ STRING_EQUAL ~DLG V1.0~) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: invalid BDSHARTE dialogue.~
+      END
+      READ_LONG 8 csr110_state_count
+      READ_LONG 12 csr110_states
+      READ_LONG 16 csr110_transition_count
+      READ_LONG 20 csr110_transitions
+      READ_LONG 24 csr110_triggers
+      READ_LONG 28 csr110_trigger_count
+      PATCH_IF (csr110_state_count < 7) OR
+               (csr110_states + csr110_state_count * 16 > BUFFER_LENGTH) OR
+               (csr110_transitions + csr110_transition_count * 32 > BUFFER_LENGTH) OR
+               (csr110_triggers + csr110_trigger_count * 8 > BUFFER_LENGTH) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE's reviewed state tables are unavailable.~
+      END
+      SET csr110_state = 4
+      LAUNCH_PATCH_MACRO csr110_field_trigger
+      PATCH_IF NOT (~%csr110_trigger%~ STRING_EQUAL_CASE ~OR(2)AreaCheck("BD0120")AreaCheck("BD0130")Global("bd_joined","locals",0)~) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE state 4 is not the reviewed crypt rejoin entry.~
+      END
+      LAUNCH_PATCH_MACRO csr110_field_route
+      SET csr110_sharteel_say = csr110_say
+      // The reused affirmative endpoint must still do exactly JoinParty().
+      READ_LONG (csr110_states + 5 * 16 + 4) csr110_first
+      READ_LONG (csr110_states + 5 * 16 + 8) csr110_count
+      SET csr110_transition = csr110_transitions + csr110_first * 32
+      READ_LONG csr110_transition csr110_flags
+      READ_LONG (csr110_transition + 16) csr110_action_index
+      READ_LONG 40 csr110_actions
+      READ_LONG 44 csr110_action_count
+      PATCH_IF (csr110_count != 1) OR (csr110_flags != 12) OR
+               (csr110_action_index >= csr110_action_count) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE's native JoinParty endpoint has changed.~
+      END
+      READ_LONG (csr110_actions + csr110_action_index * 8) csr110_text_offset
+      READ_LONG (csr110_actions + csr110_action_index * 8 + 4) csr110_text_length
+      READ_ASCII csr110_text_offset csr110_action (csr110_text_length)
+      INNER_PATCH_SAVE csr110_action ~%csr110_action%~ BEGIN
+        REPLACE_TEXTUALLY ~[%WNL% %TAB%]+~ ~~
+      END
+      PATCH_IF NOT (~%csr110_action%~ STRING_EQUAL_CASE ~JoinParty()~) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE's native JoinParty action has changed.~
+      END
+      READ_LONG (csr110_states + 6 * 16 + 4) csr110_first
+      READ_LONG (csr110_states + 6 * 16 + 8) csr110_count
+      READ_LONG (csr110_transitions + csr110_first * 32) csr110_flags
+      PATCH_IF (csr110_count != 1) OR (csr110_flags != 8) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: BDSHARTE's native wait-here endpoint has changed.~
+      END
+      FOR (csr110_state = 0; csr110_state < csr110_state_count; ++csr110_state) BEGIN
+        LAUNCH_PATCH_MACRO csr110_field_trigger
+        PATCH_IF ~%csr110_trigger%~ STRING_EQUAL_CASE ~%csr110_field_compact%~ BEGIN
+          LAUNCH_PATCH_MACRO csr110_field_route
+          PATCH_IF csr110_say != csr110_sharteel_say BEGIN
+            PATCH_FAIL ~chriz-sod-remix #110: the existing field route has different text.~
+          END
+          SET csr110_field_found += 1
+        END
+      END
+      PATCH_IF csr110_field_found > 1 BEGIN
+        PATCH_FAIL ~chriz-sod-remix #110: duplicate Shar-Teel field rejoin entries.~
+      END
+    ACTION_IF csr110_field_found = 0 BEGIN
+      COMPILE EVALUATE_BUFFER ~%dialogue_source%~
+    END
+  END
+END

@@ -3,8 +3,10 @@
 //
 // Design (user, playtest 2026-07-11): "skip all that and just have her there
 // joinable? Maybe talk about her father's dead for a moment and keep it short."
-// All @-strings are NEW dialogue, signed off word-for-word by the user
-// 2026-07-13 (BG1/BG2 register). Everything else reuses vanilla strrefs.
+// Original @-strings were signed off word-for-word by the user 2026-07-13
+// (BG1/BG2 register). The condolence reply was separated after the user's
+// 2026-09-12 playtest found it answered with "Because you're here."
+// Everything else reuses vanilla strrefs.
 //
 // Surface map: docs/research/15-skie-recruitment.md + issue #2. Key facts the
 // edits below rely on (all verified against the dev decompile 2026-07-12):
@@ -64,8 +66,17 @@ Global("CSR_SKIE_PALACE","GLOBAL",0)
 AreaCheck("BD0102")
 ~ THEN BEGIN csr197_meet
   SAY @0
-  IF ~~ THEN REPLY @1 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO csr197_ask
+  IF ~~ THEN REPLY @1 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO csr197_condolence
   IF ~~ THEN REPLY @2 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO csr197_ask
+END
+
+// A condolence needs an acknowledgement; "Because you're here" only
+// answers the other opening reply's question, "Why are you here?"
+IF ~~ THEN BEGIN csr197_condolence
+  SAY @11
+  IF ~  !InParty("SKIE")
+~ THEN REPLY @4 GOTO csr197_join
+  IF ~~ THEN REPLY @5 GOTO csr197_stay
 END
 
 IF ~~ THEN BEGIN csr197_ask

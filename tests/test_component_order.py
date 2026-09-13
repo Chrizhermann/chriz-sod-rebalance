@@ -39,8 +39,11 @@ EXPECTED_COMPONENTS = {
     245,
     250,
     255,
+    256,
+    257,
     260,
     265,
+    266,
     270,
     280,
     290,
@@ -62,10 +65,10 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_8(self) -> None:
+    def test_patch_release_version_is_v0_6_9(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.8~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.9~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()
@@ -85,6 +88,14 @@ class ComponentOrderTests(unittest.TestCase):
         self.assertLess(components.index(230), components.index(235))
         for prerequisite in (240, 260):
             self.assertLess(components.index(prerequisite), components.index(265))
+
+    def test_bridge_challenge_is_optional_and_follows_256(self) -> None:
+        source = TP2_PATH.read_text(encoding="utf-8")
+        components = designated_components()
+        self.assertLess(components.index(256), components.index(257))
+        entry = source.split('BEGIN @257 DESIGNATED 257', 1)[1].split('BEGIN @', 1)[0]
+        self.assertNotIn('INSTALL_BY_DEFAULT', entry)
+        self.assertIn('REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~256~', entry)
 
     def test_component_declarations_remain_unique(self) -> None:
         components = designated_components()

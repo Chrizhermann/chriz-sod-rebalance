@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.8~
+VERSION ~v0.6.9~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -52,10 +52,13 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //       into the temple (+XP chunk on the Neothelid)
 //   250 Morentherene stat tiers on Hard / Insane
 //   255 Boareskyr battle: durable explosive barrels
+//   256 Boareskyr elemental battle (no sequencers by default)
+//   257 optional Extra Challenge: Insane bridge mage sequencers
 // 260-289: coalition-camp chapter pass (Ch. 10-12)
 //   260 scouting maps + shadow vault trash cut (+XP chunk on the
 //       chapter-11 transition)
 //   265 repair quest loot and remaining banned creatures after 260
+//   266 stop repeated Shadow Aspect Mislead on Insane (default)
 //   270 Kanaglym: fewer undead (+XP chunk on the Kherriun award)
 //   280 no party dispel at the basement reveal
 // 290-299: ending and campaign handoff
@@ -163,6 +166,14 @@ COPY_EXISTING ~bd0103.bcs~ ~override~
     END
   END
 BUT_ONLY
+
+// Earlier whole-actor continuity mods can rename Xan and Yeslick. Preserve
+// those verified identities through the same palace handoff as their originals.
+INCLUDE ~chriz-sod-remix/lib/comp110_aliases.tpa~
+LAF csr110_keep_renamed_companions END
+
+INCLUDE ~chriz-sod-remix/lib/comp110_field.tpa~
+LAF csr110_sharteel_field_rejoin END
 
 EXTEND_TOP ~bd0101.bcs~ ~chriz-sod-remix/baf/skip0101.baf~   // Viconia
 EXTEND_TOP ~bd0108.bcs~ ~chriz-sod-remix/baf/skip0108.baf~   // Minsc, Dynaheir
@@ -639,6 +650,16 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdkegx.cre~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp255.tpa~
 
+// 256 supersedes the barrel finale, with or without the older 255 stopgap.
+// Append to existing installs; never uninstall an installed 255 to use this.
+BEGIN @256 DESIGNATED 256 GROUP @1003 LABEL ~csr_elemental_bridge_finale~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~ AND FILE_EXISTS_IN_GAME ~bd2000.bcs~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp256.tpa~
+
+BEGIN @257 DESIGNATED 257 GROUP @1006 LABEL ~csr_bridge_extra_challenge~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~256~ @25700
+INCLUDE ~chriz-sod-remix/lib/comp257.tpa~
+
 // ============================================================
 // 260 — coalition camp arc: fewer, cleaner enemies
 // ============================================================
@@ -670,6 +691,10 @@ OUTER_SET csr265_repair260 = 1
 OUTER_SET csr265_repair240 = 1
 INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp265_xp.tpa~
+
+BEGIN @266 DESIGNATED 266 GROUP @1004 LABEL ~csr_shadow_aspect_finite_mislead~ INSTALL_BY_DEFAULT
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdashiru.bcs~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
 
 // ============================================================
 // 270 — Kanaglym: fewer undead

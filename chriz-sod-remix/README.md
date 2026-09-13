@@ -4,14 +4,43 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
+Current release: **v0.6.9**. The component overview below describes this version.
+
 ## Components
 
-Unreleased additions: **135** is the default treatment of the assassin ambush
+v0.6.9 additions: **135** is the default treatment of the assassin ambush
 (keep the fight, remove dead magic and its misleading remarks). **235** preserves
 Ymori after an older 230 installation. **265**, after 260, puts Mizhena's amulet
 on the existing `Dead_fighter` corpse and removes the missed Guardian and Shadow
 Aspect's Shadowed Soul summons. Fresh 230 already excludes
 Ymori from its cuts. Append these components; do not reinstall earlier rows.
+
+**256** replaces the Boareskyr Bridge barrel/portal finale. Two mages,
+two veterans and four fire/earth elementals form one finite encounter. The fire
+mage casts regular Haste on an elemental when he sees an enemy; both have limited
+defensive recasts. Mages are level 13 below Insane and level 14 on Insane. Difficulty changes
+the elemental tiers while the fixed encounter XP stays 4,520. The day/night
+barrel artwork is cleaned and Bence appears beside the party after combat for
+the dialogue that opens the passage. No collapse timer is
+included in this version. Install before first entering BD2000, either alone
+or appended after an existing 255. The old 255 need not be removed.
+
+Optional **257 — Extra Challenge** adds only the two Insane mage sequencers:
+earth uses Greater Malison then Slow; fire uses Dispel Magic with Spell Revisions,
+or Remove Magic without it, then Flame Arrow. It requires **current component256
+resources** and must be installed before the enemies spawn. It changes only the
+two Insane mages' AI assignments, preserving stats, spellbooks, Haste, roster and
+world setup. Regular 256 can cast those spells normally but never uses sequencers.
+
+Default-selected **266** caps Shadow Aspect's Insane Mislead at one use per actor,
+preserving its other spells and ordinary Shadow summons. It can be appended to
+an older installation; no reinstall of 240 or 265 is required. Broader changes
+to that encounter are deferred.
+
+**197** now gives recruited Skie the normal SoD companion XP tiers based on the
+protagonist's XP, with no unconditional 250,000 floor or reduction of higher XP.
+It corrects the condolence/rejoin routes and makes her stock SCS invisibility
+and Freedom potions movable without changing their mechanics.
 
 Use saves from before entering BD2000, BD5000 and BD5110 for the area repairs.
 Visited-area saves retain their cached actors and container contents. The
@@ -43,11 +72,11 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-Release v0.6.8 exposes **34 declarations in six install groups**. The existing
-**31-component** fresh selection is unchanged; optionally add EET-only `910`.
-Omit repair `291` and select one of the mutually exclusive `900`/`901`
-alternatives. The designated dev installation has
-**32 installed rows**, including its existing `290` and appended repair `291`.
+v0.6.9 exposes **41 declarations in seven install groups**, including
+the optional Extra Challenge group. Select according to prerequisites and installed
+history; 176, 235 and 291 update older components, while fresh versions include
+those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
+Old per-install row counts are historical snapshots, not a current selection guide.
 
 Position: tail-install (after EET_end on EET installs — all patches are in-place edits of
 final files). Standalone BG:EE+SoD excludes EET-only `291` and `910`. Reversible via the
@@ -72,6 +101,21 @@ no new full-stack game installation or gameplay test is claimed for this patch.
 
 `.are`/`.bcs`/`.dlg` load by resref at runtime: changes apply to areas not yet visited and on
 next area (re)load. Scenes whose gate globals are already past simply never re-fire.
+Already-spawned creatures retain their saved AI assignments, so 257 requires new
+bridge spawns. Existing area snapshots also retain actors and container contents;
+use the pre-entry saves specified above for those changes.
+
+## Verification boundary
+
+The user accepted the harder bridge build, prompt Bence arrival, save/reload and
+onward crossing. Liia's 22,000 reward/reload, Skie's XP/condolence route, the native
+amulet reward and Guardian removal also have recorded checks. These do not mean
+every component or spell has been tested in a complete campaign. The final 256/257
+split and finite Mislead correction have no new native acceptance; Shadow Aspect
+testing is deferred. The reported unequipped appearance after palace rest remains
+unresolved. The [release report](../docs/releases/v0.6.9.md) records the passing
+offline checks, including 101 bridge and 13 Mislead tests. Native observations
+remain in the [test record](../docs/playtest/2026-09-09-fast-sod-test-plan.md).
 
 ## Optional full skip (component 910)
 

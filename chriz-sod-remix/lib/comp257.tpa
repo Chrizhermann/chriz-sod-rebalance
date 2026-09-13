@@ -1,0 +1,36 @@
+// Optional Insane bridge sequencers. No spellbook/stat/roster/world changes.
+// Public256 creates both script variants; only these two owned CRE pointers
+// change. Install before the encounter spawns, since saved actors cache scripts.
+DEFINE_PATCH_MACRO csr257_check_mage BEGIN
+  PATCH_IF SOURCE_SIZE < 0x2d4 BEGIN
+    PATCH_FAIL ~#257: truncated owned bridge mage CRE.~
+  END
+  READ_ASCII 0 csr257_signature (8)
+  READ_ASCII 0x280 csr257_dv (32) NULL
+  READ_ASCII 0x248 csr257_ai (8) NULL
+  READ_BYTE 0x234 csr257_level
+  PATCH_IF NOT ((~%csr257_signature%~ STRING_EQUAL_CASE ~CRE V1.0~)
+    AND (~%csr257_dv%~ STRING_EQUAL_CASE ~CSR256%csr257_role%M~)
+    AND (csr257_level = 14)
+    AND ((~%csr257_ai%~ STRING_EQUAL_CASE ~CSR26%csr257_role%MA~)
+      OR (~%csr257_ai%~ STRING_EQUAL_CASE ~CSR26%csr257_role%MX~))) BEGIN
+    PATCH_FAIL ~#257: unrecognized Insane bridge mage; install the current component256 before the optional challenge.~
+  END
+END
+
+// Validate both creatures and their scripts before changing either creature.
+ACTION_FOR_EACH csr257_role IN ~F~ ~C~ BEGIN
+  ACTION_IF NOT (FILE_EXISTS_IN_GAME ~CSR26%csr257_role%MI.CRE~
+    AND FILE_EXISTS_IN_GAME ~CSR26%csr257_role%MA.BCS~
+    AND FILE_EXISTS_IN_GAME ~CSR26%csr257_role%MX.BCS~) BEGIN
+    FAIL ~#257: current component256 bridge resources are required.~
+  END
+  COPY_EXISTING - ~CSR26%csr257_role%MI.CRE~ ~override~
+    LAUNCH_PATCH_MACRO csr257_check_mage
+END
+ACTION_FOR_EACH csr257_role IN ~F~ ~C~ BEGIN
+  COPY_EXISTING ~CSR26%csr257_role%MI.CRE~ ~override~
+    LAUNCH_PATCH_MACRO csr257_check_mage
+    WRITE_ASCIIE 0x248 ~CSR26%csr257_role%MX~ #8
+  BUT_ONLY
+END

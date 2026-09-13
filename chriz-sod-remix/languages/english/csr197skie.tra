@@ -1,5 +1,6 @@
 // csr197skie.tra — component 197 new dialogue (Ducal Palace, Skie talk-to-join)
-// ALL LINES SIGNED OFF AS-IS by the user 2026-07-13 (BG1/BG2 register, issue #2 / PT-4).
+// Original lines signed off by the user 2026-07-13 (BG1/BG2 register, issue #2 / PT-4).
+// @11 separates the condolence branch after the user's 2026-09-12 playtest report.
 // Context: post-council great hall. Entar died in BG1 ch.7 and stays dead
 // (comp185) — Skie may not blame Caelar for his death.
 
@@ -25,3 +26,6 @@
 @8 = ~Changed your mind, <CHARNAME>? Good. Take me with you—the offer stands.~
 @9 = ~All right, Skie. Come along.~
 @10 = ~Not yet, Skie.~
+
+// Skie — acknowledge the player's condolence before asking to join.
+@11 = ~Thank you. You're going after Caelar—everyone says so. Take me with you. I can open a lock and walk without a sound, and anything is better than sitting alone in Daddy's empty house.~

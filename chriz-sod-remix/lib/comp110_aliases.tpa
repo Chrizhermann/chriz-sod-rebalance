@@ -1,0 +1,42 @@
+// Companion-continuity mods may normalize the BG1 Xan/Yeslick death variables
+// before component 110 runs. These are the two verified aliases from modpack
+// 199. Remove only their native palace strip actions, not other quest actions.
+// This helper also supports a tail repair after an older component 110.
+
+DEFINE_PATCH_MACRO csr110_alias_patch BEGIN
+  SET csr110_alias_write = 0
+  PATCH_FOR_EACH csr110_alias IN ~O#XAN~ ~LK#YESLK~ BEGIN
+    SPRINT csr110_header ~IF%csr110_nl%  OR(2)%csr110_nl%    InMyArea("%csr110_alias%")%csr110_comment%%csr110_nl%    InPartyAllowDead("%csr110_alias%")%csr110_comment%%csr110_nl%  GlobalLT("BD_PLOT","GLOBAL",51)%csr110_nl%THEN%csr110_nl%  RESPONSE #100%csr110_nl%~
+    SPRINT csr110_old ~%csr110_header%    ActionOverride("%csr110_alias%",LeaveParty())%csr110_nl%    SmallWait(1)%csr110_nl%    ActionOverride("%csr110_alias%",DestroySelf())%csr110_nl%    Continue()%csr110_nl%END~
+    SPRINT csr110_clean ~%csr110_header%    SmallWait(1)%csr110_nl%    Continue()%csr110_nl%END~
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr110_header%~ csr110_headers
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr110_old%~ csr110_old_count
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr110_clean%~ csr110_clean_count
+    PATCH_IF (csr110_headers > 1) OR (csr110_headers != csr110_old_count + csr110_clean_count) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #110 [%csr110_alias%]: the palace retention block differs from the reviewed layout; no alias repair was written.~
+    END
+    PATCH_IF csr110_old_count = 1 BEGIN
+      // Capture the original header, including casing and comments; retain
+      // its party/area/plot conditions and harmless wait/Continue actions.
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~\(%csr110_header%\)    ActionOverride("%csr110_alias%",LeaveParty())%csr110_nl%    SmallWait(1)%csr110_nl%    ActionOverride("%csr110_alias%",DestroySelf())%csr110_nl%    Continue()%csr110_nl%END~
+        ~\1    SmallWait(1)%LNL%    Continue()%LNL%END~
+      SET csr110_alias_write = 1
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr110_keep_renamed_companions BEGIN
+  OUTER_SPRINT csr110_nl ~%MNL%?%LNL%~
+  OUTER_SPRINT csr110_comment ~[^%WNL%]*~
+  COPY_EXISTING - ~bd0103.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LAUNCH_PATCH_MACRO csr110_alias_patch
+    END
+  ACTION_IF csr110_alias_write BEGIN
+    COPY_EXISTING ~bd0103.bcs~ ~override~
+      DECOMPILE_AND_PATCH BEGIN
+        LAUNCH_PATCH_MACRO csr110_alias_patch
+      END
+    BUT_ONLY
+  END
+END

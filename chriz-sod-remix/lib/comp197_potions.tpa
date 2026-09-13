@@ -1,0 +1,69 @@
+// SCS processed native, non-recruitable BDSKIE as an NPC. Its stock random
+// potion tokens can therefore resolve to undroppable invisibility/Freedom
+// potions. Convert only those consumables after palace Skie joins the party.
+// Running in her existing personal script also reaches actors in older saves.
+// TransformItem retains item charges/flags; never change shared SCS resources,
+// random tables, MINHP1 plot protection or the DW#HASPT bookkeeping marker.
+DEFINE_ACTION_FUNCTION csr197_install_potion_cleanup BEGIN
+  ACTION_FOR_EACH csr197_potion_number IN ~10~ ~45~ BEGIN
+    OUTER_SPRINT csr197_old_potion ~dw#ptn%csr197_potion_number%~
+    OUTER_SPRINT csr197_new_potion ~potn%csr197_potion_number%~
+    // SCS is optional, and an installation may contain only one clone pair.
+    ACTION_IF FILE_EXISTS_IN_GAME ~%csr197_old_potion%.itm~ BEGIN
+      ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr197_new_potion%.itm~ BEGIN
+        FAIL ~chriz-sod-remix #197: %csr197_old_potion%.itm exists without %csr197_new_potion%.itm; cannot safely unlock Skie's potion.~
+      END
+      COPY_EXISTING ~%csr197_old_potion%.itm~ ~override~
+        PATCH_IF BUFFER_LENGTH < 0x72 BEGIN
+          PATCH_FAIL ~chriz-sod-remix #197: %csr197_old_potion%.itm has an unfamiliar item header.~
+        END
+        READ_ASCII 0 csr197_potion_signature (8)
+        READ_SHORT 0x1c csr197_potion_type
+        PATCH_IF NOT (~%csr197_potion_signature%~ STRING_EQUAL_CASE ~ITM V1  ~)
+          OR csr197_potion_type != 9 BEGIN
+          PATCH_FAIL ~chriz-sod-remix #197: %csr197_old_potion%.itm is not a standard potion resource.~
+        END
+        READ_LONG 0x18 csr197_potion_flags
+        SET csr197_potion_size = BUFFER_LENGTH
+        READ_ASCII 0 csr197_potion_prefix (0x18)
+        READ_ASCII 0x1c csr197_potion_tail (BUFFER_LENGTH - 0x1c)
+      BUT_ONLY
+      COPY_EXISTING ~%csr197_new_potion%.itm~ ~override~
+        PATCH_IF BUFFER_LENGTH != csr197_potion_size BEGIN
+          PATCH_FAIL ~chriz-sod-remix #197: %csr197_old_potion% and %csr197_new_potion% differ beyond the droppable flag; preserving the installed potion mechanics.~
+        END
+        READ_LONG 0x18 csr197_regular_flags
+        READ_ASCII 0 csr197_regular_prefix (0x18)
+        READ_ASCII 0x1c csr197_regular_tail (BUFFER_LENGTH - 0x1c)
+        PATCH_IF csr197_regular_flags != (csr197_potion_flags BOR 4)
+          OR NOT (~%csr197_potion_prefix%~ STRING_EQUAL ~%csr197_regular_prefix%~)
+          OR NOT (~%csr197_potion_tail%~ STRING_EQUAL ~%csr197_regular_tail%~) BEGIN
+          PATCH_FAIL ~chriz-sod-remix #197: %csr197_old_potion% and %csr197_new_potion% differ beyond the droppable flag; preserving the installed potion mechanics.~
+        END
+      BUT_ONLY
+      ACTION_IF (csr197_potion_flags BAND 4) = 0 BEGIN
+        OUTER_SPRINT csr197_potion_block ~IF
+  Name("BDSKIE",Myself)
+  InPartyAllowDead(Myself)
+  HasItem("%csr197_old_potion%",Myself)
+THEN
+  RESPONSE #100
+    TransformItem("%csr197_old_potion%","%csr197_new_potion%")
+    Continue()
+END
+~
+        OUTER_SPRINT csr197_potion_ws ~[ %TAB%%WNL%]*~
+        OUTER_SPRINT csr197_potion_pattern ~IF%csr197_potion_ws%Name("BDSKIE",Myself)%csr197_potion_ws%InPartyAllowDead(Myself)%csr197_potion_ws%HasItem("%csr197_old_potion%",Myself)%csr197_potion_ws%THEN%csr197_potion_ws%RESPONSE%csr197_potion_ws%#100%csr197_potion_ws%TransformItem("%csr197_old_potion%","%csr197_new_potion%")%csr197_potion_ws%Continue()%csr197_potion_ws%END~
+        COPY_EXISTING ~bdskie.bcs~ ~override~
+          DECOMPILE_AND_PATCH BEGIN
+            COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr197_potion_pattern%~ csr197_potion_blocks
+            PATCH_IF csr197_potion_blocks = 0 BEGIN
+              INSERT_BYTES 0 (STRING_LENGTH ~%csr197_potion_block%~)
+              WRITE_ASCIIE 0 ~%csr197_potion_block%~
+            END
+          END
+        BUT_ONLY
+      END
+    END
+  END
+END
