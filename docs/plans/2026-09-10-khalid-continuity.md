@@ -3,8 +3,9 @@
 Status: direction approved on 2026-09-10; unreleased component 115 is being integrated
 onto v0.6.9. The earlier designated-dev installation is historical evidence.
 Native BD2000 entry, normal wardstone transport and Adirran's briefing passed on
-2026-09-14 with Khalid remaining controllable. Save/reload and later quest branches
-remain unverified in the native game. The revised arrival protection and Combined
+2026-09-14 with Khalid remaining controllable. Saved control state is also verified;
+reloaded behavior and later quest branches remain unverified in the native game.
+The revised arrival protection and Combined
 tail installer have also passed offline verification.
 The user accepted a modest conditional rewrite, prioritizing clean implementation and
 consistency over a story overhaul. This addresses the Khalid/Jaheira consequences of
@@ -63,6 +64,33 @@ September 14 verification:
   remains 0. No manual allegiance/script repair was performed in this retest.
   This accepts the reproduced entry/control bug and initial briefing; it does not
   claim save/reload, later command branches or the whole fort quest were played.
+
+## Spellstone follow-up observation
+
+The user subsequently reported that the stand-in otherwise worked, but Wynan
+Hess did not initiate the post-impact conversation. They had used Ctrl-J and
+skipped parts of the sequence; that is a possible explanation, not a demonstrated
+cause. No quest flags or NPC actions were repaired in response to this report.
+
+Read-only inspection of **000000954-CSR TEST — Khalid fort fixed** confirms Khalid
+is saved as party allegiance 2 with `KHALIJ` dialogue. All six companions are in
+BD2100. The carried route and briefing remain recorded; `BD2100GL=2`,
+`bd_wynan_plot=2`, `bd_jegg_plot=1`, `bd_bridgefort_plot=5`, while `BD_SDD200` is
+unset. The impact therefore happened, but the subsequent quest introduction has
+not been recorded. This is saved-state evidence, not an observed reload.
+
+The installed initial automatic trigger belongs to defender `BDBF1.BCS`, not
+`BDWYNAN.BCS`: it requires no previous conversation with that defender, impact
+stage 2, sight of a party member, and Wynan dead or within range 15. His dialogue
+then hands through other defenders/Wynan/Khalid. The area impact block itself
+only moves Wynan and the defenders into position; it does not start his dialogue.
+
+Component 115 does not change either NPC script. Comparing installed `BDWYNAN.DLG`
+with its pre-115 backup confirms all 32 state-entry triggers and original speeches
+are unchanged. Only the referral reply and defender-report journal vary by route;
+the spellstone journal, impact spell, scene flag and remaining actions are preserved.
+No regression attributable to 115 was found. Keep the missing introduction as an
+unconfirmed separate observation; do not count the spellstone quest as accepted.
 
 ## Decided
 
