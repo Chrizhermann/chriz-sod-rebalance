@@ -1,0 +1,371 @@
+// Component 115 dialogue binding/preflight/application. No language-specific
+// TLK offsets or EET-merged party-state numbers are assumed.
+
+DEFINE_ACTION_MACRO csr115_dialog_bind BEGIN
+  OUTER_SPRINT csr115_kh_j ~~
+  OUTER_SPRINT csr115_jh_j ~~
+  ACTION_IF FILE_EXISTS_IN_GAME ~BDDIALOG.2DA~ BEGIN
+    OUTER_SPRINT csr115_party_table ~BDDIALOG.2DA~
+  END ELSE BEGIN
+    OUTER_SPRINT csr115_party_table ~PDIALOG.2DA~
+  END
+  COPY_EXISTING - ~%csr115_party_table%~ ~override~
+    READ_2DA_ENTRIES_NOW csr115_rows 3
+    FOR (csr115_r = 0; csr115_r < csr115_rows; ++csr115_r) BEGIN
+      READ_2DA_ENTRY_FORMER csr115_rows csr115_r 0 csr115_npc
+      PATCH_IF (~%csr115_npc%~ STRING_EQUAL_CASE ~KHALID~) BEGIN
+        READ_2DA_ENTRY_FORMER csr115_rows csr115_r 2 csr115_kh_j
+      END
+      PATCH_IF (~%csr115_npc%~ STRING_EQUAL_CASE ~JAHEIRA~) BEGIN
+        READ_2DA_ENTRY_FORMER csr115_rows csr115_r 2 csr115_jh_j
+      END
+    END
+  ACTION_IF ((~%csr115_kh_j%~ STRING_EQUAL ~~) OR
+             (~%csr115_jh_j%~ STRING_EQUAL ~~) OR
+             NOT FILE_EXISTS_IN_GAME ~%csr115_kh_j%.DLG~ OR
+             NOT FILE_EXISTS_IN_GAME ~%csr115_jh_j%.DLG~) BEGIN
+    FAIL ~Component 115: cannot resolve the installed SoD party dialogue table.~
+  END
+  COPY_EXISTING - ~BDKHALID.DLG~ ~override~
+    READ_LONG 0x08 csr115_nstates
+    PATCH_IF (csr115_nstates < 103) BEGIN
+      PATCH_FAIL ~Component 115: BDKHALID does not contain the audited SoD dialogue.~
+    END
+    READ_LONG 0x0c csr115_so
+    READ_LONG (csr115_so + 79 * 16) csr115_gift_say
+    READ_LONG (csr115_so + 23 * 16) csr115_reunion_say
+  COPY_EXISTING - ~BDBFORT.DLG~ ~override~
+    READ_LONG 0x08 csr115_nstates
+    PATCH_IF (csr115_nstates < 13) BEGIN
+      PATCH_FAIL ~Component 115: BDBFORT does not contain the audited defender dialogue.~
+    END
+    READ_LONG 0x0c csr115_so
+    READ_LONG csr115_so csr115_ad0_say
+    READ_LONG (csr115_so + 16) csr115_ad1_say
+    READ_LONG 0x14 csr115_to
+    READ_LONG 0x28 csr115_at
+    FOR (csr115_i = 2; csr115_i <= 3; ++csr115_i) BEGIN
+      READ_LONG (csr115_so + csr115_i * 16 + 4) csr115_first
+      READ_LONG (csr115_so + csr115_i * 16 + 8) csr115_count
+      READ_ASCII (csr115_to + csr115_first * 32 + 20) csr115_dest (8) NULL
+      READ_LONG (csr115_to + csr115_first * 32 + 28) csr115_dest_state
+      READ_LONG (csr115_to + csr115_first * 32) csr115_flags
+      PATCH_IF (csr115_count != 1 OR
+                NOT (~%csr115_dest%~ STRING_EQUAL_CASE ~BDKHALID~) OR
+                csr115_dest_state != csr115_i + 25 OR
+                (csr115_flags BAND 4) = 0) BEGIN
+        PATCH_FAIL ~Component 115: BDBFORT initial Khalid handoff has changed.~
+      END
+      READ_LONG (csr115_to + csr115_first * 32 + 16) csr115_ai
+      READ_LONG (csr115_at + csr115_ai * 8) csr115_off
+      READ_LONG (csr115_at + csr115_ai * 8 + 4) csr115_len
+      READ_ASCII csr115_off csr115_action (csr115_len)
+      INNER_PATCH_SAVE csr115_compact ~%csr115_action%~ BEGIN
+        REPLACE_TEXTUALLY ~[ %TAB%%MNL%%LNL%]+~ ~~
+      END
+      TO_LOWER csr115_compact
+      PATCH_IF (INDEX(~setglobal("bd_bridgefort_plot","global",5)~ ~%csr115_compact%~) < 0) BEGIN
+        PATCH_FAIL ~Component 115: BDBFORT initial progression action has changed.~
+      END
+    END
+  OUTER_SET csr115_gift_state = (0 - 1)
+  OUTER_SET csr115_reunion_state = (0 - 1)
+  OUTER_SET csr115_gift_hits = 0
+  OUTER_SET csr115_reunion_hits = 0
+  COPY_EXISTING - ~%csr115_kh_j%.DLG~ ~override~
+    READ_LONG 0x08 csr115_nstates
+    READ_LONG 0x0c csr115_so
+    FOR (csr115_i = 0; csr115_i < csr115_nstates; ++csr115_i) BEGIN
+      READ_LONG (csr115_so + csr115_i * 16) csr115_say
+      PATCH_IF (csr115_say = csr115_gift_say) BEGIN
+        SET csr115_gift_state = csr115_i
+        SET csr115_gift_hits += 1
+      END
+      PATCH_IF (csr115_say = csr115_reunion_say) BEGIN
+        SET csr115_reunion_state = csr115_i
+        SET csr115_reunion_hits += 1
+      END
+    END
+  ACTION_IF ((csr115_gift_hits != 1) OR (csr115_reunion_hits != 1)) BEGIN
+    FAIL ~Component 115: Khalid's gift/reunion state binding is ambiguous.~
+  END
+  // The original Neera reply points to the party interjection regardless of
+  // its EET merge offset. Bind the destination instead of guessing 199.
+  COPY_EXISTING - ~BDNEERA.DLG~ ~override~
+    READ_LONG 0x0c csr115_so
+    READ_LONG 0x14 csr115_to
+    READ_LONG (csr115_so + 57 * 16 + 4) csr115_first
+    READ_ASCII (csr115_to + (csr115_first + 1) * 32 + 20) csr115_neera_dlg (8) NULL
+    READ_LONG (csr115_to + (csr115_first + 1) * 32 + 28) csr115_neera_state
+  ACTION_IF NOT (~%csr115_neera_dlg%~ STRING_EQUAL_CASE ~%csr115_kh_j%~) BEGIN
+    FAIL ~Component 115: Neera's Khalid interjection has an unexpected destination.~
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr115_dialog_preflight BEGIN
+  LAM csr115_dialog_bind
+  ACTION_FOR_EACH csr115_required IN ~BDWYNAN.DLG~ ~BDJEGG.DLG~ ~BDJAHEIR.DLG~ ~BDBARGHE.DLG~ BEGIN
+    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr115_required%~ BEGIN
+      FAIL ~Component 115: missing %csr115_required%.~
+    END
+  END
+  COPY_EXISTING - ~BDVOGHIL.DLG~ ~override~
+    READ_ASCII 0 csr115_sig (8)
+    READ_LONG 0x08 csr115_nstates
+    PATCH_IF (NOT (~%csr115_sig%~ STRING_EQUAL_CASE ~DLG V1.0~) OR csr115_nstates < 69) BEGIN
+      PATCH_FAIL ~Component 115: Voghiln's SoD recruitment dialogue is missing.~
+    END
+    READ_LONG 0x0c csr115_so
+    READ_LONG 0x14 csr115_to
+    READ_LONG 0x28 csr115_at
+    READ_LONG (csr115_so + 9 * 16 + 4) csr115_first
+    READ_LONG (csr115_so + 9 * 16 + 8) csr115_count
+    READ_ASCII (csr115_to + (csr115_first + 1) * 32 + 20) csr115_dest (8) NULL
+    READ_LONG (csr115_to + (csr115_first + 1) * 32 + 28) csr115_dest_state
+    READ_LONG (csr115_to + csr115_first * 32) csr115_flags
+    PATCH_IF (csr115_count != 2 OR
+              NOT (~%csr115_dest%~ STRING_EQUAL_CASE ~BDJAHEIR~) OR
+              csr115_dest_state != 24 OR (csr115_flags BAND 4) = 0) BEGIN
+      PATCH_FAIL ~Component 115: Voghiln's Jaheira introduction has changed.~
+    END
+    READ_LONG (csr115_to + csr115_first * 32 + 16) csr115_ai
+    READ_LONG (csr115_at + csr115_ai * 8) csr115_off
+    READ_LONG (csr115_at + csr115_ai * 8 + 4) csr115_len
+    READ_ASCII csr115_off csr115_action (csr115_len)
+    INNER_PATCH_SAVE csr115_compact ~%csr115_action%~ BEGIN
+      REPLACE_TEXTUALLY ~[ %TAB%%MNL%%LNL%]+~ ~~
+    END
+    TO_LOWER csr115_compact
+    PATCH_IF (INDEX(~setglobal("bd_jaheira_join","global",-1)~ ~%csr115_compact%~) < 0 OR
+              INDEX(~enemy()~ ~%csr115_compact%~) < 0) BEGIN
+      PATCH_FAIL ~Component 115: Voghiln's hostile fallback has changed.~
+    END
+  COPY_EXISTING - ~BDJAHEIR.DLG~ ~override~
+    READ_LONG 0x0c csr115_so
+    READ_LONG 0x14 csr115_to
+    READ_LONG (csr115_so + 25 * 16 + 4) csr115_first
+    READ_LONG (csr115_so + 25 * 16 + 8) csr115_count
+    READ_ASCII (csr115_to + (csr115_first + 1) * 32 + 20) csr115_dest (8) NULL
+    READ_LONG (csr115_to + (csr115_first + 1) * 32 + 28) csr115_dest_state
+    PATCH_IF (csr115_count != 2 OR
+              NOT (~%csr115_dest%~ STRING_EQUAL_CASE ~BDJAHEIR~) OR csr115_dest_state != 27) BEGIN
+      PATCH_FAIL ~Component 115: Jaheira's second introduction reply has changed.~
+    END
+END
+
+// Duplicate one native transition adjacent to itself. This retains
+// original reply/action/journal data and last-valid-transition ordering.
+// Only the mutually exclusive condition and requested destination/text/
+// action substitution differ. Called in descending transition order.
+DEFINE_ACTION_FUNCTION csr115_dialog_branch
+  INT_VAR state = 0 trans = 0 new_text = (0 - 1) quest_journal = (0 - 1)
+  STR_VAR dlg = ~~ target_dlg = ~~ target_state = ~~
+          condition = ~Global("csr_kh_fort","GLOBAL",1)~
+          inverse = ~!Global("csr_kh_fort","GLOBAL",1)~
+          action_pattern = ~~ action_replacement = ~~ action_remove = ~~
+BEGIN
+  COPY_EXISTING - ~%dlg%.DLG~ ~override~
+    READ_LONG 0x0c csr115_so
+    READ_LONG 0x14 csr115_to
+    READ_LONG 0x20 csr115_tt
+    READ_LONG 0x28 csr115_at
+    READ_LONG (csr115_so + state * 16 + 4) csr115_first
+    READ_LONG (csr115_so + state * 16 + 8) csr115_count
+    PATCH_IF (trans >= csr115_count) BEGIN
+      PATCH_FAIL ~Component 115: transition %dlg%/%state%/%trans% missing.~
+    END
+    SET csr115_t = csr115_to + (csr115_first + trans) * 32
+    READ_LONG csr115_t csr115_flags
+    READ_LONG (csr115_t + 4) csr115_text
+    READ_LONG (csr115_t + 8) csr115_journal
+    READ_ASCII (csr115_t + 20) csr115_dest (8) NULL
+    READ_LONG (csr115_t + 28) csr115_dest_state
+    SPRINT csr115_trigger ~~
+    SPRINT csr115_action ~~
+    PATCH_IF (csr115_flags BAND 2) BEGIN
+      READ_LONG (csr115_t + 12) csr115_idx
+      READ_LONG (csr115_tt + csr115_idx * 8) csr115_off
+      READ_LONG (csr115_tt + csr115_idx * 8 + 4) csr115_len
+      READ_ASCII csr115_off csr115_trigger (csr115_len)
+    END
+    PATCH_IF (csr115_flags BAND 4) BEGIN
+      READ_LONG (csr115_t + 16) csr115_idx
+      READ_LONG (csr115_at + csr115_idx * 8) csr115_off
+      READ_LONG (csr115_at + csr115_idx * 8 + 4) csr115_len
+      READ_ASCII csr115_off csr115_action (csr115_len)
+    END
+  ACTION_IF NOT (~%action_pattern%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE csr115_action ~%csr115_action%~ BEGIN
+      COUNT_REGEXP_INSTANCES ~%action_pattern%~ csr115_matches
+      PATCH_IF (csr115_matches != 1) BEGIN
+        PATCH_FAIL ~Component 115: expected one action in %dlg%/%state%/%trans%, found %csr115_matches%.~
+      END
+      REPLACE_TEXTUALLY ~%action_pattern%~ ~%action_replacement%~
+    END
+  END
+  // Wynan's first journal is the defender report; his second is the
+  // spellstone quest. Change only the first, preserving all other actions.
+  ACTION_IF (quest_journal >= 0) BEGIN
+    OUTER_PATCH_SAVE csr115_action ~%csr115_action%~ BEGIN
+      SET csr115_journal_seen = 0
+      REPLACE_EVALUATE ~AddJournalEntry(\([0-9]+\),QUEST)~ BEGIN
+        SPRINT csr115_journal_replacement ~%MATCH0%~
+        PATCH_IF (csr115_journal_seen = 0) BEGIN
+          SPRINT csr115_journal_replacement ~AddJournalEntry(@%quest_journal%,QUEST)~
+        END
+        SET csr115_journal_seen += 1
+      END ~%csr115_journal_replacement%~
+      PATCH_IF (csr115_journal_seen = 0) BEGIN
+        PATCH_FAIL ~Component 115: missing defender journal in %dlg%/%state%/%trans%.~
+      END
+    END
+  END
+  ACTION_IF NOT (~%action_remove%~ STRING_EQUAL ~~) BEGIN
+    OUTER_PATCH_SAVE csr115_action ~%csr115_action%~ BEGIN
+      COUNT_REGEXP_INSTANCES ~%action_remove%~ csr115_matches
+      PATCH_IF (csr115_matches != 1) BEGIN
+        PATCH_FAIL ~Component 115: expected one retired cameo action in %dlg%/%state%/%trans%.~
+      END
+      REPLACE_TEXTUALLY ~%action_remove%~ ~~
+    END
+  END
+  OUTER_SPRINT csr115_reply ~~
+  ACTION_IF (new_text >= 0) BEGIN
+    OUTER_SPRINT csr115_reply ~REPLY @%new_text%~
+  END ELSE ACTION_IF (csr115_flags BAND 1) BEGIN
+    OUTER_SPRINT csr115_reply ~REPLY #%csr115_text%~
+  END
+  OUTER_SPRINT csr115_journal_clause ~~
+  ACTION_IF (csr115_flags BAND 0x10) BEGIN
+    ACTION_IF (csr115_flags BAND 0x40) BEGIN
+      OUTER_SPRINT csr115_journal_clause ~UNSOLVED_JOURNAL #%csr115_journal%~
+    END ELSE ACTION_IF (csr115_flags BAND 0x100) BEGIN
+      OUTER_SPRINT csr115_journal_clause ~SOLVED_JOURNAL #%csr115_journal%~
+    END ELSE BEGIN
+      OUTER_SPRINT csr115_journal_clause ~JOURNAL #%csr115_journal%~
+    END
+  END
+  OUTER_SPRINT csr115_epilogue ~EXIT~
+  ACTION_IF NOT (~%target_dlg%~ STRING_EQUAL ~~) BEGIN
+    OUTER_SPRINT csr115_epilogue ~EXTERN "%target_dlg%" %target_state%~
+  END ELSE ACTION_IF NOT (csr115_flags BAND 8) BEGIN
+    OUTER_SPRINT csr115_epilogue ~EXTERN "%csr115_dest%" %csr115_dest_state%~
+  END
+  OUTER_SET csr115_position = trans
+  <<<<<<<< csr115_branch.d
+ADD_TRANS_TRIGGER ~%dlg%~ %state% ~%inverse%~ DO %trans%
+EXTEND_TOP ~%dlg%~ %state% #%csr115_position%
+  IF ~%csr115_trigger%
+%condition%~ THEN %csr115_reply% DO ~%csr115_action%~ %csr115_journal_clause% %csr115_epilogue%
+END
+>>>>>>>>
+  COMPILE EVALUATE_BUFFER ~csr115_branch.d~ USING ~chriz-sod-remix/languages/english/csr115.tra~
+END
+
+// Find all native incoming transitions to an exact state and branch them.
+// Scanning only the supplied audited source dialogue prevents broad edits.
+DEFINE_ACTION_FUNCTION csr115_dialog_inbound
+  INT_VAR old_state = 0 rewrite_state = (0 - 1) rewrite_trans = (0 - 1) rewrite_text = (0 - 1)
+  STR_VAR source = ~~ old_dlg = ~~ new_dlg = ~~ new_state = ~~
+          condition = ~Global("csr_kh_fort","GLOBAL",1)~
+          inverse = ~!Global("csr_kh_fort","GLOBAL",1)~
+BEGIN
+  COPY_EXISTING - ~%source%.DLG~ ~override~
+    READ_LONG 0x08 csr115_n
+    READ_LONG 0x0c csr115_so
+    READ_LONG 0x14 csr115_to
+    FOR (csr115_s = 0; csr115_s < csr115_n; ++csr115_s) BEGIN
+      READ_LONG (csr115_so + csr115_s * 16 + 4) csr115_first
+      READ_LONG (csr115_so + csr115_s * 16 + 8) csr115_count
+      FOR (csr115_j = csr115_count - 1; csr115_j >= 0; --csr115_j) BEGIN
+        SET csr115_t = csr115_to + (csr115_first + csr115_j) * 32
+        READ_LONG csr115_t csr115_flags
+        READ_ASCII (csr115_t + 20) csr115_dest (8) NULL
+        READ_LONG (csr115_t + 28) csr115_dest_state
+        PATCH_IF ((csr115_flags BAND 8) = 0 AND
+                  (~%csr115_dest%~ STRING_EQUAL_CASE ~%old_dlg%~) AND
+                  csr115_dest_state = old_state) BEGIN
+          INNER_ACTION BEGIN
+            OUTER_SET csr115_reply_override = (0 - 1)
+            ACTION_IF (csr115_s = rewrite_state AND csr115_j = rewrite_trans) BEGIN
+              OUTER_SET csr115_reply_override = rewrite_text
+            END
+            LAF csr115_dialog_branch INT_VAR state = csr115_s trans = csr115_j new_text = csr115_reply_override
+              STR_VAR dlg = EVAL ~%source%~ target_dlg = EVAL ~%new_dlg%~
+                      target_state = EVAL ~%new_state%~ condition = EVAL ~%condition%~
+                      inverse = EVAL ~%inverse%~ END
+          END
+        END
+      END
+    END
+END
+
+DEFINE_ACTION_FUNCTION csr115_dialog_apply BEGIN
+  LAM csr115_dialog_bind
+  COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr115.d~ USING ~chriz-sod-remix/languages/english/csr115.tra~
+  // Symbolic labels are local to one COMPILE call. Bind the known appended
+  // tails to numeric states before compiling independent transition forks.
+  COPY_EXISTING - ~%csr115_kh_j%.DLG~ ~override~
+    READ_LONG 0x08 csr115_after_count
+    SET csr115_new_gift = csr115_after_count - 2
+    SET csr115_new_neera = csr115_after_count - 1
+  COPY_EXISTING - ~BDKHALID.DLG~ ~override~
+    READ_LONG 0x08 csr115_after_count
+    SET csr115_new_bgift = csr115_after_count - 2
+    SET csr115_new_parting = csr115_after_count - 1
+  COPY_EXISTING - ~BDJAHEIR.DLG~ ~override~
+    READ_LONG 0x08 csr115_after_count
+    SET csr115_new_north = csr115_after_count - 3
+    SET csr115_new_search = csr115_after_count - 2
+    SET csr115_new_jhparting = csr115_after_count - 1
+  OUTER_SPRINT csr115_history ~OR(2)
+Global("csr_kh_carry","GLOBAL",1)
+Global("csr_kh_fort","GLOBAL",1)~
+  OUTER_SPRINT csr115_no_history ~!Global("csr_kh_carry","GLOBAL",1)
+!Global("csr_kh_fort","GLOBAL",1)~
+  LAF csr115_dialog_inbound INT_VAR old_state = csr115_gift_state
+    STR_VAR source = EVAL ~%csr115_kh_j%~ old_dlg = EVAL ~%csr115_kh_j%~
+            new_dlg = EVAL ~%csr115_kh_j%~ new_state = EVAL ~%csr115_new_gift%~
+            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  LAF csr115_dialog_inbound INT_VAR old_state = 79
+    STR_VAR source = ~BDKHALID~ old_dlg = ~BDKHALID~ new_dlg = ~BDKHALID~ new_state = EVAL ~%csr115_new_bgift%~
+            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  LAF csr115_dialog_inbound INT_VAR old_state = 11
+    STR_VAR source = ~BDKHALID~ old_dlg = ~BDKHALID~ new_dlg = ~BDKHALID~ new_state = EVAL ~%csr115_new_parting%~
+            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  LAF csr115_dialog_inbound INT_VAR old_state = 27 rewrite_state = 25 rewrite_trans = 1 rewrite_text = 51
+    STR_VAR source = ~BDJAHEIR~ old_dlg = ~BDJAHEIR~ new_dlg = ~BDJAHEIR~ new_state = EVAL ~%csr115_new_north%~
+            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  LAF csr115_dialog_inbound INT_VAR old_state = 43
+    STR_VAR source = ~BDJAHEIR~ old_dlg = ~BDJAHEIR~ new_dlg = ~BDJAHEIR~ new_state = EVAL ~%csr115_new_search%~
+            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  ACTION_FOR_EACH csr115_source IN ~BDJAHEIR~ ~%csr115_kh_j%~ BEGIN
+    LAF csr115_dialog_inbound INT_VAR old_state = 12
+      STR_VAR source = EVAL ~%csr115_source%~ old_dlg = ~BDJAHEIR~ new_dlg = ~BDJAHEIR~
+              new_state = EVAL ~%csr115_new_jhparting%~
+              condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  END
+  LAF csr115_dialog_branch INT_VAR state = 57 trans = 1
+    STR_VAR dlg = ~BDNEERA~ target_dlg = EVAL ~%csr115_kh_j%~ target_state = EVAL ~%csr115_new_neera%~
+            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  LAF csr115_dialog_branch INT_VAR state = 31 trans = 4 new_text = 45 STR_VAR dlg = ~BDBARGHE~ END
+  LAF csr115_dialog_branch INT_VAR state = 0 trans = 0 new_text = 47 STR_VAR dlg = ~BDWYNAN~ END
+  LAF csr115_dialog_branch INT_VAR state = 2 trans = 1 quest_journal = 91 STR_VAR dlg = ~BDWYNAN~ END
+  LAF csr115_dialog_branch INT_VAR state = 2 trans = 0 quest_journal = 90 STR_VAR dlg = ~BDWYNAN~ END
+  LAF csr115_dialog_branch INT_VAR state = 20 trans = 1 quest_journal = 90 STR_VAR dlg = ~BDJEGG~ END
+  LAF csr115_dialog_branch INT_VAR state = 20 trans = 0 quest_journal = 91 STR_VAR dlg = ~BDJEGG~ END
+  // Descending independent states: local indices match the audited source.
+  LAF csr115_dialog_branch INT_VAR state = 49 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
+  LAF csr115_dialog_branch INT_VAR state = 5 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
+  LAF csr115_dialog_branch INT_VAR state = 4 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
+  LAF csr115_dialog_branch INT_VAR state = 3 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
+  // Alias only the ephemeral stakeout soldier; the real Adirran persists.
+  LAF csr115_dialog_branch INT_VAR state = 22 trans = 0
+    STR_VAR dlg = ~BDJEGG~ target_dlg = ~CSR115AD~ target_state = ~0~ END
+  LAF csr115_dialog_branch INT_VAR state = 23 trans = 0
+    STR_VAR dlg = ~BDJEGG~ target_dlg = ~CSR115AD~ target_state = ~1~ END
+  LAF csr115_dialog_branch INT_VAR state = 25 trans = 0
+    STR_VAR dlg = ~BDJEGG~ action_pattern = ~ActionOverride("bdbfort",EscapeArea())~
+            action_replacement = ~ActionOverride("csr115ad",EscapeArea())~
+            action_remove = ~ActionOverride("khalid",EscapeArea())~ END
+END

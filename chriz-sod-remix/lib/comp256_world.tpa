@@ -10,6 +10,77 @@ DEFINE_PATCH_MACRO csr256_world_exact BEGIN
   END
 END
 
+// #115 forks each native victory into carried/noncarried Khalid routes. Accept
+// only those exact pairs, and prove both copies differ solely in the reviewed
+// route guard and three retreat actions before reducing them to the native seam.
+DEFINE_PATCH_MACRO csr256_world_115_pair BEGIN
+  SPRINT csr256_115_carried_pattern ~IF%csr256_nl%  Global("csr_kh_fort","GLOBAL",1)%csr256_nl%%csr256_entry_conditions%%csr256_success_head%%csr256_success_tail%~
+  SPRINT csr256_115_ordinary_pattern ~IF%csr256_nl%  !Global("csr_kh_fort","GLOBAL",1)%csr256_nl%%csr256_entry_conditions%%csr256_success_body%~
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_115_carried_pattern%~ csr256_115_carried_hits
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_115_ordinary_pattern%~ csr256_115_ordinary_hits
+  PATCH_IF ((csr256_115_carried_hits > 0) OR (csr256_115_ordinary_hits > 0)) BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~IF%csr256_nl%%csr256_entry_conditions%%csr256_success_body%~ csr256_115_native_hits
+    PATCH_IF NOT ((csr256_115_carried_hits = 1) AND (csr256_115_ordinary_hits = 1) AND (csr256_115_native_hits = 0)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #256: incomplete or duplicate #115 bridge victory routes.~
+    END
+    REPLACE_EVALUATE CASE_INSENSITIVE ~%csr256_115_carried_pattern%~ BEGIN
+      SPRINT csr256_115_carried ~%MATCH0%~
+    END ~%MATCH0%~
+    REPLACE_EVALUATE CASE_INSENSITIVE ~%csr256_115_ordinary_pattern%~ BEGIN
+      SPRINT csr256_115_ordinary ~%MATCH0%~
+    END ~%MATCH0%~
+    INNER_PATCH_SAVE csr256_115_carried ~%csr256_115_carried%~ BEGIN
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~^IF%csr256_nl%  Global("csr_kh_fort","GLOBAL",1)%csr256_nl%~ ~IF%LNL%~
+    END
+    INNER_PATCH_SAVE csr256_115_ordinary ~%csr256_115_ordinary%~ BEGIN
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~^IF%csr256_nl%  !Global("csr_kh_fort","GLOBAL",1)%csr256_nl%~ ~IF%LNL%~
+    END
+    INNER_PATCH_SAVE csr256_115_expected_carried ~%csr256_115_ordinary%~ BEGIN
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_retreat%~ ~~
+    END
+    PATCH_IF NOT (~%csr256_115_carried%~ STRING_EQUAL_CASE ~%csr256_115_expected_carried%~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #256: #115 bridge victory copies differ beyond Khalid's retreat actions.~
+    END
+    REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_115_carried_pattern%~ ~~
+    REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_115_ordinary_pattern%~ ~%csr256_115_ordinary%~
+    SET csr256_115_pairs += 1
+  END
+END
+
+// Restore #115's mutually exclusive routes after the single #256 victory has
+// been constructed. Both copies retain the full eight-opponent/combat-clear
+// guard; only the carried branch omits Khalid's native post-battle retreat.
+DEFINE_PATCH_MACRO csr256_world_115_restore BEGIN
+  SET csr256_115_restored = 0
+  REPLACE_EVALUATE ~^IF%csr256_nl%\(\([ %TAB%]+[^%WNL%]*%csr256_nl%\|THEN%csr256_nl%\)*\)END~ BEGIN
+    SPRINT csr256_115_result ~%MATCH0%~
+    INNER_PATCH ~%csr256_115_result%~ BEGIN
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~Global("CSR256_STAGE","BD2000",2)~ csr256_115_stage
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CreateCreatureObject("bdbence",Player1,6,0,0)~ csr256_115_bence
+    END
+    PATCH_IF ((csr256_115_stage = 1) AND (csr256_115_bence = 1)) BEGIN
+      SET csr256_115_restored += 1
+      INNER_PATCH_SAVE csr256_115_carried ~%csr256_115_result%~ BEGIN
+        REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_retreat%~ ~~
+        REPLACE_TEXTUALLY ~^IF%csr256_nl%~ ~IF
+  Global("csr_kh_fort","GLOBAL",1)
+~
+      END
+      INNER_PATCH_SAVE csr256_115_ordinary ~%csr256_115_result%~ BEGIN
+        REPLACE_TEXTUALLY ~^IF%csr256_nl%~ ~IF
+  !Global("csr_kh_fort","GLOBAL",1)
+~
+      END
+      SPRINT csr256_115_result ~%csr256_115_carried%
+
+%csr256_115_ordinary%~
+    END
+  END ~%csr256_115_result%~
+  PATCH_IF (csr256_115_restored != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #256: expected one consolidated victory when restoring #115 continuity.~
+  END
+END
+
 DEFINE_PATCH_MACRO csr256_world_script BEGIN
   SPRINT csr256_pattern ~    CreateCreature("bdcrubbm",\[1465.1910\],SE)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1605.1900\],S)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1540.1935\],SE)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1480.1985\],SE)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb1",\[1430.2030\],E)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb2",\[1530.1865\],S)%csr256_comment%%csr256_nl%    CreateCreature("bdcrubb2",\[1400.1960\],E)%csr256_comment%~
   SPRINT csr256_label ~fixed demolition roster~ SET csr256_expected = 2
@@ -23,9 +94,20 @@ DEFINE_PATCH_MACRO csr256_world_script BEGIN
   REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_pattern%~ ~SetGlobal("bd_bridge_plot","bd2000",2)
     SetGlobal("CSR256_REQUEST","BD2000",1)~
 
-  SPRINT csr256_success_body ~THEN%csr256_nl%  RESPONSE #100%csr256_nl%    SetGlobal("bd_plot","global",293)%csr256_nl%    CreateCreature("bdbence",\[2425.2660\],NW)%csr256_comment%%csr256_nl%\(    CreateCreature("bdskie",\[2485.2655\],NW)%csr256_comment%%csr256_nl%\)?    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",\[2425.2485\]))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))%csr256_nl%    AddJournalEntry([0-9]+,QUEST)%csr256_nl%    SetGlobal("bd_cant_rest","myarea",0)%csr256_nl%    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)%csr256_nl%END~
-  SPRINT csr256_portal_guard ~IF%csr256_nl%  GlobalLT("bd_plot","global",293)%csr256_nl%  OR(2)%csr256_nl%    GlobalGT("bd_elemental","bd2000",0)%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%  OR(2)%csr256_nl%    Dead("bdelefir")%csr256_comment%%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%~
-  SPRINT csr256_fixed_guard ~IF%csr256_nl%  GlobalLT("bd_plot","global",293)%csr256_nl%  Global("bd_elemental","bd2000",0)%csr256_nl%  Global("bdsumfir","global",0)%csr256_nl%  !NumDeadLT("bdcrubb",6)%csr256_nl%  Dead("bdcrubbm")%csr256_comment%%csr256_nl%~
+  SPRINT csr256_success_head ~THEN%csr256_nl%  RESPONSE #100%csr256_nl%    SetGlobal("bd_plot","global",293)%csr256_nl%    CreateCreature("bdbence",\[2425.2660\],NW)%csr256_comment%%csr256_nl%\(    CreateCreature("bdskie",\[2485.2655\],NW)%csr256_comment%%csr256_nl%\)?~
+  SPRINT csr256_retreat ~    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",\[2425.2485\]))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))%csr256_nl%~
+  SPRINT csr256_success_tail ~    AddJournalEntry([0-9]+,QUEST)%csr256_nl%    SetGlobal("bd_cant_rest","myarea",0)%csr256_nl%    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)%csr256_nl%END~
+  SPRINT csr256_success_body ~%csr256_success_head%%csr256_retreat%%csr256_success_tail%~
+  SPRINT csr256_portal_conditions ~  GlobalLT("bd_plot","global",293)%csr256_nl%  OR(2)%csr256_nl%    GlobalGT("bd_elemental","bd2000",0)%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%  OR(2)%csr256_nl%    Dead("bdelefir")%csr256_comment%%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%~
+  SPRINT csr256_fixed_conditions ~  GlobalLT("bd_plot","global",293)%csr256_nl%  Global("bd_elemental","bd2000",0)%csr256_nl%  Global("bdsumfir","global",0)%csr256_nl%  !NumDeadLT("bdcrubb",6)%csr256_nl%  Dead("bdcrubbm")%csr256_comment%%csr256_nl%~
+  SPRINT csr256_portal_guard ~IF%csr256_nl%%csr256_portal_conditions%~
+  SPRINT csr256_fixed_guard ~IF%csr256_nl%%csr256_fixed_conditions%~
+  SET csr256_115_pairs = 0
+  SPRINT csr256_entry_conditions ~%csr256_portal_conditions%~ LPM csr256_world_115_pair
+  SPRINT csr256_entry_conditions ~%csr256_fixed_conditions%~ LPM csr256_world_115_pair
+  PATCH_IF NOT ((csr256_115_pairs = 0) OR (csr256_115_pairs = 2)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #256: #115 must guard both native bridge victory routes.~
+  END
   SET csr256_expected = 1
   SPRINT csr256_label ~portal victory~
   SPRINT csr256_pattern ~%csr256_portal_guard%%csr256_success_body%~ LPM csr256_world_exact
@@ -63,6 +145,7 @@ DEFINE_PATCH_MACRO csr256_world_script BEGIN
     COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_old%~ csr256_hits
     PATCH_IF csr256_hits BEGIN PATCH_FAIL ~chriz-sod-remix #256: unrecognized old finale reference %csr256_old% remains in BD2000.~ END
   END
+  PATCH_IF (csr256_115_pairs = 2) BEGIN LPM csr256_world_115_restore END
 END
 
 DEFINE_PATCH_MACRO csr256_are_table BEGIN

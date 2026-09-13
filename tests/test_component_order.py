@@ -12,6 +12,7 @@ TP2_PATH = (
 EXPECTED_COMPONENTS = {
     100,
     110,
+    115,
     120,
     130,
     135,
@@ -65,10 +66,10 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_9(self) -> None:
+    def test_patch_release_version_is_v0_6_10(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.9~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.10~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()

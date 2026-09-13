@@ -1,0 +1,65 @@
+@0 = ~Reinforcements! The crusade has us trapped here. Their commander, the Barghest, wants our supplies. Most of those inside are merchants and travellers; we cannot hold out much longer.~
+@1 = ~We came with the Flaming Fist. Tell me what you need.~
+@2 = ~Speak to Wynan Hess about our defences, and to Jegg Hillcarver about the supplies. Between them they can tell you what we stand to lose. Then we can decide whether to fight or negotiate.~
+@3 = ~I will speak to them.~
+@4 = ~These people need our h-help. I can help coordinate the defence, <CHARNAME>. Adirran knows the garrison; let us hear what he and the others have to say.~
+@5 = ~I'll take the watch outside. Report to me when you have spoken to Hess and Hillcarver, and we'll make our preparations.~
+@6 = ~What news? Have you spoken to Hess and Hillcarver?~
+@7 = ~I have spoken to them both. Let us decide how to deal with the crusade.~
+@8 = ~I still need to speak to Wynan Hess.~
+@9 = ~I still need to speak to Jegg Hillcarver.~
+@10 = ~I have more to do. Hold your position.~
+@11 = ~We will hold. Make haste.~
+@12 = ~What is your plan? We can fight, or try to negotiate a surrender. But we cannot let the crusade take all our supplies.~
+@13 = ~We should attack the crusade.~
+@14 = ~I will negotiate a surrender. Jegg can destroy the supplies before the crusaders enter.~
+@15 = ~I need to speak about the spellstone poisoning the keep.~
+@16 = ~Are you ready to attack?~
+@17 = ~Yes. The Flaming Fist stand ready to join us.~
+@18 = ~Yes. We can win without the Flaming Fist.~
+@19 = ~I will alert the Flaming Fist. If you hear fighting, join the battle.~
+@20 = ~Wait. I need more time to prepare.~
+@21 = ~Without the Flaming Fist, our people will bear the brunt of the fighting. Are you certain?~
+@22 = ~I am certain. Sound the attack.~
+@23 = ~You are right. I will alert the Flaming Fist first.~
+@24 = ~That spellstone has weakened the garrison. We can give you little help while it continues to drain our strength.~
+@25 = ~Give us what support you can. Sound the attack.~
+@26 = ~Then I should deal with the stone first.~
+@27 = ~To arms! Open the drawbridge!~
+@28 = ~We will be ready. Bring word when it is time, or let the sound of battle be our signal.~
+@29 = ~If Jegg can destroy the supplies, we may yet save the people here. Once negotiations begin, we must see them through. Are you ready?~
+@30 = ~Yes. Have a soldier call for the Barghest.~
+@31 = ~Not yet. I will return when I am ready.~
+@32 = ~Very well. We will call out that we wish to negotiate our surrender.~
+@33 = ~Have you found the scroll needed to end the spellstone's curse?~
+@34 = ~I have the scroll.~
+@35 = ~Not yet.~
+@36 = ~Then take it to the stone. There is no time to lose.~
+@37 = ~Find it quickly. We cannot endure this much longer.~
+@40 = ~I have a f-favour to ask. Even with the crusade ahead of us, I hoped Jaheira and I might find a little time for ourselves.~
+@41 = ~I c-cannot leave Jaheira. Whatever comes next, I want us to face it together.~
+@42 = ~I came north to oppose the crusade. They have trapped the people of Bridgefort, and I have been looking for a way inside.~
+@43 = ~Join me, Jaheira. Together we shall liberate Bridgefort.~
+@44 = ~I have been looking for a way into Bridgefort. The crusade holds the bridge, and a direct assault would endanger everyone within.~
+@45 = ~Khalid, can we trust the Barghest to spare the defenders if they lay down their arms?~
+@46 = ~The defenders say her magic drove the crusade back. It seems she has done her share of d-damage to the fort as well.~
+@47 = ~You are Wynan Hess? Adirran sent me to ask about the fort's defences.~
+@48 = ~Adirran sent me to ask about the fort's supplies.~
+@49 = ~Adirran can speak for the garrison. We should discuss our next move with him.~
+@50 = ~Khalid and I will remain together. What say you, <CHARNAME>? Should he leave with me, or would you have us both remain with you?~
+@51 = ~What brings you this far north?~
+@90 = ~The Desperate Defenders
+
+I should speak to Wynan Hess and Jegg Hillcarver.
+
+Adirran briefed us on Bridgefort's siege. Wynan Hess knows the state of the defences, and Jegg Hillcarver can tell us about the supplies the crusade wants. Adirran will take the watch outside; I should report to him when I have spoken to them both.~
+@91 = ~The Desperate Defenders
+
+I should decide whether to fight or negotiate a surrender.
+
+I have heard what Hess and Hillcarver have to say. The garrison needs the Flaming Fist's support for an attack. If I negotiate a surrender instead, Jegg will destroy as many supplies as she can before the crusade enters. I can discuss our next move with Adirran outside the fort.~
+@92 = ~The Desperate Defenders
+
+I should return to Adirran when I am ready.
+
+The defenders await our decision. I can alert the Flaming Fist and lead an attack, or negotiate the fort's surrender after Jegg destroys its supplies.~

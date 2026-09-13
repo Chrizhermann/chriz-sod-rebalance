@@ -1,0 +1,12 @@
+// Component 115: unvoiced alternatives for Khalid's carried-party history.
+// Original voiced strings remain in the original-history script branches.
+
+@11580 = ~S-so Voghiln, I just wanted to th-th-thank you for standing with us against the crusade.~
+
+// Preserve Khalid's existing background; omit the claim that he and Jaheira
+// arrived at Bridgefort before the party. The original biography is unchanged.
+@11581 = ~When asked about his past, Khalid nervously reveals that he was born and raised in the nation of Calimshan. From offhand comments he makes, you gather he was not favored by either of his parents but particularly not by his father. Khalid joined the city militia as soon as he was able and made his career there for a time.
+
+He leaves the details of how he met Jaheira unclear, but you know he and his wife both belong to a secretive order known as the Harpers.~
+
+@11582 = ~Thy actions at Bridgefort were impressive, Calishite. Thou didst not flinch when its defenders needed thee.~

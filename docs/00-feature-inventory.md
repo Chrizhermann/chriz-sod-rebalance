@@ -1,23 +1,31 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-09-13).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-09-14).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**41 component
-declarations in seven groups** in v0.6.9),
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**42 component
+declarations in seven groups** for v0.6.10),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.9
+## 1. Implemented in source — v0.6.10
 
-Current release: **v0.6.9**. This section describes release source, not a claim
+Prepared for release **v0.6.10**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.10:** component 115 adds the approved Khalid/Jaheira Bridgefort continuity
+treatment. The corrected BD2000 arrival, normal wardstone transport and Adirran
+briefing passed with Khalid remaining controllable. Save 954 preserves his party
+allegiance 2; native reload and later quest branches are not accepted. The user
+authorized shipment; Wynan's separate observation remains a non-blocking sidenote.
+See [the continuity record](plans/2026-09-10-khalid-continuity.md) and
+[v0.6.10 release report](releases/v0.6.10.md).
 
 **v0.6.9 additions and corrections:**
 135 keeps URE2 without dead magic and misleading descriptions; 235 repairs older
@@ -52,6 +60,7 @@ recommended universal selection. The live install is not the implementation targ
 |---|---------|--------------|------|
 | 100 | Rest-ambush felt-rate 5× reduction | Remaps each area's `.are` day/night rest-% down ~5× (via `restmap.tpa`) across the 30 areas with an active rest table; the engine rolls per in-game hour, so listed 6–18% = felt 39–80%/8h → knocked to felt ~8–15%. Reads current value (composes with other mods); leaves BDNOREST cancellers + empty tables. Changes **frequency only**, not pack size. | pred `bd0120.are` |
 | 110 | Keep all companions at SoD start | Strips the 28 BD0103 `LeaveParty()+DestroySelf` dismiss blocks (29 names) so the whole BG1 party carries into SoD; +9 recruiter-site EXTEND_TOP skip-blocks (BD0101/0108/0110/0111/1000/2000/2100/7000/7100) suppress duplicate recruit-spawns / Dorn gear-grab for kept members. | pred `bd0103.bcs` |
+| 115 | Khalid's Bridgefort continuity (v0.6.10) | Adirran supplies carried-Khalid briefing and command choices; original commander route remains otherwise. Conditional dialogue/journals/banter and scene guards cover Khalid/Jaheira. Corrected entry, wardstone transport and briefing passed with normal Khalid control, also preserved in save 954. Native reload and later quest branches remain unverified. | REQUIRE 110; before first BD2000 entry |
 | 120 | Remove the hooded man (mid-campaign) | Excises Irenicus from his 5 mid-campaign scenes (BD0103 bedside, BDCUT10/11 interrogation vision, BDCUT28 Bhaal-vision, BD5100 cameo, BDSCRY/BDIMOEN dangling options). Sets nothing the endgame reads; component 290 removes the endgame chain. | pred `bd0103.bcs` |
 | 130 | Skip the four chapter rest-dreams | EXTEND_TOP on BDBALDUR.bcs pre-sets `bd_ddd=4` (natural post-all-dreams value) so PLAYER1D's dream launchers never fire; the four nights become ordinary rests. PLAYER1D.BCS left untouched (EET-compat). | pred `bdbaldur.bcs` |
 | 135 | Assassin ambush without dead magic (default selected) | Retains the scripted encounter while removing repeated dead-magic effects and misleading descriptions/companion remarks. The user's spellcasting/persistence sample passed; this was not a full travel/combat/rest test. | pred `bd0063.are` and guarded encounter resources |
@@ -139,7 +148,7 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.9, tail-installable WeiDU mod: **41 declarations
+`chriz-sod-remix` v0.6.10 release source, tail-installable WeiDU mod: **42 declarations
 in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
@@ -152,11 +161,11 @@ XP/condolence route, the amulet reward and Guardian removal have recorded checks
 The assassin test was a limited spellcasting/persistence sample. Shadow Aspect's
 summon test is unfinished and deprioritized; finite Mislead has no native pass.
 The companion appearance defect remains unresolved. These observations do not
-replace the release's separate installer and automated verification evidence:
+replace the v0.6.9 release's separate installer and automated verification evidence:
 273 main tests (101 bridge and13 Mislead),41 research tests,14 ending self-tests,
 and WeiDU249 parsing of the TP2 and56 libraries passed. The 256/257 split's common
 AI equivalence and two-pointer-only install/disposable restore passed. See the
-[release report](releases/v0.6.9.md).
+[v0.6.9 release report](releases/v0.6.9.md).
 
 **Locked decisions already shipped as components (traceability):** item 1 / wave1-02
 keep-party → **110**; item 5 / wave1-01 rest-ambush 5× → **100**; item 10 / wave1-03
@@ -238,6 +247,7 @@ ending and EET carrier repair → **290/291**.
 | Feature | Waiting on / unblocked by |
 |---------|---------------------------|
 | Place non-party companions as SoD pickups (item 1 step 2) | A later companion pass (optional placement + a little dialogue) |
+| Returning companions' SoD quest continuity | Component 115 is ready for v0.6.10 with carried Khalid entry/briefing/control accepted and saved. Native reload and later branches remain unverified; Dorn's captivity and Neera's quest entry need their own audit/design. Road-north item 9. |
 | Scripted travel-ambush rework / URE degut (item 8, wave1-04) | Its own pass; gut BD0060/0063/0064/0066 arenas (story vignettes URE6-10 stay) |
 | Per-area zero-ambush designations (wave1-01) | Each chapter's trash/zero-list decision |
 | Dream-content rewrite (wave1-03) | Maybe-someday; skip already shipped (130), content preserved in research/09 |

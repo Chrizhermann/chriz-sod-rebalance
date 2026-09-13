@@ -1,0 +1,123 @@
+// Component 115: the two banters and biography that assume Khalid arrived
+// at Bridgefort before the party. Operates only on a decompiled BCS buffer.
+//
+// Preflight: LPF csr115_flavor_patch INT_VAR csr115_check_only = 1
+//              STR_VAR csr115_resource = ~bdban103~ END
+// Mutation: load languages/english/csr115fl.tra after ALL preflight checks,
+//           then call the same function with csr115_check_only = 0 and compile.
+// No strings are resolved/allocated by this helper; @ references remain BAF text.
+// Resources: bdban103 (one opener), bdban037 (two uses of one opener),
+//            bdkhalid (one biography block). Other blocks remain byte-identical.
+
+DEFINE_PATCH_FUNCTION ~csr115_flavor_patch~
+  INT_VAR csr115_check_only = 0
+  STR_VAR csr115_resource = ~~
+BEGIN
+  SPRINT csr115_fl_nl ~%MNL%?%LNL%~
+  SPRINT csr115_fl_history
+~  OR(2)
+    Global("csr_kh_carry","GLOBAL",1)
+    Global("csr_kh_fort","GLOBAL",1)
+~
+  SPRINT csr115_fl_original
+~  !Global("csr_kh_carry","GLOBAL",1)
+  !Global("csr_kh_fort","GLOBAL",1)
+~
+
+  PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdban103~) BEGIN
+    // The whole banter has several Khalid lines: select RESPONSE #0 below.
+    SPRINT csr115_fl_target ~  RESPONSE #0%csr115_fl_nl%    DisplayStringHead("KHALID",[0-9]+)~
+    SPRINT csr115_fl_replacement
+~  RESPONSE #0
+    DisplayStringHead("KHALID",@11580)~
+    SET csr115_fl_expected = 1
+    SPRINT csr115_fl_marker ~Switch("bd_pbdd103","MYAREA")~
+  END ELSE PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdban037~) BEGIN
+    SPRINT csr115_fl_target ~  RESPONSE #[01]%csr115_fl_nl%    DisplayStringHead("DYNAHEIR",[0-9]+)~
+    // Keep both RESPONSE values: substitution is performed on each action.
+    SET csr115_fl_expected = 2
+    SPRINT csr115_fl_marker ~Switch("bd_pbdd037","MYAREA")~
+  END ELSE PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdkhalid~) BEGIN
+    SPRINT csr115_fl_target ~SetPlayerSound(Myself,[0-9]+,BIO)~
+    SPRINT csr115_fl_replacement ~SetPlayerSound(Myself,@11581,BIO)~
+    SET csr115_fl_expected = 1
+    SPRINT csr115_fl_marker ~Global("bd_add_new_bio","LOCALS",0)~
+  END ELSE BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115 flavor: unsupported resource %csr115_resource%.~
+  END
+
+  COUNT_REGEXP_INSTANCES ~%csr115_fl_target%~ csr115_fl_targets
+  COUNT_REGEXP_INSTANCES ~%csr115_fl_marker%~ csr115_fl_markers
+  PATCH_IF ((csr115_fl_targets != csr115_fl_expected) OR (csr115_fl_markers != 1)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115 flavor [%csr115_resource%]: expected %csr115_fl_expected% target action(s) and one owner block, found %csr115_fl_targets% and %csr115_fl_markers%; refusing an unfamiliar script shape.~
+  END
+
+  SET csr115_fl_blocks = 0
+  // Decompiler blocks have indented trigger/action lines and unindented
+  // IF/THEN/END. This cannot consume the following block. Captures:
+  // MATCH1 = block, MATCH2 = triggers, MATCH4 = responses and actions.
+  REPLACE_EVALUATE
+    ~\(^IF%csr115_fl_nl%\(\(  [^%MNL%%LNL%]*%csr115_fl_nl%\)*\)THEN%csr115_fl_nl%\(\(  [^%MNL%%LNL%]*%csr115_fl_nl%\)*\)END\)~
+  BEGIN
+    SPRINT csr115_fl_result ~%MATCH1%~
+    SPRINT csr115_fl_triggers ~%MATCH2%~
+    SPRINT csr115_fl_actions ~%MATCH4%~
+    INNER_PATCH ~%csr115_fl_triggers%~ BEGIN
+      COUNT_REGEXP_INSTANCES ~%csr115_fl_marker%~ csr115_fl_this_marker
+    END
+    PATCH_IF (csr115_fl_this_marker = 1) BEGIN
+      SET csr115_fl_blocks += 1
+      INNER_PATCH ~%csr115_fl_actions%~ BEGIN
+        COUNT_REGEXP_INSTANCES ~%csr115_fl_target%~ csr115_fl_this_targets
+      END
+      PATCH_IF (csr115_fl_this_targets != csr115_fl_expected) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #115 flavor [%csr115_resource%]: target actions are not in the expected owner block.~
+      END
+      PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdkhalid~) BEGIN
+        INNER_PATCH ~%csr115_fl_actions%~ BEGIN
+          COUNT_REGEXP_INSTANCES ~SetGlobal("bd_add_new_bio","LOCALS",1)~ csr115_fl_bio_setters
+        END
+        PATCH_IF (csr115_fl_bio_setters != 1) BEGIN
+          PATCH_FAIL ~chriz-sod-remix #115 flavor [bdkhalid]: expected one biography completion marker, found %csr115_fl_bio_setters%.~
+        END
+      END
+      PATCH_IF (csr115_check_only = 0) BEGIN
+        INNER_PATCH_SAVE csr115_fl_new_actions ~%csr115_fl_actions%~ BEGIN
+          PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdban037~) BEGIN
+            REPLACE_EVALUATE
+              ~\(  RESPONSE #[01]%csr115_fl_nl%    \)DisplayStringHead("DYNAHEIR",[0-9]+)~
+            BEGIN
+              SPRINT csr115_fl_prefix ~%MATCH1%~
+            END ~%csr115_fl_prefix%DisplayStringHead("DYNAHEIR",@11582)~
+          END ELSE BEGIN
+            REPLACE_TEXTUALLY ~%csr115_fl_target%~ ~%csr115_fl_replacement%~
+          END
+          PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdkhalid~) BEGIN
+            // Update an existing save's already-assigned original biography once.
+            REPLACE_TEXTUALLY ~SetGlobal("bd_add_new_bio","LOCALS",1)~
+~SetGlobal("bd_add_new_bio","LOCALS",1)
+    SetGlobal("csr115_bio","LOCALS",1)~
+          END
+        END
+        INNER_PATCH_SAVE csr115_fl_new_triggers ~%csr115_fl_triggers%~ BEGIN
+          PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~bdkhalid~) BEGIN
+            REPLACE_TEXTUALLY ~Global("bd_add_new_bio","LOCALS",0)~
+              ~Global("csr115_bio","LOCALS",0)~
+          END
+        END
+        SPRINT csr115_fl_result
+~IF
+%csr115_fl_new_triggers%%csr115_fl_history%THEN
+%csr115_fl_new_actions%END
+
+IF
+%csr115_fl_triggers%%csr115_fl_original%THEN
+%csr115_fl_actions%END~
+      END
+    END
+  END ~%csr115_fl_result%~
+
+  PATCH_IF (csr115_fl_blocks != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115 flavor [%csr115_resource%]: expected exactly one complete owner block, found %csr115_fl_blocks%; refusing to patch.~
+  END
+END

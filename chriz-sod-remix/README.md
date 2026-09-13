@@ -4,9 +4,14 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.9**. The component overview below describes this version.
+Current release: **v0.6.10**. The component overview below describes this version.
 
 ## Components
+
+**115** fixes carried Khalid's Bridgefort entry. He remains controllable while
+Adirran handles the local briefing and command choices. It requires **110** and
+supports installation before or after **256**. Append 115 before first entering
+BD2000; use a pre-entry save if Khalid has already been reset as an NPC.
 
 v0.6.9 additions: **135** is the default treatment of the assassin ambush
 (keep the fight, remove dead magic and its misleading remarks). **235** preserves
@@ -54,6 +59,7 @@ received. The reward still occurs once, after reporting the jailbreak to Liia.
 |---|---|---|
 | 100 | Rest-ambush 5× | Maps every active SoD rest-header day/night % through a felt-rate÷5 table (30 areas, felt 22–80% → 8–15% per rest). Composes with other mods (reads current values). BDNOREST untouched; pack size untouched (per-chapter decision). |
 | 110 | Keep all companions | Neutralizes the 28 vanilla LeaveParty/DestroySelf strip blocks in BD0103.bcs; adds in-party skip-guards to 9 recruiter-area scripts so kept companions aren't yanked/converted mid-party. Mod-NPC strips untouched. |
+| 115 | Khalid's Bridgefort continuity | Protects carried Khalid's party control and assigns local briefing/command choices to Adirran. Preserves the personal quest and normal non-carried route; adapts conflicting dialogue and scenes. Requires 110; install before first BD2000 entry. |
 | 120 | No mid-campaign hooded man | Removes all five hooded-man appearances (palace bedside, bdcut11 vision, Boareskyr vision cameo, scrying option, Underground River cameo) + the two dangling dialogue replies. Component 290 removes the endgame chain. |
 | 130 | Skip chapter dreams | Pre-sets `bd_ddd=4` from BDBALDUR.BCS — the four PLAYER1D rest-dreams never fire. Dream content documented in `docs/research/09-sod-dreams.md`. |
 | 290 | Victory celebration ending | Keeps the real return and playable celebration; Dazzo ends SoD after the public victory dialogue. Removes the optional codas and murder/arrest/epilogue chain. EET enters normal SoA through its existing import rules; standalone ends at native credits. |
@@ -62,6 +68,13 @@ received. The reward still occurs once, after reporting the jailbreak to Liia.
 
 This table highlights the global and ending components; `COMPONENTS.md` in the
 release contains the complete inventory.
+
+Component 115 also records companion history for road-north dialogue when installed
+before SoD starts. It does not repair scenes that already played. Corrected BD2000
+arrival, normal wardstone transfer and Adirran's briefing passed the user's playtest;
+the saved Khalid retains normal party control. Later quest branches have installer
+coverage without a complete new native run. See the
+[continuity record](../docs/plans/2026-09-10-khalid-continuity.md).
 
 ## Install
 
@@ -72,7 +85,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.9 exposes **41 declarations in seven install groups**, including
+v0.6.10 exposes **42 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
@@ -113,8 +126,8 @@ amulet reward and Guardian removal also have recorded checks. These do not mean
 every component or spell has been tested in a complete campaign. The final 256/257
 split and finite Mislead correction have no new native acceptance; Shadow Aspect
 testing is deferred. The reported unequipped appearance after palace rest remains
-unresolved. The [release report](../docs/releases/v0.6.9.md) records the passing
-offline checks, including 101 bridge and 13 Mislead tests. Native observations
+unresolved. The [release report](../docs/releases/v0.6.10.md) records the passing
+offline checks and Khalid entry acceptance. Earlier native observations
 remain in the [test record](../docs/playtest/2026-09-09-fast-sod-test-plan.md).
 
 ## Optional full skip (component 910)
