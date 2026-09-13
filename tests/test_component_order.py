@@ -12,6 +12,7 @@ TP2_PATH = (
 EXPECTED_COMPONENTS = {
     100,
     110,
+    115,
     120,
     130,
     135,

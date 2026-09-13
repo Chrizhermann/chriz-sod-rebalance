@@ -1,0 +1,398 @@
+// Khalid carryover: use the existing fort soldier for local command, preserve
+// the party's Khalid, and retain the installed original route when not carried.
+// The preflight compiles every edited BCS in memory before the first write.
+
+OUTER_SPRINT csr115_nl ~%MNL%?%LNL%~
+OUTER_SPRINT csr115_block_re ~^IF%csr115_nl%\(\([ %TAB%]+[^%WNL%]*%csr115_nl%\|THEN%csr115_nl%\)*\)END~
+
+DEFINE_PATCH_MACRO csr115_count BEGIN
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr115_find%~ csr115_found
+  PATCH_IF (csr115_found != csr115_expect) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115 [%csr115_resource%]: expected %csr115_expect% instances of %csr115_what%, found %csr115_found%. No supported patch is available for this resource shape.~
+  END
+END
+
+// Fork only blocks containing the audited action. The original block retains
+// every installed action, with an ordinary-route guard. The carried block keeps
+// everything except the named NPC staging actions. Other mods' additions survive.
+DEFINE_PATCH_MACRO csr115_fork BEGIN
+  LAUNCH_PATCH_MACRO csr115_count
+  SET csr115_forked = 0
+  REPLACE_EVALUATE ~%csr115_block_re%~ BEGIN
+    SPRINT csr115_original ~%MATCH0%~
+    SPRINT csr115_replacement ~%csr115_original%~
+    INNER_PATCH ~%csr115_original%~ BEGIN
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr115_find%~ csr115_in_block
+    END
+    PATCH_IF (csr115_in_block > 0) BEGIN
+      SET csr115_forked += csr115_in_block
+      INNER_PATCH_SAVE csr115_carried ~%csr115_original%~ BEGIN
+        REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr115_find%~ ~%csr115_change%~
+        REPLACE_TEXTUALLY ~^IF%csr115_nl%~ ~IF
+  Global("csr_kh_fort","GLOBAL",1)
+~
+      END
+      INNER_PATCH_SAVE csr115_original ~%csr115_original%~ BEGIN
+        REPLACE_TEXTUALLY ~^IF%csr115_nl%~ ~IF
+  !Global("csr_kh_fort","GLOBAL",1)
+~
+      END
+      SPRINT csr115_replacement ~%csr115_carried%
+
+%csr115_original%~
+    END
+  END ~%csr115_replacement%~
+  PATCH_IF (csr115_forked != csr115_expect) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115 [%csr115_resource%]: matched actions were not contained in complete script blocks.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr115_prepend BEGIN
+  INSERT_BYTES 0 (STRING_LENGTH ~%csr115_header%~)
+  WRITE_ASCIIE 0 ~%csr115_header%~
+END
+
+// Read the party slots directly as well as the area-local death-variable lookup.
+// On area entry the latter may not yet resolve the arriving companion.
+OUTER_SPRINT csr115_kh_party ~OR(7)
+    InPartyAllowDead("khalid")
+    Name("khalid",Player1)
+    Name("khalid",Player2)
+    Name("khalid",Player3)
+    Name("khalid",Player4)
+    Name("khalid",Player5)
+    Name("khalid",Player6)~
+OUTER_SPRINT csr115_kh_absent ~!InPartyAllowDead("khalid")
+  !Name("khalid",Player1)
+  !Name("khalid",Player2)
+  !Name("khalid",Player3)
+  !Name("khalid",Player4)
+  !Name("khalid",Player5)
+  !Name("khalid",Player6)~
+OUTER_SPRINT csr115_party_arrived ~~
+OUTER_FOR (csr115_slot = 1; csr115_slot <= 6; ++csr115_slot) BEGIN
+  OUTER_SPRINT csr115_party_arrived ~%csr115_party_arrived%  OR(2)
+    NumInPartyLT(%csr115_slot%)
+    InMyArea(Player%csr115_slot%)
+~
+END
+
+OUTER_SPRINT csr115_history ~IF
+  Global("csr_kh_carry","GLOBAL",0)
+  Global("bd_khal_spawn","bd2000",0)
+  %csr115_kh_party%
+  GlobalLT("bd_plot","GLOBAL",240)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_carry","GLOBAL",1)
+    Continue()
+END
+
+IF
+  Global("csr_jh_carry","GLOBAL",0)
+  Global("bd_jah_spawn","bd7100",0)
+  InPartyAllowDead("jaheira")
+  GlobalLT("bd_plot","GLOBAL",240)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_jh_carry","GLOBAL",1)
+    Continue()
+END
+
+~
+
+OUTER_SPRINT csr115_route ~IF
+  Global("csr_kh_fort","GLOBAL",0)
+  GlobalLT("bd_bridgefort_plot","GLOBAL",5)
+  GlobalLT("bd_plot","GLOBAL",240)
+  %csr115_kh_party%
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_fort","GLOBAL",1)
+    SetGlobal("csr_kh_carry","GLOBAL",1)
+    SetGlobal("bd_khal_spawn","bd2000",1)
+    Continue()
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",0)
+  GlobalLT("bd_bridgefort_plot","GLOBAL",5)
+  GlobalLT("bd_plot","GLOBAL",240)
+  %csr115_kh_absent%
+%csr115_party_arrived%THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_fort","GLOBAL",2)
+    Continue()
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",0)
+  OR(2)
+    GlobalGT("bd_bridgefort_plot","GLOBAL",4)
+    GlobalGT("bd_plot","GLOBAL",239)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_fort","GLOBAL",2)
+    Continue()
+END
+
+~
+
+DEFINE_PATCH_FUNCTION csr115_script_patch
+  INT_VAR csr115_publishing = 0
+  STR_VAR csr115_resource = ~~
+BEGIN
+  DECOMPILE_BCS_TO_BAF
+  COUNT_REGEXP_INSTANCES ~csr_kh_fort\|csr_kh_carry\|csr_jh_carry~ csr115_existing
+  PATCH_IF (csr115_existing > 0) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115 [%csr115_resource%]: continuity code already present; do not stack a second copy.~
+  END
+
+  PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~BDCUT24~) BEGIN
+    SPRINT csr115_find ~^    \(MoveGlobal("bd2100","khalid",\[1460\.1025\])\|ActionOverride("khalid",Face(NE))\|ActionOverride("khalid",SetSequence(SEQ_HEAD_TURN))\)[^%WNL%]*%csr115_nl%~
+    SET csr115_expect = 3
+    SPRINT csr115_what ~first-arrival Khalid staging actions~
+    SPRINT csr115_change ~~
+    LAUNCH_PATCH_MACRO csr115_fork
+
+  END
+
+  PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~BD2000~) BEGIN
+    // Protect the actions that actually neutralize/rewire Khalid, not just the
+    // earlier skip flag. A Continue() chain must never enqueue both routes.
+    SPRINT csr115_find ~^  Global("bd_khal_spawn","bd2000",0)%csr115_nl%  GlobalLT("Chapter","GLOBAL",13)~
+    SET csr115_expect = 2
+    SPRINT csr115_what ~native Khalid recruitment gates~
+    LAUNCH_PATCH_MACRO csr115_count
+    REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr115_find%~ ~  Global("bd_khal_spawn","bd2000",0)
+  Global("csr_kh_fort","GLOBAL",2)
+  %csr115_kh_absent%
+%csr115_party_arrived%  GlobalLT("Chapter","GLOBAL",13)~
+
+    // 256 consolidates the two original victory branches. Identify that known
+    // result explicitly before allowing its three-action aftermath shape.
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~SetGlobal("CSR256_STAGE","BD2000",3)~ csr115_bridge_after
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CreateCreatureObject("bdbence",Player1,6,0,0)~ csr115_bridge_bence
+    PATCH_IF (csr115_bridge_after > 0 OR csr115_bridge_bence > 0) BEGIN
+      PATCH_IF (csr115_bridge_after != 1 OR csr115_bridge_bence != 1) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #115 [BD2000]: unsupported component 256 aftermath.~
+      END
+      SET csr115_retreat_count = 3
+    END ELSE BEGIN
+      SET csr115_retreat_count = 6
+    END
+    SPRINT csr115_find ~^    ActionOverride("khalid",\(SaveLocation("LOCALS","bd_default_loc",\[2425\.2485\])\|SetGlobal("bd_no_retreat","locals",0)\|SetGlobal("bd_retreat","locals",1)\))[^%WNL%]*%csr115_nl%~
+    SET csr115_expect = csr115_retreat_count
+    SPRINT csr115_what ~post-battle Khalid retreat actions~
+    SPRINT csr115_change ~~
+    LAUNCH_PATCH_MACRO csr115_fork
+
+    // Adirran is the garrison spokesman for this route; the party is staged by
+    // its own PlayerN actions. Never move or speak through a dismissed Khalid.
+    SPRINT csr115_find ~^    ActionOverride("khalid",\(MoveToPoint(\[2965\.1460\])\|Face(S)\))[^%WNL%]*%csr115_nl%~
+    SET csr115_expect = 2
+    SPRINT csr115_what ~surrender spokesman positioning~
+    SPRINT csr115_change ~~
+    LAUNCH_PATCH_MACRO csr115_fork
+
+    SPRINT csr115_find ~ActionOverride("khalid",DisplayStringHead(Myself,[0-9]+))~
+    SET csr115_expect = 3
+    SPRINT csr115_what ~defender command barks~
+    // Compile the carried branch in preflight without allocating a TLK entry.
+    SPRINT csr115_change ~DisplayStringHead("bdbfort",0)~
+    PATCH_IF (csr115_publishing = 1) BEGIN
+      SPRINT csr115_change ~DisplayStringHead("bdbfort",@11591)~
+    END
+    LAUNCH_PATCH_MACRO csr115_fork
+  END
+
+  PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~BDKHALID~) BEGIN
+    SPRINT csr115_find ~^  Global("bd_mdd206","global",[01])~
+    SET csr115_expect = 2
+    SPRINT csr115_what ~Jaheira separation/reunion launchers~
+    LAUNCH_PATCH_MACRO csr115_count
+    REPLACE_TEXTUALLY ~^  Global("bd_mdd206","global",\([01]\))~ ~  !Global("csr_kh_fort","GLOBAL",1)
+  !Global("csr_kh_carry","GLOBAL",1)
+  Global("bd_mdd206","global",\1)~
+  END
+
+  PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~BDVOGHIL~) BEGIN
+    // His rescue introduction assumes Jaheira is an unjoined recruiter. Its
+    // peaceful dialogue branch is unavailable when she is already in the party.
+    // Independent Voghiln recruitment and party dialogue remain unchanged.
+    SPRINT csr115_find ~^  Global("bd_jaheira_join","global",0)~
+    SET csr115_expect = 1
+    SPRINT csr115_what ~Jaheira rescue introduction launcher~
+    LAUNCH_PATCH_MACRO csr115_count
+    REPLACE_TEXTUALLY ~^  Global("bd_jaheira_join","global",0)~ ~  !InPartyAllowDead("jaheira")
+  !Global("csr_jh_carry","GLOBAL",1)
+  Global("bd_jaheira_join","global",0)~
+  END
+
+  PATCH_IF ((~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205CA~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205CB~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205CC~)) BEGIN
+    SPRINT csr115_find ~^IF%csr115_nl%  True()%csr115_nl%THEN~
+    SET csr115_expect = 1
+    SPRINT csr115_what ~Khalid stakeout cutscene~
+    LAUNCH_PATCH_MACRO csr115_count
+    REPLACE_TEXTUALLY ~^IF%csr115_nl%~ ~IF
+  !Global("csr_kh_fort","GLOBAL",1)
+~
+    SPRINT csr115_next ~bdc205db~
+    PATCH_IF (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205CA~) BEGIN
+      SPRINT csr115_next ~bdc205da~
+    END
+    SPRINT csr115_header ~IF
+  Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    SetGlobal("bd_205_stakeout","GLOBAL",4)
+    StartCutSceneEx("%csr115_next%",FALSE)
+END
+
+~
+    LAUNCH_PATCH_MACRO csr115_prepend
+  END
+
+  // The smithy visitor is a separate generic soldier, not a second Adirran.
+  PATCH_IF ((~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205AA~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205AB~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205AC~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205AD~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BDC205AE~)) BEGIN
+    SPRINT csr115_find ~"bdbfort"~
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr115_find%~ csr115_expect
+    PATCH_IF (csr115_expect < 3) BEGIN
+      PATCH_FAIL ~chriz-sod-remix #115 [%csr115_resource%]: missing audited Adirran cameo.~
+    END
+    SPRINT csr115_what ~Adirran stakeout actor references~
+    SPRINT csr115_change ~"csr115ad"~
+    LAUNCH_PATCH_MACRO csr115_fork
+  END
+
+  PATCH_IF ((~%csr115_resource%~ STRING_EQUAL_CASE ~BD0103~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BD1000~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BD7100~)) BEGIN
+    SPRINT csr115_header ~%csr115_history%~
+    LAUNCH_PATCH_MACRO csr115_prepend
+  END
+  PATCH_IF ((~%csr115_resource%~ STRING_EQUAL_CASE ~BD2000~) OR
+            (~%csr115_resource%~ STRING_EQUAL_CASE ~BD2100~)) BEGIN
+    SPRINT csr115_header ~%csr115_history%%csr115_route%~
+    LAUNCH_PATCH_MACRO csr115_prepend
+  END
+  COMPILE_BAF_TO_BCS
+END
+
+// All ownership checks precede the first game mutation.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY csr115_scenes BEGIN
+  ~BDC205AA~ => ~CS115SAA~
+  ~BDC205AB~ => ~CS115SAB~
+  ~BDC205AC~ => ~CS115SAC~
+  ~BDC205AD~ => ~CS115SAD~
+  ~BDC205AE~ => ~CS115SAE~
+  ~BDC205CA~ => ~CS115SCA~
+  ~BDC205CB~ => ~CS115SCB~
+  ~BDC205CC~ => ~CS115SCC~
+END
+ACTION_FOR_EACH csr115_new IN ~CSR115AD.CRE~ ~CSR115AD.DLG~
+  ~CS115SAA.BCS~ ~CS115SAB.BCS~ ~CS115SAC.BCS~ ~CS115SAD.BCS~
+  ~CS115SAE.BCS~ ~CS115SCA.BCS~ ~CS115SCB.BCS~ ~CS115SCC.BCS~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr115_new%~ BEGIN
+    FAIL ~chriz-sod-remix #115: private resource %csr115_new% already exists.~
+  END
+END
+
+ACTION_FOR_EACH csr115_res IN
+  ~BD0103~ ~BD1000~ ~BD7100~ ~BD2000~ ~BD2100~ ~BDCUT24~ ~BDKHALID~ ~BDVOGHIL~
+  ~BDC205CA~ ~BDC205CB~ ~BDC205CC~
+  ~BDC205AA~ ~BDC205AB~ ~BDC205AC~ ~BDC205AD~ ~BDC205AE~
+BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr115_res%.BCS~ BEGIN
+    FAIL ~chriz-sod-remix #115: required script %csr115_res%.BCS is missing.~
+  END
+  COPY_EXISTING - ~%csr115_res%.BCS~ ~override~
+    LPF csr115_script_patch STR_VAR csr115_resource = EVAL ~%csr115_res%~ END
+END
+
+COPY_EXISTING - ~BDBFORT.CRE~ ~override~
+  READ_ASCII 0 csr115_sig (8)
+  PATCH_IF ((SOURCE_SIZE < 0x2d4) OR NOT (~%csr115_sig%~ STRING_EQUAL_CASE ~CRE V1.0~)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115: expected a CRE V1.0 Adirran.~
+  END
+  READ_ASCII 0x280 csr115_dv (32) NULL
+  PATCH_IF NOT (~%csr115_dv%~ STRING_EQUAL_CASE ~bdbfort~) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #115: Adirran's script name has changed.~
+  END
+
+INCLUDE ~chriz-sod-remix/lib/csr115_dialog.tpa~
+LAF csr115_dialog_preflight END
+
+INCLUDE ~chriz-sod-remix/lib/csr115_flavor.tpa~
+ACTION_FOR_EACH csr115_res IN ~BDBAN037~ ~BDBAN103~ ~BDKHALID~ BEGIN
+  COPY_EXISTING - ~%csr115_res%.BCS~ ~override~
+    DECOMPILE_BCS_TO_BAF
+    LPF csr115_flavor_patch INT_VAR csr115_check_only = 1
+      STR_VAR csr115_resource = EVAL ~%csr115_res%~ END
+END
+
+// Publish only after scripts, scene actor and dialogue graph all passed.
+LOAD_TRA ~chriz-sod-remix/languages/english/csr115script.tra~
+ACTION_FOR_EACH csr115_res IN
+  ~BD0103~ ~BD1000~ ~BD7100~ ~BD2000~ ~BD2100~ ~BDCUT24~ ~BDKHALID~ ~BDVOGHIL~
+  ~BDC205CA~ ~BDC205CB~ ~BDC205CC~
+  ~BDC205AA~ ~BDC205AB~ ~BDC205AC~ ~BDC205AD~ ~BDC205AE~
+BEGIN
+  ACTION_IF VARIABLE_IS_SET $csr115_scenes(~%csr115_res%~) BEGIN
+    OUTER_SPRINT csr115_alias $csr115_scenes(~%csr115_res%~)
+    COPY_EXISTING ~%csr115_res%.BCS~ ~override/%csr115_alias%.BCS~
+      LPF csr115_script_patch INT_VAR csr115_publishing = 1
+        STR_VAR csr115_resource = EVAL ~%csr115_res%~ END
+    // Stock callers use StartCutSceneEx(...,FALSE), which ignores triggers.
+    // An unconditional entry dispatcher guarantees evaluated branch selection
+    // even for another mod's caller or an already queued original scene entry.
+    <<<<<<<< csr115_dispatch.baf
+IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    StartCutSceneEx("%csr115_alias%",TRUE)
+END
+>>>>>>>>
+    COPY ~csr115_dispatch.baf~ ~override/%csr115_res%.BCS~
+      EVALUATE_BUFFER
+      COMPILE_BAF_TO_BCS
+  END ELSE BEGIN
+    COPY_EXISTING ~%csr115_res%.BCS~ ~override~
+      LPF csr115_script_patch INT_VAR csr115_publishing = 1
+        STR_VAR csr115_resource = EVAL ~%csr115_res%~ END
+    BUT_ONLY
+  END
+END
+
+COPY_EXISTING ~BDBFORT.CRE~ ~override/CSR115AD.CRE~
+  // Preserve the installed soldier's equipment/stats; only scene identity changes.
+  WRITE_ASCII 0x280 ~csr115ad~ #32
+  WRITE_ASCII 0x2cc ~CSR115AD~ #8
+  SAY NAME1 @11590
+  SAY NAME2 @11590
+
+LAF csr115_dialog_apply END
+
+LOAD_TRA ~chriz-sod-remix/languages/english/csr115fl.tra~
+ACTION_FOR_EACH csr115_res IN ~BDBAN037~ ~BDBAN103~ ~BDKHALID~ BEGIN
+  COPY_EXISTING ~%csr115_res%.BCS~ ~override~
+    DECOMPILE_BCS_TO_BAF
+    LPF csr115_flavor_patch STR_VAR csr115_resource = EVAL ~%csr115_res%~ END
+    COMPILE_BAF_TO_BCS
+  BUT_ONLY
+END
+
+EXTEND_TOP ~BD2000.BCS~ ~chriz-sod-remix/baf/csr115jn.baf~
+  USING ~chriz-sod-remix/languages/english/csr115.tra~
+EXTEND_TOP ~BD2100.BCS~ ~chriz-sod-remix/baf/csr115jn.baf~
+  USING ~chriz-sod-remix/languages/english/csr115.tra~

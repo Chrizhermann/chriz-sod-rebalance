@@ -150,3 +150,17 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
 7. Voghiln + Neera recruit at Bridgefort — untouched, or simplified like the others?
 8. Rest/zero-ambush designations for the arc (wave-1 already dropped felt rates to
    ~8-15%; census: no banned no-save creatures anywhere in this arc).
+9. **Carried companions' quest continuity (user concern, 2026-09-10):** Khalid can
+   already be in the party under component 110, but the fort still treats him as
+   its resident commander in staging and dialogue. Component110 suppresses recruiter
+   placement; it does not adapt his quest role. Cover the briefing, quest choices,
+   battle commands, Jaheira reunion/search references and post-battle handling for
+   carried and non-carried Khalid. Also audit Dorn's captivity/release and Neera's
+   fort quest entry when they arrive as party members.
+   **Khalid direction approved 2026-09-10:** a small conditional rewrite, with Adirran
+   providing briefing/command choices and Khalid remaining with the party. Unreleased
+   component 115 implements this treatment; its arrival protection is under correction.
+   Combined lacked 115 and reproduced an immediate Khalid reset on BD2000 entry.
+   Normal fort entry is not accepted; the earlier finale test bypassed this route.
+   Dorn/Neera remain open. This is distinct from optional recruit simplification
+   and the barrel-finale redesign. [Contract and evidence](../../plans/2026-09-10-khalid-continuity.md).

@@ -54,6 +54,7 @@ received. The reward still occurs once, after reporting the jailbreak to Liia.
 |---|---|---|
 | 100 | Rest-ambush 5× | Maps every active SoD rest-header day/night % through a felt-rate÷5 table (30 areas, felt 22–80% → 8–15% per rest). Composes with other mods (reads current values). BDNOREST untouched; pack size untouched (per-chapter decision). |
 | 110 | Keep all companions | Neutralizes the 28 vanilla LeaveParty/DestroySelf strip blocks in BD0103.bcs; adds in-party skip-guards to 9 recruiter-area scripts so kept companions aren't yanked/converted mid-party. Mod-NPC strips untouched. |
+| 115 | Khalid's Bridgefort continuity (unreleased) | Adirran handles local briefing and command choices when Khalid arrives with the party. Preserves the personal quest and normal non-carried route; adapts conflicting dialogue and scenes. Requires 110. Arrival protection is under correction; native normal fort entry is not accepted yet. |
 | 120 | No mid-campaign hooded man | Removes all five hooded-man appearances (palace bedside, bdcut11 vision, Boareskyr vision cameo, scrying option, Underground River cameo) + the two dangling dialogue replies. Component 290 removes the endgame chain. |
 | 130 | Skip chapter dreams | Pre-sets `bd_ddd=4` from BDBALDUR.BCS — the four PLAYER1D rest-dreams never fire. Dream content documented in `docs/research/09-sod-dreams.md`. |
 | 290 | Victory celebration ending | Keeps the real return and playable celebration; Dazzo ends SoD after the public victory dialogue. Removes the optional codas and murder/arrest/epilogue chain. EET enters normal SoA through its existing import rules; standalone ends at native credits. |
@@ -62,6 +63,15 @@ received. The reward still occurs once, after reporting the jailbreak to Liia.
 
 This table highlights the global and ending components; `COMPONENTS.md` in the
 release contains the complete inventory.
+
+Unreleased component 115 is a follow-up to v0.6.9. Append after 110 before entering
+BD2000; installing before SoD starts also records companion history for road-north
+dialogue. It does not repair scenes that already played. The September 10 EET and
+standalone copied-resource checks and designated-dev installation are historical
+evidence, not native fort-entry acceptance. The Combined copy lacked 115 and
+reproduced an immediate Khalid reset on BD2000 entry; the earlier bridge-finale
+test bypassed that continuity route. The existing 115 is not yet established as
+the fix for this reproduction. See the [continuity record](../docs/plans/2026-09-10-khalid-continuity.md).
 
 ## Install
 

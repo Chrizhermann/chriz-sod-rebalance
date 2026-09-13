@@ -19,6 +19,13 @@ Current release: **v0.6.9**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
 
+**Unreleased follow-up:** component 115 ports the approved Khalid/Jaheira Bridgefort
+continuity treatment onto the v0.6.9 baseline. It is separate from the released
+41-component inventory. Normal fort entry remains unaccepted: Combined lacked 115
+and reproduced an immediate Khalid reset on BD2000 entry, while the earlier finale
+test bypassed fort continuity. Arrival protection is under correction; do not treat
+the earlier 115 installer checks as proof that this reproduction is fixed.
+
 **v0.6.9 additions and corrections:**
 135 keeps URE2 without dead magic and misleading descriptions; 235 repairs older
 Ymori cuts while preserving native quest staging; 265 puts Mizhena's amulet in
@@ -52,6 +59,7 @@ recommended universal selection. The live install is not the implementation targ
 |---|---------|--------------|------|
 | 100 | Rest-ambush felt-rate 5× reduction | Remaps each area's `.are` day/night rest-% down ~5× (via `restmap.tpa`) across the 30 areas with an active rest table; the engine rolls per in-game hour, so listed 6–18% = felt 39–80%/8h → knocked to felt ~8–15%. Reads current value (composes with other mods); leaves BDNOREST cancellers + empty tables. Changes **frequency only**, not pack size. | pred `bd0120.are` |
 | 110 | Keep all companions at SoD start | Strips the 28 BD0103 `LeaveParty()+DestroySelf` dismiss blocks (29 names) so the whole BG1 party carries into SoD; +9 recruiter-site EXTEND_TOP skip-blocks (BD0101/0108/0110/0111/1000/2000/2100/7000/7100) suppress duplicate recruit-spawns / Dorn gear-grab for kept members. | pred `bd0103.bcs` |
+| 115 | Khalid's Bridgefort continuity (unreleased) | Adirran supplies carried-Khalid briefing and command choices; original commander route remains otherwise. Conditional dialogue/journals/banter and scene guards cover Khalid/Jaheira. Earlier EET/standalone installer checks passed; native normal entry remains unaccepted and arrival protection is under correction. | REQUIRE 110; before first BD2000 entry |
 | 120 | Remove the hooded man (mid-campaign) | Excises Irenicus from his 5 mid-campaign scenes (BD0103 bedside, BDCUT10/11 interrogation vision, BDCUT28 Bhaal-vision, BD5100 cameo, BDSCRY/BDIMOEN dangling options). Sets nothing the endgame reads; component 290 removes the endgame chain. | pred `bd0103.bcs` |
 | 130 | Skip the four chapter rest-dreams | EXTEND_TOP on BDBALDUR.bcs pre-sets `bd_ddd=4` (natural post-all-dreams value) so PLAYER1D's dream launchers never fire; the four nights become ordinary rests. PLAYER1D.BCS left untouched (EET-compat). | pred `bdbaldur.bcs` |
 | 135 | Assassin ambush without dead magic (default selected) | Retains the scripted encounter while removing repeated dead-magic effects and misleading descriptions/companion remarks. The user's spellcasting/persistence sample passed; this was not a full travel/combat/rest test. | pred `bd0063.are` and guarded encounter resources |
@@ -238,6 +246,7 @@ ending and EET carrier repair → **290/291**.
 | Feature | Waiting on / unblocked by |
 |---------|---------------------------|
 | Place non-party companions as SoD pickups (item 1 step 2) | A later companion pass (optional placement + a little dialogue) |
+| Returning companions' SoD quest continuity | Khalid/Jaheira treatment is approved and ported as unreleased 115; immediate entry protection is under correction and normal fort entry remains unaccepted. Dorn's captivity and Neera's quest entry need their own audit/design; road-north item 9. |
 | Scripted travel-ambush rework / URE degut (item 8, wave1-04) | Its own pass; gut BD0060/0063/0064/0066 arenas (story vignettes URE6-10 stay) |
 | Per-area zero-ambush designations (wave1-01) | Each chapter's trash/zero-list decision |
 | Dream-content rewrite (wave1-03) | Maybe-someday; skip already shipped (130), content preserved in research/09 |

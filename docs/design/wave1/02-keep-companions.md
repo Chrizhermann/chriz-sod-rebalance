@@ -5,6 +5,14 @@ PASSED (user, 2026-07-05 — party kept through Korlasz dungeon + palace).** Dup
 at the recruiter sites still to be play-verified (see testing notes). All script facts below
 verified against the live install (file:line evidence in the session's verification transcripts).
 
+**Continuity gap identified 2026-09-10:** component 110 protects party retention and
+recruiter placement, but does not generally adapt returning companions' SoD quest roles.
+The user approved a small conditional Khalid/Bridgefort rewrite as component 115;
+see [the continuity record](../../plans/2026-09-10-khalid-continuity.md).
+Normal fort entry remains unaccepted. Combined lacked 115 and reproduced an immediate
+Khalid reset on BD2000 entry; earlier bridge-finale testing bypassed fort continuity.
+The 115 arrival protection is under correction, not an established fix for that reproduction.
+
 ## Decided (user, 2026-07-03)
 - **Step 1 (this component):** nobody is force-stripped after Sarevok — the whole BG1 party,
   including the 17 companions with zero SoD content, walks into SoD and stays. Silent
@@ -51,10 +59,56 @@ confiscated at BD2000). Fix: `EXTEND_TOP` each script with a skip-block —
 | BD7000 | Rasaad |
 | BD7100 | Jaheira |
 
-**3. Nothing else needed.** BD0120's giant companion-spawn pool is new-game-only
+**3. Other transfer mechanics.** BD0120's giant companion-spawn pool is new-game-only
 (`SOD_fromimport=0`, dead code on EET imports). The camp system (`BDPARTY`) only relocates
 existing globals. SoD's end strip (`BDCUT61`) removes Player2–6 generically — no seam work
 (and our ending rework replaces that sequence later anyway).
+
+## Returning companions' quest continuity (2026-09-10)
+
+The user raised Khalid's Bridgefort role as a missing consequence of keeping BG1 companions.
+This is separate from optional step-2 placement of companions who were not in the party.
+The initial audit below describes component 110's gap. The approved modest treatment
+is implemented separately as unreleased 115; its earlier installer evidence does not
+establish native normal-entry acceptance.
+
+- **Implemented:** `baf/skip2000.baf:1-8` sets `bd_khal_spawn=1` for an in-party Khalid.
+  This skips recruiter placement; it does not complete or reroute his Bridgefort quest.
+- **Unchanged by 110:** `research/data/sod_baf/BD2000.baf:278-307` moves/faces Khalid in
+  surrender; `:471`, `:577`, and `:589` give battle-command barks; resolution blocks at
+  `:902-904` and `:921-923` write default-location/retreat locals. Component197 preserves
+  that staging (`lib/comp197.tpa:156-165`). Party-member targets need separate guards.
+  The first wardstone entry also moves Khalid separately (`BDCUT24.baf:22`); Jegg's
+  stakeout scenes create an unguarded Khalid (`BDC205CA.baf:6`, `BDC205CB.baf:6`).
+  Recruiter suppression is not campaign-wide duplicate protection.
+- **Dialogue/progression:** import wires Khalid to `KHALIJ` (`BDINTRO.baf:294-301`),
+  while recruiter placement assigns `BDKHALID`. Read-only inspection on September 10
+  found command/turn-in entries in `BDKHALID`48-51/70 without matching `KHALIJ` entries.
+  `BDBFORT`2/3 externally enter `BDKHALID`27/28, so initial entry is not simply absent;
+  resolving that route for carried Khalid and resuming it still needs native acceptance.
+- **Static contradiction:** `BDKHALID.baf:9-35` starts the Jaheira reunion at plot 251-294
+  when she is visible without checking prior separation. Dev `KHALIJ`190/192 describe
+  days without contact, even if both companions travelled together throughout SoD.
+- **Approved treatment:** existing defender Adirran supplies the carried route's local
+  briefing and commands; Khalid contributes from the party without forced departure.
+  The original fort route stays when he was not carried over.
+- **Implemented in 115:** conditional quest dialogue, journals, banter/biography and
+  scene guards. Voghiln's Jaheira-rescue introduction is guarded for carried Jaheira:
+  its original peaceful branch excludes in-party Jaheira and can fall into hostility.
+  His independent recruitment remains. The linked record preserves September 10
+  installer/dev evidence; immediate arrival protection is being corrected now.
+- **Remaining audit:** Jaheira's Khalid-related dialogue, Dorn's captivity/release,
+  Neera's fort introduction/personal quest, and other returning-companion assumptions.
+  `baf/skip0110.baf:1-12` already suppresses Safana's Coran breakup for carried Safana;
+  this does not establish coverage of the other companions.
+- **Acceptance boundary:** normal fort entry, carried/non-carried routes, Jaheira
+  presence, dismissal/death/rejoin, quest choices, rewards and onward progression
+  remain separate from the accepted prologue and finale tests. The current reset
+  reproduction is evidence from a Combined copy without 115, not proof that 115 works
+  or fails. Correct and verify arrival protection before requesting another user run;
+  do not repeat the failed baseline merely to reconfirm it.
+
+Track the chapter treatment in [road north](../chapters/03-roadnorth.md), item 9.
 
 ## Known step-1 limitations (by design, revisit in step 2)
 - Kept **BG1-only** companions dismissed mid-SoD stand where dismissed and get left behind

@@ -28,6 +28,11 @@ here is designed or signed off yet. The list is explicitly incomplete and grows 
 
 ### Companions
 1. Keep your party after defeating Sarevok — companions should not force-leave at SoD start.
+   **2026-09-10 follow-up approved:** fit Khalid's Bridgefort quest to carried companions
+   with a small conditional rewrite. An existing defender supplies the local briefing,
+   Khalid remains with the party and can help lead the defence, and the ordinary fort
+   route stays for non-carried Khalid. Clean implementation and consistent dialogue/quest
+   behavior take priority over a story overhaul. See [the continuity plan](plans/2026-09-10-khalid-continuity.md).
 2. Keep Imoen; drop the Duke-Jannath/mage-training + poisoning plot completely. Imoen is
    re-recruitable normally, like every other SoD companion. (Trainer verified: Grand Duke
    Liia Jannath, `bdliia` — not "Janneth".)

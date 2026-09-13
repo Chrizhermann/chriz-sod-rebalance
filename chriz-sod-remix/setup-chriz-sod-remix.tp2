@@ -15,6 +15,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 // 100-139: Wave 1 — global system levers
 //   100 rest-ambush felt-rate 5x reduction
 //   110 keep all companions at SoD start
+//   115 Khalid's Bridgefort quest fits a carried BG1 party (requires 110)
 //   120 hooded man removed from the mid-campaign
 //   130 skip the four chapter rest-dreams
 //   135 keep the assassin ambush without dead magic (default)
@@ -184,6 +185,14 @@ EXTEND_TOP ~bd2000.bcs~ ~chriz-sod-remix/baf/skip2000.baf~   // Khalid, Dorn (+g
 EXTEND_TOP ~bd2100.bcs~ ~chriz-sod-remix/baf/skip2100.baf~   // Neera
 EXTEND_TOP ~bd7000.bcs~ ~chriz-sod-remix/baf/skip7000.baf~   // Rasaad
 EXTEND_TOP ~bd7100.bcs~ ~chriz-sod-remix/baf/skip7100.baf~   // Jaheira
+
+// ============================================================
+// 115 — Khalid continuity for a carried BG1 party
+// ============================================================
+BEGIN @115 DESIGNATED 115 GROUP @1000 LABEL ~csr_khalid_continuity~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ 110 @9015
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.bcs~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp115.tpa~
 
 // ============================================================
 // 120 — Remove the hooded man from the mid-campaign

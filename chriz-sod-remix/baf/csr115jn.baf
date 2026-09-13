@@ -1,0 +1,12 @@
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  GlobalGT("bd_plot","GLOBAL",249)
+  Global("csr_kh_journal_done","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_journal_done","GLOBAL",1)
+    EraseJournalEntry(@90)
+    EraseJournalEntry(@91)
+    EraseJournalEntry(@92)
+    Continue()
+END
