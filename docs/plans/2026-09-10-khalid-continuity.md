@@ -2,8 +2,10 @@
 
 Status: direction approved on 2026-09-10; unreleased component 115 is being integrated
 onto v0.6.9. The earlier designated-dev installation is historical evidence.
-Native normal fort-entry and quest-route acceptance remain pending. The revised
-arrival protection and Combined tail installer have passed offline verification.
+Native BD2000 entry, normal wardstone transport and Adirran's briefing passed on
+2026-09-14 with Khalid remaining controllable. Save/reload and later quest branches
+remain unverified in the native game. The revised arrival protection and Combined
+tail installer have also passed offline verification.
 The user accepted a modest conditional rewrite, prioritizing clean implementation and
 consistency over a story overhaul. This addresses the Khalid/Jaheira consequences of
 component 110 without redesigning the siege or its barrel finale; completeness is
@@ -11,12 +13,12 @@ not established by the previous installer checks.
 
 ## September 14 integration and reproduced entry failure
 
-The Combined playtest copy lacked component 115. Entering BD2000 reproduced an
-immediate Khalid reset, so normal fort continuity is not accepted. The earlier
+The Combined playtest copy initially lacked component 115. Entering BD2000 reproduced
+an immediate Khalid reset. The earlier
 bridge-finale test used staged progression that bypassed this route and cannot
-serve as its acceptance evidence. The existing 115 has not yet been demonstrated
-to solve this reproduction. The current work corrects its arrival protection
-before another user test; do not repeat the failed baseline merely to reconfirm it.
+serve as its acceptance evidence. The original unfinished 115 also had an entry
+protection gap and an installer conflict with 256. Both were corrected before the
+successful fresh-entry test described below.
 
 Preserve the September 10 source/fixture/dev-install evidence below as historical.
 It does not describe the Combined copy or establish the current correction's
@@ -49,12 +51,18 @@ September 14 verification:
   in order; all 37 outputs and the resulting TLK match the rehearsal byte for byte.
   Input resources outside the change set remain unchanged. Backups and the
   installation receipt are under the test copy's `khalid-continuity-20260914/`.
-- Reload **CSR TEST 14 - Fully rested** for native acceptance. Direct save parsing
+- **CSR TEST 14 - Fully rested** provided the clean checkpoint. Direct save parsing
   confirms no cached BD2000/BD2100, a living party-controlled Khalid, and unset fort
   progression/continuity markers. GAM/SAV hashes remain unchanged after installation.
-  Enter BD2000 and check control before using the wardstone; then exercise the
-  normal circle and briefing. Do not count a manual repair of the neutralized
-  session as a product pass. Fresh entry and quest-route acceptance remain pending.
+  Its GAM/SAV hashes remain unchanged after installation.
+- After the fresh retest the user confirmed that BD2000 arrival, the normal wardstone
+  circle and Adirran's completed briefing all worked with Khalid still controllable.
+  A read-only remote snapshot independently records all six companions in BD2100,
+  `csr_kh_fort=1`, `csr_kh_carry=1`, `csr115_briefed=1` and
+  `bd_bridgefort_plot=5`. Khalid is with the party at `[2016,892]`; his retreat flag
+  remains 0. No manual allegiance/script repair was performed in this retest.
+  This accepts the reproduced entry/control bug and initial briefing; it does not
+  claim save/reload, later command branches or the whole fort quest were played.
 
 ## Decided
 
