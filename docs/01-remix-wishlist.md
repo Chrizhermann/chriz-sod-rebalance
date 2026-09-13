@@ -33,6 +33,10 @@ here is designed or signed off yet. The list is explicitly incomplete and grows 
    Khalid remains with the party and can help lead the defence, and the ordinary fort
    route stays for non-carried Khalid. Clean implementation and consistent dialogue/quest
    behavior take priority over a story overhaul. See [the continuity plan](plans/2026-09-10-khalid-continuity.md).
+   **2026-09-14 shipment approved:** component 115 is ready for v0.6.10. Corrected
+   BD2000 entry, normal wardstone transport and Adirran briefing passed with Khalid
+   controllable, and save 954 preserves his party allegiance 2. Native reload and
+   later quest branches remain unverified; Wynan stays a non-blocking sidenote.
 2. Keep Imoen; drop the Duke-Jannath/mage-training + poisoning plot completely. Imoen is
    re-recruitable normally, like every other SoD companion. (Trainer verified: Grand Duke
    Liia Jannath, `bdliia` — not "Janneth".)

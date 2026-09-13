@@ -158,9 +158,10 @@ mechanism; the confirmed cut/keep intent carried over 1:1.)
    carried and non-carried Khalid. Also audit Dorn's captivity/release and Neera's
    fort quest entry when they arrive as party members.
    **Khalid direction approved 2026-09-10:** a small conditional rewrite, with Adirran
-   providing briefing/command choices and Khalid remaining with the party. Unreleased
-   component 115 implements this treatment; its arrival protection is under correction.
-   Combined lacked 115 and reproduced an immediate Khalid reset on BD2000 entry.
-   Normal fort entry is not accepted; the earlier finale test bypassed this route.
+   providing briefing/command choices and Khalid remaining with the party. Component 115
+   is ready for v0.6.10: corrected BD2000 entry, normal wardstone transport and Adirran
+   briefing passed with Khalid controllable; save 954 preserves party allegiance 2.
+   Native reload and later quest branches remain unverified. The earlier finale test
+   bypassed this route. Wynan's separate observation is a non-blocking sidenote.
    Dorn/Neera remain open. This is distinct from optional recruit simplification
    and the barrel-finale redesign. [Contract and evidence](../../plans/2026-09-10-khalid-continuity.md).

@@ -1,15 +1,22 @@
 # Changelog
 
-## Unreleased
+## v0.6.10 - 2026-09-14
 
 - Add component 115 for Khalid's Bridgefort quest when carried from BG1. The existing
   defender Adirran supplies the briefing and command choices; Khalid remains a companion.
   Adapt conflicting separation dialogue and protect against NPC staging/scene copies,
   preserving the original commander route for non-carried Khalid. Requires 110.
   Guard Voghiln's Jaheira-rescue introduction for carried Jaheira while preserving his
-  independent recruitment. Normal fort-entry acceptance remains pending: the Combined
-  copy lacked 115 and reproduced an immediate Khalid reset on BD2000 entry. Arrival
-  protection is under correction; the earlier finale test bypassed fort continuity.
+  independent recruitment.
+- Protect both native Khalid recruiter blocks directly and check all party slots,
+  preventing arriving companions from being moved, neutralized or reassigned NPC AI.
+  Wait for occupied party slots before selecting the ordinary first-entry route.
+- Support both installation orders with component 256, preserving the carried-Khalid
+  aftermath, bridge victory checks and prompt Bence arrival.
+- Native playtest passed BD2000 entry, wardstone transport and Adirran's briefing
+  with Khalid still controllable. The subsequent save preserves his party allegiance
+  and dialogue. Append 115 after 110 before the first BD2000 visit; use an earlier
+  save if the original NPC reset has already happened.
 
 ## v0.6.9 - 2026-09-13
 

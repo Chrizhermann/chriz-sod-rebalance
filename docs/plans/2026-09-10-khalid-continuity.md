@@ -1,12 +1,12 @@
 # Khalid carryover and Bridgefort continuity
 
-Status: direction approved on 2026-09-10; unreleased component 115 is being integrated
-onto v0.6.9. The earlier designated-dev installation is historical evidence.
+Status: component 115 is ready for the **v0.6.10 release**, authorized by the user
+on 2026-09-14. The earlier designated-dev installation is historical evidence.
 Native BD2000 entry, normal wardstone transport and Adirran's briefing passed on
 2026-09-14 with Khalid remaining controllable. Saved control state is also verified;
 reloaded behavior and later quest branches remain unverified in the native game.
-The revised arrival protection and Combined
-tail installer have also passed offline verification.
+The revised arrival protection and Combined tail installer have also passed
+offline verification. Wynan's separate observation below does not block shipment.
 The user accepted a modest conditional rewrite, prioritizing clean implementation and
 consistency over a story overhaul. This addresses the Khalid/Jaheira consequences of
 component 110 without redesigning the siege or its barrel finale; completeness is
@@ -44,9 +44,9 @@ September 14 verification:
   test now binds by native speech and proves her entire party dialogue unchanged.
 - Rehearsing public 115 against the actual Combined log preserves its 425 prior
   entries, emits 37 resources, preserves 330,069 existing strings and adds 55.
-- Read-only remote inspection confirms the failed session remains paused, with
+- Read-only remote inspection of the failed session showed it paused, with
   Khalid at `[2900,1310]` and route/carry markers unset. Direct party-slot identity
-  works in that session. This does not prove fresh-entry timing or acceptance.
+  worked in that session. That snapshot alone did not prove fresh-entry timing or acceptance.
 - After the user closed the game and authorized installation, public 115 was
   appended to the real Combined copy as entry 426. All 425 previous entries remain
   in order; all 37 outputs and the resulting TLK match the rehearsal byte for byte.
@@ -55,7 +55,6 @@ September 14 verification:
 - **CSR TEST 14 - Fully rested** provided the clean checkpoint. Direct save parsing
   confirms no cached BD2000/BD2100, a living party-controlled Khalid, and unset fort
   progression/continuity markers. GAM/SAV hashes remain unchanged after installation.
-  Its GAM/SAV hashes remain unchanged after installation.
 - After the fresh retest the user confirmed that BD2000 arrival, the normal wardstone
   circle and Adirran's completed briefing all worked with Khalid still controllable.
   A read-only remote snapshot independently records all six companions in BD2100,
@@ -64,33 +63,27 @@ September 14 verification:
   remains 0. No manual allegiance/script repair was performed in this retest.
   This accepts the reproduced entry/control bug and initial briefing; it does not
   claim save/reload, later command branches or the whole fort quest were played.
+- Read-only parsing of **000000954-CSR TEST — Khalid fort fixed** confirms Khalid
+  is saved with party allegiance **2** and `KHALIJ` dialogue, with all six companions
+  in BD2100 and the carried route/briefing recorded. This proves the control state
+  was saved; it is not an observed native reload.
 
-## Spellstone follow-up observation
+## Non-blocking sidenote: Wynan
 
-The user subsequently reported that the stand-in otherwise worked, but Wynan
-Hess did not initiate the post-impact conversation. They had used Ctrl-J and
-skipped parts of the sequence; that is a possible explanation, not a demonstrated
-cause. No quest flags or NPC actions were repaired in response to this report.
+The user reported that Wynan Hess did not initiate the post-impact conversation
+after some Ctrl-J/sequence skipping. The cause is unconfirmed; the user explicitly
+keeps this as a sidenote, with no new feature work or release block. No quest
+flags or NPC actions were repaired, and the spellstone quest is not a native pass.
 
-Read-only inspection of **000000954-CSR TEST — Khalid fort fixed** confirms Khalid
-is saved as party allegiance 2 with `KHALIJ` dialogue. All six companions are in
-BD2100. The carried route and briefing remain recorded; `BD2100GL=2`,
-`bd_wynan_plot=2`, `bd_jegg_plot=1`, `bd_bridgefort_plot=5`, while `BD_SDD200` is
-unset. The impact therefore happened, but the subsequent quest introduction has
-not been recorded. This is saved-state evidence, not an observed reload.
+Save 954 has `BD2100GL=2`, `bd_wynan_plot=2`, `bd_jegg_plot=1`,
+`bd_bridgefort_plot=5` and unset `BD_SDD200`: impact recorded, introduction not
+recorded. The automatic starter is `BDBF1.BCS`, gated by no prior defender talk,
+impact stage 2, sight of a party member, and Wynan dead or within range 15.
 
-The installed initial automatic trigger belongs to defender `BDBF1.BCS`, not
-`BDWYNAN.BCS`: it requires no previous conversation with that defender, impact
-stage 2, sight of a party member, and Wynan dead or within range 15. His dialogue
-then hands through other defenders/Wynan/Khalid. The area impact block itself
-only moves Wynan and the defenders into position; it does not start his dialogue.
-
-Component 115 does not change either NPC script. Comparing installed `BDWYNAN.DLG`
-with its pre-115 backup confirms all 32 state-entry triggers and original speeches
-are unchanged. Only the referral reply and defender-report journal vary by route;
-the spellstone journal, impact spell, scene flag and remaining actions are preserved.
-No regression attributable to 115 was found. Keep the missing introduction as an
-unconfirmed separate observation; do not count the spellstone quest as accepted.
+Component 115 changes neither `BDBF1.BCS` nor `BDWYNAN.BCS`; all 32 `BDWYNAN.DLG`
+state-entry triggers and speeches match the backup. Only the route-dependent
+referral/journal differ; impact and quest actions are preserved. The audit found
+no regression attributable to 115.
 
 ## Decided
 
@@ -155,12 +148,14 @@ Install before first entering BD2000, ideally before SoD starts so history marke
 also cover the road north. This is not a migration for a quest whose earlier contradictory
 scenes have already played.
 
-Required evidence: real WeiDU compilation against effective-resource fixtures; preserved
+Verification covers real WeiDU compilation against effective-resource fixtures; preserved
 ordinary dialogue/progression branches and gift rewards; clean failure on missing or
 changed resources; carried entry/menus; scene actors and party safety; attack, waiting for
 the Fist, surrender and betrayal flags. Dev installation is separate from native playtest
-acceptance. Runtime cases include Khalid alive/dead/dismissed, Jaheira present/absent,
-save/reload, and completion through the bridge and onward campaign progression.
+acceptance. The entry/control and briefing case is accepted; native reload,
+alive/dead/dismissed and Jaheira-present/absent variants, later command branches
+and full quest completion remain unverified. They are not new prerequisites for
+the shipment the user authorized on September 14.
 
 Automated evidence on 2026-09-10:
 
