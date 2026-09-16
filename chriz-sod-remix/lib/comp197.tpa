@@ -153,18 +153,14 @@ COPY_EXISTING ~bdskie.bcs~ ~override~
 BUT_ONLY
 
 // ------------------------------------------------------------
-// bd2000 (Boareskyr) — the two battle-resolution blocks keep
-// Bence, the journal and the Khalid staging; only Skie's spawn
-// goes. bd_plot=293 still set here; Bence wrap via csr197bnc.
+// bd2000 (Boareskyr) — keep each installed victory route, including
+// #115's Khalid forks and #256's consolidated aftermath. Only Skie's
+// spawn goes; Bence, journal, guards and other actions stay unchanged.
 // ------------------------------------------------------------
+INCLUDE ~chriz-sod-remix/lib/comp197_bridge.tpa~
 COPY_EXISTING ~bd2000.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    // No %csr_nl% anchor (decompiler comment on the line, see above).
-    SET csr_expect = 2
-    SPRINT ~csr_what~ ~bd2000 Skie battle-resolution spawns~
-    SPRINT ~csr_pat~ ~CreateCreature("bdskie",\[2485\.2655\],NW)~
-    SPRINT ~csr_rep~ ~~
-    LAUNCH_PATCH_MACRO ~csr197_replace~
+    LPF csr197_bridge_spawns END
   END
 BUT_ONLY
 

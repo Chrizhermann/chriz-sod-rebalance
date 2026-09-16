@@ -9,6 +9,9 @@ IF
   Global("bd_plot","global",293)
   Global("csr_bence_ot","locals",0)
   AreaCheck("bd2000")
+  // #256 owns this wrap, including retries and combat/dialogue safety. This
+  // also holds when #197 is appended after a previously installed bridge.
+  !Global("CSR256_STAGE","BD2000",3)
   Range([PC],25)
 THEN
   RESPONSE #100
