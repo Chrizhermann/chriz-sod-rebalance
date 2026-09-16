@@ -4,9 +4,18 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.10**. The component overview below describes this version.
+Current release: **v0.6.11**. The component overview below describes this version.
 
 ## Components
+
+v0.6.11 lets **197** remove Skie's obsolete bridge appearances after **115** or
+**256** has changed the victory routes. It recognizes the original two victories,
+115's four branches, 256's consolidated victory and the 115/256 pair, preserving
+their guards and all actions except Skie creation. If 197 is appended late,
+256's guarded Bence wrap retains control. Unknown layouts still stop safely.
+For an affected collection build, follow the
+[recovery handoff](../docs/recovery/2026-09-16-cebg-alpha16-skie.md); do not blindly
+rerun the selection or edit its install history.
 
 **115** fixes carried Khalid's Bridgefort entry. He remains controllable while
 Adirran handles the local briefing and command choices. It requires **110** and
@@ -85,7 +94,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.10 exposes **42 declarations in seven install groups**, including
+v0.6.11 exposes **42 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
@@ -126,8 +135,10 @@ amulet reward and Guardian removal also have recorded checks. These do not mean
 every component or spell has been tested in a complete campaign. The final 256/257
 split and finite Mislead correction have no new native acceptance; Shadow Aspect
 testing is deferred. The reported unequipped appearance after palace rest remains
-unresolved. The [release report](../docs/releases/v0.6.10.md) records the passing
-offline checks and Khalid entry acceptance. Earlier native observations
+unresolved. The [v0.6.10 report](../docs/releases/v0.6.10.md) records the earlier
+offline checks and Khalid entry acceptance. The
+[v0.6.11 report](../docs/releases/v0.6.11.md) covers the new installer/script
+compatibility checks; no new native playtest is claimed. Earlier native observations
 remain in the [test record](../docs/playtest/2026-09-09-fast-sod-test-plan.md).
 
 ## Optional full skip (component 910)

@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.10~
+VERSION ~v0.6.11~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~

@@ -1,7 +1,13 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.10**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.11**.
+
+v0.6.11 fixes Skie's component **197** installing after Khalid continuity **115**
+or the bridge overhaul **256**. It removes her obsolete bridge spawns while
+preserving the installed victory routes and Bence's guarded wrap. See the
+[release report](docs/releases/v0.6.11.md) and
+[collection recovery handoff](docs/recovery/2026-09-16-cebg-alpha16-skie.md).
 
 **115 fixes carried Khalid at Bridgefort:** he stays a controllable companion while
 Adirran supplies the fort briefing and command choices. It preserves the ordinary
@@ -75,7 +81,8 @@ The final 256/257 split and finite Mislead correction have not received new nati
 acceptance; Shadow Aspect testing is deferred. The companion appearance issue
 after palace rest remains unresolved. Khalid's corrected arrival, wardstone transfer
 and Adirran briefing passed native testing, with normal control preserved in the save.
-The [release report](docs/releases/v0.6.10.md) records the verification and installation
-boundaries. Offline checks do not establish a complete campaign playthrough.
+The [v0.6.10 report](docs/releases/v0.6.10.md) records that Khalid acceptance.
+The current compatibility fix has installer/script verification and no new native
+playtest. Offline checks do not establish a complete campaign playthrough.
 Research and approved designs remain in `docs/`; new encounter designs require
 discussion before implementation.

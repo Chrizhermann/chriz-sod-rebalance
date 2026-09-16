@@ -1,0 +1,90 @@
+// Remove Skie's bridge spawns without changing the installed victory routes.
+// #115 forks each native victory; #256 consolidates the two victories and
+// preserves that fork. Recognize these structures, not just a 2/4 hit count.
+DEFINE_PATCH_FUNCTION csr197_bridge_spawns BEGIN
+  SPRINT csr197_nl ~%MNL%?%LNL%~
+  SPRINT csr197_spawn ~^    CreateCreature("bdskie",\[2485\.2655\],NW)[^%WNL%]*%csr197_nl%~
+  SPRINT csr197_retreat ~^    ActionOverride("khalid",\(SaveLocation("LOCALS","bd_default_loc",\[2425\.2485\])\|SetGlobal("bd_no_retreat","locals",0)\|SetGlobal("bd_retreat","locals",1)\))[^%WNL%]*%csr197_nl%~
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CreateCreature("bdskie",\[2485\.2655\],NW)~ csr197_total
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~SetGlobal("CSR256_STAGE","BD2000",3)~ csr197_bridge
+  SET csr197_verified = 0
+  SET csr197_previous_routes = 0
+
+  PATCH_FOR_EACH csr197_kind IN ~portal~ ~fixed~ ~bridge~ BEGIN
+    PATCH_IF ((csr197_bridge = 0 AND NOT (~%csr197_kind%~ STRING_EQUAL ~bridge~)) OR
+              (csr197_bridge > 0 AND (~%csr197_kind%~ STRING_EQUAL ~bridge~))) BEGIN
+      PATCH_IF (~%csr197_kind%~ STRING_EQUAL ~portal~) BEGIN
+        SPRINT csr197_conditions ~  GlobalLT("bd_plot","global",293)%csr197_nl%  OR(2)%csr197_nl%    GlobalGT("bd_elemental","bd2000",0)%csr197_nl%    Global("bdsumfir","global",3)%csr197_nl%  OR(2)%csr197_nl%    Dead("bdelefir")[^%WNL%]*%csr197_nl%    Global("bdsumfir","global",3)%csr197_nl%~
+      END ELSE PATCH_IF (~%csr197_kind%~ STRING_EQUAL ~fixed~) BEGIN
+        SPRINT csr197_conditions ~  GlobalLT("bd_plot","global",293)%csr197_nl%  Global("bd_elemental","bd2000",0)%csr197_nl%  Global("bdsumfir","global",0)%csr197_nl%  !NumDeadLT("bdcrubb",6)%csr197_nl%  Dead("bdcrubbm")[^%WNL%]*%csr197_nl%~
+      END ELSE BEGIN
+        SPRINT csr197_conditions ~  Global("CSR256_STAGE","BD2000",2)%csr197_nl%  GlobalLT("bd_plot","GLOBAL",293)%csr197_nl%  CombatCounter(0)%csr197_nl%  InMyArea(Player1)%csr197_nl%  HPGT(Player1,0)%csr197_nl%~
+        PATCH_FOR_EACH csr197_dv IN ~CSR256FM~ ~CSR256CM~ ~CSR256G1~ ~CSR256G2~ ~CSR256E1~ ~CSR256E2~ ~CSR256F1~ ~CSR256F2~ BEGIN
+          SPRINT csr197_conditions ~%csr197_conditions%  OR(3)%csr197_nl%    Dead("%csr197_dv%")[^%WNL%]*%csr197_nl%    !Exists("%csr197_dv%")[^%WNL%]*%csr197_nl%    StateCheck("%csr197_dv%",STATE_STONE_DEATH)[^%WNL%]*%csr197_nl%~
+        END
+      END
+
+      SET csr197_native = 0 SET csr197_carried = 0 SET csr197_ordinary = 0
+      SPRINT csr197_carried_block ~~ SPRINT csr197_ordinary_block ~~
+      // Keep additional installed conditions/actions verbatim. For #115 the
+      // complete copies must agree, apart from its guard and retreat removal.
+      REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr197_nl%\(  !?Global("csr_kh_fort","GLOBAL",1)%csr197_nl%\)?%csr197_conditions%\(  [^%WNL%]*%csr197_nl%\)*THEN%csr197_nl%  RESPONSE #100%csr197_nl%\(    [^%WNL%]*%csr197_nl%\)*END~ BEGIN
+        SPRINT csr197_block ~%MATCH0%~
+        INNER_PATCH ~%csr197_block%~ BEGIN
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr197_spawn%~ csr197_spawns
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^  !Global("csr_kh_fort","GLOBAL",1)%csr197_nl%~ csr197_is_ordinary
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^  Global("csr_kh_fort","GLOBAL",1)%csr197_nl%~ csr197_is_carried
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^    SetGlobal("bd_plot","global",293)%csr197_nl%~ csr197_plot
+          SPRINT csr197_bence ~^    CreateCreature("bdbence",\[2425\.2660\],NW)[^%WNL%]*%csr197_nl%~
+          PATCH_IF (csr197_bridge > 0) BEGIN
+            SPRINT csr197_bence ~^    CreateCreatureObject("bdbence",Player1,6,0,0)[^%WNL%]*%csr197_nl%~
+          END
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr197_bence%~ csr197_bence_count
+          PATCH_IF (csr197_spawns != 1 OR csr197_plot != 1 OR csr197_bence_count != 1 OR
+                    csr197_is_carried + csr197_is_ordinary > 1) BEGIN
+            PATCH_FAIL ~chriz-sod-remix #197 [BD2000]: unsupported %csr197_kind% victory payload or Khalid route guards.~
+          END
+          PATCH_FOR_EACH csr197_action IN
+            ~SaveLocation("LOCALS","bd_default_loc",\[2425\.2485\])~
+            ~SetGlobal("bd_no_retreat","locals",0)~
+            ~SetGlobal("bd_retreat","locals",1)~ BEGIN
+            COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^    ActionOverride("khalid",%csr197_action%)[^%WNL%]*%csr197_nl%~ csr197_retreat_count
+            PATCH_IF (csr197_retreat_count != 1 - csr197_is_carried) BEGIN
+              PATCH_FAIL ~chriz-sod-remix #197 [BD2000]: unsupported Khalid retreat actions in %csr197_kind% victory.~
+            END
+          END
+        END
+        SET csr197_verified += 1
+        PATCH_IF (csr197_is_carried = 1) BEGIN
+          SET csr197_carried += 1
+          INNER_PATCH_SAVE csr197_carried_block ~%csr197_block%~ BEGIN
+            REPLACE_TEXTUALLY CASE_INSENSITIVE ~^IF%csr197_nl%  Global("csr_kh_fort","GLOBAL",1)%csr197_nl%~ ~IF%LNL%~
+          END
+        END ELSE PATCH_IF (csr197_is_ordinary = 1) BEGIN
+          SET csr197_ordinary += 1
+          INNER_PATCH_SAVE csr197_ordinary_block ~%csr197_block%~ BEGIN
+            REPLACE_TEXTUALLY CASE_INSENSITIVE ~^IF%csr197_nl%  !Global("csr_kh_fort","GLOBAL",1)%csr197_nl%~ ~IF%LNL%~
+            REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr197_retreat%~ ~~
+          END
+        END ELSE BEGIN
+          SET csr197_native += 1
+        END
+      END ~%csr197_block%~
+      PATCH_IF NOT ((csr197_native = 1 AND csr197_carried = 0 AND csr197_ordinary = 0) OR
+                    (csr197_native = 0 AND csr197_carried = 1 AND csr197_ordinary = 1 AND
+                     ~%csr197_carried_block%~ STRING_EQUAL_CASE ~%csr197_ordinary_block%~)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #197 [BD2000]: expected one native %csr197_kind% victory or one matching #115 route pair.~
+      END
+      SET csr197_routes = csr197_native + csr197_carried + csr197_ordinary
+      PATCH_IF (csr197_previous_routes > 0 AND csr197_previous_routes != csr197_routes) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #197 [BD2000]: incomplete #115 victory forks.~
+      END
+      SET csr197_previous_routes = csr197_routes
+    END
+  END
+  PATCH_IF (csr197_total != csr197_verified OR csr197_verified = 0 OR
+            (csr197_bridge > 0 AND csr197_bridge != csr197_verified)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #197 [BD2000]: Skie spawn count does not match the verified victory routes; refusing unrecognized spawns.~
+  END
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr197_spawn%~ ~~
+END

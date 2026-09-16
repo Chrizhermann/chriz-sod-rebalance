@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.6.11 - 2026-09-16
+
+- Fix component 197 failing after Khalid continuity 115 changes the bridge victory
+  routes. Recognize the original two victories, 115's four route branches,
+  256's single consolidated victory, or the 115/256 pair. Validate their structure
+  and remove only the obsolete Skie spawns, preserving route guards, Khalid's
+  carried-party protection and all other victory actions. Reject incomplete,
+  conflicting or unrecognized layouts before patching.
+- Keep component 256 in charge of its pending Bence wrap when 197 is appended
+  later. The older 197 starter now defers during that stage, preserving 256's
+  combat/dialogue checks and retries.
+- Verify public 197 without 115, public 115 followed by 197, and appending 197 after
+  later writers in a disposable copy of the affected 369-row collection state.
+  These are installer/script checks; no new native playtest is claimed. The
+  original installation and collection stream remain untouched. See the
+  [collection recovery handoff](docs/recovery/2026-09-16-cebg-alpha16-skie.md).
+
 ## v0.6.10 - 2026-09-14
 
 - Add component 115 for Khalid's Bridgefort quest when carried from BG1. The existing
