@@ -8,7 +8,7 @@ Status legend: **OPEN** (captured, researched, not fixed) · **FIXING** · **DON
 
 ---
 
-## PT-1 — SoD starts in the Korlasz dungeon for ~2 seconds — OPEN (question)
+## PT-1 — SoD starts in the Korlasz dungeon for ~2 seconds — **DONE (residual shortened, comp140 v2; issue #4)**
 
 **User:** "Does SoD have to start in the dungeon for 2 seconds? Can we not just fire
 everything one to one in the palace or would that be too hard to change?"
@@ -33,6 +33,34 @@ BD0103, including third-party mod hooks we do not control. High-risk, low-reward
 recommend NOT doing it. What IS worth investigating: whether the residual ~2s can be
 shortened further (the 1-3 interposed script passes run on a black screen; check
 whether the exit block can fire on pass 1 instead of waiting for the grant blocks).
+
+**Root cause of the interposed passes (issue #4 audit, 2026-07-13):** the grant
+blocks were never the problem — every `K#` block `Continue()`s, so the whole grant
+chain fires in the FIRST post-skip pass and that same pass flows toward our appended
+exit. What ate the passes were two vanilla one-shot blocks WITHOUT `Continue()`
+between the grants and the script bottom: `BD_Init_CAI` (`BD0120.baf:6727`, assigns
+BDDEFAI class AI to Player1, fresh starts only) and `BD_Restin` (`BD0120.baf:6869`,
+zeroes rest-encounter chances — fires on both flows because comp140's staging sets
+`BD_KORLASZ_SURRENDER=1`). Each ended one full ~1s pass on black: 2 interposed
+passes fresh / 1 import. Everything else that could plausibly fire was ruled out
+against the dev-install decompile + BD0120.are: `BD_PDOOR` needs Door03 open (starts
+closed, flags 0x0 — Porios IS a pre-placed actor, so `InMyArea` alone would pass),
+`Porios_spawn` is ~490px from the party start (Range 12 needs <~200px), the
+`bd_leaving2_ot` banter chain's only setter lives in BD0130, the fours-a-crowd
+advisor blocks (which overwrite `bd_plot`!) exhaust themselves before the bdintro
+launcher can ever fire, and `cd_fall_of_sarevok` (CDTweaks) one-shots on the
+pre-cutscene pass.
+
+**Fix (comp140 v2, this issue):** seam 4 adds a trailing `Continue()` to those two
+blocks (behavior identical — they still fire once with the same actions), and the
+exit is now an arm+launch pair: fresh starts spend exactly ONE deliberate interposed
+pass (the grants QUEUE six `AddSpecialAbility` instants on Player1 via
+`ActionOverride`; whether a same-tick `CutSceneId(Player1)` takeover preserves a
+pending queue is undocumented engine behavior, so the arm block ends the grant pass
+and Player1 drains his queue that frame), imports exit on the first pass with
+nothing queued. Net: fresh 2→1 passes, import 1→0, both deterministic instead of
+variable. Needs an in-game stopwatch check on stream to confirm the felt
+improvement.
 
 ---
 
