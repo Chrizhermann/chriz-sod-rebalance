@@ -1,0 +1,236 @@
+// Shared by fresh #256 and the append-only #258 upgrade.
+// Saved area variables: CLOCK 0=unstarted, 1=running, 2=safe, 3=Story, 4=failed.
+// Use game-time deadlines, never wall-clock timers or per-script-pass counters.
+OUTER_SPRINT csr256_timer_nl ~%MNL%?%LNL%~
+
+DEFINE_PATCH_MACRO csr256_timer_patch_world BEGIN
+  SPRINT csr256_ready ~IF%csr256_timer_nl%  Global("CSR256_STAGE","BD2000",1)%csr256_timer_nl%THEN%csr256_timer_nl%  RESPONSE #100%csr256_timer_nl%    SetGlobal("CSR256_STAGE","BD2000",2)%csr256_timer_nl%    DisplayStringNoName(Player1,[0-9]+)[^%WNL%]*%csr256_timer_nl%END~
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_ready%~ csr256_ready_hits
+  PATCH_IF (csr256_ready_hits != 1) BEGIN
+    PATCH_FAIL ~#258: expected one original #256 encounter-ready warning; no timer resources changed.~
+  END
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_ready%~ ~IF
+  Global("CSR256_STAGE","BD2000",1)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_STAGE","BD2000",2)
+    SetGlobal("CSR256_TIMER_V2","BD2000",1)
+END~
+
+  // Keep the complete installed aftermath (including #115/#197 variants).
+  // Its extra condition follows the eight actor checks, preserving the native
+  // prefix recognized by the companion-continuity patches.
+  SET csr256_after_hits = 0
+  REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr256_timer_nl%\(\([ %TAB%]+[^%WNL%]*%csr256_timer_nl%\|THEN%csr256_timer_nl%\)*\)END~ BEGIN
+    SPRINT csr256_after_block ~%MATCH0%~
+    INNER_PATCH ~%csr256_after_block%~ BEGIN
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CreateCreatureObject("bdbence",Player1,6,0,0)~ csr256_after_bence
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~SetGlobal("CSR256_STAGE","BD2000",3)~ csr256_after_stage
+    END
+    PATCH_IF (csr256_after_bence > 0 OR csr256_after_stage > 0) BEGIN
+      PATCH_IF (csr256_after_bence != 1 OR csr256_after_stage != 1) BEGIN
+        PATCH_FAIL ~#258: unrecognized #256 aftermath; refusing a partial timer upgrade.~
+      END
+      INNER_PATCH_SAVE csr256_after_block ~%csr256_after_block%~ BEGIN
+        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~  Global("CSR256_STAGE","BD2000",2)~ csr256_after_guard
+        PATCH_IF (csr256_after_guard != 1) BEGIN
+          PATCH_FAIL ~#258: missing #256 combat-stage guard.~
+        END
+        REPLACE_TEXTUALLY ~^THEN~ ~  Global("CSR256_CLOCK","BD2000",2)
+THEN~
+      END
+      SET csr256_after_hits += 1
+    END
+  END ~%csr256_after_block%~
+  PATCH_IF (csr256_after_hits < 1 OR csr256_after_hits > 2) BEGIN
+    PATCH_FAIL ~#258: expected the original #256 aftermath or its #115 pair.~
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr256_timer_preflight
+  INT_VAR check_world=0
+  RET already_installed
+BEGIN
+  OUTER_SET already_installed = 0
+  ACTION_IF check_world BEGIN
+    COPY_EXISTING - ~BD2000.BCS~ ~override~
+      DECOMPILE_AND_PATCH BEGIN
+        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~SetGlobal("CSR256_TIMER_V2","BD2000",1)~ csr256_timer_markers
+        PATCH_IF (csr256_timer_markers = 1) BEGIN
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~StartCutSceneEx("CSR26END",FALSE)~ csr256_timer_ends
+          PATCH_IF (csr256_timer_ends != 1 OR NOT FILE_EXISTS_IN_GAME ~CSR26END.BCS~) BEGIN
+            PATCH_FAIL ~#258: incomplete existing bridge timer; refusing to duplicate it.~
+          END
+          SET already_installed = 1
+        END ELSE BEGIN
+          PATCH_IF csr256_timer_markers BEGIN PATCH_FAIL ~#258: duplicate bridge timer marker.~ END
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~"CSR256_CLOCK"~ csr256_timer_foreign
+          PATCH_IF csr256_timer_foreign BEGIN PATCH_FAIL ~#258: unrecognized bridge timer variables.~ END
+          LPM csr256_timer_patch_world
+        END
+      END
+  END
+  ACTION_IF NOT already_installed BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~CSR26END.BCS~ BEGIN
+      FAIL ~#258: owned script name CSR26END.BCS already exists; no resources changed.~
+    END
+    ACTION_FOR_EACH csr256_rocks IN ~AMB_E17A.WAV~ ~AMB_E17B.WAV~ BEGIN
+      ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr256_rocks%~ BEGIN
+        FAIL ~#258: missing native rockfall sound %csr256_rocks%; no resources changed.~
+      END
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr256_timer_install BEGIN
+  LAF csr256_timer_preflight INT_VAR check_world=1 RET already_installed END
+  ACTION_IF NOT already_installed BEGIN
+    OUTER_SET csr256_t_start = RESOLVE_STR_REF(@25610)
+    OUTER_SET csr256_t_25 = RESOLVE_STR_REF(@25611)
+    OUTER_SET csr256_t_50 = RESOLVE_STR_REF(@25612)
+    OUTER_SET csr256_t_75 = RESOLVE_STR_REF(@25613)
+    OUTER_SET csr256_t_safe = RESOLVE_STR_REF(@25614)
+    OUTER_SET csr256_t_fail = RESOLVE_STR_REF(@25615)
+    OUTER_SET csr256_t_story = RESOLVE_STR_REF(@25616)
+    OUTER_SET csr256_t_neutral = RESOLVE_STR_REF(@25601)
+    OUTER_SPRINT csr256_timer_guard ~  Global("CSR256_STAGE","BD2000",2)
+  GlobalLT("bd_plot","GLOBAL",293)
+  InMyArea(Player1)
+  HPGT(Player1,0)
+~
+    // Match the existing encounter's death/petrification/removal semantics.
+    // Exists does not require sight: invisible or offscreen enemies still count.
+    OUTER_SPRINT csr256_timer_done ~~
+    ACTION_FOR_EACH csr256_timer_dv IN ~CSR256FM~ ~CSR256CM~ ~CSR256E1~ ~CSR256E2~ ~CSR256F1~ ~CSR256F2~ BEGIN
+      OUTER_SPRINT csr256_timer_done ~%csr256_timer_done%  OR(3)
+    Dead("%csr256_timer_dv%")
+    !Exists("%csr256_timer_dv%")
+    StateCheck("%csr256_timer_dv%",STATE_STONE_DEATH)
+~
+    END
+    // Completion has priority over Story changes, expiry and every warning.
+    OUTER_SPRINT csr256_timer_baf ~IF
+%csr256_timer_guard%  !Global("CSR256_CLOCK","BD2000",2)
+  !Global("CSR256_CLOCK","BD2000",4)
+%csr256_timer_done%THEN
+  RESPONSE #100
+    SetGlobal("CSR256_CLOCK","BD2000",2)
+    DisplayStringHeadNoLog(Player1,%csr256_t_safe%)
+    DisplayStringNoName(Player1,%csr256_t_safe%)
+END
+
+~
+    // Once Story Mode disables this encounter's deadline, switching it off
+    // does not restart a hidden countdown. Ordinary changes retain the budget.
+    ACTION_FOR_EACH csr256_story_state IN 0 1 BEGIN
+      OUTER_SET csr256_story_text = csr256_t_neutral
+      ACTION_IF csr256_story_state = 1 BEGIN OUTER_SET csr256_story_text = csr256_t_story END
+      OUTER_SPRINT csr256_timer_baf ~%csr256_timer_baf%IF
+%csr256_timer_guard%  Global("CSR256_CLOCK","BD2000",%csr256_story_state%)
+  StoryModeOn()
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_CLOCK","BD2000",3)
+    DisplayStringHeadNoLog(Player1,%csr256_story_text%)
+    DisplayStringNoName(Player1,%csr256_story_text%)
+END
+
+~
+    END
+    // Native symbols differ from the UI: EASIEST=Easy, EASY=Normal, NORMAL=Core.
+    // Explicit LoB branch avoids assuming that its separate flag implies level5.
+    ACTION_FOR_EACH csr256_tier IN ~lob~ ~easy~ ~normal~ ~core~ ~hard~ ~insane~ BEGIN
+      OUTER_SET csr256_seconds = 300
+      OUTER_SPRINT csr256_difficulty_guard ~  NightmareModeOn()
+~
+      ACTION_IF NOT (~%csr256_tier%~ STRING_EQUAL ~lob~) BEGIN
+        OUTER_SPRINT csr256_level ~HARDEST~
+        ACTION_IF (~%csr256_tier%~ STRING_EQUAL ~easy~) BEGIN OUTER_SET csr256_seconds = 600 OUTER_SPRINT csr256_level ~EASIEST~ END
+        ACTION_IF (~%csr256_tier%~ STRING_EQUAL ~normal~) BEGIN OUTER_SET csr256_seconds = 480 OUTER_SPRINT csr256_level ~EASY~ END
+        ACTION_IF (~%csr256_tier%~ STRING_EQUAL ~core~) BEGIN OUTER_SET csr256_seconds = 420 OUTER_SPRINT csr256_level ~NORMAL~ END
+        ACTION_IF (~%csr256_tier%~ STRING_EQUAL ~hard~) BEGIN OUTER_SET csr256_seconds = 360 OUTER_SPRINT csr256_level ~HARD~ END
+        OUTER_SPRINT csr256_difficulty_guard ~  !NightmareModeOn()
+  Difficulty(%csr256_level%)
+~
+      END
+      OUTER_SET csr256_quarter = csr256_seconds / 4
+      OUTER_SET csr256_half = csr256_seconds / 2
+      OUTER_SET csr256_threequarters = csr256_seconds * 3 / 4
+      OUTER_SPRINT csr256_timer_baf ~%csr256_timer_baf%IF
+%csr256_timer_guard%  Global("CSR256_CLOCK","BD2000",0)
+  !StoryModeOn()
+%csr256_difficulty_guard%THEN
+  RESPONSE #100
+    SetGlobal("CSR256_CLOCK","BD2000",1)
+    SetGlobal("CSR256_LIMIT","BD2000",%csr256_seconds%)
+    SetGlobal("CSR256_WARN","BD2000",0)
+    SetGlobalTimer("CSR256_DUE","BD2000",%csr256_seconds%)
+    SetGlobalTimer("CSR256_W25","BD2000",%csr256_quarter%)
+    SetGlobalTimer("CSR256_W50","BD2000",%csr256_half%)
+    SetGlobalTimer("CSR256_W75","BD2000",%csr256_threequarters%)
+    DisplayStringHeadNoLog(Player1,%csr256_t_start%)
+    DisplayStringNoName(Player1,%csr256_t_start%)
+END
+
+~
+    END
+    OUTER_SPRINT csr256_timer_baf ~%csr256_timer_baf%IF
+%csr256_timer_guard%  Global("CSR256_CLOCK","BD2000",1)
+  GlobalTimerExpired("CSR256_DUE","BD2000")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_CLOCK","BD2000",4)
+    SetGlobal("CSR256_STAGE","BD2000",4)
+    StartCutSceneEx("CSR26END",FALSE)
+END
+
+~
+    // Descending order coalesces overdue milestones after a return/time jump.
+    ACTION_FOR_EACH csr256_milestone IN 3 2 1 BEGIN
+      OUTER_SET csr256_pct = csr256_milestone * 25
+      OUTER_SET csr256_warning_text = csr256_t_25
+      OUTER_SPRINT csr256_sound ~AMB_E17A~
+      OUTER_SET csr256_shake = 3 * csr256_milestone
+      ACTION_IF csr256_milestone = 2 BEGIN OUTER_SET csr256_warning_text = csr256_t_50 END
+      ACTION_IF csr256_milestone = 3 BEGIN OUTER_SET csr256_warning_text = csr256_t_75 OUTER_SPRINT csr256_sound ~AMB_E17B~ END
+      OUTER_SPRINT csr256_timer_baf ~%csr256_timer_baf%IF
+%csr256_timer_guard%  Global("CSR256_CLOCK","BD2000",1)
+  GlobalLT("CSR256_WARN","BD2000",%csr256_milestone%)
+  GlobalTimerExpired("CSR256_W%csr256_pct%","BD2000")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR256_WARN","BD2000",%csr256_milestone%)
+    DisplayStringHeadNoLog(Player1,%csr256_warning_text%)
+    DisplayStringNoName(Player1,%csr256_warning_text%)
+    PlaySound("%csr256_sound%")
+    ScreenShake([%csr256_shake%.%csr256_shake%],1)
+END
+
+~
+    END
+    <<<<<<<< .../csr256_timer.baf
+%csr256_timer_baf%
+>>>>>>>>
+    <<<<<<<< .../csr26end.baf
+IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    SetCutSceneBreakable(FALSE)
+    DisplayStringHeadNoLog(Player1,%csr256_t_fail%)
+    DisplayStringNoName(Player1,%csr256_t_fail%)
+    PlaySound("AMB_E17B")
+    ScreenShake([15.15],3)
+    Wait(2)
+    FadeToColor([15.0],0)
+    Wait(1)
+    EndCutSceneMode()
+    GameOver(%csr256_t_fail%)
+END
+>>>>>>>>
+    COPY_EXISTING ~BD2000.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN LPM csr256_timer_patch_world END BUT_ONLY
+    EXTEND_TOP ~BD2000.BCS~ ~.../csr256_timer.baf~ EVALUATE_BUFFER
+    COMPILE EVALUATE_BUFFER ~.../csr26end.baf~
+  END
+END

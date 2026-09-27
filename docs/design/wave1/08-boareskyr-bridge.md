@@ -222,11 +222,128 @@ unpaused gameplay, not five rounds. The current dev `GTIMES.IDS` defines
 `FIVE_TURNS` as 301 seconds and `ONE_ROUND` as 6 seconds. This is a proposed tuning
 baseline, not evidence that the eventual Insane fight fits the budget.
 
-Presentation, exact trigger and duration, pause/save behavior, warning intervals,
-victory cancellation, retreat/re-entry behavior and the actual failure outcome
-still need a version-2 design pass. A visible remaining-time display and a clock
-that starts after the warning returns control are implementation proposals, not
-yet chosen UI or timing rules. Do not add any hidden timer to version 1.
+### DECIDED — warnings, cancellation and failure (September 27)
+
+- Give clear warnings at **25%, 50% and 75% of the chosen time budget elapsed**,
+  showing the bridge deteriorating under elemental power. Show a clear
+  confirmation when demolition stops.
+- The demolition enemies are **the two mages and four elementals only**. The
+  veteran guards and other sword/bow crusaders do not keep demolition going.
+  Stop the timer as soon as those six threats are defeated, even if other
+  enemies remain in combat. Keep this separate from Bence's existing
+  combat-clear aftermath and onward progression.
+- For this version, expiry causes a **simple game over**: a heavy stone crack
+  and short rumble, a brief collapse message, fade to black, then the normal
+  game-over flow. The user disliked the original explosion; do not reuse its
+  fireball/explosion spectacle or build an elaborate collapse animation.
+- Check demolition completion before expiry so a last-second victory counts.
+- **Scale the timer by difficulty and omit it in Story Mode.** The user said
+  "story mode or whatever the easiest is"; Story Mode has its own native
+  `StoryModeOn()` trigger. The user then authorized implementation of the
+  proposed allowances below.
+
+The user authorized implementation and release after review and automated checks
+on September 27. Version 0.6.12 includes the countdown for fresh component 256
+and append-only update 258. Native timer/game-over acceptance remains pending
+for the user's next collection test pass. Version 0.6.11 had no clock.
+
+### IMPLEMENTED — difficulty allowances and presentation
+
+Keep the original roughly five-minute budget for Insane and increase the
+allowance below it. These are the accepted initial implementation values;
+combat-duration tuning still needs native playtesting.
+
+| Difficulty | Unpaused time budget |
+| --- | --- |
+| Story Mode | No timer or timed-collapse failure |
+| Easy | 10 minutes |
+| Normal | 8 minutes |
+| Core Rules | 7 minutes |
+| Hard | 6 minutes |
+| Insane | 5 minutes |
+| Legacy of Bhaal | 5 minutes (explicitly detected; same initial budget as Insane) |
+
+The warnings use percentages of the selected budget, not fixed timestamps.
+Story Mode should not receive escalating timed-collapse warnings for a deadline
+that does not exist. The six-enemy objective and completion confirmation remain.
+The time budget is sampled once when the ready encounter hands control back.
+Ordinary difficulty changes do not reset or resize it. Enabling Story Mode while
+the encounter controller runs permanently disables that encounter's deadline;
+switching it off does not restart a hidden clock. Save/reload preserves the
+deadlines and emitted-warning state. Pausing freezes the game-time clock.
+Leaving the area does not reset the deadline; on return, the controller checks
+completion first, then expiry. If several warning milestones are overdue, only
+the most urgent is shown. No warning is replayed after completion.
+
+Implemented text (the source uses an ASCII dash in the urgent warning):
+
+| Point | Message |
+| --- | --- |
+| Start | The mages and their elementals are tearing the bridge apart. Stop them before it collapses! |
+| 25% elapsed | The bridge shudders. Elemental power cracks the stonework. |
+| 50% elapsed | Fragments of stone plunge into the river. The bridge is weakening! |
+| 75% elapsed | The bridge is giving way! The demolition must be stopped—now! |
+| Demolition stopped | The destructive magic fades. The tremors subside. The bridge will hold. |
+| Failure | The bridge gives way. The road to Dragonspear is lost. |
+
+Display the short warnings above the protagonist and copy them to the message
+log as narration. Native `DisplayStringHeadNoLog(Player1,...)` plus
+`DisplayStringNoName(Player1,...)` supports this without dialogue or issuing
+orders to the protagonist. Warnings play the native rockfall sounds AMB_E17A/B
+with brief, increasing screen shakes. These sounds exist in both clean BG:EE
+and EET and are used by native rockfall ambients. There are no dust effects or
+explosion spells. Failure uses the same rocks, a two-second warning, a one-second
+black fade and native GameOver with the collapse message. The initial warning
+and deadline are armed together after the encounter-ready stage. No continuously
+visible numerical countdown is added. Audibility, text dwell time, shake strength
+and the game-over UI require native verification.
+
+Technical references: [StoryModeOn](https://gibberlings3.github.io/iesdp/scripting/triggers/bgeetriggers.htm#0x40FA),
+[overhead text](https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#388),
+[unattributed log text](https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#262),
+and [custom GameOver](https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#366).
+These establish available native actions, not acceptance of the new sequence.
+
+Difficulty implementation note: native `EASIEST/EASY/NORMAL/HARD/HARDEST`
+values 1–5 correspond to the player-facing Easy/Normal/Core Rules/Hard/Insane
+labels. Story Mode is separate. Legacy of Bhaal has its own `NightmareModeOn()`
+trigger; do not assume that `Difficulty(HARDEST)` alone identifies it. This
+mapping was checked against the dev EET `trigger.ids` and `UI.menu` plus
+[IESDP difficulty identifiers](https://gibberlings3.github.io/iesdp/files/ids/bgee/difflev.htm).
+
+### DEFERRED — continuing after the bridge is lost
+
+The user liked an alternative to game over but explicitly saved it for later.
+The leading idea is **delayed reinforcements**: the party can reach the far side
+by another route, while an identifiable allied contingent cannot arrive for the
+Dragonspear siege. The later battle consequently has fewer allied troops.
+
+Other brainstormed possibilities are lost supply wagons/reduced camp supplies,
+a costly alternative crossing, or rescuing stranded soldiers after demolition
+becomes unstoppable, with survivors affecting later reinforcements. None of
+these is an approved implementation or a reason to add routes, rescue mechanics,
+troop losses or siege edits to this timer version. The alternative route,
+affected contingent, consequences and campaign integration require later design.
+
+### Implementation boundaries and remaining native acceptance
+
+- Fresh 256 includes the shared timer; existing installations append 258 without
+  uninstalling 256/257 or any other row. On an already updated 256, 258 performs
+  no resource changes. It preserves both entry routes, optional sequencers,
+  Khalid/Skie continuity and the existing combat-clear Bence wrap.
+- Prefer a pre-fight save. An upgraded active stage-2 encounter receives a fresh
+  allowance and opening warning on its first eligible update; already-completed
+  encounters never arm a timer. No save is edited by the installer.
+- The six-threat check preserves the existing encounter's death, petrification
+  and removal semantics. This is necessary for installed SR Banishment, which
+  uses opcode 168 removal rather than ordinary death. **Known inherited limit:**
+  native scripts cannot distinguish a removed actor from one temporarily
+  suspended by Maze; temporarily removing the final threat can count as success.
+  Invisibility/offscreen position alone do not satisfy the removal check.
+- Legacy of Bhaal reuses the five-minute Insane budget as an implementation
+  fallback; this is not a claim that LoB combat duration has been playtested.
+- See the [timer verification record](../../playtest/2026-09-27-bridge-timer.md)
+  for offline evidence and the outstanding native checklist.
 
 ## Accepted row-425 challenge-build details
 
@@ -440,6 +557,6 @@ verify the frontline receives the
 installed Haste effects; merely queuing the cast is not delivery evidence.
 
 Native acceptance should focus on actual casting/protections, challenge, elemental
-pathing, formation and progression. Version 1 has no collapse test. Version 2
-will need a separately agreed visibility/timing/failure checklist and observed
-combat-duration evidence on Insane before the time budget is accepted.
+pathing, formation and progression. Version 1 had no collapse test. The implemented
+version-2 timer has a separate visibility/timing/failure checklist and still needs
+observed combat-duration evidence on Insane before its balance is accepted.

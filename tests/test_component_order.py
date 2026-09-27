@@ -42,6 +42,7 @@ EXPECTED_COMPONENTS = {
     255,
     256,
     257,
+    258,
     260,
     265,
     266,
@@ -66,10 +67,10 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_11(self) -> None:
+    def test_patch_release_version_is_v0_6_12(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.11~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.12~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()
@@ -103,6 +104,13 @@ class ComponentOrderTests(unittest.TestCase):
 
         self.assertEqual(len(EXPECTED_COMPONENTS), len(components))
         self.assertEqual(EXPECTED_COMPONENTS, set(components))
+
+    def test_bridge_timer_update_follows_and_requires_256(self) -> None:
+        source = TP2_PATH.read_text(encoding="utf-8")
+        components = designated_components()
+        self.assertLess(components.index(256), components.index(258))
+        entry = source.split('BEGIN @258 DESIGNATED 258', 1)[1].split('BEGIN @', 1)[0]
+        self.assertIn('REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~256~', entry)
 
 
 if __name__ == "__main__":

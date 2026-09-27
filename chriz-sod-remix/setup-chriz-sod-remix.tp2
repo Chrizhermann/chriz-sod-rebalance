@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.11~
+VERSION ~v0.6.12~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -55,6 +55,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   255 Boareskyr battle: durable explosive barrels
 //   256 Boareskyr elemental battle (no sequencers by default)
 //   257 optional Extra Challenge: Insane bridge mage sequencers
+//   258 append the collapse timer to an older 256 (fresh 256 includes it)
 // 260-289: coalition-camp chapter pass (Ch. 10-12)
 //   260 scouting maps + shadow vault trash cut (+XP chunk on the
 //       chapter-11 transition)
@@ -668,6 +669,10 @@ INCLUDE ~chriz-sod-remix/lib/comp256.tpa~
 BEGIN @257 DESIGNATED 257 GROUP @1006 LABEL ~csr_bridge_extra_challenge~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~256~ @25700
 INCLUDE ~chriz-sod-remix/lib/comp257.tpa~
+
+BEGIN @258 DESIGNATED 258 GROUP @1003 LABEL ~csr_bridge_collapse_timer_update~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~256~ @25800
+INCLUDE ~chriz-sod-remix/lib/comp258.tpa~
 
 // ============================================================
 // 260 — coalition camp arc: fewer, cleaner enemies

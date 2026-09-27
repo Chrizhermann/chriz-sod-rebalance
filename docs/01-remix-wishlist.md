@@ -371,6 +371,19 @@ are separated below; the encounters have not been implemented.
   version 2. Make its timer obvious and generous even on Insane; the user proposes
   roughly five turns, with failure mainly for retreating or taking an exceptionally
   long time. The fight comes first, with only mild damage-output pressure.
+- **DECIDED and released in v0.6.12 (2026-09-27):** Story Mode has no
+  deadline; Easy/Normal/Core/Hard/Insane allow 10/8/7/6/5 unpaused minutes.
+  Give overhead/log warnings at 25%, 50% and 75%, and confirm safety when the
+  two mages and four elementals are defeated. Guards do not keep demolition
+  running. Failure uses rocks, a short fade and game over, without the old
+  explosion. Fresh 256 and append-only 258 share the implementation; native
+  presentation/balance acceptance is deferred to the next collection test pass;
+  release is authorized after review and automated checks. See the
+  [bridge design](design/wave1/08-boareskyr-bridge.md#decided--version-2-direction).
+- **DEFERRED alternative (2026-09-27):** continue after losing the bridge via
+  another route, with delayed reinforcements/fewer allied troops at Dragonspear.
+  Supply losses and rescue variants are saved as ideas in the bridge design;
+  none is part of the current timer implementation.
 - **DECIDED combat direction (2026-09-08):** level-13 fire and control mages with
   the discussed spell packages and removable prebuffs; stronger finite defensive
   recasting, informed by comparable SCS mages. Start with Slow/Grease and defer
@@ -382,8 +395,8 @@ are separated below; the encounters have not been implemented.
 - **IMPLEMENTED for native testing (component 256):** the approved first version,
   including finite spellbooks/Haste, a statically reachable formation, cleaned
   bridge artwork and the old fixed roster's 4,520 kill XP on every difficulty.
-  The first native fight and Bence wrap passed; stronger tuning and version-2
-  timer mechanics remain open. Details:
+  The first native fight and Bence wrap passed; version-2 timer source is now
+  implemented, with native presentation/balance acceptance still pending. Details:
   [bridge design](design/wave1/08-boareskyr-bridge.md).
 - **DECIDED post-playtest tuning (2026-09-13), implemented in source:** group
   Haste when the fire mage sees an enemy, targeting an elemental rather than

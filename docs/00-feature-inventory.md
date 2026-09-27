@@ -1,21 +1,21 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-09-14).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-09-27).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**42 component
-declarations in seven groups** for v0.6.10),
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**43 component
+declarations in seven groups** for v0.6.12),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.10
+## 1. Implemented in source — v0.6.12
 
-Prepared for release **v0.6.10**. This section describes release source, not a claim
+Release **v0.6.12**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
 
@@ -113,7 +113,8 @@ BD7000 and set `csr_treasure_removed=1`. Its selection depends on the player's p
 | 250 | Morentherene: a real dragon on Hard/Insane | Two CREATE-built stat spells applied asleep via vanilla's own ApplySpellRES delivery (EXTEND_TOP bd7210.bcs, difficulty-gated once-blocks). Hard+: +56 HP (168), AC −6, THAC0 −2, saves +3, MR 35. Insane stacks to: 230 HP, AC −9, THAC0 −4, saves +5 total, MR 50, 4 APR. Breath/wing buffet/AI untouched (SCS-safe); Core and below vanilla. Baseline verified: 112 HP, AC −1, THAC0 2, saves 5–8, MR 15. | pred `bd7210.are` + `bdmorent.cre` |
 | 255 | Boareskyr battle: durable explosive barrels (legacy) | Raises BDKEGX from 25 to120 HP and from0% to75% fire resistance; scripted story destruction remains possible. This older stopgap is superseded by256's elemental finale. Existing255 installations can retain the row and append256. | pred `bd2000.are` + `bdkegx.cre` |
 | 235 | Preserve Ymori after older road cuts | Restores only the quest actor/staging lost to an older 230 cut and corrects future road-north payouts to 23,100 party XP. Fresh 230 already preserves that actor and uses the corrected award. | REQUIRE 230 |
-| 256 | Boareskyr elemental finale | Two mages (level13 below Insane, level14 on Insane), two veterans and four tiered elementals replace both old finale routes. Haste on enemy sight, finite defensive recasts, shared engagement and prompt Bence aftermath; no sequencers in regular mode. Cleaned day/night art, fixed 4,520 XP, no v1 collapse timer. | before first BD2000 entry; independent or append after 255 |
+| 256 | Boareskyr elemental finale | Two mages (level13 below Insane, level14 on Insane), two veterans and four tiered elementals replace both old finale routes. Haste on enemy sight, finite defensive recasts, shared engagement and prompt Bence aftermath; no sequencers in regular mode. Cleaned day/night art, fixed 4,520 XP. Includes the difficulty-scaled collapse timer described under 258. | before first BD2000 entry; independent or append after 255 |
+| 258 | Add the bridge collapse timer to an older 256 | Story Mode: no timer. Easy/Normal/Core/Hard/Insane: 10/8/7/6/5 unpaused minutes; LoB initially 5. Three overhead/log warnings with rocks and shakes, six demolition enemies stop it, simple fade/game over on expiry. Fresh 256 already includes this; 258 then makes no resource changes. Native acceptance pending. | REQUIRE 256; append without uninstalling; prefer a pre-fight save |
 
 ### Extra Challenge (GROUP @1006)
 
@@ -148,7 +149,7 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.10 release source, tail-installable WeiDU mod: **42 declarations
+`chriz-sod-remix` v0.6.12 release source, tail-installable WeiDU mod: **43 declarations
 in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
@@ -289,7 +290,7 @@ Full user direction and DECIDED/OPEN detail: `docs/01-remix-wishlist.md`, Septem
 
 | Task | Status and next step |
 |------|----------------------|
-| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Regular256 and optional257 included in v0.6.9. The accepted challenge build passed combat/Bence/save-reload/onward playtesting; the final component split has no separate native pass. Collapse timer deferred to version2. |
+| [#14 — Boareskyr Bridge overhaul](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/14) | Regular256 and optional257 included in v0.6.9. The accepted challenge build passed combat/Bence/save-reload/onward playtesting; the final component split has no separate native pass. Version2's timer is included in v0.6.12 through 256/258; native timer acceptance is deferred to the next collection test pass. Alternative siege consequences remain deferred. |
 | [#15 — Ashatiel party encounter component](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15) | Next-version priority after the current release. Chosen of Cyric-style brief: roughly30 seconds to buff before enemies spawn, with enemy prebuffs/sequencers/potions. Requires a full user/agent back-and-forth design discussion after triage; design not yet approved. |
 | [#16 — Filler/trash coverage audit](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16) | [Static audit complete](research/22-filler-audit.md): 76 areas, all 495 historical generated actor cuts verified. Approved quest/creature fixes and the assassin ambush without dead magic are implemented in PR #21; Liia's reward is now set to flat 22,000 per character. Broader density decisions and native acceptance remain. |
 
