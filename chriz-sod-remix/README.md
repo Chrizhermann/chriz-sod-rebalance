@@ -4,7 +4,7 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.11**. The component overview below describes this version.
+Current release: **v0.6.12**. The component overview below describes this version.
 
 ## Components
 
@@ -35,9 +35,20 @@ mage casts regular Haste on an elemental when he sees an enemy; both have limite
 defensive recasts. Mages are level 13 below Insane and level 14 on Insane. Difficulty changes
 the elemental tiers while the fixed encounter XP stays 4,520. The day/night
 barrel artwork is cleaned and Bence appears beside the party after combat for
-the dialogue that opens the passage. No collapse timer is
-included in this version. Install before first entering BD2000, either alone
+the dialogue that opens the passage. Install before first entering BD2000, either alone
 or appended after an existing 255. The old 255 need not be removed.
+
+**v0.6.12 timer update:** fresh 256 includes a collapse clock; append **258**
+to upgrade an older 256 without uninstalling it. Story Mode has no deadline.
+Easy/Normal/Core/Hard/Insane allow 10/8/7/6/5 unpaused minutes, with five minutes
+initially on Legacy of Bhaal. Quarter/half/three-quarter warnings appear above
+the protagonist and in the log, with native rock sounds and brief shakes.
+Defeating the two mages and four elementals stops the clock while surviving
+guards can still fight. Failure fades to black and opens native game over.
+Save/reload and ordinary difficulty changes retain the deadline. Switching to
+Story Mode disables it for that encounter permanently. Prefer a pre-fight save:
+an old ongoing encounter gets a fresh budget on its first update after 258.
+Native presentation and timing acceptance are pending.
 
 Optional **257 — Extra Challenge** adds only the two Insane mage sequencers:
 earth uses Greater Malison then Slow; fire uses Dispel Magic with Spell Revisions,
@@ -94,9 +105,9 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.11 exposes **42 declarations in seven install groups**, including
+v0.6.12 exposes **43 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
-history; 176, 235 and 291 update older components, while fresh versions include
+history; 176, 235, 258 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
 Old per-install row counts are historical snapshots, not a current selection guide.
 
@@ -137,8 +148,10 @@ split and finite Mislead correction have no new native acceptance; Shadow Aspect
 testing is deferred. The reported unequipped appearance after palace rest remains
 unresolved. The [v0.6.10 report](../docs/releases/v0.6.10.md) records the earlier
 offline checks and Khalid entry acceptance. The
-[v0.6.11 report](../docs/releases/v0.6.11.md) covers the new installer/script
-compatibility checks; no new native playtest is claimed. Earlier native observations
+[v0.6.11 report](../docs/releases/v0.6.11.md) covers the Skie installer/script
+compatibility checks. The [v0.6.12 report](../docs/releases/v0.6.12.md) records the
+timer checks; its native presentation and balance testing is deferred to the next
+collection test pass. No new native playtest is claimed. Earlier native observations
 remain in the [test record](../docs/playtest/2026-09-09-fast-sod-test-plan.md).
 
 ## Optional full skip (component 910)

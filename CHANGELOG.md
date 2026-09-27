@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.6.12 - 2026-09-27
+
+- Add the approved Boareskyr collapse timer to fresh 256, plus append-only 258
+  for existing elemental battles. Story Mode disables it; Easy through Insane
+  allow 10/8/7/6/5 unpaused minutes, with five minutes initially on Legacy of Bhaal.
+- Show quarter/half/three-quarter warnings above the protagonist and in the log,
+  with native rockfall sounds and short shakes. Stop and confirm demolition when
+  both mages and all four elementals are defeated, regardless of living guards.
+  Preserve the existing Bence aftermath; last-second completion beats expiry.
+- Save countdown/warning state, retain the original budget through ordinary
+  difficulty changes and retreat, and disable the encounter's deadline if Story
+  Mode is enabled. Failure gives a short collapse warning, fades to black and
+  invokes native game over, without explosions or forced party deaths.
+- The alternative siege consequences remain deferred. Native presentation and
+  combat-duration acceptance are pending; see the
+  [timer verification record](docs/playtest/2026-09-27-bridge-timer.md).
+
 ## v0.6.11 - 2026-09-16
 
 - Fix component 197 failing after Khalid continuity 115 changes the bridge victory

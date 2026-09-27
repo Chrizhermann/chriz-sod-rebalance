@@ -1,7 +1,13 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.11**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.12**.
+
+v0.6.12 adds the approved Boareskyr Bridge collapse timer, with difficulty-scaled
+allowances, escalating warnings and a simple game over. Story Mode has no timer.
+Fresh **256** includes it; append **258** to upgrade an existing 256. See the
+[release report](docs/releases/v0.6.12.md). Native playtesting is deferred to the
+next collection test pass.
 
 v0.6.11 fixes Skie's component **197** installing after Khalid continuity **115**
 or the bridge overhaul **256**. It removes her obsolete bridge spawns while
@@ -33,6 +39,15 @@ It requires the current 256 resources and installation before the enemies spawn;
 regular 256 retains the same stats and spellbooks without sequencer use. Install
 256 before first entering BD2000; an installed 255 can stay in place.
 
+**Bridge timer:** fresh 256 now includes a visible collapse timer;
+append **258** to an older 256 without uninstalling it. Story Mode has no timer.
+Easy/Normal/Core/Hard/Insane allow 10/8/7/6/5 minutes of unpaused play; Legacy of
+Bhaal initially uses five minutes. Warnings appear above the protagonist and in
+the log at 25%, 50% and 75%, with rock sounds and brief shakes. Defeating the two
+mages and four elementals stops demolition even while guards survive. Failure
+uses a brief fade and game over. Native timer presentation/balance testing is
+pending; see the [verification record](docs/playtest/2026-09-27-bridge-timer.md).
+
 Default-selected **266** limits Shadow Aspect's Insane Mislead to one use per
 actor. Component **197** also gains Skie's normal, protagonist-dependent SoD XP
 catch-up, corrected recruitment/rejoin dialogue, and movable SCS stock potions.
@@ -61,9 +76,9 @@ arrival. Confirming Yes uses normal carried-inventory import rules and adds
 included. Requires EET_end and components 110, 140, 150, and 160; install before
 the first palace arrival. It adds no EEex dependency.
 
-The release has **42 component declarations in seven install groups**.
-Selection depends on installed prerequisites and earlier versions: 176, 235 and
-291 update older components; fresh versions already include those corrections.
+The release has **43 component declarations in seven install groups**.
+Selection depends on installed prerequisites and earlier versions: 176, 235, 258
+and 291 update older components; fresh versions already include those corrections.
 Choose one of 900/901, add 257 only for Extra Challenge, and select 910 only on
 supported EET setups.
 See [component instructions](chriz-sod-remix/README.md), the

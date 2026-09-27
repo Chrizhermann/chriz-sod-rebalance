@@ -1,4 +1,4 @@
-// Version 1 of the approved elemental bridge finale. No collapse timer.
+// Elemental bridge finale, including the approved difficulty-scaled countdown.
 INCLUDE ~chriz-sod-remix/lib/comp256_spells.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_creatures.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_ai.tpa~
@@ -6,6 +6,7 @@ INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_aftermath.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_text.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp256_visuals.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp256_timer.tpa~
 
 // The old fixed mage + six guards total 4520 XP; keep that fixed-roster budget
 // on every difficulty. Old variable portal reinforcements had no fixed budget.
@@ -23,6 +24,7 @@ LAF csr256_world_preflight END
 LAF csr256_aftermath_preflight END
 LAF csr256_text_preflight END
 LAF csr256_visuals_preflight END
+LAF csr256_timer_preflight RET already_installed END
 
 OUTER_SET csr256_warning = RESOLVE_STR_REF(@25601)
 LAF csr256_ai_install END
@@ -31,3 +33,4 @@ LAF csr256_world_install END
 LAF csr256_aftermath_install END
 LAF csr256_text_install END
 LAF csr256_visuals_install END
+LAF csr256_timer_install END

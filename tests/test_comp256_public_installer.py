@@ -22,6 +22,7 @@ import test_comp256_world as world_fixtures
 from test_comp256_text import dialogue, item as bwoosh_item
 from test_comp256_visuals import wed, tis
 from test_comp291_installer import WEIDU, tree
+from test_comp256_timer import write_timer_ids
 
 
 PUBLIC_TP2 = 'chriz-sod-remix/setup-chriz-sod-remix.tp2'
@@ -57,6 +58,7 @@ class PublicBridgeInstallerTests(unittest.TestCase):
         # Public controller stage 1 displays its warning in the log.
         action = self.override/'action.ids'
         action.write_text(action.read_text()+'262 DisplayStringNoName(O:Object*,I:StrRef*)\n')
+        write_timer_ids(self.game)
         for ref in ('BDOLONEI BDCRUE45 BDELFIRL BDELFIRM BDELFIRG '
                     'ELEARL01 ELEAR01 ELEARG01').split():
             (self.override/(ref+'.cre').lower()).write_bytes(creature(
@@ -90,6 +92,76 @@ class PublicBridgeInstallerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
         source = (self.game/(ref+'.baf')).read_text().upper()
         return re.findall(r'IF\n.*?\nEND', source, re.S)
+
+    def install_legacy_bridge(self):
+        """Install the actual composed 256 without its newly added clock calls.
+
+        This edits only a disposable copy of installer source. WeiDU creates
+        the old installed component/log, so 258 exercises its real append path.
+        """
+        path = self.game/'chriz-sod-remix/lib/comp256.tpa'
+        original = path.read_text()
+        legacy, includes = re.subn(r'^INCLUDE ~chriz-sod-remix/lib/comp256_timer\.tpa~\s*$',
+                                  '', original, flags=re.M)
+        legacy, calls = re.subn(r'LAF csr256_timer_(?:preflight|install)\b.*?\bEND',
+                               '', legacy, flags=re.S)
+        self.assertEqual(1, includes)
+        self.assertEqual(2, calls)
+        path.write_text(legacy)
+        try:
+            self.success(self.run_public('--force-install-list', '256'))
+        finally:
+            path.write_text(original)
+        self.assertFalse((self.override/'csr26end.bcs').exists())
+        self.assertNotIn('CSR256_CLOCK', '\n'.join(self.script_blocks('bd2000')))
+
+    def test_clock_append_requires_base_component_before_any_write(self):
+        before = tree(self.override)
+        result = self.run_public('--force-install-list', '258')
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertIn('SKIPPING:', result.stdout)
+        self.assertIn('Install component 256', result.stdout)
+        self.assertNotIn('#258', (self.game/'weidu.log').read_text())
+        self.assertEqual(before, tree(self.override))
+
+    def test_clock_append_after_fresh_base_is_byte_exact_noop(self):
+        self.success(self.run_public('--force-install-list', '256'))
+        before = tree(self.override)
+        self.assertIn('CSR26END.BCS', before)
+        tlk = (self.game/'lang/en_us/dialog.tlk').read_bytes()
+        self.success(self.run_public('--force-install-list', '258'))
+        self.assertEqual(before, tree(self.override))
+        self.assertEqual(tlk, (self.game/'lang/en_us/dialog.tlk').read_bytes())
+        self.assertIn('#258', (self.game/'weidu.log').read_text())
+        result = self.run_public('--force-uninstall-list', '258')
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertEqual(before, tree(self.override))
+
+    def test_clock_append_upgrades_real_legacy_install_without_rebuilding_encounter(self):
+        self.install_legacy_bridge()
+        before = tree(self.override)
+        self.success(self.run_public('--force-install-list', '258'))
+        after = tree(self.override)
+        self.assertEqual({'BD2000.BCS'}, {name for name in before if before[name] != after[name]})
+        self.assertEqual({'CSR26END.BCS'}, set(after) - set(before))
+        source = '\n'.join(self.script_blocks('bd2000'))
+        self.assertIn('CSR256_CLOCK', source)
+        self.assertIn('CSR256_DUE', source)
+        log = (self.game/'weidu.log').read_text()
+        self.assertIn('#256', log)
+        self.assertIn('#258', log)
+        result = self.run_public('--force-uninstall-list', '258')
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertEqual(before, tree(self.override))
+
+    def test_failure_helper_collision_prevents_fresh_base_resource_and_string_writes(self):
+        (self.override/'csr26end.bcs').write_bytes(b'FOREIGN COLLAPSE HELPER')
+        before = tree(self.override)
+        tlk = (self.game/'lang/en_us/dialog.tlk').read_bytes()
+        result = self.run_public('--force-install-list', '256')
+        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertEqual(before, tree(self.override))
+        self.assertEqual(tlk, (self.game/'lang/en_us/dialog.tlk').read_bytes())
 
     def test_default_scripts_only_differ_from_challenge_by_sequencer_blocks(self):
         self.success(self.run_public('--force-install-list', '256'))
