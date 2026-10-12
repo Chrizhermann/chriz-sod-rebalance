@@ -30,6 +30,20 @@ older 24,000 award, so installing 176 separately first is unnecessary. Previousl
 paid rewards stay paid. Compile checks passed; in-game verification is deferred
 to the user's next overall installation.
 
+Unreleased **285 — Avernus portal and a fairer final battle** skips the lift ride
+and its battles, without replacement XP, and enters the existing confrontation
+through a portal effect. Belhifet requires +1 weapons, has 60% magic resistance,
+and moves 25% faster without extra attacks. His ordinary-difficulty HP targets
+are 350/400/450/475/500 on Easy/Normal/Core/Hard/Insane; existing physical
+resistances remain. The opening mass dispel is removed in favor of delayed,
+targeted Breach. Insane starts with four devils and replenishes at most one
+every four rounds; killing reinforcements frees space under the living cap.
+Hephernaan retains his devil appearance while using a finite cleric/mage book,
+with lighter preparation and fewer spells below Insane. No separate Extra
+Challenge component is added. Install before first entering BD4700, preferably
+from a save before entering the lower tower BD4600, so saved area/creature data
+does not retain the old setup. Runtime balance and presentation need a playtest.
+
 ## Components
 
 v0.6.11 lets **197** remove Skie's obsolete bridge appearances after **115** or

@@ -1,0 +1,278 @@
+// Interim finale: preserve the native offensive AI, replace only the unfair
+// opener/reinforcement loop and apply the approved access/durability changes.
+
+<<<<<<<< .../csr285bel.baf
+%csr285_boss_prefix%
+>>>>>>>>
+<<<<<<<< .../csr285die.baf
+IF
+  Die()
+  Global("CSR285_COUNTED_DEAD","LOCALS",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR285_COUNTED_DEAD","LOCALS",1)
+    IncrementGlobal("CSR285_ADDS","BD4700",-1)
+    Continue()
+END
+>>>>>>>>
+
+DEFINE_ACTION_FUNCTION csr285_belhifet_preflight RET csr285_breach csr285_breach_range BEGIN
+  ACTION_FOR_EACH ref IN ~BDBELHIF.CRE~ ~BDBELHIF.BCS~ ~BD4700.BCS~
+    ~BDBELHIA.ITM~ ~BDBELHI1.ITM~ ~BDBELHI2.ITM~
+    ~BDABIGRE.CRE~ ~BDABIRED.CRE~ ~BDERINYE.CRE~ ~BDBONEFI.CRE~ BEGIN
+    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%ref%~ BEGIN
+      FAIL ~#285: missing finale resource %ref%.~
+    END
+  END
+  OUTER_SET csr285_breach_id = IDS_OF_SYMBOL (~SPELL~ ~WIZARD_BREACH~)
+  ACTION_IF (csr285_breach_id < 2100 OR csr285_breach_id > 2999) BEGIN
+    FAIL ~#285: cannot resolve the installed Breach spell.~
+  END
+  OUTER_SET csr285_breach_suffix = csr285_breach_id - 2000
+  OUTER_SPRINT csr285_breach ~SPWI%csr285_breach_suffix%~
+  COPY_EXISTING - ~%csr285_breach%.SPL~ ~override~
+    PATCH_IF SOURCE_SIZE < 0x72 BEGIN PATCH_FAIL ~#285: truncated Breach.~ END
+    READ_LONG 0x64 ab
+    READ_SHORT 0x68 count
+    PATCH_IF (count < 1 OR ab + count * 0x28 > SOURCE_SIZE) BEGIN
+      PATCH_FAIL ~#285: invalid Breach ability table.~
+    END
+    READ_SHORT (ab + 0x0e) csr285_breach_range
+  OUTER_SET csr285_breach_range = (csr285_breach_range < 12) ? csr285_breach_range : 12
+  COPY_EXISTING - ~BDBELHIF.CRE~ ~override~
+    READ_ASCII 0 sig (8)
+    PATCH_IF (SOURCE_SIZE < 0x2d4 OR NOT (~%sig%~ STRING_EQUAL ~CRE V1.0~)) BEGIN
+      PATCH_FAIL ~#285: unsupported Belhifet creature.~
+    END
+  COPY_EXISTING - ~BDBELHIF.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      COUNT_REGEXP_INSTANCES ~ForceSpell(\[PC\],WIZARD_TRUE_DISPEL_MAGIC)~ n
+      PATCH_IF n != 1 BEGIN PATCH_FAIL ~#285: unrecognized Belhifet dispel opener.~ END
+      COUNT_REGEXP_INSTANCES ~!GlobalTimerNotExpired("BD_Gate","LOCALS")~ n
+      PATCH_IF n != 3 BEGIN PATCH_FAIL ~#285: unrecognized Belhifet reinforcement AI.~ END
+      COUNT_REGEXP_INSTANCES ~"CSR285_INIT"~ n
+      PATCH_IF n != 0 BEGIN PATCH_FAIL ~#285: finale already patched; use its existing installation.~ END
+    END
+  COPY_EXISTING - ~BD4700.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      COUNT_REGEXP_INSTANCES ~CreateCreatureEffect("BDDCOR01"~ n
+      COUNT_REGEXP_INSTANCES ~CreateCreatureEffect("BDHAMATU"~ m
+      PATCH_IF (n != 1 OR m != 1) BEGIN PATCH_FAIL ~#285: unrecognized arena opening roster.~ END
+    END
+END
+
+DEFINE_ACTION_FUNCTION csr285_make_hp_spell
+  INT_VAR bonus = 0
+  STR_VAR ref = ~~
+BEGIN
+  CREATE ~spl~ ~%ref%~
+    WRITE_LONG 0x08 0xffffffff
+    WRITE_LONG 0x0c 0xffffffff
+    WRITE_SHORT 0x1c 4
+    WRITE_LONG 0x34 1
+    WRITE_LONG 0x64 0x72
+    WRITE_SHORT 0x68 1
+    WRITE_LONG 0x6a 0x9a
+    INSERT_BYTES 0x72 0x58
+    WRITE_BYTE 0x72 1
+    WRITE_BYTE 0x7e 5
+    WRITE_SHORT 0x82 1
+    WRITE_SHORT 0x90 1
+    WRITE_SHORT 0x98 1
+    WRITE_SHORT 0x9a 18
+    WRITE_BYTE 0x9c 1
+    WRITE_LONG 0x9e bonus
+    WRITE_LONG 0xa2 0
+    WRITE_BYTE 0xa6 1
+    WRITE_BYTE 0xa7 2
+    WRITE_BYTE 0xac 100
+END
+
+DEFINE_ACTION_FUNCTION csr285_build_boss_prefix RET csr285_boss_prefix BEGIN
+  OUTER_SPRINT csr285_boss_prefix ~~
+  // Additive, once-only HP keeps the engine's separate LoB bonus intact.
+  // On the stock 350-HP chassis: Easy350, Normal400, Core450, Hard475, Insane500.
+  ACTION_FOR_EACH tier IN ~EASIEST~ ~EASY~ ~NORMAL~ ~HARD~ ~HARDEST~ BEGIN
+    OUTER_SPRINT hp_action ~~
+    // Eight-character resources, independent of difficulty-name lengths.
+    ACTION_IF (~%tier%~ STRING_EQUAL ~EASY~) BEGIN OUTER_SPRINT hp_action ~    ApplySpellRES("CSR285H2",Myself)%LNL%~ END
+    ACTION_IF (~%tier%~ STRING_EQUAL ~NORMAL~) BEGIN OUTER_SPRINT hp_action ~    ApplySpellRES("CSR285H3",Myself)%LNL%~ END
+    ACTION_IF (~%tier%~ STRING_EQUAL ~HARD~) BEGIN OUTER_SPRINT hp_action ~    ApplySpellRES("CSR285H4",Myself)%LNL%~ END
+    ACTION_IF (~%tier%~ STRING_EQUAL ~HARDEST~) BEGIN OUTER_SPRINT hp_action ~    ApplySpellRES("CSR285H5",Myself)%LNL%~ END
+    OUTER_SPRINT csr285_boss_prefix ~%csr285_boss_prefix%IF
+  AreaCheck("BD4700")
+  !StateCheck(Myself,STATE_REALLY_DEAD)
+  Global("CSR285_INIT","LOCALS",0)
+  Difficulty(%tier%)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR285_INIT","LOCALS",1)
+%hp_action%    Continue()
+END
+
+~
+  END
+  OUTER_SPRINT csr285_boss_prefix ~%csr285_boss_prefix%IF
+  Global("bd_plot","GLOBAL",565)
+  Global("CSR285_COMBAT","LOCALS",0)
+  !StateCheck(Myself,STATE_REALLY_DEAD)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR285_COMBAT","LOCALS",1)
+    SetGlobalTimer("CSR285_BREACH","LOCALS",THREE_ROUNDS)
+    SetGlobalTimer("CSR285_GATE","LOCALS",FOUR_ROUNDS)
+    Continue()
+END
+
+~
+  ACTION_FOR_EACH tier IN ~HARDEST~ ~LOWER~ BEGIN
+    OUTER_SPRINT difficulty ~  Difficulty(HARDEST)~
+    OUTER_SPRINT cooldown ~THREE_ROUNDS~
+    ACTION_IF (~%tier%~ STRING_EQUAL ~LOWER~) BEGIN
+      OUTER_SPRINT difficulty ~  DifficultyLT(HARDEST)
+  DifficultyGT(EASIEST)~
+      OUTER_SPRINT cooldown ~FOUR_ROUNDS~
+    END
+    ACTION_FOR_EACH who IN ~NearestEnemyOf(Myself)~ ~SecondNearestEnemyOf(Myself)~ ~ThirdNearestEnemyOf(Myself)~ BEGIN
+      OUTER_SPRINT csr285_boss_prefix ~%csr285_boss_prefix%IF
+  Global("bd_plot","GLOBAL",565)
+  Global("CSR285_COMBAT","LOCALS",1)
+%difficulty%
+  !GlobalTimerNotExpired("CSR285_BREACH","LOCALS")
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  !StateCheck(Myself,STATE_IMMOBILE)
+  See(%who%)
+  Range(LastSeenBy(Myself),%csr285_breach_range%)
+  !StateCheck(LastSeenBy(Myself),STATE_REALLY_DEAD)
+  !StateCheck(LastSeenBy(Myself),STATE_INVISIBLE)
+  OR(3)
+    CheckStatGT(LastSeenBy(Myself),0,STONESKINS)
+    CheckStatGT(LastSeenBy(Myself),0,WIZARD_PROTECTION_FROM_MAGIC_WEAPONS)
+    CheckStatGT(LastSeenBy(Myself),0,WIZARD_PROTECTION_FROM_NORMAL_WEAPONS)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("CSR285_BREACH","LOCALS",%cooldown%)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    SetGlobalTimer("BD_NoTeleport","LOCALS",TWO_ROUNDS)
+    ForceSpellRES("%csr285_breach%",LastSeenBy(Myself))
+    AttackOneRound(LastSeenBy(Myself))
+END
+
+~
+    END
+  END
+  ACTION_FOR_EACH tier IN ~NORMAL~ ~HARD~ ~HARDEST~ BEGIN
+    OUTER_SET cap = 4
+    OUTER_SPRINT threshold ~~
+    OUTER_SPRINT delay ~FOUR_ROUNDS~
+    ACTION_IF (~%tier%~ STRING_EQUAL ~NORMAL~) BEGIN
+      OUTER_SET cap = 2
+      OUTER_SPRINT threshold ~  HPPercentLT(Myself,50)%LNL%~
+      OUTER_SPRINT delay ~FIVE_ROUNDS~
+    END
+    ACTION_IF (~%tier%~ STRING_EQUAL ~HARD~) BEGIN
+      OUTER_SPRINT threshold ~  HPPercentLT(Myself,75)%LNL%~
+    END
+    OUTER_SPRINT csr285_boss_prefix ~%csr285_boss_prefix%IF
+  Global("bd_plot","GLOBAL",565)
+  Global("CSR285_COMBAT","LOCALS",1)
+  Difficulty(%tier%)
+  GlobalLT("CSR285_ADDS","BD4700",%cap%)
+  !GlobalTimerNotExpired("CSR285_GATE","LOCALS")
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  !StateCheck(Myself,STATE_IMMOBILE)
+  See(NearestEnemyOf(Myself))
+%threshold%THEN
+~
+    ACTION_FOR_EACH slot IN ~1~ ~2~ ~3~ ~4~ BEGIN
+      OUTER_SPRINT csr285_boss_prefix ~%csr285_boss_prefix%  RESPONSE #100
+    SetGlobalTimer("CSR285_GATE","LOCALS",%delay%)
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureObjectEffect("CSR285D%slot%","DDOORH",Myself)
+~
+    END
+    OUTER_SPRINT csr285_boss_prefix ~%csr285_boss_prefix%END
+
+~
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr285_belhifet_install BEGIN
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr285_items BEGIN
+    BDBELHIA => CSR285AR
+    BDBELHI1 => CSR285W1
+    BDBELHI2 => CSR285W2
+  END
+  ACTION_PHP_EACH csr285_items AS original => owned BEGIN
+    COPY_EXISTING ~%original%.ITM~ ~override/%owned%.ITM~
+      READ_LONG 0x6a effect_offset
+      SET has_gate = 0
+      FOR (effect = effect_offset; effect + 0x30 <= SOURCE_SIZE; effect += 0x30) BEGIN
+        PATCH_IF (SHORT_AT effect = 120 AND LONG_AT (effect + 8) = 0) BEGIN
+          SET has_gate = 1
+        END
+      END
+      PATCH_IF has_gate BEGIN
+        LPF ALTER_EFFECT INT_VAR match_opcode = 120 match_parameter2 = 0 parameter1 = 0 END
+      END
+      // The harder weapon has a +20 MR modifier. The creature owns the new60%.
+      LPF DELETE_EFFECT INT_VAR match_opcode = 166 END
+  END
+  COPY_EXISTING ~BDBELHIF.CRE~ ~override~
+    WRITE_BYTE 0x5d 60
+    READ_LONG 0x2bc items
+    READ_LONG 0x2c0 count
+    FOR (i=0; i<count; i+=1) BEGIN
+      READ_ASCII (items + i*20) original (8) NULL
+      PHP_EACH csr285_items AS before => after BEGIN
+        PATCH_IF (~%original%~ STRING_EQUAL_CASE ~%before%~) BEGIN
+          WRITE_ASCIIE (items + i*20) ~%after%~ #8
+        END
+      END
+    END
+    LPF ADD_CRE_EFFECT INT_VAR opcode=176 target=1 parameter1=125 parameter2=2 timing=9 resist_dispel=2 END
+
+  LAF csr285_make_hp_spell INT_VAR bonus=50 STR_VAR ref=~CSR285H2~ END
+  LAF csr285_make_hp_spell INT_VAR bonus=100 STR_VAR ref=~CSR285H3~ END
+  LAF csr285_make_hp_spell INT_VAR bonus=125 STR_VAR ref=~CSR285H4~ END
+  LAF csr285_make_hp_spell INT_VAR bonus=150 STR_VAR ref=~CSR285H5~ END
+
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr285_devils BEGIN
+    1 => BDABIGRE  2 => BDABIRED  3 => BDERINYE  4 => BDBONEFI
+  END
+  ACTION_PHP_EACH csr285_devils AS slot => donor BEGIN
+    COPY_EXISTING ~%donor%.CRE~ ~override/CSR285D%slot%.CRE~
+      READ_ASCII 0x248 original_ai (8) NULL
+      WRITE_ASCIIE 0x248 ~CSR285D%slot%~ #8
+      WRITE_ASCIIE 0x280 ~CSR285D%slot%~ #32
+    ACTION_IF (~%original_ai%~ STRING_EQUAL ~~) BEGIN
+      COPY ~.../csr285die.baf~ ~weidu_external/chriz-sod-remix/csr285d%slot%.baf~
+      COMPILE ~weidu_external/chriz-sod-remix/csr285d%slot%.baf~
+    END ELSE BEGIN
+      COPY_EXISTING ~%original_ai%.BCS~ ~override/CSR285D%slot%.BCS~
+      EXTEND_TOP ~CSR285D%slot%.BCS~ ~.../csr285die.baf~
+    END
+  END
+  COPY_EXISTING ~BD4700.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      REPLACE_TEXTUALLY ~    CreateCreatureEffect("BDDCOR01"[^%LNL%]*%LNL%~ ~~
+      REPLACE_TEXTUALLY ~    CreateCreatureEffect("BDHAMATU"[^%LNL%]*%LNL%~ ~~
+      PHP_EACH csr285_devils AS slot => donor BEGIN
+        REPLACE_TEXTUALLY ~    CreateCreatureEffect("%donor%",~ ~    IncrementGlobal("CSR285_ADDS","BD4700",1)%LNL%    CreateCreatureEffect("CSR285D%slot%",~
+      END
+    END
+  COPY_EXISTING ~BDBELHIF.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      // Disable the native one-use opener without removing adjacent AI blocks.
+      REPLACE_TEXTUALLY ~  Global("BD_Dispel","LOCALS",0)~ ~  Global("BD_Dispel","LOCALS",0)%LNL%  False()~
+      REPLACE_TEXTUALLY ~    ForceSpell(\[PC\],WIZARD_TRUE_DISPEL_MAGIC)~ ~    NoAction()~
+      REPLACE_TEXTUALLY ~  !GlobalTimerNotExpired("BD_Gate","LOCALS")~ ~  !GlobalTimerNotExpired("BD_Gate","LOCALS")%LNL%  False()~
+      // One defensive invisibility instead of repeatedly occupying the spell slot.
+      REPLACE_TEXTUALLY ~  !GlobalTimerNotExpired("BD_IInv","LOCALS")~ ~  !GlobalTimerNotExpired("BD_IInv","LOCALS")%LNL%  Global("CSR285_INVIS","LOCALS",0)~
+      REPLACE_TEXTUALLY ~    ForceSpell(Myself,WIZARD_IMPROVED_INVISIBILITY)~ ~    SetGlobal("CSR285_INVIS","LOCALS",1)%LNL%    ForceSpell(Myself,WIZARD_IMPROVED_INVISIBILITY)~
+    END
+  LAF csr285_build_boss_prefix RET csr285_boss_prefix END
+  COPY ~.../csr285bel.baf~ ~weidu_external/chriz-sod-remix/csr285bel.baf~ EVALUATE_BUFFER
+  EXTEND_TOP ~BDBELHIF.BCS~ ~weidu_external/chriz-sod-remix/csr285bel.baf~
+END

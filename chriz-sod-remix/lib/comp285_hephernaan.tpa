@@ -1,0 +1,321 @@
+// Hephernaan's final devil form only. The original human creature, the native
+// transformation and the donor's creature/script are never modified.
+// SCS combat logic is David Wallace's installed, generated cleric/mage AI;
+// this bounded adaptation excludes its free casts, preparation and burst spells.
+
+DEFINE_ACTION_FUNCTION csr285_h_spell STR_VAR symbol=~~ RET res level kind BEGIN
+  OUTER_SET id = IDS_OF_SYMBOL (~SPELL~ ~%symbol%~)
+  OUTER_SPRINT prefix ~SPWI~
+  OUTER_SET kind = 1
+  OUTER_SET suffix = id - 2000
+  ACTION_IF (id >= 1000 AND id < 2000) BEGIN
+    OUTER_SPRINT prefix ~SPPR~
+    OUTER_SET suffix = id - 1000
+    OUTER_SET kind = 0
+  END ELSE ACTION_IF (id < 2000 OR id >= 3000) BEGIN
+    FAIL ~#285: missing wizard/priest identity %symbol%.~
+  END
+  OUTER_SPRINT res ~%prefix%%suffix%~
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%res%.SPL~ BEGIN
+    FAIL ~#285: missing spell %res% (%symbol%).~
+  END
+  COPY_EXISTING - ~%res%.SPL~ ~override~
+    PATCH_IF SOURCE_SIZE < 0x72 BEGIN PATCH_FAIL ~#285: truncated spell %res%.~ END
+    READ_ASCII 0 sig (8)
+    READ_LONG 0x34 level
+    READ_SHORT 0x1c spell_type
+    PATCH_IF (NOT (~%sig%~ STRING_EQUAL ~SPL V1  ~) OR level < 1 OR level > 6
+      OR spell_type != (2 - kind)) BEGIN
+      PATCH_FAIL ~#285: unreviewed spell type/level for %symbol%.~
+    END
+END
+
+// Decompilation gives a line-normalized grammar. Match one complete block,
+// excluding END by indentation, exactly as the bridge timer patch does.
+DEFINE_PATCH_MACRO csr285_h_sanitize BEGIN
+  SPRINT csr285_h_nl ~%MNL%?%LNL%~
+  REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr285_h_nl%\(\([ %TAB%]+[^%WNL%]*%csr285_h_nl%\|THEN%csr285_h_nl%\)*\)END~ BEGIN
+    SPRINT csr285_h_block ~%MATCH0%~
+    INNER_PATCH ~%csr285_h_block%~ BEGIN
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~\(ReallyForceSpell\|ForceSpell\|SpellNoDec\|Rest(\|ApplySpell\|CreateCreature\)~ csr285_h_free
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~\(Contingency\|Sequencer\|SpellTrigger\)~ csr285_h_burst
+    END
+    PATCH_IF (csr285_h_free > 0 OR csr285_h_burst > 0) BEGIN
+      SPRINT csr285_h_block ~~
+    END
+  END ~%csr285_h_block%~
+  // No hidden replenishment or free offensive action can remain in this copy.
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~\(ReallyForceSpell\|ForceSpell\|SpellNoDec\|Rest(\|ApplySpell\|CreateCreature\)~ csr285_h_left
+  PATCH_IF csr285_h_left > 0 BEGIN
+    PATCH_FAIL ~#285: unrecognized donor script blocks; refusing unbudgeted caster abilities.~
+  END
+END
+
+DEFINE_ACTION_MACRO csr285_h_context BEGIN
+  ACTION_FOR_EACH rr IN ~BDHEPHER.BCS~ ~BDFINHEP.CRE~ ~BDFINHEP.SPL~ ~BDCLMA01.BCS~ BEGIN
+    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%rr%~ BEGIN FAIL ~#285: missing finale resource %rr%.~ END
+  END
+  OUTER_SPRINT csr285_h_source ~BDCLMA01~
+  ACTION_IF FILE_EXISTS_IN_GAME ~SHUPOL01.CRE~ BEGIN
+    COPY_EXISTING - ~SHUPOL01.CRE~ ~override~
+      PATCH_IF SOURCE_SIZE >= 0x2d4 BEGIN
+        READ_ASCII 0x268 candidate (8) NULL
+        PATCH_IF (~%candidate%~ STRING_MATCHES_REGEXP ~^dw#cm[0-9]+$~ = 0
+          AND FILE_EXISTS_IN_GAME ~%candidate%.BCS~) BEGIN
+          SPRINT csr285_h_source ~%candidate%~
+        END
+      END
+  END
+  COPY_EXISTING - ~%csr285_h_source%.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LPM csr285_h_sanitize
+      READ_ASCII 0 csr285_h_combat (BUFFER_LENGTH)
+    END
+  // Every remaining combat spell is selected from this supported intersection.
+  // Preparation is authored explicitly and spends the same finite book.
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr285_h_base BEGIN
+    WIZARD_STONE_SKIN => 1 WIZARD_MIRROR_IMAGE => 1 CLERIC_ARMOR_OF_FAITH => 1
+    WIZARD_MINOR_GLOBE_OF_INVULNERABILITY => 0 CLERIC_FREE_ACTION => 0
+    WIZARD_MAGIC_MISSILE => 2 WIZARD_MELF_ACID_ARROW => 1 WIZARD_FLAME_ARROW => 1
+    WIZARD_BREACH => 1 WIZARD_GLITTERDUST => 1 WIZARD_SECRET_WORD => 0
+    WIZARD_GREATER_MALISON => 0 CLERIC_CURE_SERIOUS_WOUNDS => 1 CLERIC_COMMAND => 1
+  END
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr285_h_insane BEGIN
+    WIZARD_STONE_SKIN => 2 WIZARD_MIRROR_IMAGE => 2 CLERIC_ARMOR_OF_FAITH => 1
+    WIZARD_MINOR_GLOBE_OF_INVULNERABILITY => 1 CLERIC_FREE_ACTION => 1
+    WIZARD_MAGIC_MISSILE => 2 WIZARD_MELF_ACID_ARROW => 1 WIZARD_FLAME_ARROW => 2
+    WIZARD_BREACH => 2 WIZARD_GLITTERDUST => 1 WIZARD_SECRET_WORD => 1
+    WIZARD_GREATER_MALISON => 0 CLERIC_CURE_SERIOUS_WOUNDS => 2 CLERIC_COMMAND => 1
+  END
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr285_h_prep BEGIN
+    WIZARD_STONE_SKIN => 1 WIZARD_MIRROR_IMAGE => 1 CLERIC_ARMOR_OF_FAITH => 1
+    WIZARD_MINOR_GLOBE_OF_INVULNERABILITY => 2 CLERIC_FREE_ACTION => 2
+    WIZARD_MAGIC_MISSILE => 0 WIZARD_MELF_ACID_ARROW => 0 WIZARD_FLAME_ARROW => 0
+    WIZARD_BREACH => 0 WIZARD_GLITTERDUST => 0 WIZARD_SECRET_WORD => 0
+    WIZARD_GREATER_MALISON => 0 CLERIC_CURE_SERIOUS_WOUNDS => 0 CLERIC_COMMAND => 0
+  END
+  OUTER_SET csr285_h_offense = 0
+  ACTION_PHP_EACH csr285_h_base AS symbol => copies BEGIN
+    LAF csr285_h_spell STR_VAR symbol RET res level kind END
+    OUTER_SPRINT $csr285_h_res(~%symbol%~) ~%res%~
+    OUTER_SET $csr285_h_level(~%symbol%~) = level
+    OUTER_SET $csr285_h_kind(~%symbol%~) = kind
+    OUTER_SET supports = 0
+    OUTER_INNER_PATCH ~%csr285_h_combat%~ BEGIN
+      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~HaveSpell(%symbol%)~ supports
+    END
+    // Unavailable combat branches get no unused memorized spell. Mandatory
+    // preparation survives independently; its reserve requires a donor branch.
+    ACTION_IF supports = 0 BEGIN
+      OUTER_SET $csr285_h_insane(~%symbol%~) = ($csr285_h_prep(~%symbol%~) > 0)
+      OUTER_SET $csr285_h_base(~%symbol%~) = ($csr285_h_prep(~%symbol%~) = 1)
+    END ELSE ACTION_IF ($csr285_h_prep(~%symbol%~) = 0 AND copies > 0) BEGIN
+      OUTER_SET csr285_h_offense += 1
+    END
+  END
+  ACTION_IF csr285_h_offense < 3 BEGIN
+    FAIL ~#285: caster donor does not support enough of the bounded spellbook.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr285_h_check_transform BEGIN
+  PATCH_IF SOURCE_SIZE < 0x72 BEGIN PATCH_FAIL ~#285: truncated BDFINHEP spell.~ END
+  READ_LONG 0x64 ao
+  READ_SHORT 0x68 ac
+  READ_LONG 0x6a eo
+  SET found = 0
+  FOR (a=0; a<ac; ++a) BEGIN
+    PATCH_IF ao + (a+1)*40 > SOURCE_SIZE BEGIN PATCH_FAIL ~#285: invalid transformation header.~ END
+    READ_SHORT (ao+a*40+0x1e) ec
+    READ_SHORT (ao+a*40+0x20) ei
+    PATCH_IF eo+(ei+ec)*48 > SOURCE_SIZE BEGIN PATCH_FAIL ~#285: invalid transformation effects.~ END
+    FOR (i=ei; i<ei+ec; ++i) BEGIN
+      READ_SHORT (eo+i*48) op
+      READ_ASCII (eo+i*48+20) rr (8) NULL
+      PATCH_IF (op=151 AND ~%rr%~ STRING_EQUAL_CASE ~BDFINHEP~) BEGIN SET found += 1 END
+    END
+  END
+  PATCH_IF found != 1 BEGIN PATCH_FAIL ~#285: expected one native final-form replacement.~ END
+END
+
+DEFINE_ACTION_FUNCTION csr285_hephernaan_preflight BEGIN
+  LAM csr285_h_context
+  ACTION_FOR_EACH rr IN ~CSR285HP.CRE~ ~CSR285HI.CRE~ ~CSR285HF.SPL~ ~CSR285HX.SPL~
+    ~CSR285HB.BCS~ ~CSR285HN.BCS~ ~CSR285HC.BCS~ BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%rr%~ BEGIN FAIL ~#285: owned resource %rr% already exists.~ END
+  END
+  COPY_EXISTING - ~BDFINHEP.SPL~ ~override~ LPM csr285_h_check_transform
+  COPY_EXISTING - ~BDFINHEP.CRE~ ~override~
+    PATCH_IF SOURCE_SIZE < 0x2d4 BEGIN PATCH_FAIL ~#285: truncated final devil CRE.~ END
+    READ_ASCII 0 sig (8)
+    READ_ASCII 0x280 dv (32) NULL
+    PATCH_IF (NOT (~%sig%~ STRING_EQUAL ~CRE V1.0~) OR NOT (~%dv%~ STRING_EQUAL_CASE ~BDHEPHER~)) BEGIN
+      PATCH_FAIL ~#285: unrecognized final devil identity.~
+    END
+  COPY_EXISTING - ~BDHEPHER.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN
+    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~ForceSpellRES("BDFINHEP",Myself)~ hits
+    PATCH_IF hits != 1 BEGIN PATCH_FAIL ~#285: expected one native Hephernaan transformation.~ END
+  END
+END
+
+DEFINE_PATCH_MACRO csr285_h_slots BEGIN
+  REMOVE_KNOWN_SPELLS
+  REMOVE_MEMORIZED_SPELLS
+  READ_LONG 0x2a8 old_off
+  READ_LONG 0x2ac old_count
+  SET old_size = old_count * 16
+  DELETE_BYTES old_off old_size
+  PATCH_FOR_EACH p IN 0x2a0 0x2b0 0x2b8 0x2bc 0x2c4 BEGIN
+    READ_LONG p value
+    PATCH_IF value >= old_off+old_size BEGIN WRITE_LONG p (value - old_size) END
+  END
+  SET new_off = BUFFER_LENGTH
+  INSERT_BYTES new_off 192
+  WRITE_LONG 0x2a8 new_off
+  WRITE_LONG 0x2ac 12
+  FOR (kind=0; kind<2; ++kind) BEGIN
+    FOR (level=0; level<6; ++level) BEGIN
+      SET b = new_off+(kind*6+level)*16
+      WRITE_SHORT b level
+      WRITE_SHORT (b+6) kind
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr285_hephernaan_install BEGIN
+  LAM csr285_h_context
+  COPY_EXISTING ~%csr285_h_source%.BCS~ ~override/CSR285HC.BCS~
+    DECOMPILE_AND_PATCH BEGIN LPM csr285_h_sanitize END
+  ACTION_FOR_EACH tier IN ~base~ ~insane~ BEGIN
+    OUTER_SPRINT actor ~CSR285HP~
+    OUTER_SPRINT transform ~CSR285HF~
+    OUTER_SPRINT ai ~CSR285HB~
+    ACTION_IF ~%tier%~ STRING_EQUAL ~insane~ BEGIN
+      OUTER_SPRINT actor ~CSR285HI~
+      OUTER_SPRINT transform ~CSR285HX~
+      OUTER_SPRINT ai ~CSR285HN~
+    END
+    OUTER_SPRINT prep_actions ~~
+    ACTION_PHP_EACH csr285_h_prep AS symbol => prep BEGIN
+      ACTION_IF (prep=1 OR (prep=2 AND ~%tier%~ STRING_EQUAL ~insane~)) BEGIN
+        OUTER_SPRINT res $csr285_h_res(~%symbol%~)
+        OUTER_SPRINT prep_actions ~%prep_actions%    ReallyForceSpellRES("%res%",Myself)
+    RemoveSpellRES("%res%")
+~
+      END
+    END
+    OUTER_SPRINT prep_script ~IF
+  OR(4)
+    !AreaCheck("BD4700")
+    !Global("BDFinHep","GLOBAL",2)
+    !Global("bd_plot","GLOBAL",565)
+    !Allegiance(Myself,ENEMY)
+THEN
+  RESPONSE #100
+    NoAction()
+END
+
+IF
+  Global("CSR285_READY","LOCALS",0)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("CSR285_READY","LOCALS",1)
+    SetGlobal("instantprep","LOCALS",1)
+    SetGlobal("bd_prebuff","LOCALS",1)
+    SetGlobal("bd_no_retreat","LOCALS",1)
+%prep_actions%    SetGlobalTimer("castspell","LOCALS",6)
+    SetGlobalTimer("BD_Cast","LOCALS",6)
+    SetInterrupt(TRUE)
+    Continue()
+END
+~
+    COMPILE EVALUATE_BUFFER ~.../%ai%.baf~
+    COPY_EXISTING ~BDFINHEP.CRE~ ~override/%actor%.CRE~
+      // Own only caster role/book/scripts; preserve devil animation, equipment,
+      // allegiance, death variable, dialogue, HP, resistances and other effects.
+      WRITE_BYTE 0x273 14
+      WRITE_BYTE 0x234 14
+      WRITE_BYTE 0x235 14
+      WRITE_BYTE 0x236 0
+      WRITE_ASCIIE 0x248 ~%ai%~ #8
+      WRITE_ASCII 0x250 ~~ #8
+      WRITE_ASCII 0x258 ~~ #8
+      WRITE_ASCII 0x260 ~~ #8
+      WRITE_ASCII 0x268 ~CSR285HC~ #8
+      LPM csr285_h_slots
+      PHP_EACH csr285_h_base AS symbol => base_copies BEGIN
+        SET copies = base_copies
+        PATCH_IF ~%tier%~ STRING_EQUAL ~insane~ BEGIN SET copies = $csr285_h_insane(~%symbol%~) END
+        PATCH_IF copies > 0 BEGIN
+          SPRINT res $csr285_h_res(~%symbol%~)
+          SET level = $csr285_h_level(~%symbol%~) - 1
+          SET kind = $csr285_h_kind(~%symbol%~)
+          PATCH_IF kind=1 BEGIN
+            ADD_KNOWN_SPELL ~%res%~ (level) wizard
+            ADD_MEMORIZED_SPELL ~%res%~ (level) wizard (copies)
+          END ELSE BEGIN
+            ADD_KNOWN_SPELL ~%res%~ (level) priest
+            ADD_MEMORIZED_SPELL ~%res%~ (level) priest (copies)
+          END
+        END
+      END
+      READ_LONG 0x2a8 info
+      DEFINE_ASSOCIATIVE_ARRAY csr285_h_wizard_caps BEGIN 0 => 5 1 => 5 2 => 5 3 => 4 4 => 4 5 => 2 END
+      DEFINE_ASSOCIATIVE_ARRAY csr285_h_priest_caps BEGIN 0 => 6 1 => 6 2 => 6 3 => 5 4 => 3 5 => 2 END
+      FOR (i=0; i<12; ++i) BEGIN
+        READ_SHORT (info+i*16) level
+        READ_SHORT (info+i*16+6) kind
+        READ_LONG (info+i*16+12) count
+        SET cap = $csr285_h_priest_caps(~%level%~)
+        PATCH_IF kind=1 BEGIN SET cap = $csr285_h_wizard_caps(~%level%~) END
+        PATCH_IF count > cap BEGIN PATCH_FAIL ~#285: installed spell levels exceed the level-14 caster budget.~ END
+        WRITE_SHORT (info+i*16+2) count
+        WRITE_SHORT (info+i*16+4) count
+      END
+    COPY_EXISTING ~BDFINHEP.SPL~ ~override/%transform%.SPL~
+      LPM csr285_h_check_transform
+      LPF ALTER_SPELL_EFFECT INT_VAR match_opcode=151 STR_VAR match_resource=~BDFINHEP~ resource=EVAL ~%actor%~ END
+  END
+  // These blocks consume the native one-shot flag only in the finale. Original
+  // dialogue/plot actions and transformation behavior elsewhere remain intact.
+  EXTEND_TOP ~BDHEPHER.BCS~ ~.../csr285_heph_transition.baf~
+END
+
+<<<<<<<< .../CSR285HB.baf
+%prep_script%
+>>>>>>>>
+
+<<<<<<<< .../CSR285HN.baf
+%prep_script%
+>>>>>>>>
+
+<<<<<<<< .../csr285_heph_transition.baf
+IF
+  AreaCheck("BD4700")
+  Name("BDHEPHER",Myself)
+  Global("BDFinHep","GLOBAL",1)
+  Difficulty(HARDEST)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BDFinHep","GLOBAL",2)
+    ForceSpellRES("CSR285HX",Myself)
+    ActionOverride("cutspy",DestroySelf())
+    SetInterrupt(TRUE)
+END
+
+IF
+  AreaCheck("BD4700")
+  Name("BDHEPHER",Myself)
+  Global("BDFinHep","GLOBAL",1)
+  !Difficulty(HARDEST)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BDFinHep","GLOBAL",2)
+    ForceSpellRES("CSR285HF",Myself)
+    ActionOverride("cutspy",DestroySelf())
+    SetInterrupt(TRUE)
+END
+>>>>>>>>
