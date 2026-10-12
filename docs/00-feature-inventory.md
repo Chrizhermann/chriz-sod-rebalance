@@ -1,23 +1,30 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-09-27).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-13).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**43 component
-declarations in seven groups** for v0.6.12),
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**46 component
+declarations in seven groups** for v0.6.13),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.12
+## 1. Implemented in source — v0.6.13
 
-Release **v0.6.12**. This section describes release source, not a claim
+Release **v0.6.13**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.13:** component 198 adds early BG1 companion recruitment and earlier
+palace Skie; 177 lets the player report Korlasz to Liia after the first night;
+285 replaces the Avernus lift with a portal and bounds the final battle.
+Relocated 170/900 loot keeps its original identification state. All are
+offline-checked only; in-game checks belong to the next collection test pass.
+See [the v0.6.13 report](releases/v0.6.13.md).
 
 **v0.6.10:** component 115 adds the approved Khalid/Jaheira Bridgefort continuity
 treatment. The corrected BD2000 arrival, normal wardstone transport and Adirran
@@ -73,15 +80,17 @@ recommended universal selection. The live install is not the implementation targ
 | 145 | No auto-granted starting party | Removes the 9-NPC + Safana fresh-pool `JoinPartyOverride` joins so a fresh/imported-into-fresh SoD start wakes solo; continuous BG1→SoD path (comp 110) untouched. *(Declared after 150 in the tp2 → installs after 150.)* | REQUIRE 140 |
 | 150 | No assassination night, crusade council | "Strangle-by-flag" kills the first-night palace assassination; 14-day timeskip moved behind a "retire for the night" servant choice (csrserv); BD0100 night-ambush set swept; BD0102 council re-gated LT52 → exactly `bd_plot=51`, crusade-only, captured-assassin corpse dropped. **Prereq for 160/180/185/190/195.** | pred `bd0120.are` |
 | 160 | Imoen stays and is recruitable | Imports keep build/XP/gear (defused BD0120 strip → parked → swapped into bedroom); fresh starts get `csrimo` BG1-chassis clone (XP floor 64k); BDDIALOG IMOEN2 row re-pointed to `csrimoen`; adds the XP catch-up ladder vanilla omits for Imoen. | REQUIRE 140+150 |
-| 170 | The Korlasz jailbreak | Re-timed BD0116 fight on vanilla rematch scaffolding: rebuilt `csrkorl` (Mage 12, Slow+Confusion+Glitterdust sequencer) + named 6-member crew (Hasska/Vhast/Sillune/Porios/Grit/dying Fist) carrying the re-homed dungeon loot; difficulty-branched roster; HARDEST buff layer resolved by spell NAME; SCS detect-and-adapt. Stairs-top BD0102 hint beat re-times the trigger. | REQUIRE 140 |
+| 170 | The Korlasz jailbreak | Re-timed BD0116 fight on vanilla rematch scaffolding: rebuilt `csrkorl` (Mage 12, Slow+Confusion+Glitterdust sequencer) + named 6-member crew (Hasska/Vhast/Sillune/Porios/Grit/dying Fist) carrying the re-homed dungeon loot; difficulty-branched roster; HARDEST buff layer resolved by spell NAME; SCS detect-and-adapt. Stairs-top BD0102 hint beat re-times the trigger. v0.6.13: relocated loot keeps its original instance's identification state instead of arriving identified. | REQUIRE 140 |
 | 175 | XP ledger: Liia's reward after the jailbreak | Approved 2026-09-08: **22,000 per character on every difficulty**, as one quest reward at Liia's return-beat close. Uses six `AddXPObject` actions before DestroySelf, with the existing one-time gate. The earlier released 24,000 award is superseded; the recount is in research/23. | REQUIRE 170+180 |
 | 176 | Existing Liia reward update | Append-only update from 24,000 to 22,000 per character, preserving the dialogue and once-only delivery. Already-corrected rewards remain unchanged. Does not deduct previously paid XP. | REQUIRE 175 |
+| 177 | Report Korlasz to Liia after the first night | Liia's ordinary and departure-day greetings offer the unpaid report after the council. Both report routes share `CSR_KORL_RET=2` and pay 22,000 XP per present party member once; the journal stays pending until reported and a one-time reminder repairs unpaid city saves. Forced council/departure speeches unchanged. Offline compile checks only. | REQUIRE 175+180; after 176 if present |
 | 180 | Celebration + Caelar's proclamation | Victory beat on first walk into BD0102 (nobles + Fist dressing w/ click-dialogs, Liia toast / Belt seconds, BG1 register, palace locked for the night); opens the jailbreak-quest journal and hands over Caelar's proclamation naming the Bhaalspawn (`csrpam`); Liia return beat + Fist march after the jailbreak. | REQUIRE 140+150 |
 | 185 | Entar Silvershield removed (stays dead) | Unspawns his plot-51 war-council appearances (2 spawn coords, 14 staging actions, count-guarded); rebuilds the plot-56 departure send-off around Belt; drops his roll-call name + the "weren't you killed?" resurrection reply. Component 290 false-gates the last BDPALACE reference; the unreachable trial files stay on disk. | REQUIRE 140+150 |
 | 187 | Assassination night set never spawns | Schedule-zeroes the nine always-placed BD0100 night actors (Corwin, three assassins, two guards, three corpses), preventing the one-frame render/pop that comp150's script sweep could not stop. The sweep remains as protection for saves with BD0100 already baked. | REQUIRE 150; pred `bd0100.are` |
 | 190 | Skie's second-night bedroom visit removed | A Skie-free dawn wake mirrors the two BD0103 night blocks and pre-sets `BD_MDD005=1` so they can never fire (party sleeps to dawn, `bd_plot` 54→55 as before); BDSKIE night root (state 16) sealed with False(). | REQUIRE 150 |
 | 195 | Assassination/poison references scrubbed | Zero-new-text cleanup after 150: reply/state False() gates + 2 ALTER_TRANS re-routes (BDSCHAEL 227 retire-commit moves onto the "ready to march" reply + EXIT; BDLIIA 13 "how fares Imoen?" → training advice) across Corwin/Eltan/Edwin/Liia/Fist/debug. de Lancie supply-poison quest explicitly out of scope. | REQUIRE 150 |
 | 197 | Skie: talk-to-join recruit at the palace | Entar-death recruitment, native SoD companion XP tiers based on protagonist XP, corrected condolence/rejoin routes, and movable stock SCS invisibility/Freedom potions with unchanged mechanics. No unconditional 250k floor or lowering existing XP. Retires her incompatible SoD plot handlers while preserving the joined actor. Estate/gear inheritance remains deferred. | REQUIRE 150+185+210 |
+| 198 | Early BG1 companions; Skie before the first rest | Skie stands at BD0102 [600,510] before the first rest with context-neutral early lines. Yeslick, Branwen and Ajantis outside the palace; Coran and Garrick at the Elfsong (BD0110/BD0109); Kagain, Alora and Xan in BD0020; Tiax in his BD0104 cell; Kivan and Shar-Teel at BD1000. Saved actors keep build, gear and spellbook; known deaths prevent replacements; fresh starts use installed BG1 level-5/6 donors and normal SoD join XP. Dismissed recruits follow BD1000, BD7100 and BD3000. The Coran/Safana argument is retired. Round 2 (Faldorn, Quayle, Eldoth, Xzar, Montaron) deferred. Offline compile checks only. | REQUIRE 110+197 |
 
 ### Optional full SoD skip (GROUP @1001)
 
@@ -99,7 +108,7 @@ recommended universal selection. The live install is not the implementation targ
 | 220 | Dwarven dig site re-garrisoned | Cuts ~169 pre-placed undead (BD1100 69 / BD1200 100 + 11 moves) to a designed shape: 1 horde room, an honor guard (2 mummies + 2 elite skeleton warriors) standing on the vacated "Drowned in Blood" coords before the lich (2026-07-10 polish — literal replacement per the locked placement rule), pushover groups, umber-hulks-only dig monsters; no-save cheese hard-banned; 80% of cut kill-XP returns as one **106,700 party-total** chunk on the lich clean-kill (engine-divided like the kill XP it replaces; ≈17,783/char at 6 — unit-corrected 2026-07-12). Quest wiring (Semahl, Deepvein, Coldhearth) preserved. | pred `bd1100.are` + `bd1200.are` |
 | 225 | Scrying pool: one text-only Caelar omen | Requires all three Silver Scepters and both Essences; keeps the 3,000 party-total scepter reward, then consumes both Essences atomically, shows the approved abstract Caelar text, grants 1,000 XP once to Player1–6, and leaves the pool permanently dormant. The cut wight stays cut and its vial moves to `Sarcophagus01`; all Imoen/Caelar/Hooded picker routes and cinematics are unreachable. **Fresh no-Aura EET install verified; focused runtime/save-reload accepted 2026-09-05. Natural acquisition pending.** | REQUIRE 120+220; pred `bd1200.are` + `bdodscry.bcs` + `bdscry.dlg` |
 | 245 | Coast Way bridge: wall removal is skip-proof | Patches CUTSKIP's mirrored BDCUT14 end-state so skipping the scene cannot re-raise comp200's removed force wall or restore the vanilla three-round timer; keeps the wall gone and the timer at FIVE_ROUNDS. Establishes the rule that every BDCUT patch must audit CUTSKIP. | REQUIRE 200; pred `cutskip.bcs` |
-| 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. v0.6.8 preserves existing chest items and metadata instead of requiring one vanilla sword; covered by synthetic public-installer tests. | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
+| 900 | Treasure from removed content: **collect** | Mod-wide treasure choice, "collect" flavor: the BD7000 loot (Gemblade+1, Suncatcher+2, Boot-and-a-Half of Speed, Wand of Paralyzation ×5, Ring of Free Action, SODTRE08 ×2 / 09) lands in camp chest Container009 `(509,3220)`; sets `csr_keep_treasure=1`. v0.6.8 preserves existing chest items and metadata instead of requiring one vanilla sword; covered by synthetic public-installer tests. v0.6.13 no longer forces identification; the original instance's state is kept. | SUBCOMPONENT @902 (XOR 901); REQUIRE 210 |
 
 Component 901 is the mutually exclusive alternative: remove the treasure with
 BD7000 and set `csr_treasure_removed=1`. Its selection depends on the player's preference.
@@ -131,6 +140,7 @@ BD7000 and set `csr_treasure_removed=1`. Its selection depends on the player's p
 | 266 | Finite Shadow Aspect Mislead (default selected) | Limits its existing Insane Mislead action to one use per actor, preserving the original invisibility/difficulty/timer checks and other spells/summons. Broader simplification is deferred; no native Mislead acceptance is claimed. | pred `bdashiru.bcs`; append without reinstalling240/265 |
 | 270 | Kanaglym: fewer undead | NE graveyard 19→8 (3 banned shadowed souls; archers 9→3, armored 3→2, bladed 2→1; the 4k skeleton-warrior mini-boss anchors the rest). South quest cluster neutral-until-quest = untouched by construction; C0MNEV01 (foreign mod) never touched. **+5,200 party-total** (≈870/char at 6; unit-corrected 2026-07-12) riding the Kherriun 12,000 award (both branches, one fires). | pred `bd5300.are` + `.bcs` |
 | 280 | No party dispel at the basement reveal | BOTH reveal variants strip the party (6× bddispel on Player1–6 in BDCUT45A **and** BDCUT45B) and CUTSKIP mirrors both (12 more) — all 24 removed; ward flare, bdglowgr glow and every enemy-side dispel stay. Corrects the earlier "45B only dispels enemies" note. | pred `bdcut45a/b.bcs` + `cutskip.bcs` |
+| 285 | Avernus portal and a fairer final battle | The lower tower switch becomes a one-way portal into the existing confrontation (no lift ride or its battles, no replacement XP). Belhifet needs +1 weapons, has 60% MR, +25% movement and 350/400/450/475/500 HP by difficulty; delayed targeted Breach replaces the mass dispel; devils are capped at 2/4/4 on Core/Hard/Insane and refill one vacancy at a time. Hephernaan keeps his devil form with a finite 14/14 cleric/mage book. Offline installer checks only. | pred `BD4600.ARE`+`BD4700.ARE`; before first BD4700 entry |
 
 ### Victory ending (GROUP @1005)
 

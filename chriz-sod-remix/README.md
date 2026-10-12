@@ -4,9 +4,9 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.12**. The component overview below describes this version.
+Current release: **v0.6.13**. The component overview below describes this version.
 
-**Unreleased addition: 198** makes Skie available in the palace hall before the
+**v0.6.13 — 198** makes Skie available in the palace hall before the
 first rest. Recruit Yeslick, Branwen and Ajantis near the palace; Coran and Garrick
 at the Elfsong; Kagain, Alora and Xan in the Elfsong district; Tiax in the Flaming
 Fist jail; and Kivan and Shar-Teel at the Coast Way camp. Conversations are short.
@@ -14,14 +14,14 @@ Saved recruits keep their build and belongings, while fresh starts use BG1 donor
 and normal SoD join XP. Previously recruited, dismissed companions move to each
 later camp; unjoined companions stay behind. Known deaths prevent replacements.
 Requires 110 and 197. Compile-checked on captured resources; in-game checks are
-deferred to the next overall install. This is not a published release yet.
+deferred to the next overall install.
 
 The palace bedroom already permits normal resting in the inspected area data.
 Use the normal Rest button to prepare spells; this addition does not reuse the
 one-time story bedtime or departure choice. Its actual behavior remains a user
 playtest check.
 
-**Unreleased addition: 177** lets you report Korlasz's defeat to Liia after the
+**v0.6.13 — 177** lets you report Korlasz's defeat to Liia after the
 first night, including departure day, without interrupting the council. The early
 and late conversations pay the same 22,000 XP to each present party member, once. A journal
 reminder points to Liia until you report, including on an existing unpaid city
@@ -30,7 +30,7 @@ older 24,000 award, so installing 176 separately first is unnecessary. Previousl
 paid rewards stay paid. Compile checks passed; in-game verification is deferred
 to the user's next overall installation.
 
-Unreleased **285 — Avernus portal and a fairer final battle** skips the lift ride
+**v0.6.13 — 285, Avernus portal and a fairer final battle,** skips the lift ride
 and its battles, without replacement XP, and enters the existing confrontation
 through a portal effect. Belhifet requires +1 weapons, has 60% magic resistance,
 and moves 25% faster without extra attacks. His ordinary-difficulty HP targets
@@ -43,6 +43,10 @@ with lighter preparation and fewer spells below Insane. No separate Extra
 Challenge component is added. Install before first entering BD4700, preferably
 from a save before entering the lower tower BD4600, so saved area/creature data
 does not retain the old setup. Runtime balance and presentation need a playtest.
+
+**v0.6.13 — 170/900:** relocated Korlasz jailbreak loot and Coast Way camp-chest
+treasure keep the original item's identification state instead of arriving
+identified. Existing chest/creature records and authored rewards are unchanged.
 
 ## Components
 
