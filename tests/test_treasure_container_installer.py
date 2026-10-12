@@ -13,7 +13,7 @@ def item(name, *, expiration=0, charges=(0, 0, 0), flags=1):
     return struct.pack("<8s4HI", name.encode("ascii"), expiration, *charges, flags)
 
 
-PAYLOAD = [item(name, charges=(charges, 0, 0)) for name, charges in (
+PAYLOAD = [item(name, charges=(charges, 0, 0), flags=0) for name, charges in (
     ("BDDAGG03", 0), ("BDSHLD02", 0), ("BDBOOT04", 0), ("WAND04", 5),
     ("RING09", 0), ("SODTRE08", 0), ("SODTRE08", 0), ("SODTRE09", 0),
 )]
@@ -85,11 +85,11 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         self.addCleanup(game.cleanup)
         return game
 
-    def assert_preserved(self, before, after, target_index=1):
+    def assert_preserved(self, before, after, target_index=1, payload=PAYLOAD):
         offset, count = struct.unpack_from("<IH", before, 0x70)
         target_base = offset + target_index * 0xC0
         original_items = container_records(before, target_index)
-        self.assertEqual(original_items + PAYLOAD, container_records(after, target_index))
+        self.assertEqual(original_items + payload, container_records(after, target_index))
         for index in range(count):
             if index != target_index:
                 self.assertEqual(container_records(before, index), container_records(after, index))
@@ -105,6 +105,63 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         old_offset = struct.unpack_from("<I", before, 0x78)[0]
         self.assertEqual(before[old_offset:old_offset + old_count * 20],
                          after[new_offset:new_offset + old_count * 20])
+
+    def test_source_identification_is_preserved_without_copying_other_metadata(self):
+        before = area([item("WAND04", expiration=91, charges=(4, 8, 9), flags=0x82)])
+        game = self.game(before)
+        donor = area([], containers=[("Extra", [item("UNRELATED", flags=1)]),
+                                    ("Source", [item("SODTRE08", flags=0),
+                                                item("BDDAGG03", expiration=61,
+                                                     charges=(30, 5, 6), flags=0x83),
+                                                item("SODTRE08", flags=0),
+                                                item("SODTRE09", flags=1)])])
+        (game.root / "override/bd7000.are").write_bytes(donor)
+        result, text = game.install()
+        self.assertEqual(0, result.returncode, text)
+        expected = list(PAYLOAD)
+        expected[0] = item("BDDAGG03", flags=1)
+        expected[7] = item("SODTRE09", flags=1)
+        self.assert_preserved(before, game.tree()["bd1000.are"], payload=expected)
+        self.assertEqual(donor, game.tree()["bd7000.are"])
+
+    def test_mixed_identification_donors_report_real_ambiguity_without_area_writes(self):
+        game = self.game(area([]))
+        (game.root / "override/bd7000.are").write_bytes(area(
+            [item("BDDAGG03", flags=0), item("BDDAGG03", flags=1)]))
+        before = game.tree()
+        result, text = game.install()
+        self.assertNotEqual(0, result.returncode, text)
+        self.assertIn("both identified and unidentified BDDAGG03", text)
+        self.assertEqual(before, game.tree())
+
+    def test_empty_source_area_is_a_valid_absent_drop_not_corruption(self):
+        before = area([])
+        game = self.game(before)
+        donor = bytearray(0x11c)
+        donor[:8] = b"AREAV1.0"
+        (game.root / "override/bd7000.are").write_bytes(donor)
+        result, text = game.install()
+        self.assertEqual(0, result.returncode, text)
+        self.assertIn("without auto-identification", text)
+        self.assert_preserved(before, game.tree()["bd1000.are"])
+        self.assertEqual(bytes(donor), game.tree()["bd7000.are"])
+
+    def test_repeat_install_does_not_duplicate_rewards_and_uninstall_restores_chest(self):
+        before = area([item("WAND04", expiration=4, charges=(1, 2, 3), flags=0x82)])
+        game = self.game(before)
+        result, text = game.install()
+        self.assertEqual(0, result.returncode, text)
+        first = game.tree()["bd1000.are"]
+        result, text = game.install()
+        self.assertEqual(0, result.returncode, text)
+        self.assertEqual(first, game.tree()["bd1000.are"])
+        result = subprocess.run([
+            str(WEIDU), "chriz-sod-remix/setup-chriz-sod-remix.tp2",
+            "--force-uninstall-list", "900", "--language", "0", "--use-lang", "en_us",
+            "--no-exit-pause", "--noautoupdate", "--quick-log",
+        ], cwd=game.root, capture_output=True, text=True, timeout=60)
+        self.assertEqual(0, result.returncode, game.transcript(result))
+        self.assertEqual(before, game.tree()["bd1000.are"])
 
     def test_empty_changed_and_same_resref_chests_preserve_every_original_record(self):
         variants = {

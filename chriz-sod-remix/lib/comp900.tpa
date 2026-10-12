@@ -39,6 +39,8 @@
 
 ACTION_IF (csr_keep_treasure = 1) BEGIN
 
+  INCLUDE ~chriz-sod-remix/lib/relocated_loot.tpa~
+
   // payload rows (resref, charges1) — index-parallel arrays
   ACTION_CLEAR_ARRAY csr_pay
   ACTION_CLEAR_ARRAY csr_chg
@@ -50,6 +52,25 @@ ACTION_IF (csr_keep_treasure = 1) BEGIN
   OUTER_SPRINT $csr_pay(~5~) ~SODTRE08~ OUTER_SET $csr_chg(~5~) = 0
   OUTER_SPRINT $csr_pay(~6~) ~SODTRE08~ OUTER_SET $csr_chg(~6~) = 0
   OUTER_SPRINT $csr_pay(~7~) ~SODTRE09~ OUTER_SET $csr_chg(~7~) = 0
+
+  // Preserve explicit identification on the original drop when present. Ring09
+  // is an authored replacement for Tsolak's vampreg death drop, not a copied
+  // RING09 instance: like a newly created item, it is not auto-identified.
+  ACTION_CLEAR_ARRAY csr_pay_id
+  OUTER_SET $csr_pay_id(~4~) = 0
+  ACTION_PHP_EACH csr_pay AS csr_index => csr_item BEGIN
+    ACTION_IF csr_index != 4 BEGIN
+      OUTER_SPRINT csr_source ~bd7000.are~
+      ACTION_IF csr_index = 1 BEGIN OUTER_SPRINT csr_source ~bdisabel.cre~ END
+      ACTION_IF csr_index = 2 BEGIN OUTER_SPRINT csr_source ~bdtsolak.cre~ END
+      ACTION_IF csr_index = 3 BEGIN OUTER_SPRINT csr_source ~bdikros.cre~ END
+      LAF csr_relocated_loot_id
+        STR_VAR source = ~%csr_source%~ item_resref = ~%csr_item%~
+        RET csr_identified = id_bit
+      END
+      OUTER_SET $csr_pay_id(~%csr_index%~) = csr_identified
+    END
+  END
 
   COPY_EXISTING ~bd1000.are~ ~override~
     PATCH_IF (BUFFER_LENGTH < 0x11c) BEGIN
@@ -128,7 +149,7 @@ ACTION_IF (csr_keep_treasure = 1) BEGIN
       WRITE_SHORT (csr_e + 0x0a) $csr_chg(~%csr_j%~)     // charges/quantity 1
       WRITE_SHORT (csr_e + 0x0c) 0
       WRITE_SHORT (csr_e + 0x0e) 0
-      WRITE_LONG  (csr_e + 0x10) 1                       // identified
+      WRITE_LONG  (csr_e + 0x10) $csr_pay_id(~%csr_j%~)  // original identification
       SET csr_e += 0x14
     END
     WRITE_LONG  0x78 csr_new

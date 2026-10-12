@@ -1,0 +1,91 @@
+// Relocation must not identify an item. Read only the source instance's
+// identified bit; authored destination quantities, charges and other flags stay
+// with the granting component. Existing destination records are never touched.
+DEFINE_PATCH_FUNCTION csr_loot_id_run
+  INT_VAR item_offset = 0 item_count = 0
+  STR_VAR item_resref = ~~
+  RET csr_id_seen csr_id_value
+BEGIN
+  PATCH_IF (item_offset < 0 OR item_count < 0 OR
+            item_count > BUFFER_LENGTH / 20 OR
+            item_offset > BUFFER_LENGTH - item_count * 20) BEGIN
+    PATCH_FAIL ~SoD Remix: invalid item table while checking relocated %item_resref%.~
+  END
+  FOR (csr_id_i = 0; csr_id_i < item_count; csr_id_i += 1) BEGIN
+    SET csr_id_pos = item_offset + csr_id_i * 20
+    READ_ASCII csr_id_pos csr_id_ref (8) NULL
+    PATCH_IF (~%csr_id_ref%~ STRING_EQUAL_CASE ~%item_resref%~) BEGIN
+      READ_LONG (csr_id_pos + 16) csr_id_flags
+      SET csr_id_bit = csr_id_flags BAND 1
+      PATCH_IF (csr_id_seen AND csr_id_value != csr_id_bit) BEGIN
+        PATCH_FAIL ~SoD Remix: %SOURCE_FILE% has both identified and unidentified %item_resref% copies; the relocation source is ambiguous.~
+      END
+      SET csr_id_seen = 1
+      SET csr_id_value = csr_id_bit
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr_relocated_loot_id
+  STR_VAR source = ~~ item_resref = ~~
+  RET flags id_bit
+BEGIN
+  OUTER_SPRINT source EVALUATE_BUFFER ~%source%~
+  OUTER_SPRINT item_resref EVALUATE_BUFFER ~%item_resref%~
+  OUTER_SET csr_id_seen = 0
+  OUTER_SET csr_id_value = 0
+  // Earlier mods can remove/replace the old drop. The retained Remix reward
+  // then starts unidentified, like an ordinary newly granted item; never infer
+  // identification from another unrelated copy elsewhere in the game.
+  ACTION_IF FILE_EXISTS_IN_GAME ~%source%~ BEGIN
+    COPY_EXISTING - ~%source%~ ~override~
+      READ_ASCII 0 csr_id_sig (8)
+      PATCH_IF (~%csr_id_sig%~ STRING_EQUAL_CASE ~CRE V1.0~) BEGIN
+        PATCH_IF BUFFER_LENGTH < 0x2d4 BEGIN
+          PATCH_FAIL ~SoD Remix: truncated creature %source% while checking relocated loot.~
+        END
+        READ_LONG 0x2bc csr_id_offset
+        READ_LONG 0x2c0 csr_id_count
+        LPF csr_loot_id_run
+          INT_VAR item_offset = csr_id_offset item_count = csr_id_count
+          STR_VAR item_resref
+          RET csr_id_seen csr_id_value
+        END
+      END ELSE PATCH_IF (~%csr_id_sig%~ STRING_EQUAL_CASE ~AREAV1.0~) BEGIN
+        PATCH_IF BUFFER_LENGTH < 0x11c BEGIN
+          PATCH_FAIL ~SoD Remix: truncated area %source% while checking relocated loot.~
+        END
+        READ_LONG 0x70 csr_id_co
+        READ_SHORT 0x74 csr_id_cc
+        READ_LONG 0x78 csr_id_io
+        READ_SHORT 0x76 csr_id_ic
+        PATCH_IF (csr_id_co < 0 OR (csr_id_cc > 0 AND csr_id_co < 0x11c) OR csr_id_cc > BUFFER_LENGTH / 0xc0 OR
+                  csr_id_co > BUFFER_LENGTH - csr_id_cc * 0xc0 OR
+                  csr_id_io < 0 OR csr_id_ic > BUFFER_LENGTH / 20 OR
+                  csr_id_io > BUFFER_LENGTH - csr_id_ic * 20) BEGIN
+          PATCH_FAIL ~SoD Remix: invalid area tables in %source% while checking relocated loot.~
+        END
+        FOR (csr_id_c = 0; csr_id_c < csr_id_cc; csr_id_c += 1) BEGIN
+          READ_LONG (csr_id_co + csr_id_c * 0xc0 + 0x40) csr_id_first
+          READ_LONG (csr_id_co + csr_id_c * 0xc0 + 0x44) csr_id_count
+          PATCH_IF (csr_id_first < 0 OR csr_id_count < 0 OR csr_id_first > csr_id_ic OR
+                    csr_id_count > csr_id_ic - csr_id_first) BEGIN
+            PATCH_FAIL ~SoD Remix: invalid container item run in %source%.~
+          END
+          LPF csr_loot_id_run
+            INT_VAR item_offset = csr_id_io + csr_id_first * 20 item_count = csr_id_count
+            STR_VAR item_resref
+            RET csr_id_seen csr_id_value
+          END
+        END
+      END ELSE BEGIN
+        PATCH_FAIL ~SoD Remix: unsupported loot-source format in %source%.~
+      END
+  END
+  ACTION_IF NOT csr_id_seen BEGIN
+    PRINT ~SoD Remix: %item_resref% is absent from %source%; retaining the authored reward without auto-identification.~
+  END
+  OUTER_SET id_bit = csr_id_value
+  ACTION_IF id_bit BEGIN OUTER_SPRINT flags ~IDENTIFIED~ END
+  ELSE BEGIN OUTER_SPRINT flags ~NONE~ END
+END
