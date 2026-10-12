@@ -1,0 +1,15 @@
+// Shared by prison and hall. Also repairs an unpaid city save whose old kill
+// journal has already fired; never repeats the death event or awards any XP.
+IF
+  Dead("BDKORLAS")
+  GlobalGT("BD_PLOT","GLOBAL",49)
+  GlobalLT("BD_PLOT","GLOBAL",57)
+  GlobalLT("CSR_KORL_RET","GLOBAL",2)
+  Global("CSR177_REPORT","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR177_REPORT","GLOBAL",1)
+    EraseJournalEntry(%csr177_done%)
+    AddJournalEntry(%csr177_pending%,QUEST)
+    Continue()
+END

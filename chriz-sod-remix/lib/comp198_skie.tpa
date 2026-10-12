@@ -1,0 +1,92 @@
+// Component 198: the selected living Skie is already at the palace on arrival.
+// Actor identity, placement, XP and camp travel belong to the shared #198
+// recruitment installer. This helper owns only council safety and her dialogue.
+// Requires #197: that component retires Skie's later SoD plot and adds the one
+// remaining palace departure cleanup action which is removed below.
+
+OUTER_SET csr198_skie_choice = 4
+COPY_EXISTING - ~skie6.cre~ ~override~
+  READ_ASCII 0x280 csr198_skie_donor_dv (32) NULL
+  PATCH_IF ~%csr198_skie_donor_dv%~ STRING_EQUAL_CASE ~BDSKIE~ BEGIN
+    SET csr198_skie_choice = 1
+  END
+
+DEFINE_PATCH_FUNCTION csr198_skie_replace
+  INT_VAR expected = 1
+  STR_VAR pattern = ~~ replacement = ~~ context = ~~
+BEGIN
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%pattern%~ csr198_skie_matches
+  PATCH_IF csr198_skie_matches != expected BEGIN
+    PATCH_FAIL ~chriz-sod-remix #198 [Skie: %context%]: expected %expected% match(es), found %csr198_skie_matches%.~
+  END
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%pattern%~ ~%replacement%~
+END
+
+COPY_EXISTING ~bd0102.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // All five council layouts used to create a new BDSKIE. The recruitment
+    // dispatcher now resolves SKIE/BDSKIE once, preserving the saved actor.
+    LPF csr198_skie_replace
+      INT_VAR expected = 5
+      STR_VAR pattern = ~CreateCreature("BDSKIE",\[[0-9]+\.[0-9]+\],[A-Z]+)~
+        context = ~five council spawns~
+    END
+
+    // #197's !InParty guard still killed a recruited-and-dismissed Skie.
+    // Keep her alive for #198 camp travel; never-recruited companions may
+    // remain at their original location after the army departs.
+    LPF csr198_skie_replace
+      STR_VAR pattern = EVAL ~IF[%WNL% %TAB%]+Global("BD_plot","global",55)[%WNL% %TAB%]+!\(InParty\|IsValidForPartyDialogue\)("bdskie")[^%WNL%]*[%WNL% %TAB%]+THEN[%WNL% %TAB%]+RESPONSE #100[%WNL% %TAB%]+ApplySpellRES("bddest","bdskie")[^%WNL%]*[%WNL% %TAB%]+Continue()[%WNL% %TAB%]+END[%WNL%]*~
+        context = ~palace departure cleanup~
+    END
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bdcut04.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // The old council exit staged its newly created cameo at the meeting
+    // spot. She is already there, or a party member, so neither direct action
+    // should touch her now. Preserve the other dukes' actions and timing.
+    LPF csr198_skie_replace
+      STR_VAR pattern = ~ActionOverride("bdskie",MoveToPointNoInterrupt(\[600\.510\]))~
+        context = ~council exit movement~
+    END
+    LPF csr198_skie_replace
+      STR_VAR pattern = ~ActionOverride("bdskie",FaceObject(Player1))~
+        context = ~council exit facing~
+    END
+  END
+BUT_ONLY
+
+COPY_EXISTING ~bd7100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // The old bridgefort cameo cleanup also destroys a dismissed companion.
+    // #197 retires her plot; this last area-owned cleanup must stop as well.
+    LPF csr198_skie_replace
+      STR_VAR pattern = ~InMyArea("bdskie")~
+        replacement = ~False()
+  InMyArea("bdskie")~
+        context = ~bridgefort cameo cleanup~
+    END
+  END
+BUT_ONLY
+
+COMPILE ~chriz-sod-remix/dlg/csr198sk.d~
+  USING ~chriz-sod-remix/languages/english/csr198sk.tra~
+
+<<<<<<<< .../csr198-skie-cameo.baf
+// Existing saves can contain both an imported SKIE and the old council cameo.
+// The dispatcher is extended above this block and adopts an eligible BDSKIE
+// as its installed candidate choice. Remove only an unjoined cameo it did not select.
+IF
+  InMyArea("BDSKIE")
+  !Global("CSR198_12_PICK","GLOBAL",%csr198_skie_choice%)
+  !InPartyAllowDead("BDSKIE")
+  !BeenInParty("BDSKIE")
+THEN
+  RESPONSE #100
+    ActionOverride("BDSKIE",DestroySelf())
+    Continue()
+END
+>>>>>>>>
+EXTEND_TOP ~bd0102.bcs~ ~.../csr198-skie-cameo.baf~ EVALUATE_BUFFER

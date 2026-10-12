@@ -4,7 +4,9 @@
 // Running in her existing personal script also reaches actors in older saves.
 // TransformItem retains item charges/flags; never change shared SCS resources,
 // random tables, MINHP1 plot protection or the DW#HASPT bookkeeping marker.
-DEFINE_ACTION_FUNCTION csr197_install_potion_cleanup BEGIN
+DEFINE_ACTION_FUNCTION csr197_install_potion_cleanup
+  STR_VAR target_script = ~bdskie~
+BEGIN
   ACTION_FOR_EACH csr197_potion_number IN ~10~ ~45~ BEGIN
     OUTER_SPRINT csr197_old_potion ~dw#ptn%csr197_potion_number%~
     OUTER_SPRINT csr197_new_potion ~potn%csr197_potion_number%~
@@ -54,7 +56,7 @@ END
 ~
         OUTER_SPRINT csr197_potion_ws ~[ %TAB%%WNL%]*~
         OUTER_SPRINT csr197_potion_pattern ~IF%csr197_potion_ws%Name("BDSKIE",Myself)%csr197_potion_ws%InPartyAllowDead(Myself)%csr197_potion_ws%HasItem("%csr197_old_potion%",Myself)%csr197_potion_ws%THEN%csr197_potion_ws%RESPONSE%csr197_potion_ws%#100%csr197_potion_ws%TransformItem("%csr197_old_potion%","%csr197_new_potion%")%csr197_potion_ws%Continue()%csr197_potion_ws%END~
-        COPY_EXISTING ~bdskie.bcs~ ~override~
+        COPY_EXISTING ~%target_script%.bcs~ ~override~
           DECOMPILE_AND_PATCH BEGIN
             COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr197_potion_pattern%~ csr197_potion_blocks
             PATCH_IF csr197_potion_blocks = 0 BEGIN

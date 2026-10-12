@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+- Add component **198**: Skie can join in the palace hall before the first rest;
+  Yeslick, Branwen, Ajantis, Coran, Garrick, Kagain, Alora, Xan, Tiax, Kivan and
+  Shar-Teel are simple early recruits. Reuse saved actors and their possessions,
+  respect known deaths, and use modest BG1 donors for fresh starts.
+- Dismissed, previously recruited companions follow the Coast Way, Troll Claw
+  and Coalition camps. Retire duplicate cameos, Skie's obsolete cleanup, and
+  the Coran/Safana argument; keep Tiax's jail release and once-only native XP.
+  Requires 110 and 197. Captured-resource compilation and focused source review
+  passed; in-game recruitment, camp movement and normal bedroom rest remain
+  for the user's next install. Faldorn, Quayle, Eldoth, Xzar and Montaron remain
+  deferred to the second round.
+- Add component **177**: report Korlasz's defeat to Liia during ordinary palace
+  conversations after the first night, including departure day. Preserve the
+  early reward and council/departure scenes; both report routes share the existing
+  once-only guard and pay 22,000 XP per present party member.
+- Keep the journal pending until Liia receives the report and restore that reminder
+  once for existing unpaid city saves. Already-paid saves receive no extra reward.
+  Requires 175 and 180; append after 176 if present. Captured-resource compilation
+  passed for old and current reward amounts; native verification is deferred.
+
 ## v0.6.12 - 2026-09-27
 
 - Add the approved Boareskyr collapse timer to fresh 256, plus append-only 258

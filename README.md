@@ -3,6 +3,20 @@
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
 standalone BG:EE + SoD also in scope. Current release: **v0.6.12**.
 
+**Unreleased: component 198** adds eleven simple BG1 recruits and moves Skie to
+the palace hall before the first rest. Previously recruited companions follow
+the army's camps when dismissed; saved actors keep their builds and possessions,
+and known deaths are respected. Requires 110 and 197. See the
+[roster and implementation record](docs/design/wave1/11-early-bg1-companions.md).
+No game installation or playtest has been performed for this addition.
+
+**Unreleased: component 177** keeps Liia's Korlasz reward available after the first
+night, including departure day. Report the victory in her ordinary conversation
+for the same once-only 22,000 XP per present party member. The journal now directs
+you back to Liia and closes when you report; unpaid city saves receive a reminder.
+Requires 175 and 180; append after 176 if it is installed. Compile checks passed;
+the user's next overall install will provide the in-game check.
+
 v0.6.12 adds the approved Boareskyr Bridge collapse timer, with difficulty-scaled
 allowances, escalating warnings and a simple game over. Story Mode has no timer.
 Fresh **256** includes it; append **258** to upgrade an existing 256. See the

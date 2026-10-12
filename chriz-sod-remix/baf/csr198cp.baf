@@ -1,0 +1,17 @@
+// Runs on arrival at a later camp, including for actors in unloaded old areas.
+// A living, previously recruited actor moves once per camp; never a new copy.
+IF
+  Global("CSR198_%csr198_id%_PICK","GLOBAL",%csr198_choice%)
+  Global("CSR198_%csr198_key%_JOINED","GLOBAL",1)
+  GlobalLT("CSR198_%csr198_id%_CAMP","GLOBAL",%csr198_stage%)
+  !InPartyAllowDead("%csr198_dv%")
+  !Dead("%csr198_dv%")
+  !StateCheck("%csr198_dv%",STATE_REALLY_DEAD)
+  BeenInParty("%csr198_dv%")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_%csr198_id%_CAMP","GLOBAL",%csr198_stage%)
+    SetGlobal("CSR198_%csr198_id%_PLACED","GLOBAL",1)
+    MoveGlobal("%csr198_camp%","%csr198_dv%",[%csr198_cx%.%csr198_cy%])
+    Continue()
+END

@@ -1,0 +1,61 @@
+// SoD-only personal override. Saved builds, items and player AI are untouched.
+// Restore the installed BG1 override at the campaign boundary. EET continuity
+// mods still own their later BG2 arrival/dialogue/script handoff.
+%csr198_cameo_restore%
+
+IF
+  OR(2)
+    GlobalLT("chapter","GLOBAL",7)
+    GlobalGT("chapter","GLOBAL",13)
+THEN
+  RESPONSE #100
+    ChangeAIScript("%csr198_old_override%",OVERRIDE)
+END
+
+IF
+  InParty(Myself)
+  Global("CSR198_PARTY","LOCALS",0)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_PARTY","LOCALS",1)
+    SetGlobal("CSR198_WAITING","LOCALS",0)
+    SetGlobal("CSR198_JOINED","LOCALS",1)
+    SetGlobal("CSR198_%csr198_key%_JOINED","GLOBAL",1)
+    SetGlobal("bd_joined","LOCALS",1)
+    Continue()
+END
+
+IF
+  !InPartyAllowDead(Myself)
+  Global("CSR198_WAITING","LOCALS",0)
+  !StateCheck(Myself,STATE_REALLY_DEAD)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_PARTY","LOCALS",0)
+    SetGlobal("CSR198_WAITING","LOCALS",1)
+    SetDialogue("%csr198_dialogue%")
+    ChangeEnemyAlly(Myself,NEUTRAL)
+    Continue()
+END
+
+// Fresh BG1 donors may start below the normal SoD floor. Never reduce XP.
+IF
+  Global("BD_JOINXP","LOCALS",0)
+  IsValidForPartyDialogue(Myself)
+  XPLT(Myself,64000)
+THEN
+  RESPONSE #100
+    ChangeStat(Myself,XP,64000,SET)
+    Continue()
+END
+
+%csr198_xp_script%
+
+// A waiting recruit must not run their obsolete BG1 quest/combat scripts.
+// In-party actors fall through to their existing player AI script slots.
+IF
+  !InPartyAllowDead(Myself)
+THEN
+  RESPONSE #100
+    NoAction()
+END
