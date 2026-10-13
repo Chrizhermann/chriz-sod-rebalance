@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.12~
+VERSION ~v0.6.13~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -27,6 +27,7 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   170 the Korlasz jailbreak              (requires 140)
 //   175 XP ledger: Liia's reward after the jailbreak (requires 170+180)
 //   176 update an existing Liia reward to flat 22,000/character (requires 175)
+//   177 report Korlasz to Liia after the first night (requires 175+180)
 //   180 celebration + Caelar's proclamation (requires 140+150)
 //   185 Entar Silvershield removed          (requires 140+150)
 //   187 the assassination night-set never spawns (render-proof;
@@ -35,6 +36,8 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 //   195 assassination/poison references scrubbed (requires 150)
 //   197 Skie: talk-to-join recruit at the palace, SoD plot
 //       removed                        (requires 150+185+210)
+//   198 early BG1 recruits, earlier Skie, dismissed recruits follow camps
+//       (requires 110+197)
 // 200-229: Coast Way chapter pass
 //   200 Coast Way Crossing: west spiders cut, no magic wall,
 //       5-round bridge fight
@@ -412,6 +415,14 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~csrcele.dlg~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp176.tpa~
 
+// 177 — Keep the once-only reward available throughout the city phase.
+BEGIN @177 DESIGNATED 177 GROUP @1001 LABEL ~csr_prologue_late_report~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~175~ ~Component 177 extends Liia's existing quest reward; install 175 first.~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~180~ ~Component 177 requires component 180 (celebration + return beat).~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+
+INCLUDE ~chriz-sod-remix/lib/comp177.tpa~
+
 // ============================================================
 // 185 — Prologue: Entar Silvershield removed (stays dead)
 // ============================================================
@@ -493,6 +504,14 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 1
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~Component 197 (Skie talk-to-join) requires component 210 (Coast Way Forest removed - it retires the BD7000 Skie vignette this component leaves dormant).~
 
 INCLUDE ~chriz-sod-remix/lib/comp197.tpa~
+
+// Earlier palace Skie and eleven simple BG1 recruitment options.
+BEGIN @198 DESIGNATED 198 GROUP @1001 LABEL ~csr_early_bg1_companions~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~110~ ~Component 198 requires component 110 (keep the imported BG1 party).~
+REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~197~ ~Component 198 requires component 197 (Skie's retired SoD plot and palace recruitment).~
+
+INCLUDE ~chriz-sod-remix/lib/comp198.tpa~
 
 // ============================================================
 // 187 — Prologue: the assassination night-set never spawns
@@ -736,6 +755,13 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcut45b.bcs~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp280.tpa~
+
+// ============================================================
+// 285 — interim Avernus portal and finale cleanup
+// ============================================================
+BEGIN @285 DESIGNATED 285 GROUP @1004 LABEL ~csr_avernus_finale~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~BD4600.ARE~ AND FILE_EXISTS_IN_GAME ~BD4700.ARE~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp285.tpa~
 
 // ============================================================
 // 290 — end at the Dragonspear victory celebration

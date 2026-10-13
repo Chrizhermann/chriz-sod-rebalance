@@ -82,6 +82,13 @@ chapter-pass docs only.
   content (silent passengers are fine — flexibility wins). That's *step 1*. *Step 2* (later):
   optionally place non-party companions somewhere in SoD as pickups, maybe with a little
   dialogue.
+  **2026-10-04 follow-up approved and implemented, unreleased:** step 2's first
+  round is component 198: earlier Skie plus eleven early BG1 recruits, short
+  conversations, saved-actor/gear preservation, known deaths respected, and
+  dismissed previously recruited companions following the camps. Five remaining
+  BG1 companions are deferred, not excluded. Component 177 fixes reporting a
+  delayed Korlasz victory to Liia. Keep validation light; the user will perform
+  the next in-game check. [Full decision and implementation record](design/wave1/11-early-bg1-companions.md).
 - **Items 10/11 (ending):** remove the **entire post-victory epilogue** — dream, Skie murder,
   arrest, trial, jail, breakout, hooded man. No replacement narrative: defeat the final boss,
   victory, fade out, BG2 begins unexplained (the original BG1→BG2 feel). Rationale: the

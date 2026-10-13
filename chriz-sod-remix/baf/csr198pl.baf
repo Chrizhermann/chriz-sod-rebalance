@@ -1,0 +1,18 @@
+// Rescued saved companions keep their actor, inventory, effects and spellbook.
+%csr198_relocation%
+
+IF
+  Global("CSR198_%csr198_id%_PICK","GLOBAL",0)
+  Global("CSR198_%csr198_id%_PLACED","GLOBAL",0)
+  GlobalLT("chapter","GLOBAL",9)
+  %csr198_fresh_guards%
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_%csr198_id%_PICK","GLOBAL",1)
+    SetGlobal("CSR198_%csr198_id%_PLACED","GLOBAL",1)
+    CreateCreature("%csr198_code%",[%csr198_x%.%csr198_y%],S)
+    // Match native SoD promotion for a never-recruited fallback. Every known
+    // recruited identity is excluded above; saved companions use MoveGlobal.
+    ActionOverride("%csr198_actual%",MakeGlobalOverride())
+    Continue()
+END

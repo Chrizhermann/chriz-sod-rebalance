@@ -1,0 +1,83 @@
+// Liia's Korlasz report remains available after the celebration evening.
+// Append after 175/180 (and 176 if present); no actor or plot state is reset.
+LOAD_TRA ~chriz-sod-remix/languages/english/comp177.tra~
+
+// These are normal conversations, never the council (9) or departure speech
+// (30). Keep every existing reply; state 33's silent exit becomes a farewell.
+COPY_EXISTING - ~bdliia.dlg~ ~override~
+  READ_LONG 0x08 csr177_states
+  READ_LONG 0x0c csr177_so
+  PATCH_IF (csr177_states <= 33) BEGIN
+    PATCH_FAIL ~comp177: BDLIIA is missing the expected normal conversations.~
+  END
+  READ_STRREF (csr177_so + 13 * 16) csr177_greeting
+  READ_STRREF (csr177_so + 33 * 16) csr177_departure
+  PATCH_IF ((~%csr177_greeting%~ STRING_CONTAINS_REGEXP ~glad to see you well~) != 0 OR
+            (~%csr177_departure%~ STRING_CONTAINS_REGEXP ~Leave through the main doors~) != 0) BEGIN
+    PATCH_FAIL ~comp177: Liia's normal greeting or departure-day anchor changed.~
+  END
+  READ_LONG (csr177_so + 33 * 16 + 4) csr177_first
+  READ_LONG (csr177_so + 33 * 16 + 8) csr177_count
+  READ_LONG 0x14 csr177_to
+  READ_LONG (csr177_to + csr177_first * 32) csr177_flags
+  PATCH_IF (csr177_count != 1 OR csr177_flags != 8) BEGIN
+    PATCH_FAIL ~comp177: Liia's departure greeting no longer has its simple EXIT.~
+  END
+
+// Reuse 176's anchored validation and 24,000 -> 22,000 normalization. This
+// supports old 175 installs even when 176 has not separately been installed.
+INCLUDE ~chriz-sod-remix/lib/comp176.tpa~
+
+// Resolve the native completion strref from the specific death-journal block,
+// rather than assuming EET's 200000 offset. Keep its map-note/global actions.
+// A separate once-only journal block handles both new kills and unpaid saves
+// where the old death-journal flag already fired.
+OUTER_SET csr177_done = 0xffffffff
+OUTER_SET csr177_pending = RESOLVE_STR_REF(@17700)
+OUTER_SET csr177_complete = RESOLVE_STR_REF(@17704)
+OUTER_SPRINT csr177_nl ~%MNL%?%LNL%~
+OUTER_SPRINT csr177_block ~^IF%csr177_nl%\(\([ %TAB%]+[^%WNL%]*%csr177_nl%\|THEN%csr177_nl%\)*\)END~
+COPY_EXISTING ~bd0116.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    SET csr177_matches = 0
+    REPLACE_EVALUATE ~%csr177_block%~ BEGIN
+      SPRINT csr177_result ~%MATCH0%~
+      INNER_PATCH_SAVE csr177_result ~%csr177_result%~ BEGIN
+        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~Global("bd_sdd011b_korlasz_journal_entry","BD0116",0)~ csr177_here
+        PATCH_IF (csr177_here = 1) BEGIN
+          SET csr177_matches += 1
+          COUNT_REGEXP_INSTANCES ~AddJournalEntry([0-9]+,QUEST_DONE)~ csr177_entries
+          PATCH_IF (csr177_entries != 1) BEGIN
+            PATCH_FAIL ~comp177: Korlasz's death journal is not the expected single completed entry.~
+          END
+          REPLACE_EVALUATE ~AddJournalEntry(\([0-9]+\),QUEST_DONE)~ BEGIN
+            SET csr177_done = ~%MATCH1%~
+          END ~~
+        END
+      END
+    END ~%csr177_result%~
+    PATCH_IF (csr177_matches != 1 OR csr177_done = 0xffffffff) BEGIN
+      PATCH_FAIL ~comp177: expected one Korlasz death-journal block in BD0116.~
+    END
+  END
+BUT_ONLY
+
+// Register the reminder under the same EE quest as the original completion.
+// The entry's quest id and display metadata are taken from this installation.
+ACTION_IF FILE_EXISTS_IN_GAME ~bgee.lua~ BEGIN
+  COPY_EXISTING ~bgee.lua~ ~override~
+    SET csr177_registered = 0
+    REPLACE_EVALUATE ~\(createEntry[ %TAB%]*( *[0-9]+, *-1, *\)%csr177_done%\(, *{}, *[0-9]+ *)\)~ BEGIN
+      SET csr177_registered += 1
+      SPRINT csr177_entry ~%MATCH0%%LNL%%TAB%%MATCH1%%csr177_pending%%MATCH2%%LNL%%TAB%%MATCH1%%csr177_complete%%MATCH2%~
+    END ~%csr177_entry%~
+    PATCH_IF (csr177_registered != 1) BEGIN
+      PATCH_FAIL ~comp177: expected one EE journal registration for Korlasz's completion.~
+    END
+  BUT_ONLY
+END
+
+COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr177.d~
+  USING ~chriz-sod-remix/languages/english/comp177.tra~
+EXTEND_TOP ~bd0116.bcs~ ~chriz-sod-remix/baf/csr177jr.baf~ EVALUATE_BUFFER
+EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/csr177jr.baf~ EVALUATE_BUFFER

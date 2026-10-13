@@ -1,0 +1,123 @@
+// One-way portal at the former downstairs lift switch. Include defines only;
+// the component preflights all finale resources before calling install.
+// Keep the party-gather checks and the normal arrival/confrontation scripts.
+
+DEFINE_PATCH_MACRO csr285_portal_area BEGIN
+  PATCH_IF (SOURCE_SIZE < 0xf4) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #285 portal: truncated BD4600 area.~
+  END
+  READ_ASCII 0 csr285_portal_sig (8)
+  PATCH_IF NOT (~%csr285_portal_sig%~ STRING_EQUAL_CASE ~AREAV1.0~) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #285 portal: unsupported BD4600 area format.~
+  END
+  READ_LONG 0xa4 csr285_portal_dc
+  READ_LONG 0xa8 csr285_portal_do
+  READ_LONG 0xc4 csr285_portal_no
+  READ_LONG 0xc8 csr285_portal_nc
+  PATCH_IF ((csr285_portal_dc < 1) OR (csr285_portal_do < 0xf4) OR
+            (csr285_portal_do > SOURCE_SIZE) OR
+            (csr285_portal_dc > (SOURCE_SIZE - csr285_portal_do) / 0xc8) OR
+            (csr285_portal_nc < 1) OR (csr285_portal_no < 0xf4) OR
+            (csr285_portal_no > SOURCE_SIZE) OR
+            (csr285_portal_nc > (SOURCE_SIZE - csr285_portal_no) / 0x34)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #285 portal: invalid door or map-note table.~
+  END
+  SET csr285_portal_doors = 0
+  FOR (csr285_portal_i = 0; csr285_portal_i < csr285_portal_dc; csr285_portal_i += 1) BEGIN
+    SET csr285_portal_b = csr285_portal_do + csr285_portal_i * 0xc8
+    READ_ASCII (csr285_portal_b + 0x80) csr285_portal_script (8) NULL
+    PATCH_IF (~%csr285_portal_script%~ STRING_EQUAL_CASE ~BDELEV01~) BEGIN
+      SET csr285_portal_doors += 1
+      SET csr285_portal_door = csr285_portal_b
+      READ_SHORT (csr285_portal_b + 0x74) csr285_portal_x
+      READ_SHORT (csr285_portal_b + 0x76) csr285_portal_y
+    END
+  END
+  SET csr285_portal_notes = 0
+  FOR (csr285_portal_i = 0; csr285_portal_i < csr285_portal_nc; csr285_portal_i += 1) BEGIN
+    SET csr285_portal_b = csr285_portal_no + csr285_portal_i * 0x34
+    READ_SHORT csr285_portal_b csr285_portal_nx
+    READ_SHORT (csr285_portal_b + 2) csr285_portal_ny
+    // Location identifies the lift note without English text or a TLK index.
+    PATCH_IF ((csr285_portal_nx = 1340) AND (csr285_portal_ny = 1150)) BEGIN
+      SET csr285_portal_notes += 1
+      SET csr285_portal_note = csr285_portal_b
+    END
+  END
+  PATCH_IF ((csr285_portal_doors != 1) OR (csr285_portal_notes != 1)) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #285 portal: expected one downstairs switch and its map note.~
+  END
+END
+
+DEFINE_PATCH_MACRO csr285_portal_activation BEGIN
+  SPRINT csr285_portal_nl ~%MNL%?%LNL%~
+  SPRINT csr285_portal_old ~SetGlobal("bd_hellevator","global",1)%csr285_portal_nl%    StartCutSceneEx("bdcut55",FALSE)~
+  SPRINT csr285_portal_new ~SetGlobal("bd_hellevator","global",5)%csr285_portal_nl%    SetGlobal("bd_plot","global",560)%csr285_portal_nl%    CreateVisualEffect("DDOORH",\[[0-9]+\.[0-9]+\])%csr285_portal_nl%    Wait(1)%csr285_portal_nl%    StartCutSceneEx("bdcut56",FALSE)~
+  COUNT_REGEXP_INSTANCES ~%csr285_portal_old%~ csr285_portal_old_count
+  COUNT_REGEXP_INSTANCES ~%csr285_portal_new%~ csr285_portal_new_count
+  COUNT_REGEXP_INSTANCES ~Global("bd_hellevator","global",0)~ csr285_portal_guard_count
+  PATCH_IF NOT (((csr285_portal_old_count = 1) AND (csr285_portal_new_count = 0)) OR
+                ((csr285_portal_old_count = 0) AND (csr285_portal_new_count = 1))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #285 portal: unsupported downstairs activation sequence.~
+  END
+  PATCH_IF (csr285_portal_guard_count != 1) BEGIN
+    PATCH_FAIL ~chriz-sod-remix #285 portal: downstairs activation guard is missing or ambiguous.~
+  END
+END
+
+DEFINE_ACTION_FUNCTION csr285_portal_preflight BEGIN
+  ACTION_FOR_EACH csr285_portal_res IN
+    ~bd4600.are~ ~bdelev01.bcs~ ~bdcut56.bcs~ ~bd4700.bcs~ ~ddoorh.vvc~
+  BEGIN
+    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr285_portal_res%~ BEGIN
+      FAIL ~chriz-sod-remix #285 portal: required resource %csr285_portal_res% is missing.~
+    END
+  END
+  COPY_EXISTING - ~bd4600.are~ ~override~
+    LAUNCH_PATCH_MACRO csr285_portal_area
+  COPY_EXISTING - ~bdelev01.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LAUNCH_PATCH_MACRO csr285_portal_activation
+    END
+  COPY_EXISTING - ~bdcut56.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      COUNT_REGEXP_INSTANCES ~StartCutSceneEx("bdcut57",FALSE)~ csr285_portal_confrontations
+      COUNT_REGEXP_INSTANCES ~LeaveAreaLUA\(Panic\)?("bd4700",~ csr285_portal_arrivals
+      PATCH_IF ((csr285_portal_confrontations != 1) OR (csr285_portal_arrivals != 7)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #285 portal: upper-arrival cutscene no longer has its normal party/confrontation handoff.~
+      END
+    END
+  COPY_EXISTING - ~bd4700.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      // BDCUT56 explicitly starts the confrontation. Setting bd_plot=560 before
+      // crossing suppresses this independent area-entry trigger.
+      COUNT_REGEXP_INSTANCES ~GlobalLT("bd_plot","global",560)~ csr285_portal_entry_guards
+      COUNT_REGEXP_INSTANCES ~StartCutSceneEx("bdcut57",FALSE)~ csr285_portal_entries
+      PATCH_IF ((csr285_portal_entry_guards != 1) OR (csr285_portal_entries != 1)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix #285 portal: final-area confrontation entry differs from the supported seam.~
+      END
+    END
+END
+
+DEFINE_ACTION_FUNCTION csr285_portal_install BEGIN
+  COPY_EXISTING ~bd4600.are~ ~override~
+    LAUNCH_PATCH_MACRO csr285_portal_area
+    SAY (csr285_portal_note + 4) @28501
+    // The old switch's open/close clank would undermine the portal sound.
+    // DDOORH.VVC already contains its native EFF_M93 teleport sound.
+    WRITE_ASCII (csr285_portal_door + 0x58) ~~ #8
+    WRITE_ASCII (csr285_portal_door + 0x60) ~~ #8
+  BUT_ONLY
+  COPY_EXISTING ~bdelev01.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LAUNCH_PATCH_MACRO csr285_portal_activation
+      PATCH_IF (csr285_portal_old_count = 1) BEGIN
+        REPLACE_TEXTUALLY ~%csr285_portal_old%~ ~SetGlobal("bd_hellevator","global",5)
+    SetGlobal("bd_plot","global",560)
+    CreateVisualEffect("DDOORH",[%csr285_portal_x%.%csr285_portal_y%])
+    Wait(1)
+    StartCutSceneEx("bdcut56",FALSE)~
+      END
+    END
+  BUT_ONLY
+END

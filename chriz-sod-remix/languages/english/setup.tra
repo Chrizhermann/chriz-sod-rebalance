@@ -1,4 +1,6 @@
 @100 = ~SoD remix: rest-ambush chance reduced 5x (felt rate)~
+@285 = ~SoD remix: Avernus portal and a fairer final battle~
+@28501 = ~Portal to the summit~
 @110 = ~SoD remix: keep all companions at SoD start~
 @115 = ~SoD remix: Khalid's Bridgefort quest fits a carried BG1 party~
 @9015 = ~Install component 110 (keep all companions at SoD start) first.~
@@ -13,12 +15,14 @@
 @170 = ~SoD remix: prologue - the Korlasz jailbreak~
 @175 = ~SoD remix: prologue - the XP ledger: Liia's reward after the jailbreak~
 @176 = ~SoD remix: prologue - update Liia's reward to 22,000 XP per character~
+@177 = ~SoD remix: prologue - report Korlasz to Liia after the first night~
 @180 = ~SoD remix: prologue - celebration and Caelar's proclamation~
 @185 = ~SoD remix: prologue - Entar Silvershield removed (stays dead)~
 @187 = ~SoD remix: prologue - the assassination night-set never spawns~
 @190 = ~SoD remix: prologue - Skie's second-night bedroom visit removed~
 @195 = ~SoD remix: prologue - assassination and poison references scrubbed~
 @197 = ~SoD remix: prologue - Skie: talk-to-join recruit at the palace, SoD plot removed~
+@198 = ~SoD remix: early BG1 companion recruitment and camp follow-up~
 
 @200 = ~SoD remix: Coast Way Crossing - fewer spiders, fairer bridge fight~
 @210 = ~SoD remix: Coast Way Forest removed - Rasaad recruits at the camp~

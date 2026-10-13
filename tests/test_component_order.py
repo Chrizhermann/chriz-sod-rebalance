@@ -23,12 +23,14 @@ EXPECTED_COMPONENTS = {
     170,
     175,
     176,
+    177,
     180,
     185,
     187,
     190,
     195,
     197,
+    198,
     200,
     210,
     215,
@@ -48,6 +50,7 @@ EXPECTED_COMPONENTS = {
     266,
     270,
     280,
+    285,
     290,
     291,
     900,
@@ -67,15 +70,17 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_12(self) -> None:
+    def test_patch_release_version_is_v0_6_13(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.12~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.13~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()
 
         self.assertLess(components.index(210), components.index(197))
+        self.assertLess(components.index(110), components.index(198))
+        self.assertLess(components.index(197), components.index(198))
 
     def test_ending_prerequisites_precede_290_and_repair_291(self) -> None:
         components = designated_components()
@@ -87,6 +92,8 @@ class ComponentOrderTests(unittest.TestCase):
     def test_filler_repairs_follow_their_prerequisites(self) -> None:
         components = designated_components()
         self.assertLess(components.index(175), components.index(176))
+        for prerequisite in (175, 176, 180):
+            self.assertLess(components.index(prerequisite), components.index(177))
         self.assertLess(components.index(230), components.index(235))
         for prerequisite in (240, 260):
             self.assertLess(components.index(prerequisite), components.index(265))

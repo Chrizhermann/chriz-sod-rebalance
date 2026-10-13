@@ -19,6 +19,26 @@
 
 LOAD_TRA ~chriz-sod-remix/languages/english/comp170.tra~
 
+INCLUDE ~chriz-sod-remix/lib/relocated_loot.tpa~
+// Preserve the original drop's identification, not the blanket IDENTIFIED
+// formerly imposed by the jailbreak. Only new grants use these flags.
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~scrl1z~ RET csr170_id_scrl1z = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~scrl6h~ RET csr170_id_scrl6h = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~scrl3g~ RET csr170_id_scrl3g = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~potn21~ RET csr170_id_potn21 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~clck12~ RET csr170_id_clck12 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~clck01~ RET csr170_id_clck01 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~bdbrac13~ RET csr170_id_bdbrac13 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bdshkorl.cre~ item_resref = ~staf02~ RET csr170_id_staf02 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~bdshsare~ RET csr170_id_bdshsare = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~bdshbhr~ RET csr170_id_bdshbhr = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~bdshkorj~ RET csr170_id_bdshkorj = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~bdhelm10~ RET csr170_id_bdhelm10 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~wand11~ RET csr170_id_wand11 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~bdsw2h03~ RET csr170_id_bdsw2h03 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0130.are~ item_resref = ~potn14~ RET csr170_id_potn14 = flags END
+LAF csr_relocated_loot_id STR_VAR source = ~bd0120.are~ item_resref = ~bdshkoro~ RET csr170_id_bdshkoro = flags END
+
 // ------------------------------------------------------------
 // 0. Loud preconditions: every game resource this component wires up must
 //    exist NOW — a missing chassis/spell/item must abort the install, not
@@ -175,18 +195,18 @@ COPY_EXISTING ~bdkorlas.cre~ ~override/csrkorl.cre~
   // restored consumables — revives her four dead vanilla AI scroll/potion
   // blocks (research 10d §1: dead code on this install because SCS #6100 left
   // her itemless); loot = the re-homed family papers + her BD0130 kit (10a §2)
-  ADD_CRE_ITEM ~scrl1z~   #1 #0 #0 ~IDENTIFIED~ ~inv~     // Minor Globe scroll
-  ADD_CRE_ITEM ~scrl6h~   #1 #0 #0 ~IDENTIFIED~ ~inv~     // Prot. from Elemental Energy
-  ADD_CRE_ITEM ~scrl3g~   #1 #0 #0 ~IDENTIFIED~ ~inv~     // Vocalize
-  ADD_CRE_ITEM ~potn21~   #1 #0 #0 ~IDENTIFIED~ ~QITEM~   // Potion of Clarity (usable slot)
-  ADD_CRE_ITEM ~bdshsare~ #0 #0 #0 ~IDENTIFIED~ ~inv~     // Page from Sarevok's Notes (P1)
-  ADD_CRE_ITEM ~bdshbhr~  #0 #0 #0 ~IDENTIFIED~ ~inv~     // Bhaal Research (P1)
-  ADD_CRE_ITEM ~bdshkorj~ #0 #0 #0 ~IDENTIFIED~ ~inv~     // Korlasz's Journal
-  ADD_CRE_ITEM ~bdshkoro~ #0 #0 #0 ~IDENTIFIED~ ~inv~     // Orders from Korlasz
-  ADD_CRE_ITEM ~clck12~   #0 #0 #0 ~IDENTIFIED~ ~ARMOR~   // Knave's Robe (worn)
-  ADD_CRE_ITEM ~clck01~   #0 #0 #0 ~IDENTIFIED~ ~CLOAK~   // Cloak of Protection +1
-  ADD_CRE_ITEM ~bdbrac13~ #0 #0 #0 ~IDENTIFIED~ ~GLOVES~  // Bracers of Defense AC 6
-  ADD_CRE_ITEM ~staf02~   #0 #0 #0 ~IDENTIFIED~ ~WEAPON1~ EQUIP  // Quarterstaff +1
+  ADD_CRE_ITEM ~scrl1z~   #1 #0 #0 ~%csr170_id_scrl1z%~ ~inv~     // Minor Globe scroll
+  ADD_CRE_ITEM ~scrl6h~   #1 #0 #0 ~%csr170_id_scrl6h%~ ~inv~     // Prot. from Elemental Energy
+  ADD_CRE_ITEM ~scrl3g~   #1 #0 #0 ~%csr170_id_scrl3g%~ ~inv~     // Vocalize
+  ADD_CRE_ITEM ~potn21~   #1 #0 #0 ~%csr170_id_potn21%~ ~QITEM~   // Potion of Clarity (usable slot)
+  ADD_CRE_ITEM ~bdshsare~ #0 #0 #0 ~%csr170_id_bdshsare%~ ~inv~     // Page from Sarevok's Notes (P1)
+  ADD_CRE_ITEM ~bdshbhr~  #0 #0 #0 ~%csr170_id_bdshbhr%~ ~inv~     // Bhaal Research (P1)
+  ADD_CRE_ITEM ~bdshkorj~ #0 #0 #0 ~%csr170_id_bdshkorj%~ ~inv~     // Korlasz's Journal
+  ADD_CRE_ITEM ~bdshkoro~ #0 #0 #0 ~%csr170_id_bdshkoro%~ ~inv~     // Orders from Korlasz
+  ADD_CRE_ITEM ~clck12~   #0 #0 #0 ~%csr170_id_clck12%~ ~ARMOR~   // Knave's Robe (worn)
+  ADD_CRE_ITEM ~clck01~   #0 #0 #0 ~%csr170_id_clck01%~ ~CLOAK~   // Cloak of Protection +1
+  ADD_CRE_ITEM ~bdbrac13~ #0 #0 #0 ~%csr170_id_bdbrac13%~ ~GLOVES~  // Bracers of Defense AC 6
+  ADD_CRE_ITEM ~staf02~   #0 #0 #0 ~%csr170_id_staf02%~ ~WEAPON1~ EQUIP  // Quarterstaff +1
   SET_BG2_PROFICIENCY PROFICIENCYQUARTERSTAFF 1
 BUT_ONLY
 
@@ -229,8 +249,8 @@ COPY_EXISTING ~bdkorme9.cre~ ~override/csrhass.cre~
   // his own key and bd_stole_ophyllis_key only trips if HIS copy is gone
   // (BDOPHYLL.baf:35-46, BD0116.baf:56-63) — a second copy on her body is inert.
   REMOVE_CRE_ITEM ~helm01~
-  ADD_CRE_ITEM ~bdhelm10~ #0 #0 #0 ~IDENTIFIED~ ~HELMET~
-  ADD_CRE_ITEM ~wand11~   #5 #0 #0 ~IDENTIFIED~ ~QITEM~
+  ADD_CRE_ITEM ~bdhelm10~ #0 #0 #0 ~%csr170_id_bdhelm10%~ ~HELMET~
+  ADD_CRE_ITEM ~wand11~   #5 #0 #0 ~%csr170_id_wand11%~ ~QITEM~
   ADD_CRE_ITEM ~bdkey10~  #0 #0 #0 ~IDENTIFIED~ ~inv~
   SET_BG2_PROFICIENCY PROFICIENCYFLAILMORNINGSTAR 1
   SET_BG2_PROFICIENCY PROFICIENCYSWORDANDSHIELD 1
@@ -280,8 +300,8 @@ COPY_EXISTING ~bdkorme8.cre~ ~override/csrvhas.cre~
   REMOVE_CRE_ITEM ~helm01~
   ADD_CRE_ITEM ~plat04~ #0 #0 #0 ~IDENTIFIED&UNDROPPABLE~ ~ARMOR~ EQUIP    // Full Plate Mail
   ADD_CRE_ITEM ~helm01~ #0 #0 #0 ~IDENTIFIED&UNDROPPABLE~ ~HELMET~ EQUIP   // Helmet
-  ADD_CRE_ITEM ~bdsw2h03~ #0 #0 #0 ~IDENTIFIED~ ~WEAPON2~ EQUIP TWOHANDED  // Sword of Ruin +2
-  ADD_CRE_ITEM ~potn14~   #1 #0 #0 ~IDENTIFIED~ ~QITEM~                    // Oil of Speed ×1
+  ADD_CRE_ITEM ~bdsw2h03~ #0 #0 #0 ~%csr170_id_bdsw2h03%~ ~WEAPON2~ EQUIP TWOHANDED  // Sword of Ruin +2
+  ADD_CRE_ITEM ~potn14~   #1 #0 #0 ~%csr170_id_potn14%~ ~QITEM~                    // Oil of Speed ×1
   SET_BG2_PROFICIENCY PROFICIENCYTWOHANDEDSWORD 3
   SET_BG2_PROFICIENCY PROFICIENCY2HANDED 2
   SET_BG2_PROFICIENCY PROFICIENCYDART 1
@@ -322,9 +342,9 @@ COPY_EXISTING ~bdshis07.cre~ ~override/csrsill.cre~
   // SCS thief brains restealth off SCS's own potion resref; SoD-native gets the
   // vanilla one. Same potion either way, so loot value is identical.
   PATCH_IF (FILE_EXISTS_IN_GAME ~dw#ptn10.itm~) AND (FILE_EXISTS_IN_GAME ~dw1melth.bcs~) BEGIN
-    ADD_CRE_ITEM ~dw#ptn10~ #3 #0 #0 ~IDENTIFIED~ ~QITEM~  // Potion of Invisibility ×3
+    ADD_CRE_ITEM ~dw#ptn10~ #3 #0 #0 ~NONE~ ~QITEM~  // Potion of Invisibility ×3
   END ELSE BEGIN
-    ADD_CRE_ITEM ~potn10~   #3 #0 #0 ~IDENTIFIED~ ~QITEM~
+    ADD_CRE_ITEM ~potn10~   #3 #0 #0 ~NONE~ ~QITEM~
   END
   PATCH_IF (FILE_EXISTS_IN_GAME ~bag02i.itm~) BEGIN
     ADD_CRE_ITEM ~bag02i~ #0 #0 #0 ~IDENTIFIED~ ~inv~      // Gem Bag (early-QoL re-home)

@@ -1,7 +1,19 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.12**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.13**.
+
+v0.6.13 adds early BG1 companion recruitment in SoD (**198**): Skie can join in
+the palace hall before the first rest, and Yeslick, Branwen, Ajantis, Coran,
+Garrick, Kagain, Alora, Xan, Tiax, Kivan and Shar-Teel are simple early recruits.
+Saved companions keep their builds and possessions, known deaths are respected,
+and dismissed recruits follow the army's camps. Requires 110 and 197. **177**
+lets you report Korlasz's defeat to Liia after the first night for the same
+once-only 22,000 XP per present party member. **285** turns the Avernus lift
+into a portal and makes the final battle fairer. Relocated Korlasz and
+camp-chest loot now keeps its original identification state. See the
+[release report](docs/releases/v0.6.13.md); in-game checks are pending the
+next collection test pass.
 
 v0.6.12 adds the approved Boareskyr Bridge collapse timer, with difficulty-scaled
 allowances, escalating warnings and a simple game over. Story Mode has no timer.

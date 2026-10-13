@@ -20,6 +20,8 @@ branches remain unverified. The earlier finale test had bypassed fort continuity
   passengers are acceptable.
 - **Step 2 (later, separate):** optionally place non-party companions somewhere in SoD as
   pickups, maybe with a little dialogue.
+  **Update 2026-10-04:** first round approved and implemented as unreleased
+  component 198; see [early BG1 recruitment](11-early-bg1-companions.md).
 - Imoen is **not** part of this component — her absence is structural (escort NPC, poisoning
   plot) and is handled in the prologue chapter pass.
 

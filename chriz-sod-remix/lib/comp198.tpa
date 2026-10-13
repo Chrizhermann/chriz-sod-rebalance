@@ -1,0 +1,293 @@
+// Early BG1 recruits. One selected identity per companion, an installed BG1
+// donor for fresh starts, and the original global actor for prior recruits.
+// No resurrection, inventory copying, party relocation or BG2 donor takeover.
+// The coordinates use existing cameo positions or clear searchmap cells near
+// native city/camp placements; see docs/design/wave1/11-early-bg1-companions.md.
+
+LOAD_TRA ~chriz-sod-remix/languages/english/comp198.tra~
+MKDIR ~weidu_external/work/chriz-sod-remix/198~
+
+INCLUDE ~chriz-sod-remix/lib/comp198_skie.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp198_cameos.tpa~
+
+COPY ~chriz-sod-remix/baf/csrskixp.baf~ ~weidu_external/work/chriz-sod-remix/198/xp.baf~
+  READ_ASCII 0 csr198_xp_script (BUFFER_LENGTH)
+
+// The palace has two campaign-variant city exits. Follow the installed ARE's
+// active destination, as #180 does when restoring its first-evening door lock.
+OUTER_SPRINT csr198_palace_area ~~
+COPY_EXISTING - ~bd0102.are~ ~override~
+  READ_LONG 0x5c csr198_regions
+  READ_SHORT 0x5a csr198_region_count
+  SET csr198_exits = 0
+  FOR (csr198_i = 0; csr198_i < csr198_region_count; ++csr198_i) BEGIN
+    SET csr198_region = csr198_regions + csr198_i * 0xc4
+    READ_ASCII csr198_region csr198_region_name (32) NULL
+    READ_LONG (csr198_region + 0x60) csr198_region_flags
+    PATCH_IF ((~%csr198_region_name%~ STRING_EQUAL_CASE ~TranBD0010~) OR
+              (~%csr198_region_name%~ STRING_EQUAL_CASE ~TranBD0101~)) AND
+              ((csr198_region_flags BAND 0x100) = 0) BEGIN
+      READ_ASCII (csr198_region + 0x38) csr198_palace_area (8) NULL
+      SET csr198_exits += 1
+    END
+  END
+  PATCH_IF csr198_exits != 1 BEGIN
+    PATCH_FAIL ~chriz-sod-remix #198: expected one active palace city exit; cannot choose the near-palace recruitment area.~
+  END
+
+// ID, key, BG1 donor, original identity, supported alternate identity, cameo,
+// first area/x/y, Coast Way x/y, Troll Claw x/y, Coalition x/y => greeting.
+// Read the actual donor DV too: modpack 199 may have normalized Xan/Yeslick.
+// C#Ajantis and O#Bran are separate BG2 characters, not aliases for this use.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY csr198_roster BEGIN
+  ~01~, ~YESLICK~, ~YESLIC5~, ~yeslick~, ~LK#YESLK~, ~***~, ~BD0010~, ~700~, ~850~, ~515~, ~3575~, ~370~, ~3150~, ~1105~, ~1455~ => ~10~
+  ~02~, ~BRANWEN~, ~BRANWE5~, ~branwen~, ~***~, ~***~, ~BD0010~, ~900~, ~880~, ~840~, ~3575~, ~440~, ~3150~, ~1170~, ~1455~ => ~20~
+  ~03~, ~AJANTIS~, ~AJANTI6~, ~ajantis~, ~***~, ~***~, ~BD0010~, ~1020~, ~900~, ~905~, ~3575~, ~230~, ~3210~, ~1235~, ~1455~ => ~30~
+  ~04~, ~CORAN~, ~CORAN5~, ~coran~, ~***~, ~BDCORAN~, ~BD0110~, ~899~, ~576~, ~970~, ~3575~, ~300~, ~3210~, ~1300~, ~1455~ => ~40~
+  ~05~, ~GARRICK~, ~GARRIC6~, ~garrick~, ~***~, ~BDGARRIC~, ~BD0109~, ~805~, ~323~, ~1035~, ~3575~, ~370~, ~3210~, ~1365~, ~1455~ => ~50~
+  ~06~, ~KAGAIN~, ~KAGAIN6~, ~kagain~, ~***~, ~***~, ~BD0020~, ~550~, ~850~, ~515~, ~3630~, ~440~, ~3210~, ~1170~, ~1510~ => ~60~
+  ~07~, ~ALORA~, ~ALORA6~, ~alora~, ~***~, ~***~, ~BD0020~, ~625~, ~950~, ~905~, ~3630~, ~300~, ~3270~, ~1235~, ~1510~ => ~70~
+  ~08~, ~XAN~, ~XAN6~, ~xan~, ~O#XAN~, ~***~, ~BD0020~, ~690~, ~785~, ~970~, ~3630~, ~370~, ~3270~, ~1300~, ~1510~ => ~80~
+  ~09~, ~KIVAN~, ~KIVAN6~, ~kivan~, ~***~, ~***~, ~BD1000~, ~1035~, ~3630~, ~1035~, ~3630~, ~370~, ~3330~, ~1365~, ~1510~ => ~90~
+  ~10~, ~SHARTEEL~, ~SHARTE6~, ~sharteel~, ~shar-teel~, ~***~, ~BD1000~, ~515~, ~3685~, ~515~, ~3685~, ~370~, ~3390~, ~1170~, ~1565~ => ~100~
+  ~11~, ~TIAX~, ~TIAX6~, ~tiax~, ~***~, ~BDTIAX~, ~BD0104~, ~546~, ~772~, ~580~, ~3685~, ~930~, ~3390~, ~1235~, ~1565~ => ~110~
+  ~12~, ~SKIE~, ~SKIE6~, ~skie~, ~***~, ~BDSKIE~, ~BD0102~, ~600~, ~510~, ~710~, ~3685~, ~860~, ~3510~, ~1300~, ~1565~ => ~0~
+END
+
+ACTION_PHP_EACH csr198_roster AS csr198_row => csr198_greeting BEGIN
+  OUTER_SPRINT csr198_id ~%csr198_row_0%~
+  OUTER_SPRINT csr198_key ~%csr198_row_1%~
+  OUTER_SPRINT csr198_donor ~%csr198_row_2%~
+  OUTER_SPRINT csr198_canonical ~%csr198_row_3%~
+  OUTER_SPRINT csr198_alias ~%csr198_row_4%~
+  OUTER_SPRINT csr198_cameo ~%csr198_row_5%~
+  OUTER_SPRINT csr198_area ~%csr198_row_6%~
+  OUTER_SPRINT csr198_x ~%csr198_row_7%~
+  OUTER_SPRINT csr198_y ~%csr198_row_8%~
+  OUTER_SPRINT csr198_c1x ~%csr198_row_9%~
+  OUTER_SPRINT csr198_c1y ~%csr198_row_10%~
+  OUTER_SPRINT csr198_c2x ~%csr198_row_11%~
+  OUTER_SPRINT csr198_c2y ~%csr198_row_12%~
+  OUTER_SPRINT csr198_c3x ~%csr198_row_13%~
+  OUTER_SPRINT csr198_c3y ~%csr198_row_14%~
+  ACTION_IF ~%csr198_area%~ STRING_EQUAL ~BD0010~ BEGIN
+    OUTER_SPRINT csr198_area ~%csr198_palace_area%~
+  END
+  OUTER_SPRINT csr198_code ~C198%csr198_id%~
+  OUTER_SPRINT csr198_dialogue ~%csr198_code%~
+  ACTION_IF ~%csr198_key%~ STRING_EQUAL ~SKIE~ BEGIN
+    OUTER_SPRINT csr198_dialogue ~CSR198SK~
+  END
+
+  COPY_EXISTING - ~%csr198_donor%.cre~ ~override~
+    READ_ASCII 0x280 csr198_actual (32) NULL
+    READ_ASCII 0x248 csr198_old_override (8) NULL
+    PATCH_IF ~%csr198_actual%~ STRING_EQUAL ~~ OR ~%csr198_actual%~ STRING_EQUAL_CASE ~NONE~ BEGIN
+      PATCH_FAIL ~chriz-sod-remix #198: %csr198_donor% has no usable companion identity.~
+    END
+
+  // A new fallback has the installed BG1 build and modest donor equipment.
+  // These are clone-only edits; never apply them to a saved imported actor.
+  COPY_EXISTING ~%csr198_donor%.cre~ ~override/%csr198_code%.cre~
+    WRITE_ASCIIE 0x248 ~%csr198_code%~ #8
+    WRITE_ASCII 0x250 ~~ #24 // obsolete non-player BG1 AI slots
+    WRITE_ASCIIE 0x2cc ~%csr198_dialogue%~ #8
+    WRITE_BYTE 0x270 128 // NEUTRAL until recruited
+    REMOVE_CRE_ITEM ~MIHP1~ ~MINHP1~
+    PATCH_IF ~%csr198_key%~ STRING_EQUAL ~BRANWEN~ BEGIN
+      // Her unused BG1 donor is a statue, not a death in this playthrough.
+      READ_LONG 0x20 csr198_state
+      WRITE_LONG 0x20 (csr198_state BAND (BNOT 0x80))
+    END
+    READ_LONG 0x2c0 csr198_items
+    PATCH_IF csr198_items = 0 BEGIN
+      // Prisoner donors (e.g. Xan/Yeslick) can have no starting inventory.
+      ADD_CRE_ITEM ~STAF01~ #0 #0 #0 ~IDENTIFIED~ ~WEAPON1~ EQUIP
+    END
+
+  ACTION_DEFINE_ARRAY csr198_candidates BEGIN ~%csr198_actual%~ ~%csr198_canonical%~ ~%csr198_alias%~ ~%csr198_cameo%~ END
+  OUTER_SPRINT csr198_party_selection ~~
+  OUTER_SPRINT csr198_saved_selection ~~
+  OUTER_SPRINT csr198_registration ~~
+  OUTER_SPRINT csr198_relocation ~~
+  OUTER_SPRINT csr198_fresh_guards ~Global("BD_%csr198_key%_DIED_IN_BG","GLOBAL",0)~
+  OUTER_SPRINT csr198_cameo_restore ~~
+  ACTION_IF NOT (~%csr198_cameo%~ STRING_EQUAL ~***~) BEGIN
+    COPY_EXISTING - ~%csr198_cameo%.cre~ ~override~
+      READ_ASCII 0x248 csr198_cameo_override (8) NULL
+    OUTER_SPRINT csr198_cameo_restore ~IF
+  Name("%csr198_cameo%",Myself)
+  OR(2)
+    GlobalLT("chapter","GLOBAL",7)
+    GlobalGT("chapter","GLOBAL",13)
+THEN
+  RESPONSE #100
+    ChangeAIScript("%csr198_cameo_override%",OVERRIDE)
+END~
+  END
+
+  ACTION_PHP_EACH csr198_candidates AS csr198_index => csr198_dv BEGIN
+    OUTER_SET csr198_duplicate = 0
+    OUTER_FOR (csr198_j = 0; csr198_j < csr198_index; ++csr198_j) BEGIN
+      ACTION_IF ~%csr198_dv%~ STRING_EQUAL_CASE $csr198_candidates(~%csr198_j%~) BEGIN
+        OUTER_SET csr198_duplicate = 1
+      END
+    END
+    ACTION_IF NOT (~%csr198_dv%~ STRING_EQUAL ~***~) AND NOT csr198_duplicate BEGIN
+      OUTER_SET csr198_choice = csr198_index + 1
+      OUTER_SPRINT csr198_fresh_guards ~%csr198_fresh_guards%
+  !InPartyAllowDead("%csr198_dv%")
+  !BeenInParty("%csr198_dv%")
+  !Dead("%csr198_dv%")
+  !StateCheck("%csr198_dv%",STATE_REALLY_DEAD)~
+
+      OUTER_SPRINT csr198_party_selection ~%csr198_party_selection%
+IF
+  Global("CSR198_%csr198_id%_PICK","GLOBAL",0)
+  InPartyAllowDead("%csr198_dv%")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_%csr198_id%_PICK","GLOBAL",%csr198_choice%)
+    SetGlobal("CSR198_%csr198_key%_JOINED","GLOBAL",1)
+    Continue()
+END
+~
+      OUTER_SPRINT csr198_saved_selection ~%csr198_saved_selection%
+IF
+  Global("CSR198_%csr198_id%_PICK","GLOBAL",0)
+  BeenInParty("%csr198_dv%")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_%csr198_id%_PICK","GLOBAL",%csr198_choice%)
+    SetGlobal("CSR198_%csr198_key%_JOINED","GLOBAL",1)
+    Continue()
+END
+~
+      OUTER_SPRINT csr198_registration ~%csr198_registration%
+IF
+  Global("CSR198_%csr198_id%_PICK","GLOBAL",%csr198_choice%)
+  Global("CSR198_%csr198_id%_INIT","GLOBAL",0)
+  InMyArea("%csr198_dv%")
+  !StateCheck("%csr198_dv%",STATE_REALLY_DEAD)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_%csr198_id%_INIT","GLOBAL",1)
+    ActionOverride("%csr198_dv%",MakeGlobal())
+    ActionOverride("%csr198_dv%",ChangeAIScript("%csr198_code%",OVERRIDE))
+    ActionOverride("%csr198_dv%",SetDialogue("%csr198_dialogue%"))
+    Continue()
+END
+~
+      OUTER_SPRINT csr198_relocation ~%csr198_relocation%
+IF
+  Global("CSR198_%csr198_id%_PICK","GLOBAL",%csr198_choice%)
+  Global("CSR198_%csr198_id%_PLACED","GLOBAL",0)
+  !InPartyAllowDead("%csr198_dv%")
+  !Dead("%csr198_dv%")
+  !StateCheck("%csr198_dv%",STATE_REALLY_DEAD)
+  BeenInParty("%csr198_dv%")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_%csr198_id%_PLACED","GLOBAL",1)
+    MoveGlobal("%csr198_area%","%csr198_dv%",[%csr198_x%.%csr198_y%])
+    Continue()
+END
+~
+
+      // BDDIALOG is SoD-specific. Leave PDIALOG and BG2 mod routes untouched.
+      COPY_EXISTING ~bddialog.2da~ ~override~
+        COUNT_2DA_ROWS 4 csr198_rows
+        SET csr198_found = 0
+        FOR (csr198_r = 0; csr198_r < csr198_rows; ++csr198_r) BEGIN
+          READ_2DA_ENTRY csr198_r 0 4 csr198_name
+          PATCH_IF ~%csr198_name%~ STRING_EQUAL_CASE ~%csr198_dv%~ BEGIN
+            SET_2DA_ENTRY csr198_r 1 4 ~%csr198_dialogue%~
+            SET_2DA_ENTRY csr198_r 2 4 ~%csr198_dialogue%~
+            SET csr198_found = 1
+          END
+        END
+      BUT_ONLY
+      ACTION_IF NOT csr198_found BEGIN
+        APPEND ~bddialog.2da~ ~%csr198_dv% %csr198_dialogue% %csr198_dialogue% ***~
+      END
+
+      ACTION_FOR_EACH csr198_stage IN ~1~ ~2~ ~3~ BEGIN
+        ACTION_IF csr198_stage = 1 BEGIN
+          OUTER_SPRINT csr198_camp ~BD1000~
+          OUTER_SET csr198_cx = csr198_c1x OUTER_SET csr198_cy = csr198_c1y
+        END ELSE ACTION_IF csr198_stage = 2 BEGIN
+          OUTER_SPRINT csr198_camp ~BD7100~
+          OUTER_SET csr198_cx = csr198_c2x OUTER_SET csr198_cy = csr198_c2y
+        END ELSE BEGIN
+          OUTER_SPRINT csr198_camp ~BD3000~
+          OUTER_SET csr198_cx = csr198_c3x OUTER_SET csr198_cy = csr198_c3y
+        END
+        EXTEND_TOP ~%csr198_camp%.bcs~ ~chriz-sod-remix/baf/csr198cp.baf~ EVALUATE_BUFFER
+      END
+    END
+  END
+
+  OUTER_SPRINT csr198_selection ~%csr198_party_selection%%csr198_saved_selection%~
+  ACTION_IF ~%csr198_key%~ STRING_EQUAL ~SKIE~ BEGIN
+    // Existing #197 saves can already have the living, never-joined palace
+    // Skie. Adopt her instead of adding a second Skie with a different DV.
+    OUTER_SPRINT csr198_selection ~%csr198_selection%
+IF
+  Global("CSR198_12_PICK","GLOBAL",0)
+  InMyArea("BDSKIE")
+  %csr198_fresh_guards%
+THEN
+  RESPONSE #100
+    SetGlobal("CSR198_12_PICK","GLOBAL",%csr198_skie_choice%)
+    SetGlobal("CSR198_12_PLACED","GLOBAL",1)
+    Continue()
+END~
+  END
+  // BDBALDUR runs only in SoD. Register carried companions even when their
+  // original recruiter site is never visited. Area copies resolve before spawn.
+  EXTEND_TOP ~bdbaldur.bcs~ ~chriz-sod-remix/baf/csr198rg.baf~ EVALUATE_BUFFER
+  EXTEND_TOP ~%csr198_area%.bcs~ ~chriz-sod-remix/baf/csr198pl.baf~ EVALUATE_BUFFER
+  EXTEND_TOP ~%csr198_area%.bcs~ ~chriz-sod-remix/baf/csr198rg.baf~ EVALUATE_BUFFER
+
+  COPY ~chriz-sod-remix/baf/csr198np.baf~ ~weidu_external/work/chriz-sod-remix/198/%csr198_code%.baf~
+    EVALUATE_BUFFER
+  COMPILE ~weidu_external/work/chriz-sod-remix/198/%csr198_code%.baf~
+
+  ACTION_IF ~%csr198_key%~ STRING_EQUAL ~SKIE~ BEGIN
+    // Adopted BDSKIE must retain #197's stock-potion repair after changing her
+    // personal script. Reuse its validation; imported SKIE is name-excluded.
+    INCLUDE ~chriz-sod-remix/lib/comp197_potions.tpa~
+    LAF csr197_install_potion_cleanup STR_VAR target_script = EVAL ~%csr198_code%~ END
+  END
+
+  ACTION_IF NOT (~%csr198_key%~ STRING_EQUAL ~SKIE~) BEGIN
+    OUTER_SET csr198_rejoin = csr198_greeting + 1
+    OUTER_SPRINT csr198_join_extra ~~
+    ACTION_IF ~%csr198_key%~ STRING_EQUAL ~TIAX~ BEGIN
+      OUTER_SPRINT csr198_join_extra ~SetGlobal("BD_Spoken_Tiax","GLOBAL",1)~
+    END
+    ACTION_IF ~%csr198_key%~ STRING_EQUAL ~GARRICK~ BEGIN
+      OUTER_SPRINT csr198_join_extra ~SetGlobal("BD_Spoken_Garrick","GLOBAL",1)~
+    END
+    OUTER_SPRINT csr198_join_actions ~SetGlobal("CSR198_JOINED","LOCALS",1)
+SetGlobal("CSR198_%csr198_key%_JOINED","GLOBAL",1)
+SetGlobal("bd_joined","LOCALS",1)
+%csr198_join_extra%
+JoinParty()~
+    OUTER_SPRINT csr198_join_guard ~~
+    OUTER_SPRINT csr198_release_transition ~~
+    ACTION_IF ~%csr198_key%~ STRING_EQUAL ~TIAX~ BEGIN
+      // A camp rejoin must never unlock an unrelated area's DOOR03. Only
+      // this explicit jail recruitment arms the existing invitation reward.
+      OUTER_SPRINT csr198_join_guard ~!AreaCheck("BD0104")~
+      OUTER_SPRINT csr198_release_transition ~~~~~IF ~AreaCheck("BD0104")~ THEN DO ~SetGlobal("CSR198_TIAX_RELEASE","GLOBAL",1)
+Unlock("DOOR03")
+OpenDoor("DOOR03")
+%csr198_join_actions%~ EXIT~~~~~
+    END
+    COPY ~chriz-sod-remix/dlg/csr198np.d~ ~weidu_external/work/chriz-sod-remix/198/%csr198_code%.d~
+      EVALUATE_BUFFER
+    COMPILE ~weidu_external/work/chriz-sod-remix/198/%csr198_code%.d~
+      USING ~chriz-sod-remix/languages/english/comp198.tra~
+  END
+END

@@ -1,0 +1,14 @@
+// Small interim Avernus finale. Install before first entering BD4700; creatures
+// already embedded in saved areas do not receive installer-side CRE patches.
+INCLUDE ~chriz-sod-remix/lib/comp285_portal.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp285_belhifet.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp285_hephernaan.tpa~
+
+LAF csr285_portal_preflight END
+LAF csr285_belhifet_preflight RET csr285_breach csr285_breach_range END
+LAF csr285_hephernaan_preflight END
+
+MKDIR ~weidu_external/chriz-sod-remix~
+LAF csr285_portal_install END
+LAF csr285_belhifet_install END
+LAF csr285_hephernaan_install END

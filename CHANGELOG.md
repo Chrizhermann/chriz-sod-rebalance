@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.6.13 - 2026-10-13
+
+- Add component **198**: Skie can join in the palace hall before the first rest;
+  Yeslick, Branwen, Ajantis, Coran, Garrick, Kagain, Alora, Xan, Tiax, Kivan and
+  Shar-Teel are simple early recruits. Reuse saved actors and their possessions,
+  respect known deaths, and use modest BG1 donors for fresh starts.
+- Dismissed, previously recruited companions follow the Coast Way, Troll Claw
+  and Coalition camps. Retire duplicate cameos, Skie's obsolete cleanup, and
+  the Coran/Safana argument; keep Tiax's jail release and once-only native XP.
+  Requires 110 and 197. Captured-resource compilation and focused source review
+  passed; in-game recruitment, camp movement and normal bedroom rest remain
+  for the user's next install. Faldorn, Quayle, Eldoth, Xzar and Montaron remain
+  deferred to the second round.
+- Add component **177**: report Korlasz's defeat to Liia during ordinary palace
+  conversations after the first night, including departure day. Preserve the
+  early reward and council/departure scenes; both report routes share the existing
+  once-only guard and pay 22,000 XP per present party member.
+- Keep the journal pending until Liia receives the report and restore that reminder
+  once for existing unpaid city saves. Already-paid saves receive no extra reward.
+  Requires 175 and 180; append after 176 if present. Captured-resource compilation
+  passed for old and current reward amounts; native verification is deferred.
+- Add component **285**: the lower Avernus tower switch becomes a one-way
+  portal into the existing confrontation, skipping the lift ride and its
+  battles without replacement XP. Belhifet requires +1 weapons, has 60% magic
+  resistance and 25% extra movement, with 350/400/450/475/500 HP on
+  Easy/Normal/Core/Hard/Insane. Delayed targeted Breach replaces the opening
+  mass dispel; Insane opens with four devils and refills one vacancy at most
+  every four rounds. Hephernaan keeps his devil form with a finite 14/14
+  cleric/mage spellbook. Install before first entering BD4700.
+- Relocated Korlasz jailbreak loot (170) and Coast Way camp-chest treasure
+  (900) no longer arrive pre-identified. New grants keep the identification
+  state of the original item instance; existing inventory and chest records,
+  quantities, charges and other flags are unchanged. Existing saves that already
+  contain these creatures or chests are not repaired.
+
 ## v0.6.12 - 2026-09-27
 
 - Add the approved Boareskyr collapse timer to fresh 256, plus append-only 258

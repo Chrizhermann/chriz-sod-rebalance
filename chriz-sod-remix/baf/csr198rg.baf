@@ -1,0 +1,5 @@
+// Resolve one identity before touching any actor. Current party wins over a
+// parked BG1 actor; canonical and known continuity aliases share one choice.
+%csr198_selection%
+
+%csr198_registration%
