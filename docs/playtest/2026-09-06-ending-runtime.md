@@ -20,8 +20,8 @@ the integrated release was not separately played through end to end.
 - Task root: `C:\Games\csr290-test-20260905`.
 - EET game: `C:\Games\csr290-test-20260905\eet`.
 - Standalone game: `C:\Games\csr290-test-20260905\sod`.
-- EET profile: `C:\Users\chris\OneDrive\Documents\Baldur's Gate - Enhanced Edition Trilogy - CSR290 20260905`.
-- Standalone profile: `C:\Users\chris\OneDrive\Documents\Baldur's Gate - Enhanced Edition - CSR290 20260905`.
+- EET profile: `%USERPROFILE%\OneDrive\Documents\Baldur's Gate - Enhanced Edition Trilogy - CSR290 20260905`.
+- Standalone profile: `%USERPROFILE%\OneDrive\Documents\Baldur's Gate - Enhanced Edition - CSR290 20260905`.
 
 Each clone's `engine.lua` selects its separate profile. Original saves remain in
 the user's ordinary EET profile, under `save backups`; test copies and evidence

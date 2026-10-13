@@ -39,7 +39,7 @@ two-pointer-only install/disposable restore contract; see the
 Preserve both local manifests:
 `bridge-tuning-install-20260913/installed.json` (row 424, preceding balance) and
 `bridge-correction-20260913/installed.json` (row 425, newly accepted challenge),
-under `C:/Users/chris/CEBG-Tests/Combined-20260908/`. These are historical evidence,
+under `~/CEBG-Tests/Combined-20260908/`. These are historical evidence,
 not instructions to revert row 425. The installed test copy still contains
 row 425's combat behavior. The optional Insane-only payloads are fire:
 Dispel Magic with SR / Remove Magic without SR + Flame Arrow; earth: Greater

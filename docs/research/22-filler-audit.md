@@ -119,7 +119,7 @@ record the exact effective ARE/CRE/BCS inputs. The log, key and every materializ
 source resource were rechecked at the end and remained identical.
 
 The prior-agent drift note was consulted only as historical context:
-`C:\Users\chris\.claude\projects\C--src-private-chriz-sod-rebalance\memory\dev-install-mod-drift.md`
+`%USERPROFILE%\.claude\projects\C--src-private-chriz-sod-rebalance\memory\dev-install-mod-drift.md`
 (mtime 2026-07-12T23:07:48Z). Current resource hashes and current chapter decisions,
 not that note's obsolete install state or reinstall procedure, govern this audit.
 

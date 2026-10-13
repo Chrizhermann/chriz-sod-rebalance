@@ -135,7 +135,7 @@ bridge tests** (28.563 seconds, no skips). No broader new test result is claimed
 With the game closed, installation appended row 425 and preserved all 424 prior
 package/language/component rows. Three output resources and three backups were
 verified; the TLK is unchanged. Evidence:
-`C:/Users/chris/CEBG-Tests/Combined-20260908/bridge-correction-20260913/installed.json`.
+`~/CEBG-Tests/Combined-20260908/bridge-correction-20260913/installed.json`.
 Preserve the row-424 evidence and saves 945–947. Checkpoint 945, **CSR TEST 15 —
 Bridge ready**, remains suitable for the next native replay.
 
@@ -153,7 +153,7 @@ The update patches the current BD2000 script's eight mage spawn entries only,
 preserving other late-installed behavior. Bence and Skie retain their previous
 script bodies beneath the added prefixes. The exact local tail package passed a
 disposable installation and byte-exact uninstall before the actual installation.
-Evidence: `C:/Users/chris/CEBG-Tests/Combined-20260908/bridge-tuning-install-20260913/installed.json`.
+Evidence: `~/CEBG-Tests/Combined-20260908/bridge-tuning-install-20260913/installed.json`.
 
 Parsed native save945, **CSR TEST 15 — Bridge ready**, is suitable for this update:
 Chapter7/plot279, retreat1, bridgePlot/request/stage/alert0, no owned encounter

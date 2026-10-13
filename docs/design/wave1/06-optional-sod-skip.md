@@ -88,7 +88,7 @@ EET v14.0 source was read without modifying the test copy:
 ### Effective import rules: source-template-only inspection is insufficient
 
 On 2026-09-05 the effective `K#TELBGT.BCS` and `AR0602.BCS` were decompiled
-read-only from `C:\Users\chris\Games\CEBG-SOD120-v065-test\game`. Outputs went to
+read-only from `%USERPROFILE%\Games\CEBG-SOD120-v065-test\game`. Outputs went to
 an external inspection directory; the game's WeiDU.log SHA-256 was identical
 before and after (`47a3d364d37085f0c5e29cfd404737223f9a1ae133604a4bfd3e1c142bee4f07`).
 

@@ -108,12 +108,12 @@ Inspected-copy SHA-256 checkpoints (September 16, 2026):
 | override/BDBENCE.DLG | `2dba943b02b732133fc013837879c367c21a9d626168672b8887813eb5704818` |
 
 The local capture, full input hashes and test logs are under
-`C:\Users\chris\CEBG-Tests\115-197-20260916`. Re-run the public effective tests
+`%USERPROFILE%\CEBG-Tests\115-197-20260916`. Re-run the public effective tests
 against a refreshed capture if these inputs or the installed component sequence
 change. The source capture is read-only input, never a WeiDU target.
 
 ```powershell
-$env:CSR_197_FIXTURE = 'C:\Users\chris\CEBG-Tests\115-197-20260916'
+$env:CSR_197_FIXTURE = "$env:USERPROFILE\CEBG-Tests\115-197-20260916"
 $env:WEIDU_EXE = '<path to WeiDU 249>'
 python -m unittest discover -s tests -p test_comp115_comp197_order.py -v
 python -m unittest discover -s tests -p test_comp197_effective.py -v
