@@ -71,7 +71,7 @@ build totals below remain separate; these checks add no native acceptance.
   preserved all existing dialogue
   states except the condolence transition's destination. The test-game
   repair is prepared outside the game at
-  `C:\Users\chris\CEBG-Tests\Combined-20260908\skie-playtest-fix-20260912`;
+  `%USERPROFILE%\CEBG-Tests\Combined-20260908\skie-playtest-fix-20260912`;
   it was installed with the game closed during the authorized AFK test run.
   Native XP correction and the condolence branch passed as described below.
 - Still pending: palace departure and the remaining
@@ -96,7 +96,7 @@ SAV bytes were manually edited.
   Final record: `final-after-dialogue-verification.json` in the evidence folder.
   WeiDU rewrote log description comments, so this is not a byte-identical
   log-prefix claim. Evidence lives outside the repo in
-  `C:\Users\chris\CEBG-Tests\Combined-20260908\afk-evidence-20260912`.
+  `%USERPROFILE%\CEBG-Tests\Combined-20260908\afk-evidence-20260912`.
 - **Skie XP, native pass:** save 930 (`CSR AFK 00 - User handoff`) retains the
   user's 64,000-XP Skie. Loading it on the repaired script raised Skie to
   250,000 without manually awarding XP. Native save 931 (`CSR AFK 01 - Skie XP
@@ -285,7 +285,7 @@ outputs/six backups verified and unchanged TLK. The replay used
 **CSR TEST 15 — Bridge ready** on Insane: parsed save945 contains no spawned
 encounter actors and has all six members rested, so no staging helper was needed.
 Its result is native save 947 (`CSR TEST 17`), described below. Full installation evidence is in
-`C:/Users/chris/CEBG-Tests/Combined-20260908/bridge-tuning-install-20260913/installed.json`.
+`~/CEBG-Tests/Combined-20260908/bridge-tuning-install-20260913/installed.json`.
 
 ### Save 947 feedback and latest correction — installed, native replay pending
 
@@ -314,7 +314,7 @@ restore passed, together with **96 bridge tests** (28.563 seconds, no skips);
 no broader new test result is claimed. Installation ran with the game closed,
 preserved all 424 previous package/language/component rows, verified three outputs
 and three backups, and left the TLK unchanged. Evidence:
-`C:/Users/chris/CEBG-Tests/Combined-20260908/bridge-correction-20260913/installed.json`.
+`~/CEBG-Tests/Combined-20260908/bridge-correction-20260913/installed.json`.
 Preserve saves 945–947. Checkpoint 945, **CSR TEST 15 — Bridge ready**, is suitable
 for the next Insane replay. Native Haste delivery and replay remain pending; the
 soldier's remaining barrel-transport text and save/reload checks remain open.
@@ -356,7 +356,7 @@ in BD2000; the user must take normal world-map travel to consume the queue.
 No BD0063 initialization, enemies, completion or rest flags were set. The
 test-only queue intentionally replaces an earlier pending encounter (URE4=1);
 preserve save949 as the unmodified parent. Native arrival remains unverified.
-Helper/result: `C:/Users/chris/CEBG-Tests/Combined-20260908/assassin-evidence-20260913/`.
+Helper/result: `~/CEBG-Tests/Combined-20260908/assassin-evidence-20260913/`.
 
 **Travel staging blocked:** the user reports that the world map still treats
 this shortcut save as being in the city, preventing the intended journey.
@@ -427,7 +427,7 @@ The original intended sample was one native summon cycle: two ordinary Shadows
 and no Shadowed Souls, without finishing the fight. It did not run to acceptance
 and is now deferred. If revisited, avoid the confusion trap south of the chamber.
 
-Evidence/helpers: `C:/Users/chris/CEBG-Tests/Combined-20260908/filler-evidence-20260913/`
+Evidence/helpers: `~/CEBG-Tests/Combined-20260908/filler-evidence-20260913/`
 (`guardian-active-state.json`, `aspect-ready-state.json`). These are live staging
 snapshots, not native saved checkpoints. The user then ended testing and closed
 the game; summon acceptance remains unfinished.
@@ -440,16 +440,16 @@ the user's observations of an overpowered or underpowered group.
 ## Starting point
 
 Use the finished game at
-`C:\Users\chris\CEBG-Tests\Combined-20260908\game\InfinityLoader.exe`, with
+`%USERPROFILE%\CEBG-Tests\Combined-20260908\game\InfinityLoader.exe`, with
 that game directory as the working directory. Its isolated profile is
-`C:\Users\chris\OneDrive\Documents\CEBG Combined Playtest 2026-09-08 - c2a832a75741`.
+`%USERPROFILE%\OneDrive\Documents\CEBG Combined Playtest 2026-09-08 - c2a832a75741`.
 September 12 update: the game has been launched, saves are present, and Debug
 Mode was enabled in this isolated profile while the game was closed. Restart
 through InfinityLoader before using Ctrl+Space.
 
 The user explicitly selected **jajaja i am lord** on September 12, replacing
 the older proposed test seed. Source:
-`C:\Users\chris\OneDrive\Documents\Baldur's Gate - Enhanced Edition Trilogy - Chriz RC 20260903\save\000000055-jajaja i am lord`.
+`%USERPROFILE%\OneDrive\Documents\Baldur's Gate - Enhanced Edition Trilogy - Chriz RC 20260903\save\000000055-jajaja i am lord`.
 An identical GAM/SAV copy already exists under the Combined profile's `save`
 directory; its party and story data have not been edited by this preparation.
 

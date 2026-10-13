@@ -24,7 +24,7 @@ Status legend: **PENDING** · **STAGED** (save prepared, not run) · **PASS** ·
 ## Shared staging notes (read first)
 
 - **Save directory is SHARED with the live install** (EET userdir):
-  `C:\Users\chris\OneDrive\Documents\Baldur's Gate - Enhanced Edition Trilogy\save\`.
+  `%USERPROFILE%\OneDrive\Documents\Baldur's Gate - Enhanced Edition Trilogy\save\`.
   Test saves show up in the live game's load menu too. Namespace every test copy
   `CSR END <case>` and delete them after the matrix closes. Do not touch live
   `Interval-Save*` folders.

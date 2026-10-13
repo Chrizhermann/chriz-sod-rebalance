@@ -50,7 +50,7 @@ Decompiled evidence is retained with the staging evidence below.
 ## Optional future restart
 
 Use **CSR TEST 18 — Extra Challenge bridge won** (save949), whose complete folder
-is under `C:/Users/chris/OneDrive/Documents/CEBG Combined Playtest 2026-09-08 - c2a832a75741/save/`.
+is under `~/OneDrive/Documents/CEBG Combined Playtest 2026-09-08 - c2a832a75741/save/`.
 No named Shadow Aspect checkpoint was saved. The game was closed after the
 unsaved staged entry, so do not say the party is still paused in that room.
 Save949 had neither BD5110 nor BD7230 cached and restores the full party.
@@ -70,7 +70,7 @@ The staged Chapter7 save's city world-map context prevented normal travel; direc
 area staging leaves the travel launcher untested.
 
 Staging helpers/evidence:
-`C:/Users/chris/CEBG-Tests/Combined-20260908/filler-evidence-20260913/`.
+`~/CEBG-Tests/Combined-20260908/filler-evidence-20260913/`.
 Every BCS action in a remote response must be on its own line. Validate parsed
 action IDs and verify all six arrivals before declaring a checkpoint ready.
 Do not rerun guarded helpers blindly or reuse the abandoned split-party state.

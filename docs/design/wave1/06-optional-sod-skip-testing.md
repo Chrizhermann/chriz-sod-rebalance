@@ -49,7 +49,7 @@ downstream item location. No such broader runtime pass is claimed.
 ## Repeat the focused test
 
 1. With other game sessions closed, double-click
-   `C:\Users\chris\Games\CEBG-SOD-ground-probe-20260905\Launch CSR910 Test.cmd`.
+   `%USERPROFILE%\Games\CEBG-SOD-ground-probe-20260905\Launch CSR910 Test.cmd`.
    It launches only this isolated, copy-local offline game and refuses a second
    game or a stale remote-console request.
 2. Choose **Load Game**, not Continue, and load **CSR910 BEFORE SKIP**.
@@ -63,8 +63,8 @@ downstream item location. No such broader runtime pass is claimed.
    should return to the question; confirming play-SoD should leave normal control,
    allow the original backpack impound, and award no skip XP.
 
-Game: `C:\Users\chris\Games\CEBG-SOD-ground-probe-20260905\game`.
-Profile: `C:\Users\chris\OneDrive\Documents\CEBG SoD Ground Probe Offline 20260905`.
+Game: `%USERPROFILE%\Games\CEBG-SOD-ground-probe-20260905\game`.
+Profile: `%USERPROFILE%\OneDrive\Documents\CEBG SoD Ground Probe Offline 20260905`.
 Starting fixture: `save\000000911-CSR910 BEFORE SKIP`.
 Do not use an old already-impounded bedroom save to test this arrival hook.
 
@@ -91,7 +91,7 @@ polish are tracked in [issue #19](https://github.com/Chrizhermann/chriz-sod-reba
 
 ## Evidence and harness boundaries
 
-External evidence: `C:\Users\chris\Games\CEBG-SOD-ground-probe-20260905\evidence`.
+External evidence: `%USERPROFILE%\Games\CEBG-SOD-ground-probe-20260905\evidence`.
 The immutable `skip-bg1-fixture`, earlier `skip-no` save/report, and test-only
 `skip-trace.tsv` are retained. The trace also contains old rejected runs; use
 the timestamps above to identify the accepted r3 run.

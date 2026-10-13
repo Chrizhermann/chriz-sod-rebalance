@@ -25,8 +25,8 @@ this failed probe.
 
 ## Environment and evidence
 
-- Game: `C:\Users\chris\Games\CEBG-SOD-ground-probe-20260905\game`
-- Profile: `C:\Users\chris\OneDrive\Documents\CEBG SoD Ground Probe Offline 20260905`
+- Game: `%USERPROFILE%\Games\CEBG-SOD-ground-probe-20260905\game`
+- Profile: `%USERPROFILE%\OneDrive\Documents\CEBG SoD Ground Probe Offline 20260905`
 - Source: a full copy of the accepted v0.6.5 EET test install; the copied
   single-character pool test save was used only as a disposable starting point.
 - Actual executable: **BG2:EE 2.7.3.0**, with installed **EEex v1.2.0**.
@@ -38,7 +38,7 @@ this failed probe.
   resources. The copy/move primitives are native engine actions, not replacement
   EEex implementations. The bridge only submitted native action strings.
 - Raw evidence stays outside Git under
-  `C:\Users\chris\Games\CEBG-SOD-ground-probe-20260905\evidence`.
+  `%USERPROFILE%\Games\CEBG-SOD-ground-probe-20260905\evidence`.
 
 | Evidence | SHA-256 |
 |---|---|

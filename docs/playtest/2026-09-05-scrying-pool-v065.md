@@ -9,7 +9,7 @@ repair; it does not establish full-playthrough or standalone-game compatibility.
 - Code commit: `3b21d6f0ed023551ceaa209479f31d8264b7ef3f`.
 - Candidate: `chriz-sod-remix-v0.6.5.zip`, SHA-256
   `1113b9e6fd0f2929fce187a1a693b253b30b34da80c48850c9741333847d891e`.
-- Game: `C:\Users\chris\Games\CEBG-SOD120-v065-test\game`.
+- Game: `%USERPROFILE%\Games\CEBG-SOD120-v065-test\game`.
 - Separate profile: `CEBG SoD120 v065 Test`; no stream saves were imported for staging.
 - Only missing components 120/225 were tail-installed onto a disposable copy of the
   frozen collection r3 game, retaining component 220 and all 344 previous WeiDU entries.

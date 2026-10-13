@@ -84,7 +84,7 @@ Installed AI components (WeiDU.log:296–344): #5900 init, **#6000 Smarter gener
 - Rest-ambush spawn amounts use the ARE-header difficulty multiplier (prior project finding), not the slider; SCS's #8040 ties only SCS's own level-dependent groupings to the slider.
 - **Design implication:** the rebuilt Korlasz fight should ship its own `Difficulty()` branches (e.g., extra lieutenants/second wave only on HARD+/HARDEST) — that is the native, save-compatible mechanism; Insane already contributes 2× enemy damage for free, and SCS AI sharpness follows the DMWW INI settings automatically.
 
-**Files produced (scratchpad only):** `BDKORLAS.d`, `BDKORME1.d`, `dw#mg13.baf`, `dw1melge.baf`, `dw#gpsht.baf`, `RAHVIN.baf`, `ZHALIMAR.baf`, parsers `creparse.py`/`areactors.py` in `C:\Users\chris\AppData\Local\Temp\claude\C--src-private-chriz-sod-rebalance\3f405051-32e3-4471-9cb3-0ff63d4d5c2c\scratchpad`.
+**Files produced (scratchpad only):** `BDKORLAS.d`, `BDKORME1.d`, `dw#mg13.baf`, `dw1melge.baf`, `dw#gpsht.baf`, `RAHVIN.baf`, `ZHALIMAR.baf`, parsers `creparse.py`/`areactors.py` in `%USERPROFILE%\AppData\Local\Temp\claude\C--src-private-chriz-sod-rebalance\3f405051-32e3-4471-9cb3-0ff63d4d5c2c\scratchpad`.
 
 ## Verified facts
 - BDKORLAS.CRE (live override): Mage 8, Generalist kit (word-swapped 0x4000), HP 32/32, AC 10, THAC0 18, XP value 2500, EA=NEUTRAL(128), dialog BDKORLAS, scripts override=BDKORLAS/class=BDENSHTV/race=BDSHKORL; no equipped gear; sole inventory item is SCS token DW#RND03 (strref 9999999, zero effects).
