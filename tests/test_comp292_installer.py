@@ -170,7 +170,8 @@ class ImoenGame(SkipGame):
         actions = (override / "action.ids").read_text()
         if eeex:
             actions += "472 EEex_LuaAction(S:Chunk*)\n"
-            (override / "M___EEex.lua").write_text("-- synthetic EEex marker\n")
+            # Lower case like every fixture file: WeiDU on Linux looks resources up in lower case.
+            (override / "m___eeex.lua").write_text("-- synthetic EEex marker\n")
         (override / "action.ids").write_text(actions + EXTRA_ACTIONS, encoding="ascii")
         triggers = (override / "trigger.ids").read_text()
         if next_trigger_object:
