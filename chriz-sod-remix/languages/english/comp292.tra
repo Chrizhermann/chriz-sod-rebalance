@@ -1,0 +1,7 @@
+// chriz-sod-remix 292-294: Imoen in Shadows of Amn (messages in the game's log)
+@1 = ~Imoen could not be prepared for Shadows of Amn when Siege of Dragonspear ended. The equipment she still carried has now been stored with the party's other banked equipment; she keeps only her belt.~
+@2 = ~Imoen could not be rebuilt as Shadows of Amn's Imoen, so she continues as she was, with her own ability scores.~
+@3 = ~Imoen could not be dual-classed to mage (EEex is not running, or it reported an error). She continues as she was.~
+@4 = ~Imoen could not learn every spell from Shadows of Amn's Imoen's spellbook.~
+@5 = ~When Siege of Dragonspear ended, another script had already replaced Imoen, so nothing of hers could be carried over: Shadows of Amn's own Imoen takes her place.~
+@6 = ~Imoen could not leave the party when Siege of Dragonspear ended, so she was handed over like the other companions: her equipment went through the same import as the party's.~

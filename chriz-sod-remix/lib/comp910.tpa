@@ -294,3 +294,14 @@ EXTEND_TOP ~BD0103.bcs~ ~.../csr910-arrival.baf~
 EXTEND_TOP ~BD6100.bcs~ ~.../csr910-handoff.baf~ USING ~chriz-sod-remix/languages/english/csrskip.tra~
 EXTEND_TOP ~BALDUR.bcs~ ~.../csr910-xp.baf~
 PRINT ~Optional bedroom skip: original EET carried-inventory handoff; %csr910_index% effective rules checked for imported Imoen. Loose ground loot is not collected. Start before the first palace arrival.~
+
+// Components 292-294 (Imoen in Shadows of Amn) installed earlier: run their
+// SoD-end preparation in this helper too. Installed later, they add it here.
+OUTER_SET csr910_imoen_choice = 0
+ACTION_IF MOD_IS_INSTALLED ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~292~ BEGIN OUTER_SET csr910_imoen_choice = 1 END
+ACTION_IF MOD_IS_INSTALLED ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~293~ BEGIN OUTER_SET csr910_imoen_choice = 2 END
+ACTION_IF MOD_IS_INSTALLED ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~294~ BEGIN OUTER_SET csr910_imoen_choice = 3 END
+ACTION_IF (csr910_imoen_choice > 0) BEGIN
+  INCLUDE ~chriz-sod-remix/lib/comp292_lib.tpa~
+  LAF csr292_host_skip INT_VAR choice = csr910_imoen_choice END
+END

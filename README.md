@@ -1,7 +1,15 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.13**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.14**.
+
+v0.6.14 hands Imoen over into Shadows of Amn on EET (**292 / 293 / 294**, choose
+one). Her SoD gear goes through EET's import rules like the party's, and she keeps
+only her BG2 belt, correctly equipped. Then she becomes EET's Shadows of Amn Imoen
+plus her tome boosts (292, the CEBG default), continues as taken along (293), or
+dual-classes to mage at her end-of-SoD thief level (294, requires EEex). All three
+passed the lab on engine 2.7.3.0. Raise a dead Imoen before ending SoD. See the
+[release report](docs/releases/v0.6.14.md).
 
 v0.6.13 adds early BG1 companion recruitment in SoD (**198**): Skie can join in
 the palace hall before the first rest, and Yeslick, Branwen, Ajantis, Coran,
@@ -88,11 +96,22 @@ arrival. Confirming Yes uses normal carried-inventory import rules and adds
 included. Requires EET_end and components 110, 140, 150, and 160; install before
 the first palace arrival. It adds no EEex dependency.
 
-The release has **43 component declarations in seven install groups**.
+Optional EET components **292 / 293 / 294** (choose one) hand Imoen over into
+Shadows of Amn. Before the campaign switch, her SoD gear goes through EET's import
+rules like the party's, and she keeps only her BG2 belt, now correctly equipped.
+Then she becomes EET's Shadows of Amn Imoen plus her tome boosts (292, the CEBG
+default), continues as taken along (293), or dual-classes to mage at her
+end-of-SoD thief level (294, requires EEex). They require components 160 and 290
+and EET_end, and work with 910 in either install order. Raise a dead Imoen before
+ending SoD: EET has no case for a dead Imoen who has been in the party, and SoA's
+opening scene would never give control back (this already applies to 160 and 290
+alone).
+
+The release has **49 component declarations in seven install groups**.
 Selection depends on installed prerequisites and earlier versions: 176, 235, 258
 and 291 update older components; fresh versions already include those corrections.
-Choose one of 900/901, add 257 only for Extra Challenge, and select 910 only on
-supported EET setups.
+Choose one of 900/901, add 257 only for Extra Challenge, select 910 only on
+supported EET setups, and choose at most one of 292/293/294 on EET.
 See [component instructions](chriz-sod-remix/README.md), the
 [feature inventory](docs/00-feature-inventory.md), and [changelog](CHANGELOG.md).
 

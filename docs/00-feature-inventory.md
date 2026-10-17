@@ -1,23 +1,30 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-13).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-18).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**46 component
-declarations in seven groups** for v0.6.13),
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**49 component
+declarations in seven groups** for v0.6.14),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.13
+## 1. Implemented in source — v0.6.14
 
-Release **v0.6.13**. This section describes release source, not a claim
+Release **v0.6.14**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.14:** EET-only choice 292/293/294 hands Imoen over into Shadows of Amn:
+her SoD gear goes through EET's import rules, she keeps only her BG2 belt, and she
+becomes EET's `IMOEN10` plus her tome boosts (292), continues as taken along (293)
+or dual-classes at her SoD thief level (294, EEex). All three passed the lab on
+engine 2.7.3.0; a dead Imoen at the end of SoD is still open. See
+[the v0.6.14 report](releases/v0.6.14.md).
 
 **v0.6.13:** component 198 adds early BG1 companion recruitment and earlier
 palace Skie; 177 lets the player report Korlasz to Liia after the first night;
@@ -148,6 +155,9 @@ BD7000 and set `csr_treasure_removed=1`. Its selection depends on the player's p
 |---|---------|--------------|------|
 | 290 | End SoD at the victory celebration | Preserves BDCUT59/59A/59B, party barks, public de Lancie/Bence dialogue, and a playable BD4300 celebration; Dazzo ends SoD at plot 590. Retires the optional codas, Skie murder/arrest/trial/jail/escape/ambush chain, remaining Hooded-Man rumors, and final BDPALACE Entar reference. EET uses a private guarded clone of the installed handoff, transfers the local bank through `BD6100*K#ImportContainer`, and enters normal SoA without a party visit to BD6100. Standalone uses native credits. | REQUIRE 120+130+185; guarded ending resources |
 | 291 | Repair an existing EET ending installation | Append-only correction for the original 290 carrier-script softlock: release full cutscene mode, enter native lite mode before spawning the carrier, and clear lite mode when the guard fails. Validates legacy/current endpoints and guard before writing; only BDDAZZO.DLG and private CSRETBGT.BCS can change. Fresh 290 already includes the correction, so 291 is unnecessary there and leaves corrected resources unchanged. | REQUIRE 290 + complete EET handoff resource family |
+| 292 | Imoen in SoA: Shadows of Amn's Imoen plus tome boosts (CEBG default) | Shared SoD-end preparation, in 290's carrier clone and (when installed) 910's skip helper: marks Imoen with EET's own SoD-party flag (`K#PartySoD`, normally set by the replaced SoD epilogue), separates her from the party (her post-party dialog from `BDDIALOG.2DA`, `csrimoen` with 160, stays closed meanwhile so she cannot rejoin), mirrors the installed carrier's EET import rules for her items, banks the rest, and keeps only `IMOENHP1`. Then reads her tome boosts against `IMOEN2.CRE` and swaps her for a stand-in made from `IMOEN10.CRE` in EET's list of global creatures (EET would carry even a destroyed Imoen over), so EET creates its own `IMOEN10`; the boosts are added in SoA only to an Imoen without her SoD mark (capped at 25 against `IMOEN10.CRE`). No EEex. | EET + EET_end; REQUIRE 160+290; `NextTriggerObject` |
+| 293 | Imoen in SoA: as taken along | Same preparation; after the bank she removes herself like any companion, and EET brings her own build back with its SoA dialog and scripts. A fallback in `BALDUR.BCS` banks her gear in `AR0602` if the preparation could not reach her. | EET + EET_end; REQUIRE 160+290 |
+| 294 | Imoen in SoA: dual-class at her SoD thief level (EEex) | Same preparation; in SoA one EEex Lua call converts a pure single-class thief (any kit) to mage/thief, mage 1 and XP 0, re-arming SoA's join ladder. It then teaches `IMOEN10`'s wizard spellbook (opcode 147 at INT 25, verified, 10 retries). Anyone else is left unchanged; errors and untaught spells are reported. | EET + EET_end + EEex; REQUIRE 160+290 |
 
 **Verified boundary:** the isolated EET guard and its save/reload passed; one real
 return/celebration run, celebration reload, and user-approved reduced inventory
@@ -159,7 +169,7 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.12 release source, tail-installable WeiDU mod: **43 declarations
+`chriz-sod-remix` v0.6.14 release source, tail-installable WeiDU mod: **49 declarations
 in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in

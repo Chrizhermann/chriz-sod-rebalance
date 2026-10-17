@@ -4,7 +4,16 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.13**. The component overview below describes this version.
+Current release: **v0.6.14**. The component overview below describes this version.
+
+**v0.6.14 — 292 / 293 / 294 (EET, choose one)** hand Imoen over into Shadows of
+Amn. Before the campaign switch, her SoD gear goes through EET's import rules like
+the party's, and she keeps only her BG2 belt, correctly equipped. 292 (CEBG
+default) makes her EET's Shadows of Amn Imoen plus her tome boosts, 293 keeps her
+as taken along, and 294 (requires EEex) dual-classes her to mage at her end-of-SoD
+thief level. Requires **160 + 290** and EET_end; works with 910 in either install
+order. Install before leaving SoD, and raise a dead Imoen before the ending.
+Lab-tested on engine 2.7.3.0.
 
 **v0.6.13 — 198** makes Skie available in the palace hall before the
 first rest. Recruit Yeslick, Branwen and Ajantis near the palace; Coran and Garrick
@@ -126,6 +135,7 @@ received. The reward still occurs once, after reporting the jailbreak to Liia.
 | 130 | Skip chapter dreams | Pre-sets `bd_ddd=4` from BDBALDUR.BCS — the four PLAYER1D rest-dreams never fire. Dream content documented in `docs/research/09-sod-dreams.md`. |
 | 290 | Victory celebration ending | Keeps the real return and playable celebration; Dazzo ends SoD after the public victory dialogue. Removes the optional codas and murder/arrest/epilogue chain. EET enters normal SoA through its existing import rules; standalone ends at native credits. |
 | 291 | Existing EET ending repair | Append-only fix for the original 290 carrier-script softlock. Fresh 290 already includes it; an already-corrected installation is left unchanged. Requires 290 and EET. |
+| 292 / 293 / 294 | Imoen in Shadows of Amn (EET, choose one) | Before the campaign switch, an imported or recruited Imoen's SoD gear goes through EET's import rules like the party's (the rest is banked) and she keeps only her BG2 belt, correctly equipped. Then: 292 (CEBG default) EET's Shadows of Amn Imoen plus her tome boosts; 293 as taken along; 294 (EEex) dual-class to mage at her end-of-SoD thief level. Requires 160, 290 and EET_end. |
 | 910 | Optional full SoD skip (EET) | Offers a confirmed bedroom choice after continuous BG1 import. Yes uses normal carried-inventory handling and grants 250,000 protagonist XP once in BG2. No continues SoD. Loose-loot recovery is excluded. |
 
 This table highlights the global and ending components; `COMPONENTS.md` in the
@@ -147,14 +157,15 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.12 exposes **43 declarations in seven install groups**, including
+v0.6.14 exposes **49 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235, 258 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
+On EET, choose one of `292`/`293`/`294` for Imoen's handover into Shadows of Amn.
 Old per-install row counts are historical snapshots, not a current selection guide.
 
 Position: tail-install (after EET_end on EET installs — all patches are in-place edits of
-final files). Standalone BG:EE+SoD excludes EET-only `291` and `910`. Reversible via the
+final files). Standalone BG:EE+SoD excludes EET-only `291`, `292`-`294` and `910`. Reversible via the
 standard WeiDU backups (`weidu_external/backup/chriz-sod-remix`).
 
 ## Treasure compatibility (component 900)
