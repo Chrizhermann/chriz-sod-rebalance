@@ -29,7 +29,7 @@
   - **293**: she continues as taken along. After her gear is handed over she
     leaves like any companion, so EET gives her SoA's dialog and scripts; left
     in place, she kept SoD's dialog and her BG1 script, and SoA's XP catch-up
-    never ran (lab). 293 and 294 still need their lab run before release.
+    never ran (lab).
   - **294** (requires EEex): a pure single-class thief dual-classes to mage at her
     end-of-SoD thief level. SoA's catch-up XP then goes into mage, and she learns
     `IMOEN10`'s wizard spellbook. Kit, HP, skills and proficiencies stay.

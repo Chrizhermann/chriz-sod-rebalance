@@ -75,24 +75,46 @@ there, the preparation left the BG1 Imoen to EET.
 
 ## Choices 2 and 3 (293, 294)
 
-One run of 293 (S1, before the fix): her own build arrived (thief 9 with her
-kit and tome boosts) with only `IMOENHP1` in the belt slot, her gear banked and
-`RING25` imported. But the preparation had left her alive and dismissed in
+The first run of 293 (S1, before the fix): her own build arrived (thief 9 with
+her kit and tome boosts) with only `IMOENHP1` in the belt slot, her gear banked
+and `RING25` imported. But the preparation had left her alive and dismissed in
 `BD4300`, and of the actions `AR0602` queued on her only those after its
 `MoveGlobal` ran. Her SoA dialog and all five `ChangeAIScript` calls were lost:
 she kept SoD's dialog (`CSRIMOEN`, offered in SoA's opening conversation) and
 her BG1 script (`IMOEN_`), and SoA's XP ladder never ran (150,000 XP). In S9
 (dismissed in another area) and S11 (removed by the carrier) every action ran.
+Fix: after the bank, every choice has her remove herself like any companion,
+and EET brings her back the same way.
 
-Fix: after the bank, every choice now has her remove herself like any
-companion, and EET brings her back the same way. Covered by the installer
-tests only; the lab run of 293 and 294, including choice 3's conversion, is
-still open. The lab was stopped there by Christopher's decision (2026-10-18).
+With the fix (2026-10-18), choice 2 (293):
+
+| Case | Route | Result |
+|---|---|---|
+| Imported, in the party (S1) | ending | Her own build: thief 9 with her kit, DEX 19 / CON 18 (her tome boosts), SoA's dialog (`IMOEN2J`) and script (`IMOEN`), 1,000,000 XP from SoA's join ladder. Only `IMOENHP1`, in the belt slot; her gear banked, `RING25` imported. |
+| Imported, dismissed and unmarked in `BD4400` (S2) | ending | Brought to `BD4300` first; same result. |
+| Fresh `csrimo` recruited, given a belt and `RING25` (S7) | ending | Her own build (thief 2, the chassis scores), handed over the same way. The never-recruited BG1 Imoen stays in `BG2700`. |
+| Preparation could not reach her (S9) | ending | As in choice 1: the SoA fallback banked exactly her items and gave her a fresh `IMOENHP1` in the belt slot; the report was shown. |
+| Imported, in the party (S8) | 910 skip | As S1, with 1,250,000 XP. |
+| Imported, dismissed in the bedroom (S8b) | 910 skip | Same. |
+
+Choice 3 (294), each SoA save also reloaded and run 30 more seconds:
+
+| Case | Route | Result |
+|---|---|---|
+| Imported, in the party (S1) | ending | Dual-classed: mage/thief with thief as the original class, thief 9 and her kit kept, mage 1 with SoA's 1,000,000 XP to level up, `IMOEN10`'s 24 known wizard spells (the same list). Only `IMOENHP1`, in the belt slot; her gear banked, `RING25` imported; SoA's dialog and script. |
+| The same Imoen without a kit (S5) | ending | Same conversion, no kit. |
+| Never recruited (S6) | ending | EET's own `IMOEN10` (already mage/thief), left unchanged. |
+| Fresh `csrimo` recruited, given a belt and `RING25` (S7) | ending | Same conversion at her thief level 2. |
+
+After the reload nothing changed; she was not converted a second time.
 
 ## Coverage and limits
 
 - Spell Revisions was installed in the lab; without it, only the synthetic
   installer tests ran (all 388 main and 41 research tests pass).
 - One thief kit (`C0TRICKS`) in the lab; without a kit, see choice 3.
+- Choice 3 ran on the ending route only; its preparation is choice 2's, which
+  passed on both routes. Her new mage levels were not taken through the
+  level-up screen.
 - Not run: a BG1 Imoen dismissed in BG1 and never taken back, together with
   910's skip and an unrecruited `csrimo` (see the design doc's edge cases).

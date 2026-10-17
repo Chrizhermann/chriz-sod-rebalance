@@ -135,8 +135,8 @@ own transition blocks until the preparation reports finished: a final wait block
    an Imoen left alive in the area the transition starts from lost the actions
    `AR0602` queues on her before its `MoveGlobal` (her SoA dialog and scripts).
    She then started SoA with SoD's dialog and her BG1 script, and SoA's XP
-   ladder never ran. Choices 2/3 with this step are covered by the installer
-   tests only; their lab run is still open.
+   ladder never ran. With this step, choices 2 and 3 passed in the lab
+   (2026-10-18).
 7. **Choice 1 only: a stand-in.** She also has to stop being an Imoen who
    joined the party, because only then does EET's `AR0602` create `IMOEN10`
    (`!BeenInParty("Imoen2")`). Destroying her is not enough (see "The problem"),
@@ -241,7 +241,11 @@ disposable copy of the CEBG install (EET, EEex, Spell Revisions, engine 2.7.3.0)
 - `MoveGlobalObject` brings an off-party Imoen from another SoD area.
 - **Choices 2/3:** the first run of 293 (before step 6 existed) brought her own
   build with only `IMOENHP1` and her gear handled, but with SoD's dialog, her
-  BG1 script and her SoD XP. Step 6 is the fix; its lab run, and choice 3's
-  conversion in the lab, are still open.
+  BG1 script and her SoD XP. With step 6, choice 2 passes on both routes in
+  choice 1's cases: her own build arrives with SoA's dialog, scripts and join
+  XP. Choice 3 (ending route) converts an imported thief with or without a kit
+  and a recruited `csrimo`: thief level, kit and HP kept, mage XP from SoA's
+  ladder, `IMOEN10`'s known wizard spells. EET's own `IMOEN10` stays
+  unchanged, and a reload does not convert her again.
 - Without the preparation (160 and 290 alone), the opening scene completes too.
   A dead Imoen stops it (see Edge cases).
