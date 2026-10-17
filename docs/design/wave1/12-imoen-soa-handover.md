@@ -94,12 +94,15 @@ own transition blocks until the preparation reports finished: a final wait block
 3. **Import:** for every item rule in the *effective* installed carrier
    (EET_end-generated from `K#IMPORT.2DA`, `IMPORT01-03.2DA` and `BDSODIMP`, plus
    other mods' additions), if she has the item and the party does not, add one
-   copy to EET's `K#IMPORT` bag store — the same operation EET's own rule performs.
+   copy to EET's `K#IMPORT` bag store and destroy hers. That is what EET's own
+   rule does for the party (take, destroy, add to the store), so an imported item
+   is not also banked.
    The rules are read from the installed script and verified at install time:
    when an import rule has an unexpected shape, installation stops instead of
    guessing.
-4. **Bank:** `TakeCreatureItems("IMOEN2",0)` (0 = all items, including equipped
-   ones) into the host's container.
+4. **Bank** (one second later, so her own `DestroyItem` actions come first):
+   `TakeCreatureItems("IMOEN2",0)` (0 = all items, including equipped ones) into
+   the host's container.
 5. **Choice 1 only:** strip ability-score effects (opcode 337 for opcodes 6, 10,
    15, 19, 44, 49, 97), read her base scores with `CheckStat`, store each positive
    difference to the installed BG1 chassis (`IMOEN2.CRE`) as a tome boost, and

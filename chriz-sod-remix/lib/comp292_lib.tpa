@@ -6,7 +6,7 @@
 // hosts the same preparation in its skip helper when 910 is installed later.
 //
 // Every generated block uses these GLOBALs:
-//   CSR_IMSOA_PREP   0 idle, 1 bring her here, 2 import + bank, 3-5 choice 1
+//   CSR_IMSOA_PREP   0 idle, 1 bring her here, 2 import, 6 bank, 3-5 choice 1
 //                    (strip, read, remove her), 9 finished
 //   CSR_IMSOA_TIMER  real-time step timeout
 //   CSR_IMSOA_FAILED 1 she could not be brought here: her gear was not handed
@@ -75,7 +75,9 @@ END
 //   THEN TakePartyItem(X) DestroyItem(X) AddStoreItem("K#IMPORT",X,1,1)
 //        Continue() END
 // Each item gets one block: one copy into the same bag store when she carries
-// it and the party does not (at most one copy, as EET imports for the party).
+// it and the party does not (at most one copy, as EET imports for the party),
+// and her own copy is destroyed as EET destroys the party's, so it is not also
+// banked. The bank follows in a later pass (her DestroyItem must come first).
 // Every K#IMPORT addition in the script must belong to such a rule; another
 // shape cannot be mirrored faithfully and stops the install.
 // ------------------------------------------------------------
@@ -123,6 +125,7 @@ IF
 THEN
   RESPONSE #100
     AddStoreItem("K#IMPORT","%csr292_item%",1,1)
+    ActionOverride("IMOEN2",DestroyItem("%csr292_item%"))
     Continue()
 END
 ~
@@ -370,6 +373,17 @@ IF
   Global("CSR_IMSOA_PREP","GLOBAL",2)
 THEN
   RESPONSE #100
+    RealSetGlobalTimer("CSR_IMSOA_TIMER","GLOBAL",1)
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",6)
+    SetInterrupt(TRUE)
+END
+IF
+%gate%
+  Global("CSR_IMSOA_PREP","GLOBAL",6)
+  RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
     ActionOverride("%bank%",TakeCreatureItems("IMOEN2",0))
     SmallWait(4)
     SetGlobal("CSR_IMSOA_PREP","GLOBAL",%csr292_after_bank%)

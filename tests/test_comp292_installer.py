@@ -281,10 +281,23 @@ class ImoenSoAInstallerTests(unittest.TestCase):
             item = re.search(r'HasItem\("([^"]+)"', trigger).group(1)
             self.assertIn(f'!PartyHasItem("{item}")', trigger)
             self.assertIn(f'AddStoreItem("K#IMPORT","{item}",1,1)', action)
+            # Her copy is destroyed like the party's, so it is not banked too.
+            destroy = f'ActionOverride("IMOEN2",DestroyItem("{item}"))'
+            self.assertIn(destroy, action)
+            self.assertLess(action.index("AddStoreItem("), action.index(destroy))
             self.assertNotIn("TakePartyItem", action)
         bank_index = next(i for i, (_, a) in enumerate(blocks) if re.search(TAKE_ALL, a))
         self.assertRegex(blocks[bank_index][1], r'ActionOverride\("K#ImportContainer",' + TAKE_ALL)
         self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)', blocks[bank_index][1])
+        # The bank is a later pass, after her DestroyItem actions have run.
+        self.assertIn('Global("CSR_IMSOA_PREP","GLOBAL",6)', blocks[bank_index][0])
+        self.assertIn('RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")', blocks[bank_index][0])
+        handoff = next(i for i, (t, a) in enumerate(blocks) if 'Global("CSR_IMSOA_PREP","GLOBAL",2)' in t
+                       and 'SetGlobal("CSR_IMSOA_PREP","GLOBAL",6)' in a)
+        self.assertIn('RealSetGlobalTimer("CSR_IMSOA_TIMER","GLOBAL",1)', blocks[handoff][1])
+        self.assertLess(max(i for i, (t, a) in enumerate(blocks) if "AddStoreItem(" in a and "CSR_IMSOA_PREP" in t),
+                        handoff)
+        self.assertLess(handoff, bank_index)
         self.assertTrue(all(i < bank_index for i, (t, a) in enumerate(blocks)
                             if "AddStoreItem(" in a and "CSR_IMSOA_PREP" in t))
         self.assertNotIn("CSRIMSTR", game.baf("csretbgt"))
