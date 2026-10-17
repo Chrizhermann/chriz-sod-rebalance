@@ -1,0 +1,339 @@
+// ============================================================
+// Components 292-294 — Imoen in Shadows of Amn (EET)
+// ============================================================
+// Design (DECIDED 2026-10-17): docs/design/wave1/12-imoen-soa-handover.md.
+// The tp2 sets csr292_choice before including this file:
+//   1 Shadows of Amn's Imoen (EET's IMOEN10) plus her BG1/SoD tome boosts
+//   2 as taken along
+//   3 dual-classed to mage at her end-of-SoD thief level (EEex)
+// Every choice hands her SoD gear over like the party's (EET's import rules,
+// everything else banked) before the campaign switch. The SoD side lives in
+// lib/comp292_lib.tpa; the Shadows of Amn side is appended to BALDUR.BCS here.
+// The game's own resources are checked before anything is written; the host
+// helpers verify their targets while patching (WeiDU restores all on failure).
+
+INCLUDE ~chriz-sod-remix/lib/comp292_lib.tpa~
+
+ACTION_IF ((csr292_choice < 1) OR (csr292_choice > 3)) BEGIN
+  FAIL ~chriz-sod-remix 292-294: internal error, unknown Imoen choice %csr292_choice%.~
+END
+
+ACTION_FOR_EACH csr292_res IN ~AR0602.BCS~ ~BALDUR.BCS~ ~K#TELBGT.BCS~ ~K#IMPORT.STO~ ~IMOENHP1.ITM~ BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr292_res%~ BEGIN
+    FAIL ~chriz-sod-remix 292-294: %csr292_res% is missing; install after EET_end and component 290.~
+  END
+END
+ACTION_IF ((csr292_choice != 2) AND NOT FILE_EXISTS_IN_GAME ~IMOEN10.CRE~) BEGIN
+  FAIL ~chriz-sod-remix 292-294: IMOEN10.CRE (EET's Shadows of Amn Imoen) is missing.~
+END
+ACTION_FOR_EACH csr292_res IN ~CSRIMSTR.SPL~ ~M_CSRIMD.LUA~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr292_res%~ BEGIN
+    FAIL ~chriz-sod-remix 292-294: reserved resource %csr292_res% already exists.~
+  END
+END
+// The preparation verifies Imoen's EET mark on her with NextTriggerObject
+// (Enhanced Edition 2.0 and later) before she leaves the party.
+COPY_EXISTING - ~TRIGGER.IDS~ ~override~
+  COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~NextTriggerObject(~ csr292_nto
+  PATCH_IF (csr292_nto = 0) BEGIN
+    PATCH_FAIL ~chriz-sod-remix 292-294: TRIGGER.IDS has no NextTriggerObject (Enhanced Edition 2.0 or later), so Imoen's SoD party mark cannot be verified before she leaves the party.~
+  END
+BUT_ONLY
+COPY_EXISTING - ~BALDUR.BCS~ ~override~
+  DECOMPILE_BCS_TO_BAF
+  COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~CSR_IMSOA_~ csr292_done
+  PATCH_IF (csr292_done != 0) BEGIN
+    PATCH_FAIL ~chriz-sod-remix 292-294: BALDUR.BCS already handles Imoen's arrival in Shadows of Amn.~
+  END
+BUT_ONLY
+
+// EET's own arrival rules in AR0602 (read only). Every choice waits for EET's
+// arrival marker; choice 1 relies on EET creating IMOEN10 when no Imoen is left.
+COPY_EXISTING - ~AR0602.BCS~ ~override~
+  DECOMPILE_BCS_TO_BAF
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~SetGlobal("K#ImoenImport","AR0602",1)~ csr292_marks
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~!BeenInParty("Imoen2")~ csr292_fresh_tests
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~CreateCreature("Imoen10",~ csr292_fresh_creates
+  PATCH_IF (csr292_marks = 0) BEGIN
+    PATCH_FAIL ~chriz-sod-remix 292-294: AR0602.BCS never marks Imoen's arrival (K#ImoenImport); unsupported EET version.~
+  END
+  PATCH_IF ((csr292_choice = 1) AND ((csr292_fresh_tests = 0) OR (csr292_fresh_creates = 0))) BEGIN
+    PATCH_FAIL ~chriz-sod-remix 292: AR0602.BCS does not create IMOEN10 for an absent Imoen; Shadows of Amn's Imoen cannot replace her.~
+  END
+BUT_ONLY
+
+// Choice 3: EEex must be installed and expose its script action.
+ACTION_IF (csr292_choice = 3) BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~M___EEex.lua~ BEGIN
+    FAIL ~chriz-sod-remix 294: requires EEex.~
+  END
+  COPY_EXISTING - ~ACTION.IDS~ ~override~
+    COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~EEex_LuaAction(S:~ csr292_lua_action
+    PATCH_IF (csr292_lua_action = 0) BEGIN
+      PATCH_FAIL ~chriz-sod-remix 294: ACTION.IDS has no EEex_LuaAction; install EEex first.~
+    END
+  BUT_ONLY
+END
+
+// ------------------------------------------------------------
+// Choice 1: SoA Imoen's own ability scores cap the boosts at 25.
+// ------------------------------------------------------------
+ACTION_IF (csr292_choice = 1) BEGIN
+  LAF csr292_chassis_scores RET_ARRAY csr292_refs END
+  ACTION_CLEAR_ARRAY csr292_bg2
+  COPY_EXISTING - ~IMOEN10.CRE~ ~override~
+    READ_ASCII 0 csr292_sig (8)
+    PATCH_IF NOT (~%csr292_sig%~ STRING_EQUAL_CASE ~CRE V1.0~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix 292: IMOEN10.CRE is not a CRE V1.0 file.~
+    END
+    PATCH_PHP_EACH csr292_abilities AS csr292_name => csr292_off BEGIN
+      READ_BYTE csr292_off csr292_value
+      PATCH_IF ((csr292_value < 1) OR (csr292_value > 25)) BEGIN
+        PATCH_FAIL ~chriz-sod-remix 292: IMOEN10.CRE has an invalid %csr292_name% score (%csr292_value%).~
+      END
+      DEFINE_ASSOCIATIVE_ARRAY csr292_bg2 BEGIN ~%csr292_name%~ => ~%csr292_value%~ END
+    END
+  BUT_ONLY
+  OUTER_SPRINT csr292_soa ~~
+  ACTION_PHP_EACH csr292_refs AS csr292_name => csr292_ref BEGIN
+    OUTER_SET csr292_room = 25 - $csr292_bg2(~%csr292_name%~)
+    OUTER_FOR (csr292_d = 1; csr292_d <= (25 - csr292_ref); ++csr292_d) BEGIN
+      OUTER_SET csr292_add = (csr292_d < csr292_room) ? csr292_d : csr292_room
+      ACTION_IF (csr292_add > 0) BEGIN
+        OUTER_SPRINT csr292_soa ~%csr292_soa%
+IF
+  Global("CSR_IMSOA_BOOST","GLOBAL",1)
+  InParty("IMOEN2")
+  Global("CSR_IMSOA_D%csr292_name%","GLOBAL",%csr292_d%)
+THEN
+  RESPONSE #100
+    ChangeStat("IMOEN2",%csr292_name%,%csr292_add%,ADD)
+    Continue()
+END
+~
+      END
+    END
+  END
+  OUTER_SPRINT csr292_soa ~// chriz-sod-remix 292: tome boosts on Shadows of Amn's Imoen.%csr292_soa%
+IF
+  Global("CSR_IMSOA_BOOST","GLOBAL",1)
+  InParty("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_BOOST","GLOBAL",2)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_FAILED","GLOBAL",2)
+  InParty("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)
+    DisplayStringNoName(Player1,@2)
+    Continue()
+END
+~
+  // Removes every temporary ability-score effect before her scores are read.
+  CREATE ~spl~ ~csrimstr~
+    PATCH_IF (BUFFER_LENGTH != 0x72) BEGIN
+      PATCH_FAIL ~chriz-sod-remix 292: CREATE spl produced a %BUFFER_LENGTH%-byte skeleton (expected 0x72).~
+    END
+    WRITE_LONG  0x08 (0 - 1)      // no name
+    WRITE_LONG  0x0C (0 - 1)
+    WRITE_SHORT 0x1C 4            // innate: script-applied only
+    WRITE_LONG  0x34 1            // level 1
+    WRITE_LONG  0x64 0x72         // ability table offset
+    WRITE_SHORT 0x68 1            // one ability
+    WRITE_LONG  0x6A 0x9A         // effect table offset
+    INSERT_BYTES 0x72 (0x28 + (7 * 0x30))
+    WRITE_BYTE  (0x72 + 0x00) 1   // ability type
+    WRITE_BYTE  (0x72 + 0x0C) 1   // target: living actor
+    WRITE_SHORT (0x72 + 0x10) 1   // min level
+    WRITE_SHORT (0x72 + 0x1E) 7   // effect count (empirical offset, see comp250)
+    WRITE_SHORT (0x72 + 0x20) 0   // first effect index
+    WRITE_SHORT (0x72 + 0x26) 1   // projectile: none
+    SET csr292_fx = 0x9A
+    // CHR, CON, DEX, INT, STR, WIS, exceptional STR
+    PATCH_FOR_EACH csr292_opcode IN 6 10 15 19 44 49 97 BEGIN
+      WRITE_SHORT  csr292_fx           337          // remove effects by opcode
+      WRITE_BYTE  (csr292_fx + 0x02)   2            // target: preset
+      WRITE_LONG  (csr292_fx + 0x04)   (0 - 1)      // any parameter 2
+      WRITE_LONG  (csr292_fx + 0x08)   csr292_opcode
+      WRITE_BYTE  (csr292_fx + 0x0C)   1            // instant / permanent
+      WRITE_BYTE  (csr292_fx + 0x0D)   2            // not dispellable, bypasses MR
+      WRITE_BYTE  (csr292_fx + 0x12)   100          // probability
+      SET csr292_fx += 0x30
+    END
+END
+
+// ------------------------------------------------------------
+// Choice 3: the conversion and BG2 Imoen's spellbook (EEex).
+// ------------------------------------------------------------
+ACTION_IF (csr292_choice = 3) BEGIN
+  ACTION_CLEAR_ARRAY csr292_wizard
+  COPY_EXISTING - ~IMOEN10.CRE~ ~override~
+    READ_ASCII 0 csr292_sig (8)
+    PATCH_IF NOT (~%csr292_sig%~ STRING_EQUAL_CASE ~CRE V1.0~) BEGIN
+      PATCH_FAIL ~chriz-sod-remix 294: IMOEN10.CRE is not a CRE V1.0 file.~
+    END
+    READ_LONG 0x2a0 csr292_ko
+    READ_LONG 0x2a4 csr292_kn
+    PATCH_IF ((csr292_ko < 0x2d4) OR ((csr292_ko + csr292_kn * 0x0c) > SOURCE_SIZE)) BEGIN
+      PATCH_FAIL ~chriz-sod-remix 294: IMOEN10.CRE has an invalid known-spell table.~
+    END
+    FOR (csr292_i = 0; csr292_i < csr292_kn; ++csr292_i) BEGIN
+      READ_SHORT (csr292_ko + csr292_i * 0x0c + 0x0a) csr292_type
+      PATCH_IF (csr292_type = 1) BEGIN  // wizard
+        READ_ASCII (csr292_ko + csr292_i * 0x0c) csr292_spell (8) NULL
+        TO_UPPER csr292_spell
+        DEFINE_ASSOCIATIVE_ARRAY csr292_wizard BEGIN ~%csr292_spell%~ => 1 END
+      END
+    END
+  BUT_ONLY
+  OUTER_SPRINT csr292_spells ~~
+  OUTER_SET csr292_taught = 0
+  ACTION_PHP_EACH csr292_wizard AS csr292_spell => csr292_ignored BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%csr292_spell%.spl~ BEGIN
+      OUTER_SPRINT csr292_spells ~%csr292_spells%"%csr292_spell%", ~
+      OUTER_SET csr292_taught += 1
+    END ELSE BEGIN
+      PRINT ~chriz-sod-remix 294: IMOEN10's spell %csr292_spell% is not in this game; skipped.~
+    END
+  END
+  COPY ~chriz-sod-remix/lua/M_CSRIMD.lua~ ~override~
+    COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~--[[CSR292_SPELLS]]~ csr292_slots
+    PATCH_IF (csr292_slots != 1) BEGIN
+      PATCH_FAIL ~chriz-sod-remix 294: M_CSRIMD.lua has no single spell-list placeholder.~
+    END
+    REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~--[[CSR292_SPELLS]]~ ~%csr292_spells%~
+  OUTER_SPRINT csr292_soa ~// chriz-sod-remix 294: dual-class Imoen at her SoD thief level (EEex).
+IF
+  Global("CSR_IMSOA_DUAL","GLOBAL",0)
+  Global("K#ImoenImport","AR0602",1)
+  BeenInParty("IMOEN2")
+  !StateCheck("IMOEN2",STATE_REALLY_DEAD)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_DUAL","GLOBAL",1)
+    RealSetGlobalTimer("CSR_IMSOA_DTIMER","GLOBAL",10)
+    EEex_LuaAction("CSR_ImoenSoA_Dual()")
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_DUAL","GLOBAL",1)
+  RealGlobalTimerExpired("CSR_IMSOA_DTIMER","GLOBAL")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_DUAL","GLOBAL",8)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_DUAL","GLOBAL",2)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_DUAL","GLOBAL",3)
+    RealSetGlobalTimer("CSR_IMSOA_DTIMER","GLOBAL",1)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_DUAL","GLOBAL",3)
+  RealGlobalTimerExpired("CSR_IMSOA_DTIMER","GLOBAL")
+THEN
+  RESPONSE #100
+    RealSetGlobalTimer("CSR_IMSOA_DTIMER","GLOBAL",1)
+    EEex_LuaAction("CSR_ImoenSoA_Learn()")
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_DUAL","GLOBAL",5)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_DUAL","GLOBAL",6)
+    DisplayStringNoName(Player1,@4)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_DUAL","GLOBAL",8)
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_DUAL","GLOBAL",9)
+    DisplayStringNoName(Player1,@3)
+    Continue()
+END
+~
+END
+
+ACTION_IF (csr292_choice = 2) BEGIN
+  OUTER_SPRINT csr292_soa ~// chriz-sod-remix 293: Imoen continues as taken along.~
+END
+
+// ------------------------------------------------------------
+// Every choice: if the SoD-end preparation could not reach her, she arrived
+// with her SoD gear. Once she is in the party, bank it in EET's AR0602 import
+// container and give her BG2 belt back to her (now correctly equipped).
+// ------------------------------------------------------------
+OUTER_SPRINT csr292_unprepared ~DisplayStringNoName(Player1,@1)~
+ACTION_IF (csr292_choice = 1) BEGIN
+  OUTER_SPRINT csr292_unprepared ~%csr292_unprepared%
+    DisplayStringNoName(Player1,@2)~
+END
+OUTER_SPRINT csr292_soa ~%csr292_soa%
+IF
+  Global("CSR_IMSOA_FAILED","GLOBAL",1)
+  Global("CSR_IMSOA_FB","GLOBAL",0)
+  Global("K#ImoenImport","AR0602",1)
+  AreaCheck("AR0602")
+  InParty("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FB","GLOBAL",1)
+    ActionOverride("K#ImportContainer",TakeCreatureItems("IMOEN2",0))
+    RealSetGlobalTimer("CSR_IMSOA_FBTIMER","GLOBAL",2)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_FB","GLOBAL",1)
+  RealGlobalTimerExpired("CSR_IMSOA_FBTIMER","GLOBAL")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FB","GLOBAL",2)
+    SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)
+    ActionOverride("IMOEN2",CreateItem("IMOENHP1",1,0,0))
+    ActionOverride("IMOEN2",FillSlot(SLOT_BELT))
+    %csr292_unprepared%
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_FAILED","GLOBAL",4)
+  InParty("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)
+    DisplayStringNoName(Player1,@5)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_FAILED","GLOBAL",5)
+  InParty("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)
+    DisplayStringNoName(Player1,@6)
+    Continue()
+END
+~
+
+// ------------------------------------------------------------
+// Writes: the SoD-end preparation in every host, then Shadows of Amn.
+// ------------------------------------------------------------
+LAF csr292_host_ending INT_VAR choice = csr292_choice END
+LAF csr292_host_skip INT_VAR choice = csr292_choice END
+
+<<<<<<<< .../csr292soa.baf
+%csr292_soa%
+>>>>>>>>
+EXTEND_TOP ~BALDUR.BCS~ ~.../csr292soa.baf~ EVALUATE_BUFFER USING ~chriz-sod-remix/languages/%LANGUAGE%/comp292.tra~
+
+ACTION_IF (csr292_choice = 3) BEGIN
+  PRINT ~chriz-sod-remix 294: %csr292_taught% wizard spells of IMOEN10 will be taught after the conversion.~
+END

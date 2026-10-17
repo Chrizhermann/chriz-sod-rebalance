@@ -2,8 +2,9 @@
 
 Set CSR_DEV_GAME to a locally supplied EET fixture source, and WEIDU_EXE if WeiDU
 249 is not on the normal test path. The local, ignored baseline at
-.worktrees/csr115-fixture/game (captured 2026-09-10 before component 115) is preferred
-over the documented dev copy, which is the last fallback. Game-owned
+.worktrees/csr115-fixture/game (captured 2026-09-10 before component 115; also found
+from a linked worktree via the main checkout) is preferred over the documented dev
+copy, which is the last fallback and must not already contain component 115. Game-owned
 resources are read only and never committed; all installer writes and deliberate
 negative-fixture mutations happen in a TemporaryDirectory. This is installer and
 compiled-resource evidence, not live dialogue selection or engine acceptance.
@@ -24,7 +25,22 @@ from pathlib import Path
 from test_bdscry_compat import ROOT, WEIDU, _write_key_and_bif
 
 
-LOCAL_BASELINE = ROOT / ".worktrees/csr115-fixture/game"
+def _local_baselines() -> list[Path]:
+    """The ignored baseline lives in the main checkout; linked worktrees share it."""
+    candidates = [ROOT / ".worktrees/csr115-fixture/game"]
+    try:
+        common = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=ROOT, capture_output=True, text=True, check=True, timeout=30,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return candidates
+    candidates.append(Path(common).parent / ".worktrees/csr115-fixture/game")
+    return candidates
+
+
+LOCAL_BASELINE = next((path for path in _local_baselines() if path.is_dir()),
+                      ROOT / ".worktrees/csr115-fixture/game")
 DEV_GAME = Path(os.environ.get("CSR_DEV_GAME") or
                 (LOCAL_BASELINE if LOCAL_BASELINE.is_dir() else
                  r"C:\Games\Baldur's Gate II Enhanced Edition modded - dev eet install"))

@@ -53,6 +53,9 @@ EXPECTED_COMPONENTS = {
     285,
     290,
     291,
+    292,
+    293,
+    294,
     900,
     901,
     910,
@@ -70,10 +73,10 @@ def designated_components() -> list[int]:
 
 
 class ComponentOrderTests(unittest.TestCase):
-    def test_patch_release_version_is_v0_6_13(self) -> None:
+    def test_patch_release_version_is_v0_6_14(self) -> None:
         source = TP2_PATH.read_text(encoding="utf-8")
 
-        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.13~"))
+        self.assertEqual(1, source.splitlines().count("VERSION ~v0.6.14~"))
 
     def test_component_210_is_declared_before_component_197(self) -> None:
         components = designated_components()
@@ -105,6 +108,18 @@ class ComponentOrderTests(unittest.TestCase):
         entry = source.split('BEGIN @257 DESIGNATED 257', 1)[1].split('BEGIN @', 1)[0]
         self.assertNotIn('INSTALL_BY_DEFAULT', entry)
         self.assertIn('REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~256~', entry)
+
+    def test_imoen_handover_choices_follow_their_hosts(self) -> None:
+        source = TP2_PATH.read_text(encoding="utf-8")
+        components = designated_components()
+        for choice in (292, 293, 294):
+            for prerequisite in (160, 290, 910):
+                self.assertLess(components.index(prerequisite), components.index(choice))
+            entry = source.split(f"BEGIN @{choice} DESIGNATED {choice}", 1)[1].split("BEGIN @", 1)[0]
+            self.assertIn("SUBCOMPONENT @2920", entry)
+            self.assertNotIn("INSTALL_BY_DEFAULT", entry)
+            for prerequisite in (160, 290):
+                self.assertIn(f"REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~{prerequisite}~", entry)
 
     def test_component_declarations_remain_unique(self) -> None:
         components = designated_components()

@@ -148,6 +148,9 @@ BD7000 and set `csr_treasure_removed=1`. Its selection depends on the player's p
 |---|---------|--------------|------|
 | 290 | End SoD at the victory celebration | Preserves BDCUT59/59A/59B, party barks, public de Lancie/Bence dialogue, and a playable BD4300 celebration; Dazzo ends SoD at plot 590. Retires the optional codas, Skie murder/arrest/trial/jail/escape/ambush chain, remaining Hooded-Man rumors, and final BDPALACE Entar reference. EET uses a private guarded clone of the installed handoff, transfers the local bank through `BD6100*K#ImportContainer`, and enters normal SoA without a party visit to BD6100. Standalone uses native credits. | REQUIRE 120+130+185; guarded ending resources |
 | 291 | Repair an existing EET ending installation | Append-only correction for the original 290 carrier-script softlock: release full cutscene mode, enter native lite mode before spawning the carrier, and clear lite mode when the guard fails. Validates legacy/current endpoints and guard before writing; only BDDAZZO.DLG and private CSRETBGT.BCS can change. Fresh 290 already includes the correction, so 291 is unnecessary there and leaves corrected resources unchanged. | REQUIRE 290 + complete EET handoff resource family |
+| 292 | Imoen in SoA: Shadows of Amn's Imoen plus tome boosts (CEBG default) | Shared SoD-end preparation, in 290's carrier clone and (when installed) 910's skip helper: marks Imoen with EET's own SoD-party flag (`K#PartySoD`, normally set by the replaced SoD epilogue), separates her from the party, mirrors the installed carrier's EET import rules for her items, banks the rest, and keeps only `IMOENHP1`. Then removes her after reading her tome boosts against `IMOEN2.CRE`; EET creates `IMOEN10`, and the boosts are added in SoA (capped at 25 against `IMOEN10.CRE`). No EEex. | EET + EET_end; REQUIRE 160+290; `NextTriggerObject` |
+| 293 | Imoen in SoA: as taken along | Same preparation; her own build continues into SoA. A fallback in `BALDUR.BCS` banks her gear in `AR0602` if the preparation could not reach her. | EET + EET_end; REQUIRE 160+290 |
+| 294 | Imoen in SoA: dual-class at her SoD thief level (EEex) | Same preparation; in SoA one EEex Lua call converts a pure single-class thief (any kit) to mage/thief, mage 1 and XP 0, re-arming SoA's join ladder. It then teaches `IMOEN10`'s wizard spellbook (opcode 147 at INT 25, verified, 10 retries). Anyone else is left unchanged; errors and untaught spells are reported. | EET + EET_end + EEex; REQUIRE 160+290 |
 
 **Verified boundary:** the isolated EET guard and its save/reload passed; one real
 return/celebration run, celebration reload, and user-approved reduced inventory
@@ -159,7 +162,7 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.12 release source, tail-installable WeiDU mod: **43 declarations
+`chriz-sod-remix` v0.6.14 release source, tail-installable WeiDU mod: **49 declarations
 in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in

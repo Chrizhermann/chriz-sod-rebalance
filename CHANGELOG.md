@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.6.14 - unreleased
+
+- Add EET-only choice **292 / 293 / 294** "Imoen in Shadows of Amn" (one of three,
+  installed after 160 and 290). Every choice hands an imported or recruited
+  Imoen's SoD gear over like the party's before the campaign switch: items on
+  EET's installed import lists are imported (one copy, only when the party has
+  none), everything else goes to EET's hidden import bank, and she keeps only
+  her BG2 belt, now correctly equipped. This fixes the off-party Imoen who
+  reached SoA with all her gear and her own belt pushed into the magic-weapon
+  slot (she fought bare-handed). She is brought to the transition from any SoD
+  area; a dead or never-recruited Imoen is left to EET. Before she leaves the
+  party she gets EET's own SoD-party mark (`K#PartySoD`), which EET normally
+  sets in the SoD epilogue that the remix's ending replaces. Without it, EET's
+  BG1 Imoen script deleted her, gear included, the moment she left the party.
+  - **292** (CEBG default): she becomes EET's Shadows of Amn Imoen (`IMOEN10`) plus
+    her BG1/SoD tome boosts (each score capped at 25). No EEex needed.
+  - **293**: she continues as taken along.
+  - **294** (requires EEex): a pure single-class thief dual-classes to mage at her
+    end-of-SoD thief level. SoA's catch-up XP then goes into mage, and she learns
+    `IMOEN10`'s wizard spellbook. Kit, HP, skills and proficiencies stay.
+  - Hosts: component 290's ending carrier and, when installed, 910's bedroom
+    skip (either install order). Installation stops without changes when EET's
+    import rules or arrival script have an unexpected shape.
+
 ## v0.6.13 - 2026-10-13
 
 - Add component **198**: Skie can join in the palace hall before the first rest;
