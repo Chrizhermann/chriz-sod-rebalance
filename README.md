@@ -94,7 +94,10 @@ rules like the party's, and she keeps only her BG2 belt, now correctly equipped.
 Then she becomes EET's Shadows of Amn Imoen plus her tome boosts (292, the CEBG
 default), continues as taken along (293), or dual-classes to mage at her
 end-of-SoD thief level (294, requires EEex). They require components 160 and 290
-and EET_end, and work with 910 in either install order.
+and EET_end, and work with 910 in either install order. Raise a dead Imoen before
+ending SoD: EET has no case for a dead Imoen who has been in the party, and SoA's
+opening scene would never give control back (this already applies to 160 and 290
+alone).
 
 The release has **49 component declarations in seven install groups**.
 Selection depends on installed prerequisites and earlier versions: 176, 235, 258

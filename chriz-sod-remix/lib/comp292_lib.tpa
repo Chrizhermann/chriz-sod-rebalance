@@ -6,20 +6,38 @@
 // hosts the same preparation in its skip helper when 910 is installed later.
 //
 // Every generated block uses these GLOBALs:
-//   CSR_IMSOA_PREP   0 idle, 1 bring her here, 2 import, 6 bank, 3-5 choice 1
-//                    (strip, read, remove her), 9 finished
+//   CSR_IMSOA_PREP   0 idle, 1 bring her here, 2 import, 6 bank, 3 choice 1:
+//                    strip, 4 (choice 1: read) remove her, 5 she leaves the
+//                    area, 7 choice 1: stand-in, 9 finished
 //   CSR_IMSOA_TIMER  real-time step timeout
 //   CSR_IMSOA_FAILED 1 she could not be brought here: her gear was not handed
-//                    over, SoA banks it on arrival; 2 choice 1 could not confirm
-//                    her removal (gear already handed over); 3 reported in SoA;
-//                    4 she no longer existed (another script removed her), so
-//                    SoA's own Imoen takes her place; 5 she could not leave
-//                    the party, so the host's transition handled her like any
-//                    companion and SoA's own Imoen takes her place
+//                    over, SoA banks it on arrival; 3 reported in SoA;
+//                    4 "Imoen2" was no longer her (another script had replaced
+//                    her), so SoA's own Imoen takes her place; 5 she could not
+//                    leave the party, so the host's transition handed her over
+//                    like any companion (EET carries her into SoA as she is)
 //   CSR_IMSOA_D<ab>  choice 1: tome boost per ability score
-//   CSR_IMSOA_BOOST  choice 1: 1 boosts pending, 2 applied
+//   CSR_IMSOA_BOOST  choice 1: 1 pending, 2 applied to SoA's Imoen, 3 not
+//                    applied (the arriving Imoen is still hers, see comp292.tpa)
+//   CSR_IMSOA_STANDIN choice 1: 1 once the stand-in has been given its actions
 //   CSR_IMSOA_FB     SoA gear fallback progress
 //   CSR_IMSOA_DUAL   choice 3: SoA conversion progress
+//
+// How EET treats a removed Imoen (lab, 2026-10-17): DestroySelf() takes her out
+// of her area, but she stays in EET's list of global creatures, still marked as
+// having been in the party, and does nothing until she is moved. MoveGlobal()
+// to any other area brings her back with her queued actions. EET's AR0602 does
+// exactly that for every Imoen who has been in the party and is not dead, so
+// destroying her never makes EET create IMOEN10 (that needs !BeenInParty), and
+// any action still queued on her runs when she arrives in Shadows of Amn: two
+// leftover DestroySelf() actions removed her again there, and SoA's opening
+// scene then waited for her forever. So nothing here queues an action on her
+// that could outlive the step that needs it.
+// An Imoen left alive in the area the transition starts from fares worse: the
+// actions AR0602 queues on her before its MoveGlobal() (her SoA dialog and
+// scripts) were lost in the lab, so she kept SoD's dialog and her BG1 script,
+// and SoA's XP ladder never ran. So every choice ends with her removing
+// herself, and EET brings her back the way it brings any companion.
 
 // The six ability scores: STATS.IDS symbol (also the global suffix) => CRE
 // offset of the base score.
@@ -66,6 +84,62 @@ BEGIN
       DEFINE_ASSOCIATIVE_ARRAY csr292_refs BEGIN ~%csr292_name%~ => ~%csr292_value%~ END
     END
   BUT_ONLY
+END
+
+// ------------------------------------------------------------
+// Imoen must not start a conversation while she is handed over. LeaveParty()
+// gives her the SoD campaign's post-party dialog (BDDIALOG.2DA
+// POST_DIALOG_FILE; component 160 points it at csrimoen) and she opens it at
+// once. csrimoen then offers to rejoin the party (lab, 2026-10-17), which in
+// the middle of the preparation hands her over twice or removes a party
+// member. Read only: returns that dialog and the states that can open a
+// conversation (those with a trigger) as "first" and the space-separated
+// "rest"; all empty when she has no post-party dialog in this game.
+// ------------------------------------------------------------
+DEFINE_ACTION_FUNCTION csr292_post_dialog
+  RET dialog first rest
+BEGIN
+  OUTER_SPRINT dialog ~~
+  OUTER_SPRINT first ~~
+  OUTER_SPRINT rest ~~
+  ACTION_IF FILE_EXISTS_IN_GAME ~bddialog.2da~ BEGIN
+    COPY_EXISTING - ~bddialog.2da~ ~override~
+      SET csr292_found = 0
+      COUNT_2DA_ROWS 4 csr292_rows
+      FOR (csr292_i = 0; csr292_i < csr292_rows; ++csr292_i) BEGIN
+        READ_2DA_ENTRY csr292_i 0 4 csr292_name
+        // The engine uses the first row with her name.
+        PATCH_IF ((csr292_found = 0) AND (~%csr292_name%~ STRING_EQUAL_CASE ~IMOEN2~)) BEGIN
+          SET csr292_found = 1
+          READ_2DA_ENTRY csr292_i 1 4 dialog
+        END
+      END
+    BUT_ONLY
+  END
+  ACTION_IF ((~%dialog%~ STRING_EQUAL_CASE ~*~) OR (~%dialog%~ STRING_EQUAL_CASE ~NONE~)
+             OR (NOT FILE_EXISTS_IN_GAME ~%dialog%.dlg~)) BEGIN
+    OUTER_SPRINT dialog ~~
+  END
+  ACTION_IF NOT (~%dialog%~ STRING_EQUAL ~~) BEGIN
+    COPY_EXISTING - ~%dialog%.dlg~ ~override~
+      READ_ASCII 0 csr292_sig (8)
+      PATCH_IF NOT (~%csr292_sig%~ STRING_EQUAL_CASE ~DLG V1.0~) BEGIN
+        PATCH_FAIL ~chriz-sod-remix 292-294: %dialog%.dlg (Imoen's SoD post-party dialog) is not a DLG V1.0 file.~
+      END
+      READ_LONG 0x08 csr292_count
+      READ_LONG 0x0c csr292_table
+      FOR (csr292_i = 0; csr292_i < csr292_count; ++csr292_i) BEGIN
+        READ_SLONG (csr292_table + csr292_i * 0x10 + 0x0c) csr292_trigger
+        PATCH_IF (csr292_trigger >= 0) BEGIN
+          PATCH_IF (~%first%~ STRING_EQUAL ~~) BEGIN
+            SPRINT first ~%csr292_i%~
+          END ELSE BEGIN
+            SPRINT rest ~%rest% %csr292_i%~
+          END
+        END
+      END
+    BUT_ONLY
+  END
 END
 
 // ------------------------------------------------------------
@@ -180,10 +254,24 @@ BEGIN
     FAIL ~chriz-sod-remix 292-294: internal error, unknown Imoen choice %choice%.~
   END
   LAF csr292_skim_blocks STR_VAR script = EVAL ~%script%~ gate = EVAL ~%gate%~ RET csr292_skims = blocks csr292_skim_count = count END
-  OUTER_SET csr292_after_bank = (choice = 1) ? 3 : 9
+  OUTER_SET csr292_after_bank = (choice = 1) ? 3 : 4
   OUTER_SPRINT csr292_choice1 ~~
+  OUTER_SPRINT csr292_standin ~~
+  OUTER_SPRINT csr292_left ~SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)~
+  OUTER_SPRINT csr292_late ~SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)~
   ACTION_IF (choice = 1) BEGIN
     LAF csr292_read_blocks STR_VAR gate = EVAL ~%gate%~ RET csr292_reads = blocks END
+    // After the read she leaves her area (below). A stand-in made from
+    // IMOEN10.CRE, whose script name is Imoen2 too, then appears here; "IMOEN2"
+    // now finds it first because it is in this area (lab), and
+    // MakeGlobalOverride() replaces her in EET's global list with it. It never
+    // joined the party, so once it leaves the area as well, EET's AR0602 finds
+    // no Imoen who has been in the party and creates its own IMOEN10, which then
+    // replaces the stand-in. Actions are queued on the stand-in only once it is
+    // seen in the area, so a failed creation leaves nothing queued on her. Every
+    // timeout still ends the preparation with the boosts pending: SoA applies
+    // them only to an Imoen without her SoD mark (K#PartySoD), and reports it if
+    // she is still hers.
     OUTER_SPRINT csr292_choice1 ~
 IF
 %gate%
@@ -205,11 +293,71 @@ THEN
     SetInterrupt(FALSE)
     Continue()
 END
-%csr292_reads%
+%csr292_reads%~
+    OUTER_SPRINT csr292_left ~CreateCreatureObject("IMOEN10",Myself,0,0,0)
+    RealSetGlobalTimer("CSR_IMSOA_TIMER","GLOBAL",3)
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",7)~
+    OUTER_SPRINT csr292_late ~SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)~
+    OUTER_SPRINT csr292_standin ~
+IF
+%gate%
+  Global("CSR_IMSOA_PREP","GLOBAL",7)
+  Global("CSR_IMSOA_STANDIN","GLOBAL",0)
+  InMyArea("IMOEN2")
+  !InPartyAllowDead("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_STANDIN","GLOBAL",1)
+    ActionOverride("IMOEN2",MakeGlobalOverride())
+    ActionOverride("IMOEN2",DestroySelf())
+END
+IF
+%gate%
+  Global("CSR_IMSOA_PREP","GLOBAL",7)
+  Global("CSR_IMSOA_STANDIN","GLOBAL",1)
+  !InMyArea("IMOEN2")
+  !BeenInParty("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)
+END
+IF
+%gate%
+  Global("CSR_IMSOA_PREP","GLOBAL",7)
+  RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")
+THEN
+  RESPONSE #100
+    ClearActions("IMOEN2")
+    SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)
+END~
+  END
+  // Every choice: two seconds after the bank she removes herself, as the
+  // carrier removes every companion (never while in the party: that leaves an
+  // empty portrait, lab 2026-10-17). EET's AR0602 then brings her back with all
+  // of its own actions, or, for choice 1, finds only the stand-in. Should she be
+  // back in the party by then, the host's transition hands her over like any
+  // companion (CSR_IMSOA_FAILED 5). The timeout clears what is still queued on
+  // her and lets the transition go ahead.
+  OUTER_SPRINT csr292_tail ~%csr292_choice1%
 IF
 %gate%
   Global("CSR_IMSOA_PREP","GLOBAL",4)
   RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")
+  InPartyAllowDead("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FAILED","GLOBAL",5)
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)
+    SetInterrupt(TRUE)
+END
+IF
+%gate%
+  Global("CSR_IMSOA_PREP","GLOBAL",4)
+  RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")
+  !InPartyAllowDead("IMOEN2")
 THEN
   RESPONSE #100
     ActionOverride("IMOEN2",DestroySelf())
@@ -220,11 +368,10 @@ END
 IF
 %gate%
   Global("CSR_IMSOA_PREP","GLOBAL",5)
-  !BeenInParty("IMOEN2")
+  !InMyArea("IMOEN2")
 THEN
   RESPONSE #100
-    SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)
-    SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)
+    %csr292_left%
 END
 IF
 %gate%
@@ -232,22 +379,16 @@ IF
   RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")
 THEN
   RESPONSE #100
-    SetGlobal("CSR_IMSOA_FAILED","GLOBAL",2)
-    SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)
+    ClearActions("IMOEN2")
+    %csr292_late%
 END
-IF
-%gate%
-  Global("CSR_IMSOA_PREP","GLOBAL",5)
-THEN
-  RESPONSE #100
-    ActionOverride("IMOEN2",DestroySelf())
-END
-~
-  END
+%csr292_standin%~
   // Only an Imoen who has been in the party and is alive is handled. Anyone
-  // else is EET's business: a never-recruited csrimo means EET creates IMOEN10;
-  // a dead Imoen keeps EET's own handling. The final block holds every rule
-  // below the preparation (the host's own transition) until it has finished.
+  // else is EET's business: a never-recruited csrimo means EET creates IMOEN10.
+  // A dead Imoen is left untouched; EET's AR0602 has no case for her, and SoA's
+  // opening scene then never gives control back (lab, 2026-10-17; open design
+  // question, see the design doc). The final block holds every rule below the
+  // preparation (the host's own transition) until it has finished.
   //
   // Before she leaves the party she is marked as a SoD party member
   // (K#PartySoD), exactly as EET's own SoD epilogue marks her (BD6200, chapter
@@ -255,6 +396,9 @@ END
   // BG1 Imoen once she is out of the party after BG1 (lab, 2026-10-17). The
   // mark is verified on her before LeaveParty. An Imoen elsewhere gets the mark
   // queued ahead of the move, so it is the first thing she does on arrival.
+  // Her post-party dialog cannot open while the preparation runs (see
+  // csr292_post_dialog); should she still be back in the party before her gear
+  // is handed over, the preparation returns to that step until its time runs out.
   OUTER_SPRINT text ~// chriz-sod-remix 292-294: Imoen's SoD-end handover preparation.
 IF
 %gate%
@@ -294,6 +438,7 @@ IF
   InPartyAllowDead("IMOEN2")
 THEN
   RESPONSE #100
+    ClearActions("IMOEN2")
     SetGlobal("CSR_IMSOA_FAILED","GLOBAL",5)
     SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)
 END
@@ -361,6 +506,16 @@ THEN
 END
 IF
 %gate%
+  OR(2)
+    Global("CSR_IMSOA_PREP","GLOBAL",2)
+    Global("CSR_IMSOA_PREP","GLOBAL",6)
+  InPartyAllowDead("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_PREP","GLOBAL",1)
+END
+IF
+%gate%
   Global("CSR_IMSOA_PREP","GLOBAL",2)
 THEN
   RESPONSE #100
@@ -386,10 +541,11 @@ THEN
     SetInterrupt(FALSE)
     ActionOverride("%bank%",TakeCreatureItems("IMOEN2",0))
     SmallWait(4)
+    RealSetGlobalTimer("CSR_IMSOA_TIMER","GLOBAL",2)
     SetGlobal("CSR_IMSOA_PREP","GLOBAL",%csr292_after_bank%)
     SetInterrupt(TRUE)
 END
-%csr292_choice1%
+%csr292_tail%
 IF
 %gate%
   !Global("CSR_IMSOA_PREP","GLOBAL",9)

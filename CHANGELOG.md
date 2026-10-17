@@ -14,15 +14,32 @@
   party she gets EET's own SoD-party mark (`K#PartySoD`), which EET normally
   sets in the SoD epilogue that the remix's ending replaces. Without it, EET's
   BG1 Imoen script deleted her, gear included, the moment she left the party.
+  Leaving the party also opens her post-party dialog at once, which offers to
+  rejoin; that dialog (read from SoD's `BDDIALOG.2DA`, `csrimoen` with 160)
+  stays closed while the handover runs, and the handover never removes a party
+  member.
   - **292** (CEBG default): she becomes EET's Shadows of Amn Imoen (`IMOEN10`) plus
-    her BG1/SoD tome boosts (each score capped at 25). No EEex needed.
-  - **293**: she continues as taken along.
+    her BG1/SoD tome boosts (each score capped at 25). No EEex needed. Removing
+    her is not enough, because EET carries even a destroyed Imoen into SoA (she
+    stays in its list of global creatures); so after her gear is handed over and
+    her boosts are read, a stand-in made from `IMOEN10.CRE` takes her place in
+    that list and is removed too, and EET creates its own `IMOEN10`. The boosts
+    go only to an Imoen without her SoD mark; should the swap fail, her own
+    Imoen continues as she was and the game log says so.
+  - **293**: she continues as taken along. After her gear is handed over she
+    leaves like any companion, so EET gives her SoA's dialog and scripts; left
+    in place, she kept SoD's dialog and her BG1 script, and SoA's XP catch-up
+    never ran (lab). 293 and 294 still need their lab run before release.
   - **294** (requires EEex): a pure single-class thief dual-classes to mage at her
     end-of-SoD thief level. SoA's catch-up XP then goes into mage, and she learns
     `IMOEN10`'s wizard spellbook. Kit, HP, skills and proficiencies stay.
   - Hosts: component 290's ending carrier and, when installed, 910's bedroom
     skip (either install order). Installation stops without changes when EET's
     import rules or arrival script have an unexpected shape.
+  - Known issue (open): if Imoen is dead when SoD ends, SoA's opening scene
+    never gives control back, because EET has no case for a dead Imoen who
+    has been in the party. This already happens with 160 and 290 alone;
+    raise her before the ending.
 
 ## v0.6.13 - 2026-10-13
 

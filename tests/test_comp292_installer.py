@@ -26,13 +26,16 @@ EXTRA_ACTIONS = """0 NoAction()
 1 ActionOverride(O:Actor*,A:Action*)
 21 LeaveParty()
 82 CreateItem(S:ResRef*,I:Usage1*,I:Usage2*,I:Usage3*)
+139 JoinParty()
 83 SmallWait(I:Time*)
+133 ClearActions(O:Object*)
 160 ApplySpellRES(S:RES*,O:Target)
 197 MoveGlobal(S:Area*,O:Object*,P:Point*)
 258 FillSlot(I:Slot*SLOTS)
 262 DisplayStringNoName(O:Object*,I:StrRef*)
 291 MoveGlobalObject(O:Object*,O:Target*)
 370 ChangeStat(O:Object*,I:Stat*Stats,I:Value*,I:Modifier*StatMod)
+383 MakeGlobalOverride()
 """
 EXTRA_TRIGGERS = """0x4037 StateCheck(O:Object*,I:State*State)
 0x4043 InParty(O:Object*)
@@ -77,13 +80,16 @@ END
 """
 
 
-def creature(scores, spells=()):
-    """CRE V1.0 with the given ability scores and known wizard spells."""
+def creature(scores, spells=(), script_name="Imoen2", flags=0):
+    """CRE V1.0 with the given ability scores, known wizard spells, script name
+    (death variable) and creature flags."""
     known = 0x2D4
     tail = known + len(spells) * 12
     data = bytearray(tail)
     data[:8] = b"CRE V1.0"
     struct.pack_into("<i", data, 0x08, -1)
+    struct.pack_into("<I", data, 0x10, flags)
+    data[0x280:0x2A0] = script_name.encode().ljust(32, bytes(1))
     for name, value in scores.items():
         data[ABILITY_OFFSETS[name]] = value
     struct.pack_into("<II", data, 0x2A0, known, len(spells))
@@ -96,6 +102,49 @@ def creature(scores, spells=()):
         data[pos:pos + 8] = resref.encode().ljust(8, b"\0")
         struct.pack_into("<HH", data, pos + 8, level - 1, 1)
     return bytes(data)
+
+
+# Component 160's dialog for Imoen in SoD, as BDDIALOG.2DA's POST_DIALOG_FILE: one
+# transition-only state (stay) between three triggered ones.
+def post_dialog_source(name):
+    return f"""BEGIN {name}
+IF ~Global("CSR_IMOEN_JOINED","GLOBAL",0)~ THEN BEGIN greet
+  SAY ~Heya!~
+  IF ~~ THEN REPLY ~Together again.~ DO ~SetGlobal("CSR_IMOEN_JOINED","GLOBAL",1) JoinParty()~ EXIT
+  IF ~~ THEN REPLY ~Not yet.~ GOTO stay
+END
+IF ~~ THEN BEGIN stay
+  SAY ~Fiiine.~
+  IF ~~ THEN EXIT
+END
+IF ~Global("CSR_IMOEN_JOINED","GLOBAL",1) !InParty(Myself)~ THEN BEGIN rejoin
+  SAY ~Done leavin' me behind?~
+  IF ~~ THEN REPLY ~Come on, then - rejoin the party.~ DO ~JoinParty()~ EXIT
+  IF ~~ THEN REPLY ~Not just yet.~ EXIT
+END
+IF ~Global("CSR_IMOEN_JOINED","GLOBAL",1) InParty(Myself)~ THEN BEGIN chat
+  SAY ~Quit pokin' me.~
+  IF ~~ THEN EXIT
+END
+"""
+
+
+def dlg_state_triggers(data):
+    """{state number: whitespace-normalized trigger, or None} of a DLG V1.0 file."""
+    count, table = struct.unpack_from("<II", data, 0x08)
+    triggers = struct.unpack_from("<I", data, 0x18)[0]
+    out = {}
+    for state in range(count):
+        index = struct.unpack_from("<i", data, table + state * 16 + 12)[0]
+        if index < 0:
+            out[state] = None
+        else:
+            offset, length = struct.unpack_from("<II", data, triggers + index * 8)
+            out[state] = " ".join(data[offset:offset + length].decode("latin-1").split())
+    return out
+
+
+CLOSED = 'OR(2) GlobalLT("CSR_IMSOA_PREP","GLOBAL",1) GlobalGT("CSR_IMSOA_PREP","GLOBAL",8)'
 
 
 # Real games have no TAKEITM.IDS (0 decompiles as 0); the 910 fixture maps 0 to ALL.
@@ -113,7 +162,9 @@ class ImoenGame(SkipGame):
                  fresh_imoen10=True, imoen2=None, imoen10=None,
                  imoen10_spells=(("SPWI112", 1), ("SPWI203", 2), ("SPWI304", 3),
                                  ("CSRGONE1", 2)),
-                 eeex=True, next_trigger_object=True, missing_remix=None):
+                 eeex=True, next_trigger_object=True, missing_remix=None,
+                 post_dialog="CSRIMOEN", dialogs=("csrimoen",),
+                 imoen10_script_name="Imoen2", imoen10_flags=0):
         super().__init__(missing_dependency=missing_remix if missing_remix in (110, 140, 150, 160) else None)
         override = self.root / "override"
         actions = (override / "action.ids").read_text()
@@ -129,7 +180,7 @@ class ImoenGame(SkipGame):
             (override / name).write_text(text, encoding="ascii")
         (override / "imoen2.cre").write_bytes(creature(imoen2 or BG1_SCORES))
         (override / "imoen10.cre").write_bytes(
-            creature(imoen10 or BG1_SCORES, imoen10_spells))
+            creature(imoen10 or BG1_SCORES, imoen10_spells, imoen10_script_name, imoen10_flags))
         for name in ("imoenhp1.itm", "spwi112.spl", "spwi203.spl", "spwi304.spl"):
             header = b"ITM V1  " if name.endswith(".itm") else b"SPL V1  "
             (override / name).write_bytes(header + bytes(0x6A))
@@ -138,6 +189,13 @@ class ImoenGame(SkipGame):
 
         fixture = self.root / "fixture292"
         fixture.mkdir()
+        for name in dialogs:
+            (fixture / f"{name}.d").write_text(post_dialog_source(name), encoding="ascii")
+        if post_dialog is not None:
+            (override / "bddialog.2da").write_text(
+                "2DA V1.0\n*\n         POST_DIALOG_FILE JOIN_DIALOG_FILE DREAM_SCRIPT_FILE\n"
+                "KHALID   BDKHALIP         BDKHALIJ         BDKHALID\n"
+                f"IMOEN2   {post_dialog:<16} {post_dialog:<16} BDIMOEN\n", encoding="ascii")
         lite = "    SetCutSceneLite(FALSE)\n" if guard == "current" else ""
         rules = "".join(import_rule(item) for item in ending_rules)
         if odd_ending_rule:
@@ -231,9 +289,9 @@ class ImoenSoAInstallerTests(unittest.TestCase):
 
     def test_each_choice_changes_only_its_owned_resources(self):
         expected = {
-            292: {"csretbgt.bcs", "baldur.bcs", "csrimstr.spl"},
-            293: {"csretbgt.bcs", "baldur.bcs"},
-            294: {"csretbgt.bcs", "baldur.bcs", "m_csrimd.lua"},
+            292: {"csretbgt.bcs", "baldur.bcs", "csrimstr.spl", "csrimoen.dlg"},
+            293: {"csretbgt.bcs", "baldur.bcs", "csrimoen.dlg"},
+            294: {"csretbgt.bcs", "baldur.bcs", "m_csrimd.lua", "csrimoen.dlg"},
         }
         for number, owned in expected.items():
             with self.subTest(component=number):
@@ -288,7 +346,9 @@ class ImoenSoAInstallerTests(unittest.TestCase):
             self.assertNotIn("TakePartyItem", action)
         bank_index = next(i for i, (_, a) in enumerate(blocks) if re.search(TAKE_ALL, a))
         self.assertRegex(blocks[bank_index][1], r'ActionOverride\("K#ImportContainer",' + TAKE_ALL)
-        self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)', blocks[bank_index][1])
+        # Then she removes herself (step 4), two seconds later.
+        self.assertIn('RealSetGlobalTimer("CSR_IMSOA_TIMER","GLOBAL",2)', blocks[bank_index][1])
+        self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",4)', blocks[bank_index][1])
         # The bank is a later pass, after her DestroyItem actions have run.
         self.assertIn('Global("CSR_IMSOA_PREP","GLOBAL",6)', blocks[bank_index][0])
         self.assertIn('RealGlobalTimerExpired("CSR_IMSOA_TIMER","GLOBAL")', blocks[bank_index][0])
@@ -301,6 +361,86 @@ class ImoenSoAInstallerTests(unittest.TestCase):
         self.assertTrue(all(i < bank_index for i, (t, a) in enumerate(blocks)
                             if "AddStoreItem(" in a and "CSR_IMSOA_PREP" in t))
         self.assertNotIn("CSRIMSTR", game.baf("csretbgt"))
+
+    def test_post_party_dialog_stays_closed_only_while_she_is_handed_over(self):
+        # LeaveParty() opens her post-party dialog at once (lab, 2026-10-17); its
+        # rejoin offer must not be available during the preparation.
+        for number in (292, 293, 294):
+            with self.subTest(component=number):
+                game = self.installed(number)
+                before = dlg_state_triggers(game.before["csrimoen.dlg"])
+                after = dlg_state_triggers(game.tree()["csrimoen.dlg"])
+                self.assertEqual(set(before), set(after))
+                self.assertIsNone(after[1])  # transition-only "stay" is untouched
+                for state in (0, 2, 3):
+                    # WeiDU puts the added condition first; all lines must hold.
+                    self.assertEqual(f"{CLOSED} {before[state]}", after[state])
+
+    def test_post_party_dialog_comes_from_the_installed_campaign_table(self):
+        game = self.installed(293, post_dialog="XXIMOENP", dialogs=("csrimoen", "xximoenp"))
+        self.assertEqual(game.before["csrimoen.dlg"], game.tree()["csrimoen.dlg"])
+        before = dlg_state_triggers(game.before["xximoenp.dlg"])
+        after = dlg_state_triggers(game.tree()["xximoenp.dlg"])
+        self.assertEqual(f"{CLOSED} {before[2]}", after[2])
+        for kwargs in ({"post_dialog": None}, {"post_dialog": "*"}, {"post_dialog": "XXGONE"}):
+            with self.subTest(**kwargs):
+                game = self.installed(293, **kwargs)
+                self.assertEqual({"csretbgt.bcs", "baldur.bcs"}, game.changed())
+
+    def test_a_rejoined_imoen_is_never_removed_from_the_party(self):
+        game = self.installed(292)
+        blocks = self.prep_blocks(game)
+        back = [i for i, (t, a) in enumerate(blocks) if 'InPartyAllowDead("IMOEN2")' in t
+                and "!InPartyAllowDead" not in t and 'SetGlobal("CSR_IMSOA_PREP","GLOBAL",1)' in a]
+        self.assertEqual(1, len(back), back)
+        trigger = blocks[back[0]][0]
+        for step in (2, 6):
+            self.assertIn(f'Global("CSR_IMSOA_PREP","GLOBAL",{step})', trigger)
+        self.assertIn("OR(2)", trigger)
+        later = [i for i, (_, a) in enumerate(blocks) if "AddStoreItem(" in a or re.search(TAKE_ALL, a)]
+        self.assertTrue(later and all(back[0] < i for i in later))
+        # Her removal and the stand-in's both require "IMOEN2" out of the party.
+        removals = [(t, a) for t, a in blocks if 'ActionOverride("IMOEN2",DestroySelf())' in a]
+        self.assertEqual(2, len(removals))
+        for trigger, _ in removals:
+            self.assertIn('!InPartyAllowDead("IMOEN2")', trigger)
+        # Back in the party after the read: the transition hands her over like any
+        # companion, so EET carries her own Imoen over; no boosts are armed.
+        kept = [a for t, a in blocks if 'Global("CSR_IMSOA_PREP","GLOBAL",4)' in t
+                and re.search(r'(?m)^\s*InPartyAllowDead\("IMOEN2"\)', t)]
+        self.assertEqual(1, len(kept))
+        self.assertIn('SetGlobal("CSR_IMSOA_FAILED","GLOBAL",5)', kept[0])
+        self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)', kept[0])
+        self.assertIn("SetInterrupt(TRUE)", kept[0])
+        self.assertNotIn("CSR_IMSOA_BOOST", kept[0])
+        self.assertNotIn("DestroySelf", kept[0])
+        for number in (293, 294):
+            with self.subTest(component=number):
+                # Choices 2/3 end the same way without a stand-in: she removes
+                # herself once, out of the party, and EET's AR0602 brings her back
+                # like any companion (an Imoen left alive in the area lost EET's
+                # SoA dialog and scripts in the lab).
+                blocks = self.prep_blocks(self.installed(number))
+                removals = [t for t, a in blocks if 'ActionOverride("IMOEN2",DestroySelf())' in a]
+                self.assertEqual(1, len(removals))
+                self.assertIn('Global("CSR_IMSOA_PREP","GLOBAL",4)', removals[0])
+                self.assertIn('!InPartyAllowDead("IMOEN2")', removals[0])
+                kept = [a for t, a in blocks if 'Global("CSR_IMSOA_PREP","GLOBAL",4)' in t
+                        and re.search(r'(?m)^\s*InPartyAllowDead\("IMOEN2"\)', t)]
+                self.assertEqual(1, len(kept))
+                self.assertIn('SetGlobal("CSR_IMSOA_FAILED","GLOBAL",5)', kept[0])
+                left = [a for t, a in blocks if 'Global("CSR_IMSOA_PREP","GLOBAL",5)' in t
+                        and '!InMyArea("IMOEN2")' in t]
+                self.assertEqual(1, len(left))
+                self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)', left[0])
+                late = [a for t, a in blocks if 'Global("CSR_IMSOA_PREP","GLOBAL",5)' in t
+                        and "RealGlobalTimerExpired" in t]
+                self.assertEqual(1, len(late))
+                self.assertIn('ClearActions("IMOEN2")', late[0])
+                self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)', late[0])
+                text = "\n".join(a for _, a in blocks)
+                for absent in ("MakeGlobalOverride", 'CreateCreatureObject("IMOEN10"', "CSR_IMSOA_BOOST"):
+                    self.assertNotIn(absent, text)
 
     def test_imoen_is_marked_as_a_sod_party_member_before_she_leaves(self):
         # EET's IMOEN_ removes an unmarked BG1 Imoen once she is out of the
@@ -349,8 +489,11 @@ class ImoenSoAInstallerTests(unittest.TestCase):
                 outcomes = {where(t): re.search(
                     r'SetGlobal\("CSR_IMSOA_FAILED","GLOBAL",(\d)\)', a).group(1) for t, a in timeouts}
                 # Only an Imoen who is still out there and keeps her gear gets the
-                # SoA fallback (1); in the party, the transition replaces her (5).
+                # SoA fallback (1); in the party, the transition hands her over (5)
+                # without the preparation's own LeaveParty() still queued on her.
                 self.assertEqual({"in party": "5", "elsewhere": "1", "gone": "4"}, outcomes)
+                in_party = next(a for t, a in timeouts if where(t) == "in party")
+                self.assertIn('ClearActions("IMOEN2")', in_party)
                 for _, action in timeouts:
                     self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)', action)
                 corpse = next(i for i, (t, _) in enumerate(blocks)
@@ -400,18 +543,89 @@ class ImoenSoAInstallerTests(unittest.TestCase):
         self.assertNotIn("ChangeStat(\"IMOEN2\",STR", baldur)  # SoA Imoen is already at 25
         self.assertLess(baldur.index("ChangeStat("),
                         baldur.index('SetGlobal("CSR_IMSOA_BOOST","GLOBAL",2)'))
+        # Only an Imoen without her SoD party mark gets them (Shadows of Amn's own);
+        # her own Imoen, carried over after a failed swap, gets a report instead.
+        # WeiDU decompiles NextTriggerObject + trigger as TriggerOverride.
+        new = (r'(?:NextTriggerObject\("IMOEN2"\)\s+!Global\("K#PartySoD","LOCALS",1\)'
+               r'|!TriggerOverride\("IMOEN2",Global\("K#PartySoD","LOCALS",1\)\))')
+        soa = baf_blocks(baldur)
+        for trigger, action in soa:
+            if "ChangeStat(" in action or 'SetGlobal("CSR_IMSOA_BOOST","GLOBAL",2)' in action:
+                self.assertIn('Global("CSR_IMSOA_BOOST","GLOBAL",1)', trigger)
+                self.assertIn('InParty("IMOEN2")', trigger)
+                self.assertRegex(trigger, new)
+        hers = [(t, a) for t, a in soa if 'SetGlobal("CSR_IMSOA_BOOST","GLOBAL",3)' in a]
+        self.assertEqual(1, len(hers))
+        self.assertRegex(hers[0][0], r'(?:NextTriggerObject\("IMOEN2"\)\s+Global\("K#PartySoD","LOCALS",1\)'
+                                     r'|(?<![!\w])TriggerOverride\("IMOEN2",Global\("K#PartySoD","LOCALS",1\)\))')
+        self.assertIn("DisplayStringNoName(Player1,", hers[0][1])
+        self.assertNotIn("ChangeStat(", hers[0][1])
 
-    def test_choice1_removes_her_only_after_strip_and_read(self):
+    def test_choice1_swaps_her_for_an_imoen10_stand_in_after_strip_and_read(self):
         game = self.installed(292)
         blocks = self.prep_blocks(game)
         actions = [a for _, a in blocks]
+
+        def step(n):
+            return [(i, t, a) for i, (t, a) in enumerate(blocks)
+                    if f'Global("CSR_IMSOA_PREP","GLOBAL",{n})' in t]
         strip = next(i for i, a in enumerate(actions) if 'ApplySpellRES("CSRIMSTR","IMOEN2")' in a)
         read = next(i for i, (t, _) in enumerate(blocks) if "CheckStat(" in t)
-        remove = next(i for i, a in enumerate(actions) if 'ActionOverride("IMOEN2",DestroySelf())' in a)
+        remove = next(i for i, t, a in step(4) if 'ActionOverride("IMOEN2",DestroySelf())' in a)
         self.assertLess(strip, read)
         self.assertLess(read, remove)
-        done = next(t for t, a in blocks if 'SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)' in a)
-        self.assertIn('!BeenInParty("IMOEN2")', done)
+        self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",5)', actions[remove])
+        # Once she has left the area, a stand-in is made from IMOEN10.CRE; nothing
+        # is queued on "IMOEN2" until it is seen here, so a failed creation leaves
+        # nothing behind on her (EET's AR0602 would run it when it carries her over).
+        create = [(i, t, a) for i, t, a in step(5) if 'CreateCreatureObject("IMOEN10",Myself,0,0,0)' in a]
+        self.assertEqual(1, len(create))
+        _, trigger, action = create[0]
+        self.assertIn('!InMyArea("IMOEN2")', trigger)
+        self.assertNotIn("ActionOverride", action)
+        self.assertIn('SetGlobal("CSR_IMSOA_PREP","GLOBAL",7)', action)
+        swap = [(t, a) for _, t, a in step(7) if "MakeGlobalOverride()" in a]
+        self.assertEqual(1, len(swap))
+        trigger, action = swap[0]
+        for need in ('Global("CSR_IMSOA_STANDIN","GLOBAL",0)', 'InMyArea("IMOEN2")',
+                     '!InPartyAllowDead("IMOEN2")'):
+            self.assertIn(need, trigger)
+        self.assertIn('SetGlobal("CSR_IMSOA_STANDIN","GLOBAL",1)', action)
+        self.assertLess(action.index('ActionOverride("IMOEN2",MakeGlobalOverride())'),
+                        action.index('ActionOverride("IMOEN2",DestroySelf())'))
+        # Done once EET finds no Imoen who has been in the party: it creates IMOEN10.
+        done = [t for _, t, a in step(7) if 'SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)' in a
+                and "RealGlobalTimerExpired" not in t]
+        self.assertEqual(1, len(done))
+        for need in ('Global("CSR_IMSOA_STANDIN","GLOBAL",1)', '!InMyArea("IMOEN2")',
+                     '!BeenInParty("IMOEN2")'):
+            self.assertIn(need, done[0])
+        # Each timeout drops whatever is still queued and ends with the boosts
+        # pending; SoA decides by who arrives.
+        for n in (5, 7):
+            timeout = [a for _, t, a in step(n) if "RealGlobalTimerExpired" in t]
+            self.assertEqual(1, len(timeout), n)
+            for need in ('ClearActions("IMOEN2")', 'SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)',
+                         'SetGlobal("CSR_IMSOA_PREP","GLOBAL",9)'):
+                self.assertIn(need, timeout[0])
+        # No destructive action is queued twice: each one leaves its state.
+        end = next(i for i, (t, _) in enumerate(blocks) if '!Global("CSR_IMSOA_PREP","GLOBAL",9)' in t)
+        self.assertEqual(2, sum(a.count("DestroySelf()") for a in actions[strip:end]))
+        self.assertNotIn('CSR_IMSOA_FAILED","GLOBAL",2', game.baf("csretbgt") + game.baf("baldur"))
+
+    def test_choice1_refuses_an_imoen10_that_cannot_stand_in_for_her(self):
+        cases = (({"imoen10_script_name": "Imoen10"}, 'script name is "Imoen10"'),
+                 ({"imoen10_flags": 0x8000}, "marked as having been in the party"))
+        for kwargs, message in cases:
+            with self.subTest(**kwargs):
+                game = self.game(**kwargs)
+                _, text = game.install_component(292)
+                self.assertIn("NOT INSTALLED DUE TO ERRORS", text)
+                self.assertIn(message, text)
+                self.assertEqual(game.before, game.tree())
+        for number in (293, 294):
+            with self.subTest(component=number):
+                self.installed(number, imoen10_script_name="Imoen10")
 
     def test_strip_spell_removes_every_ability_score_effect(self):
         game = self.installed(292)
