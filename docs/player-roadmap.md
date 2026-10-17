@@ -2,6 +2,17 @@
 
 Status snapshot: 6 September 2026. These are priorities, not promised dates.
 
+**Added 4 October 2026 — early BG1 companion recruitment.** Make most, preferably
+all, surviving BG1 companions available as simple recruits in the city and early
+SoD. Bring Skie's palace recruitment forward to before the first rest, checking
+her dialogue for both timings. Preserve returning companions' saved equipment
+where available; use modest starting gear for fresh recruits. The direction is
+approved, with 12 companions covered in round 1 (including earlier Skie).
+Faldorn, Quayle, Eldoth, Xzar and Montaron follow in round 2 after continuity
+checks. Broad placement groups are approved; exact staging remains open. See the
+[companion plan](design/wave1/11-early-bg1-companions.md). The older snapshot below
+has not been refreshed by this addition.
+
 - **v0.6.7 — optional full SoD skip.** A bedroom choice lets you continue SoD or
   move into the normal BG2 opening with 250,000 extra XP for your main character.
   It uses normal carried-inventory import handling; automatic recovery of loose

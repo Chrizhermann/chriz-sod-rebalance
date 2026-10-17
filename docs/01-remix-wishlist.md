@@ -82,6 +82,30 @@ chapter-pass docs only.
   content (silent passengers are fine — flexibility wins). That's *step 1*. *Step 2* (later):
   optionally place non-party companions somewhere in SoD as pickups, maybe with a little
   dialogue.
+  **2026-10-04 follow-up:** step 2 is now an explicit requested roadmap item: make most,
+  preferably all, surviving BG1 companions recruitable during the city/early SoD, with
+  simple placement and short join dialogue. Make Skie available in her current palace
+  hall before the first rest, with context-appropriate dialogue. Exact roster, placements,
+  and implementation remain open; see [early companion recruitment](design/wave1/11-early-bg1-companions.md).
+  **Same-day follow-up approved:** round 1 covers Skie (earlier timing), Coran,
+  Garrick, Yeslick, Branwen, Ajantis, Kagain, Alora, Xan, Kivan, Shar-Teel and Tiax,
+  using the plan's broad palace/city/early-road locations. Faldorn, Quayle, Eldoth,
+  Xzar and Montaron move to round 2 for continuity checks; none is excluded.
+  Keep recruitment very short, retaining worthwhile existing dialogue and cutting
+  fluff/contradictions per companion. Exact staging and wording remain open.
+  **Opening support follow-up:** fix the late Korlasz reward through Liia's normal
+  conversation when unpaid, with a journal reminder to report success. The user
+  favors repeatable bedroom rests for preparing recruited companions without
+  advancing the story. Both inspected EET bedroom area files already permit
+  native resting; verify that behavior before adding a servant/bed shortcut.
+  Details and the separate story-night safeguards are in the companion plan.
+  **Validation scope (same-day user follow-up):** no large test/review suite or
+  separate exhaustive playtest for these changes. Basic compile checks and
+  focused code review are sufficient for implementation; the user will check
+  the additions during the next overall install and report issues for fixes.
+  **Dismissal approved:** previously recruited companions follow the army to
+  subsequent camps when dismissed; unrecruited companions remain at their
+  original locations. Preserve their saved build/equipment and avoid duplicates.
 - **Items 10/11 (ending):** remove the **entire post-victory epilogue** — dream, Skie murder,
   arrest, trial, jail, breakout, hooded man. No replacement narrative: defeat the final boss,
   victory, fade out, BG2 begins unexplained (the original BG1→BG2 feel). Rationale: the
@@ -371,6 +395,17 @@ are separated below; the encounters have not been implemented.
   version 2. Make its timer obvious and generous even on Insane; the user proposes
   roughly five turns, with failure mainly for retreating or taking an exceptionally
   long time. The fight comes first, with only mild damage-output pressure.
+- **DECIDED timer design (2026-09-27):** difficulty-scaled time budget, omitted
+  in Story Mode; warnings at 25%, 50% and 75% elapsed, plus confirmation when
+  both mages and all four elementals are defeated. Guards/other crusaders do
+  not keep the timer running. Failure uses a short stone crack/rumble, collapse
+  message, fade to black and game over, without the old explosion. Exact
+  allowances and remaining clock/presentation rules are still proposed/open
+  in the [bridge design](design/wave1/08-boareskyr-bridge.md#decided--version-2-direction).
+- **DEFERRED alternative (2026-09-27):** allow continuation after losing the
+  bridge, with delayed allied reinforcements/fewer allied troops at Dragonspear.
+  Other supply/rescue consequences are saved as ideas in the bridge design;
+  none is part of this timer implementation.
 - **DECIDED combat direction (2026-09-08):** level-13 fire and control mages with
   the discussed spell packages and removable prebuffs; stronger finite defensive
   recasting, informed by comparable SCS mages. Start with Slow/Grease and defer
@@ -426,22 +461,63 @@ are separated below; the encounters have not been implemented.
 
 ### Ashatiel: Chosen of Cyric-style party fight — [#15](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/15)
 
-- **DECIDED scope/process:** queue a separate component for the default Ashatiel
+- **DECIDED scope/process:** queue a separate component for the Ashatiel
   encounter during the final castle assault. Triage first, then a **full back-and-forth
   design discussion with substantial input from both the user and the agent**, before
   implementation. This is separate from the Caelar/Avernus and post-victory passes.
-- **Current roadmap priority (2026-09-13):** finish the current release first;
-  this encounter is next-version work. The Chosen of Cyric-style brief still
-  requires that full user/agent discussion before implementation.
-- **Requested starting brief:** a Chosen of Cyric-style party encounter, with about
-  **30 seconds for the player to buff before the opposing group spawns**. Enemies get
-  prebuffs, sequencers, and potions too. Carry forward the earlier preference to warn
-  the player and preserve their existing buffs.
+- **Current roadmap priority (2026-09-26):** Ashatiel is the immediate focus for
+  the next community-playtest draft; the new minor playthrough fixes are queued
+  afterward. The Chosen of Cyric-style brief still requires the full user/agent
+  discussion before implementation.
+- **DECIDED routes (2026-09-26):** add an agreed group brawl while preserving
+  both the original solo duel and outright refusal/ordinary battle. Keep the
+  northern named party in place as a separate encounter; do not merge or rework it.
+- **Updated preparation brief (2026-09-26, clarified):** reset the **player party**
+  with dispel/full rest; no literal enemy reset is required. Enemies start present,
+  hostile/red, properly resourced and strongly prebuffed, out of sight. Early
+  player approach triggers immediate combat; otherwise enemies engage after the
+  first few rounds (about 30 seconds remains the working baseline). This replaces
+  both preserving player buffs and spawning enemies only after preparation.
+  Discuss each enemy's prebuffs, sequencers, potions and AI separately.
+- **DECIDED arena direction (2026-09-26, accepted):** use the right-hand
+  side path within candidate A, not the entire tent court. Small but not tiny,
+  just large enough for the groups to start out of sight. Remove any arena traps,
+  seal every escape with visible wooden barricades, and retain useful
+  movement/hiding space without a sprawling chase. Some actor
+  movement and extra focused tests are acceptable; no additional cuts are approved.
+  [Current design decisions and open questions](design/wave1/09-ashatiel-party-brawl.md).
+- **DECIDED victory outcome:** winning the group fight removes the visible
+  barricades and their collision, then follows the same aftermath as winning
+  Ashatiel's solo duel. Wait for the group encounter to be resolved rather than
+  ending it on Ashatiel's death while allies still fight; preserve the normal
+  siege resolution and onward Caelar progression, once only across reloads.
 - **OPEN:** reference-fight mechanics to adopt, enemy roster/roles, Ashatiel's role,
-  dialogue and existing duel/alternate routes, preparation-window trigger and warning,
-  exact timing/spawn positions, spell/potion loadouts, difficulty tiers, and rewards.
+  new dialogue and integration with the preserved routes, preparation-window trigger
+  and warning, exact reset semantics, arena/barricades, timing/spawn positions,
+  spell/potion loadouts, difficulty tiers, and rewards.
   Research the current encounter and reference fight, then bring alternatives to the
   discussion; this sketch is not a signed-off encounter design.
+- **2026-09-26 loadout/AI audit:** [complete current party dossier](research/25-ashatiel-party-dossier.md)
+  records all seven available members' builds, equipment, prepared spells,
+  real prebuffs/recasts, consumables and difficulty behavior. Use SCS Drasus and
+  Chosen of Cyric as a checklist of design considerations, not packages to add
+  everywhere. Discuss each character and scaling with the user before changes.
+  This is static installed-resource evidence, not a live-tested new encounter.
+- **2026-09-22 preparation:** [map and reuse research](research/24-ashatiel-map-triage.md)
+  identifies the northern named adventuring party, Ashatiel's separate escorts,
+  current formations/AI, and the siege completion hooks. Annotated maps and a
+  Chosen of Cyric source comparison are ready for the design discussion. No
+  encounter changes or roster/location decisions were made.
+
+### Later playthrough improvements (2026-09-26)
+
+Captured as [side notes after Ashatiel](design/wave1/10-playthrough-followups.md):
+consolidate the skipped-dungeon XP awards; revisit the placement of a removed
+area's chest rewards (exact source to identify); preserve unidentified states
+for relocated loot; skip the Avernus lift ride/battles without replacing their
+XP and jump from the lower lift directly to the upper Belhifet confrontation.
+Make the final fight more engaging before a later full rewrite; exact encounter
+changes still require discussion. These do not displace the Ashatiel priority.
 
 ### Campaign filler and trash coverage audit — [#16](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/16)
 

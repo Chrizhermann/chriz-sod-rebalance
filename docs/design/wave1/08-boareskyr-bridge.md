@@ -39,7 +39,7 @@ two-pointer-only install/disposable restore contract; see the
 Preserve both local manifests:
 `bridge-tuning-install-20260913/installed.json` (row 424, preceding balance) and
 `bridge-correction-20260913/installed.json` (row 425, newly accepted challenge),
-under `C:/Users/chris/CEBG-Tests/Combined-20260908/`. These are historical evidence,
+under `%USERPROFILE%/CEBG-Tests/Combined-20260908/`. These are historical evidence,
 not instructions to revert row 425. The installed test copy still contains
 row 425's combat behavior. The optional Insane-only payloads are fire:
 Dispel Magic with SR / Remove Magic without SR + Flame Arrow; earth: Greater
@@ -222,11 +222,102 @@ unpaused gameplay, not five rounds. The current dev `GTIMES.IDS` defines
 `FIVE_TURNS` as 301 seconds and `ONE_ROUND` as 6 seconds. This is a proposed tuning
 baseline, not evidence that the eventual Insane fight fits the budget.
 
-Presentation, exact trigger and duration, pause/save behavior, warning intervals,
-victory cancellation, retreat/re-entry behavior and the actual failure outcome
-still need a version-2 design pass. A visible remaining-time display and a clock
-that starts after the warning returns control are implementation proposals, not
-yet chosen UI or timing rules. Do not add any hidden timer to version 1.
+### DECIDED — warnings, cancellation and failure (September 27)
+
+- Give clear warnings at **25%, 50% and 75% of the chosen time budget elapsed**,
+  showing the bridge deteriorating under elemental power. Show a clear
+  confirmation when demolition stops.
+- The demolition enemies are **the two mages and four elementals only**. The
+  veteran guards and other sword/bow crusaders do not keep demolition going.
+  Stop the timer as soon as those six threats are defeated, even if other
+  enemies remain in combat. Keep this separate from Bence's existing
+  combat-clear aftermath and onward progression.
+- For this version, expiry causes a **simple game over**: a heavy stone crack
+  and short rumble, a brief collapse message, fade to black, then the normal
+  game-over flow. The user disliked the original explosion; do not reuse its
+  fireball/explosion spectacle or build an elaborate collapse animation.
+- Check demolition completion before expiry so a last-second victory counts.
+- **Scale the timer by difficulty and omit it in Story Mode.** The user said
+  "story mode or whatever the easiest is"; Story Mode has its own native
+  `StoryModeOn()` trigger. Exact lower-tier allowances remain proposed below.
+
+These are design decisions, not implemented or live-tested timer behavior.
+The released version-1 component still has no collapse clock.
+
+### PROPOSED — difficulty allowances and presentation
+
+Keep the original roughly five-minute budget for Insane and increase the
+allowance below it. These values await user acceptance and later combat-duration
+testing; difficulty scaling itself and the Story Mode exemption are decided.
+
+| Difficulty | Proposed unpaused time budget |
+| --- | --- |
+| Story Mode | No timer or timed-collapse failure |
+| Easy | 10 minutes |
+| Normal | 8 minutes |
+| Core Rules | 7 minutes |
+| Hard | 6 minutes |
+| Insane | 5 minutes |
+
+The warnings use percentages of the selected budget, not fixed timestamps.
+Story Mode should not receive escalating timed-collapse warnings for a deadline
+that does not exist. The six-enemy objective and completion confirmation remain.
+Legacy of Bhaal treatment and changes of difficulty/Story Mode during the fight
+still need an explicit rule before implementation.
+
+Proposed text, retained for wording review:
+
+| Point | Message |
+| --- | --- |
+| Start | The mages and their elementals are tearing the bridge apart. Stop them before it collapses! |
+| 25% elapsed | The bridge shudders. Elemental power cracks the stonework. |
+| 50% elapsed | Fragments of stone plunge into the river. The bridge is weakening! |
+| 75% elapsed | The bridge is giving way! The demolition must be stopped—now! |
+| Demolition stopped | The destructive magic fades. The tremors subside. The bridge will hold. |
+| Failure | The bridge gives way. The road to Dragonspear is lost. |
+
+Display the short warnings above the protagonist and copy them to the message
+log as narration. Native `DisplayStringHeadNoLog(Player1,...)` plus
+`DisplayStringNoName(Player1,...)` supports this without dialogue or issuing
+orders to the protagonist. Increasing stone-cracking sounds/dust and a brief
+75% screen shake remain presentation proposals; exact assets and timing need
+verification. An initial warning followed by the timer starting when control
+returns is also proposed. No continuously visible numerical countdown is locked.
+
+Technical references: [StoryModeOn](https://gibberlings3.github.io/iesdp/scripting/triggers/bgeetriggers.htm#0x40FA),
+[overhead text](https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#388),
+[unattributed log text](https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#262),
+and [custom GameOver](https://gibberlings3.github.io/iesdp/scripting/actions/bgeeactions.htm#366).
+These establish available native actions, not acceptance of the new sequence.
+
+Difficulty implementation note: native `EASIEST/EASY/NORMAL/HARD/HARDEST`
+values 1–5 correspond to the player-facing Easy/Normal/Core Rules/Hard/Insane
+labels. Story Mode is separate. Legacy of Bhaal has its own `NightmareModeOn()`
+trigger; do not assume that `Difficulty(HARDEST)` alone identifies it. This
+mapping was checked against the dev EET `trigger.ids` and `UI.menu` plus
+[IESDP difficulty identifiers](https://gibberlings3.github.io/iesdp/files/ids/bgee/difflev.htm).
+
+### DEFERRED — continuing after the bridge is lost
+
+The user liked an alternative to game over but explicitly saved it for later.
+The leading idea is **delayed reinforcements**: the party can reach the far side
+by another route, while an identifiable allied contingent cannot arrive for the
+Dragonspear siege. The later battle consequently has fewer allied troops.
+
+Other brainstormed possibilities are lost supply wagons/reduced camp supplies,
+a costly alternative crossing, or rescuing stranded soldiers after demolition
+becomes unstoppable, with survivors affecting later reinforcements. None of
+these is an approved implementation or a reason to add routes, rescue mechanics,
+troop losses or siege edits to this timer version. The alternative route,
+affected contingent, consequences and campaign integration require later design.
+
+### OPEN — before implementation
+
+Confirm the numerical difficulty allowances, exact timer-start seam, pause and
+save/reload behavior, retreat/re-entry behavior, mid-fight difficulty changes,
+Legacy of Bhaal treatment, and final presentation/text. Preserve normal
+counterplay when defining which permanent removals count as defeating a
+demolition enemy. Keep these separate from the agreed six-enemy stop condition.
 
 ## Accepted row-425 challenge-build details
 

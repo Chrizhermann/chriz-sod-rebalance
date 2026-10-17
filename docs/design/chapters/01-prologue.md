@@ -39,6 +39,16 @@ palace, not the jail.
 
 ## 2. The Korlasz jailbreak — DECIDED as the build-v1 core fight
 
+**Source audit correction, 2026-10-04:** the first palace rest does not require
+Korlasz's defeat, and the stairs hint/breakout remains available afterwards.
+Component 180 does lock the outside palace doors on the opening evening and
+reopens them after rest, superseding the older roam-at-50 city-access note below.
+However, its custom post-fight Liia return and component 175 XP reward only run
+at plot 50; the return Liia also despawns when that phase ends. A delayed fight
+therefore lacks the custom reward path in current source. Track a single-reward
+fix for both timings with [early recruitment](../wave1/11-early-bg1-companions.md#opening-order-and-delayed-korlasz-defect-source-verified).
+This is source evidence, not a runtime test or an implemented repair.
+
 Location: **BD0116 palace basement** (treasury + wine cellar + jail cells), on the
 vanilla rematch scaffolding (TrapBDKorlasz region → `BD_KORLAS_FREED` → she breaks out,
 kills a guard, forced dialog → hostile; journals 261626/261627). We re-time the trigger

@@ -20,6 +20,10 @@ branches remain unverified. The earlier finale test had bypassed fort continuity
   passengers are acceptable.
 - **Step 2 (later, separate):** optionally place non-party companions somewhere in SoD as
   pickups, maybe with a little dialogue.
+  **Updated 2026-10-04:** the user now requests most/all surviving BG1 companions as
+  simple city/early-SoD recruits, including Skie before the first palace rest. This is
+  separate from component 110's retention behavior; roster and placement proposals are
+  recorded in [early companion recruitment](11-early-bg1-companions.md).
 - Imoen is **not** part of this component — her absence is structural (escort NPC, poisoning
   plot) and is handled in the prologue chapter pass.
 
