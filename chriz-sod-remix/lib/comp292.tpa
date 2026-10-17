@@ -269,8 +269,11 @@ END
 
 // ------------------------------------------------------------
 // Every choice: if the SoD-end preparation could not reach her, she arrived
-// with her SoD gear. Once she is in the party, bank it in EET's AR0602 import
-// container and give her BG2 belt back to her (now correctly equipped).
+// with her SoD gear (and EET's belt, possibly pushed out of the belt slot).
+// Once she is in the party: drop EET's belt (no second copy in the bank),
+// bank the rest in EET's AR0602 import container, then give her BG2 belt
+// back, now correctly equipped. Separate passes: each step is done by a
+// different object.
 // ------------------------------------------------------------
 OUTER_SPRINT csr292_unprepared ~DisplayStringNoName(Player1,@1)~
 ACTION_IF (csr292_choice = 1) BEGIN
@@ -287,8 +290,8 @@ IF
 THEN
   RESPONSE #100
     SetGlobal("CSR_IMSOA_FB","GLOBAL",1)
-    ActionOverride("K#ImportContainer",TakeCreatureItems("IMOEN2",0))
-    RealSetGlobalTimer("CSR_IMSOA_FBTIMER","GLOBAL",2)
+    ActionOverride("IMOEN2",DestroyItem("IMOENHP1"))
+    RealSetGlobalTimer("CSR_IMSOA_FBTIMER","GLOBAL",1)
     Continue()
 END
 IF
@@ -297,6 +300,16 @@ IF
 THEN
   RESPONSE #100
     SetGlobal("CSR_IMSOA_FB","GLOBAL",2)
+    ActionOverride("K#ImportContainer",TakeCreatureItems("IMOEN2",0))
+    RealSetGlobalTimer("CSR_IMSOA_FBTIMER","GLOBAL",2)
+    Continue()
+END
+IF
+  Global("CSR_IMSOA_FB","GLOBAL",2)
+  RealGlobalTimerExpired("CSR_IMSOA_FBTIMER","GLOBAL")
+THEN
+  RESPONSE #100
+    SetGlobal("CSR_IMSOA_FB","GLOBAL",3)
     SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)
     ActionOverride("IMOEN2",CreateItem("IMOENHP1",1,0,0))
     ActionOverride("IMOEN2",FillSlot(SLOT_BELT))

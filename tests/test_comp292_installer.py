@@ -351,8 +351,9 @@ class ImoenSoAInstallerTests(unittest.TestCase):
                     self.assertIn('SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)', report[1])
                     self.assertNotIn("TakeCreatureItems", report[1])
                     self.assertIn("DisplayStringNoName(Player1,", report[1])
-                fallback = next(t for t, a in soa if "TakeCreatureItems" in a)
-                self.assertIn('Global("CSR_IMSOA_FAILED","GLOBAL",1)', fallback)
+                starts = [t for t, a in soa if 'Global("CSR_IMSOA_FB","GLOBAL",0)' in t]
+                self.assertEqual(1, len(starts))
+                self.assertIn('Global("CSR_IMSOA_FAILED","GLOBAL",1)', starts[0])
 
     def test_dead_or_never_recruited_imoen_is_left_to_eet(self):
         game = self.installed(292)
@@ -450,12 +451,25 @@ class ImoenSoAInstallerTests(unittest.TestCase):
             with self.subTest(component=number):
                 game = self.installed(number)
                 blocks = baf_blocks(game.baf("baldur"))
-                bank = next((t, a) for t, a in blocks if "TakeCreatureItems" in a)
-                self.assertIn('Global("CSR_IMSOA_FAILED","GLOBAL",1)', bank[0])
-                self.assertIn('AreaCheck("AR0602")', bank[0])
-                self.assertRegex(bank[1], r'ActionOverride\("K#ImportContainer",' + TAKE_ALL)
-                belt = next(a for t, a in blocks if 'CreateItem("IMOENHP1"' in a)
-                self.assertLess(belt.index("CreateItem"), belt.index("FillSlot(SLOT_BELT)"))
+                # Three passes: drop EET's belt, bank the rest, re-equip a fresh belt,
+                # so no second unique belt ends up in EET's bank.
+                drop = next(i for i, (t, a) in enumerate(blocks) if 'DestroyItem("IMOENHP1")' in a)
+                self.assertIn('Global("CSR_IMSOA_FAILED","GLOBAL",1)', blocks[drop][0])
+                self.assertIn('Global("CSR_IMSOA_FB","GLOBAL",0)', blocks[drop][0])
+                self.assertIn('AreaCheck("AR0602")', blocks[drop][0])
+                self.assertIn('InParty("IMOEN2")', blocks[drop][0])
+                self.assertIn('ActionOverride("IMOEN2",DestroyItem("IMOENHP1"))', blocks[drop][1])
+                self.assertNotIn("TakeCreatureItems", blocks[drop][1])
+                bank = next(i for i, (t, a) in enumerate(blocks) if "TakeCreatureItems" in a)
+                self.assertIn('Global("CSR_IMSOA_FB","GLOBAL",1)', blocks[bank][0])
+                self.assertIn("RealGlobalTimerExpired", blocks[bank][0])
+                self.assertRegex(blocks[bank][1], r'ActionOverride\("K#ImportContainer",' + TAKE_ALL)
+                belt = next(i for i, (t, a) in enumerate(blocks) if 'CreateItem("IMOENHP1"' in a)
+                self.assertIn('Global("CSR_IMSOA_FB","GLOBAL",2)', blocks[belt][0])
+                self.assertIn("RealGlobalTimerExpired", blocks[belt][0])
+                action = blocks[belt][1]
+                self.assertLess(action.index("CreateItem"), action.index("FillSlot(SLOT_BELT)"))
+                self.assertIn('SetGlobal("CSR_IMSOA_FAILED","GLOBAL",3)', action)
 
     # ---- component 910 integration -------------------------------------------
 

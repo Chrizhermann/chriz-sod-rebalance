@@ -130,10 +130,13 @@ own transition blocks until the preparation reports finished: a final wait block
   spellbook, retrying up to 10 times. Spells that still fail are logged and
   reported once. A Lua error or a missing EEex leaves her unchanged and reports it.
 - **Fallback (she could not be brought, `CSR_IMSOA_FAILED` 1):** when she is in
-  the party in `AR0602`, bank everything she still carries in
-  `AR0602*K#ImportContainer` and re-equip `IMOENHP1` in the belt slot. Choice 1's
-  rebuild is not attempted in this failure path (it would have to swap a party
-  member after the dungeon intro); a message reports it.
+  the party in `AR0602`, drop EET's `IMOENHP1` from her (it may sit outside the
+  belt slot), bank everything else she still carries in
+  `AR0602*K#ImportContainer`, then create a fresh `IMOENHP1` in the belt slot.
+  These are three separate passes, because different objects act and no second
+  copy of the unique belt may reach EET's bank. Choice 1's rebuild is not
+  attempted in this failure path (it would have to swap a party member after the
+  dungeon intro); a message reports it.
 
 ## Edge cases
 
