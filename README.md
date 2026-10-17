@@ -1,7 +1,15 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.13**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.14**.
+
+v0.6.14 hands Imoen over into Shadows of Amn on EET (**292 / 293 / 294**, choose
+one). Her SoD gear goes through EET's import rules like the party's, and she keeps
+only her BG2 belt, correctly equipped. Then she becomes EET's Shadows of Amn Imoen
+plus her tome boosts (292, the CEBG default), continues as taken along (293), or
+dual-classes to mage at her end-of-SoD thief level (294, requires EEex). All three
+passed the lab on engine 2.7.3.0. Raise a dead Imoen before ending SoD. See the
+[release report](docs/releases/v0.6.14.md).
 
 v0.6.13 adds early BG1 companion recruitment in SoD (**198**): Skie can join in
 the palace hall before the first rest, and Yeslick, Branwen, Ajantis, Coran,

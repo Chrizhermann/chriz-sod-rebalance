@@ -1,23 +1,30 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-13).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-18).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
-Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**46 component
-declarations in seven groups** for v0.6.13),
+Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**49 component
+declarations in seven groups** for v0.6.14),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.13
+## 1. Implemented in source — v0.6.14
 
-Release **v0.6.13**. This section describes release source, not a claim
+Release **v0.6.14**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.14:** EET-only choice 292/293/294 hands Imoen over into Shadows of Amn:
+her SoD gear goes through EET's import rules, she keeps only her BG2 belt, and she
+becomes EET's `IMOEN10` plus her tome boosts (292), continues as taken along (293)
+or dual-classes at her SoD thief level (294, EEex). All three passed the lab on
+engine 2.7.3.0; a dead Imoen at the end of SoD is still open. See
+[the v0.6.14 report](releases/v0.6.14.md).
 
 **v0.6.13:** component 198 adds early BG1 companion recruitment and earlier
 palace Skie; 177 lets the player report Korlasz to Liia after the first night;

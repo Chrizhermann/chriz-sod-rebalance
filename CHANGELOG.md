@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6.14 - unreleased
+## v0.6.14 - 2026-10-18
 
 - Add EET-only choice **292 / 293 / 294** "Imoen in Shadows of Amn" (one of three,
   installed after 160 and 290). Every choice hands an imported or recruited

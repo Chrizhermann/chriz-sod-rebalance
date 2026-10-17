@@ -4,7 +4,16 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.13**. The component overview below describes this version.
+Current release: **v0.6.14**. The component overview below describes this version.
+
+**v0.6.14 — 292 / 293 / 294 (EET, choose one)** hand Imoen over into Shadows of
+Amn. Before the campaign switch, her SoD gear goes through EET's import rules like
+the party's, and she keeps only her BG2 belt, correctly equipped. 292 (CEBG
+default) makes her EET's Shadows of Amn Imoen plus her tome boosts, 293 keeps her
+as taken along, and 294 (requires EEex) dual-classes her to mage at her end-of-SoD
+thief level. Requires **160 + 290** and EET_end; works with 910 in either install
+order. Install before leaving SoD, and raise a dead Imoen before the ending.
+Lab-tested on engine 2.7.3.0.
 
 **v0.6.13 — 198** makes Skie available in the palace hall before the
 first rest. Recruit Yeslick, Branwen and Ajantis near the palace; Coran and Garrick
