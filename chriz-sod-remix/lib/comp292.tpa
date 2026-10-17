@@ -224,7 +224,8 @@ ACTION_IF (csr292_choice = 3) BEGIN
       PRINT ~chriz-sod-remix 294: IMOEN10's spell %csr292_spell% is not in this game; skipped.~
     END
   END
-  COPY ~chriz-sod-remix/lua/M_CSRIMD.lua~ ~override~
+  // Lower-case source: WeiDU on Linux and macOS looks mod files up in lower case.
+  COPY ~chriz-sod-remix/lua/m_csrimd.lua~ ~override/M_CSRIMD.lua~
     COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~--[[CSR292_SPELLS]]~ csr292_slots
     PATCH_IF (csr292_slots != 1) BEGIN
       PATCH_FAIL ~chriz-sod-remix 294: M_CSRIMD.lua has no single spell-list placeholder.~
