@@ -738,6 +738,13 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp280.tpa~
 
 // ============================================================
+// 285 — interim Avernus portal and finale cleanup
+// ============================================================
+BEGIN @285 DESIGNATED 285 GROUP @1004 LABEL ~csr_avernus_finale~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~BD4600.ARE~ AND FILE_EXISTS_IN_GAME ~BD4700.ARE~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp285.tpa~
+
+// ============================================================
 // 290 — end at the Dragonspear victory celebration
 // ============================================================
 // Keep the playable victory and its public de Lancie/Bence exchange, then
