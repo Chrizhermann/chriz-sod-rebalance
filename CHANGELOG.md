@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **256** now installs alongside Tweaks Anthology's "Summoned Creatures Clear Fog
+  of War" (`cdtweaks` 3500). That tweak gives every summoned creature a permanent
+  self-cast of `CDTFOW`, and 256 stopped on it as an unreviewed donor effect:
+  on EET at the summoned fire elemental `BDELFIRM`, on BG:EE+SoD also at the
+  `SUMELEAR` fallback. `CDTFOW` clears the fog of war only for allies, so the
+  hostile bridge elementals now leave exactly that effect behind. Any other
+  shape of it, and every other unknown effect, still stops the installation
+  before anything is written
+  ([#31](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/31)).
+
 ## v0.6.14 - 2026-10-18
 
 - Add EET-only choice **292 / 293 / 294** "Imoen in Shadows of Amn" (one of three,

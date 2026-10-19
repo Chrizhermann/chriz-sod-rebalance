@@ -96,30 +96,82 @@ def item(fire=False):
     return bytes(b)
 
 
+# Field offsets of an embedded effect: CRE V1.0 effect format 0 (48 bytes)
+# and format 1 (EFF V2.0, 264 bytes).
+LAYOUTS = ({'target': (2, 'B'), 'power': (3, 'B'), 'param1': (4, 'I'),
+            'param2': (8, 'I'), 'timing': (12, 'B'), 'duration': (14, 'I'),
+            'prob1': (18, 'B'), 'prob2': (19, 'B'), 'special': (44, 'I')},
+           {'target': (12, 'I'), 'power': (16, 'I'), 'param1': (20, 'I'),
+            'param2': (24, 'I'), 'timing': (28, 'I'), 'duration': (32, 'I'),
+            'prob1': (36, 'H'), 'prob2': (38, 'H'), 'special': (64, 'I')})
+
+
+def effect_record(version, opcode, resource, **fields):
+    effect = bytearray(264 if version else 48)
+    if version:
+        effect[:8] = b'EFF V2.0'
+    struct.pack_into('<I' if version else '<H', effect, 8 if version else 0, opcode)
+    for key, value in fields.items():
+        off, fmt = LAYOUTS[version][key]
+        struct.pack_into('<' + fmt, effect, off, value)
+    off = 40 if version else 20
+    effect[off:off+8] = resource.ljust(8, b'\0')
+    return bytes(effect)
+
+
 def monk_policy_creature(version=1, **changes):
     """Artisan's reviewed class-filtered equipment helpers in either CRE format."""
     b = bytearray(creature(version=version))
     fields = dict(target=0, power=0, param2=105, timing=1, duration=0,
                   prob1=100, prob2=0, special=0)
     fields.update(changes)
-    layouts = ({'target': (2, 'B'), 'power': (3, 'B'), 'param1': (4, 'I'),
-                'param2': (8, 'I'), 'timing': (12, 'B'), 'duration': (14, 'I'),
-                'prob1': (18, 'B'), 'prob2': (19, 'B'), 'special': (44, 'I')},
-               {'target': (12, 'I'), 'power': (16, 'I'), 'param1': (20, 'I'),
-                'param2': (24, 'I'), 'timing': (28, 'I'), 'duration': (32, 'I'),
-                'prob1': (36, 'H'), 'prob2': (38, 'H'), 'special': (64, 'I')})
     for cls in (19, 1):
-        effect = bytearray(264 if version else 48)
-        if version:
-            effect[:8] = b'EFF V2.0'
-        struct.pack_into('<I' if version else '<H', effect, 8 if version else 0, 326)
-        for key, value in {'param1': cls, **fields}.items():
-            off, fmt = layouts[version][key]
-            struct.pack_into('<' + fmt, effect, off, value)
-        off = 40 if version else 20
-        effect[off:off+8] = b'C0PR#MO1'
-        b += effect
+        b += effect_record(version, 326, b'C0PR#MO1', **{'param1': cls, **fields})
     struct.pack_into('<I', b, 0x2c8, 4)
+    return bytes(b)
+
+
+# Tweaks Anthology #3500 (Summoned Creatures Clear Fog of War) adds this effect
+# to every summoned creature; the game files carry the resource in lower case.
+FOG = dict(target=1, power=0, param1=0, param2=1, timing=1, duration=0,
+           prob1=100, prob2=0, special=0)
+
+
+def summon_donor(version=1, fog=None, resource=b'cdtfow'):
+    """A summoned elemental laid out like the game's own files: the effects
+    come before the items and the equipment slots. fog adds the #3500 effect
+    with these field changes; None leaves it out."""
+    records = [effect_record(version, 326, b'C0PR#AT1', target=1, param1=19,
+                             param2=105, timing=1, prob1=100),
+               effect_record(version, 326, b'C0PR#CL', target=2, power=100,
+                             timing=9, prob1=100)]
+    if fog is not None:
+        records.insert(1, effect_record(version, 146, resource, **{**FOG, **fog}))
+    b = bytearray(0x2d4)
+    b[:8] = b'CRE V1.0'
+    struct.pack_into('<HH', b, 0x24, 108, 108)
+    b[0x33] = version
+    b[0x234] = 9
+    b[0x273] = 187
+    b[0x275] = 6
+    for o in (0x248, 0x250, 0x258, 0x260, 0x268, 0x280, 0x2cc):
+        b[o:o+8] = b'FOREIGN\0'
+    struct.pack_into('<II', b, 0x2a0, len(b), 0)
+    struct.pack_into('<II', b, 0x2a8, len(b), 1)
+    b += struct.pack('<HHHHII', 0, 0, 0, 1, 0, 0)
+    struct.pack_into('<II', b, 0x2b0, len(b), 0)
+    struct.pack_into('<II', b, 0x2c4, len(b), len(records))
+    b += b''.join(records)
+    struct.pack_into('<II', b, 0x2bc, len(b), 2)
+    b += struct.pack('<8sHHHHI', b'FIREELEM', 0, 0, 0, 0, 0)
+    b += struct.pack('<8sHHHHI', b'IMMUNE2', 0, 0, 0, 0, 0)
+    struct.pack_into('<I', b, 0x2b8, len(b))
+    slots = [-1] * 40
+    slots[4] = 1
+    slots[9] = 0
+    slots[38] = 0
+    slots[39] = 0
+    b += struct.pack('<40h', *slots)
     return bytes(b)
 
 
@@ -542,6 +594,67 @@ LAF csr256_creatures_preflight END
         self.assertNotEqual(self.run_install(), 0)
         self.assertIn('requires SPLPROT row 105', self.output)
         self.assertFalse(self.owned_resources())
+
+    def assert_tables_valid(self, b):
+        size = 264 if b[0x33] else 48
+        spans = sorted((o, o + n) for o, n in (
+            (u(b, 0x2a0), u(b, 0x2a4)*12), (u(b, 0x2a8), u(b, 0x2ac)*16),
+            (u(b, 0x2b0), u(b, 0x2b4)*12), (u(b, 0x2bc), u(b, 0x2c0)*20),
+            (u(b, 0x2c4), u(b, 0x2c8)*size), (u(b, 0x2b8), 80)) if n)
+        self.assertTrue(all(0x2d4 <= start and end <= len(b) for start, end in spans), spans)
+        self.assertTrue(all(a[1] <= c[0] for a, c in zip(spans, spans[1:])), spans)
+        slots = struct.unpack_from('<38h', b, u(b, 0x2b8))
+        self.assertTrue(all(-1 <= ix < u(b, 0x2c0) for ix in slots), slots)
+
+    def assert_summon_fog_left_out(self, version, resource=b'cdtfow'):
+        donor = summon_donor(version, fog={}, resource=resource)
+        self.resource('BDELFIRM.CRE').write_bytes(donor)
+        self.assert_success()
+        for ref in ('CSR26F1S', 'CSR26F2S'):
+            b = self.read(ref)
+            # Byte-exact: only the fog effect goes, the reviewed helpers stay.
+            self.assertEqual(effects(b), [effects(donor)[i] for i in (0, 2)])
+            self.assert_tables_valid(b)
+            self.assertEqual(set(inventory(b)), {'IMMUNE2', 'FIREELEM'})
+            self.assertEqual(s(b, 0x280, 32), 'CSR256F' + ref[6])
+        self.assertEqual(self.resource('BDELFIRM.CRE').read_bytes(), donor)
+
+    def test_v2_summon_fog_is_left_out_of_the_hostile_clones(self):
+        self.assert_summon_fog_left_out(1)
+
+    def test_upper_case_summon_fog_is_left_out_of_the_hostile_clones(self):
+        self.assert_summon_fog_left_out(1, b'CDTFOW')
+
+    def test_v1_summon_fog_is_left_out_of_the_hostile_clones(self):
+        self.assert_summon_fog_left_out(0)
+
+    def test_standalone_summon_fallback_also_drops_the_fog(self):
+        # BG:EE+SoD has no ELEARL01: the lesser earth slot clones SUMELEAR.
+        self.resource('ELEARL01.CRE').unlink()
+        donor = summon_donor(fog={})
+        self.resource('SUMELEAR.CRE').write_bytes(donor)
+        self.assert_success()
+        for ref in ('CSR26E1L', 'CSR26E2L'):
+            b = self.read(ref)
+            self.assertEqual(effects(b), [effects(donor)[i] for i in (0, 2)])
+            self.assert_tables_valid(b)
+            self.assertEqual((b[0x237], b[0x275]), (1, 4))
+        self.assertEqual(self.resource('SUMELEAR.CRE').read_bytes(), donor)
+
+    def test_summon_fog_variants_stay_unreviewed(self):
+        variants = dict(target=2, power=1, param1=1, param2=0, timing=0,
+                        duration=1, prob1=99, prob2=1, special=1)
+        for version in (0, 1):
+            for key, value in [*variants.items(), ('resource', b'CDTFOX')]:
+                with self.subTest(version=version, field=key):
+                    if key == 'resource':
+                        donor = summon_donor(version, fog={}, resource=value)
+                    else:
+                        donor = summon_donor(version, fog={key: value})
+                    self.resource('BDELFIRM.CRE').write_bytes(donor)
+                    self.assertNotEqual(self.run_install(), 0)
+                    self.assertIn('unreviewed donor effect 146', self.output)
+                    self.assertFalse(self.owned_resources())
 
     def test_malformed_tables_fail_before_any_owned_resource(self):
         b = bytearray(self.donors['BDOLONEI.CRE'])
