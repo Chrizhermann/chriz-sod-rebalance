@@ -4,7 +4,12 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.14**. The component overview below describes this version.
+Current release: **v0.6.15**. The component overview below describes this version.
+
+**v0.6.15 — 256** installs alongside Tweaks Anthology's "Summoned Creatures
+Clear Fog of War" (`cdtweaks` 3500): the hostile bridge elementals leave its
+ally-only fog clearing (`CDTFOW`) behind instead of stopping the installation.
+Every other unreviewed donor effect still stops 256 before anything is written.
 
 **v0.6.14 — 292 / 293 / 294 (EET, choose one)** hand Imoen over into Shadows of
 Amn. Before the campaign switch, her SoD gear goes through EET's import rules like
@@ -159,7 +164,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.14 exposes **49 declarations in seven install groups**, including
+v0.6.15 exposes **49 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235, 258 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.

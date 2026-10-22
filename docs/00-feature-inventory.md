@@ -1,23 +1,29 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-18).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-23).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
 Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**49 component
-declarations in seven groups** for v0.6.14),
+declarations in seven groups** for v0.6.15),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.14
+## 1. Implemented in source — v0.6.15
 
-Release **v0.6.14**. This section describes release source, not a claim
+Release **v0.6.15**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.15:** 256 accepts Tweaks Anthology's summon fog effect (`CDTFOW`, from
+`cdtweaks` 3500) on its elemental donors and leaves it out of the hostile clones;
+any other shape of it, and every other unknown effect, still stops the install
+([#31](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/31)). See
+[the v0.6.15 report](releases/v0.6.15.md).
 
 **v0.6.14:** EET-only choice 292/293/294 hands Imoen over into Shadows of Amn:
 her SoD gear goes through EET's import rules, she keeps only her BG2 belt, and she
@@ -169,7 +175,7 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.14 release source, tail-installable WeiDU mod: **49 declarations
+`chriz-sod-remix` v0.6.15 release source, tail-installable WeiDU mod: **49 declarations
 in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in
