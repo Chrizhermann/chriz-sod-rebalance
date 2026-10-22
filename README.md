@@ -1,7 +1,13 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.14**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.15**.
+
+v0.6.15 lets the Boareskyr bridge finale (**256**) install alongside Tweaks
+Anthology's "Summoned Creatures Clear Fog of War" (`cdtweaks` 3500). The
+hostile bridge elementals now leave that tweak's ally-only fog clearing behind
+instead of stopping the installation. See the
+[release report](docs/releases/v0.6.15.md).
 
 v0.6.14 hands Imoen over into Shadows of Amn on EET (**292 / 293 / 294**, choose
 one). Her SoD gear goes through EET's import rules like the party's, and she keeps

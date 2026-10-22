@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.6.15 - 2026-10-23
 
 - **256** now installs alongside Tweaks Anthology's "Summoned Creatures Clear Fog
   of War" (`cdtweaks` 3500). That tweak gives every summoned creature a permanent
