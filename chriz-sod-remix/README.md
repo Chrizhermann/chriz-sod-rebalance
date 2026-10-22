@@ -87,7 +87,9 @@ defensive recasts. Mages are level 13 below Insane and level 14 on Insane. Diffi
 the elemental tiers while the fixed encounter XP stays 4,520. The day/night
 barrel artwork is cleaned and Bence appears beside the party after combat for
 the dialogue that opens the passage. Install before first entering BD2000, either alone
-or appended after an existing 255. The old 255 need not be removed.
+or appended after an existing 255. The old 255 need not be removed. With Tweaks
+Anthology's "Summoned Creatures Clear Fog of War" (3500) installed first, the
+hostile elementals leave its ally-only fog clearing behind.
 
 **v0.6.12 timer update:** fresh 256 includes a collapse clock; append **258**
 to upgrade an older 256 without uninstalling it. Story Mode has no deadline.

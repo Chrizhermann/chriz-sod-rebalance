@@ -3,6 +3,78 @@
 // csr256_xp_guard, csr256_xp_elemental; each slot has the same XP in every tier.
 // Fresh resource clones only: this never changes the donors or existing actors.
 
+// Reads the reviewed fields of one CRE effect record in either effect format.
+DEFINE_PATCH_FUNCTION csr256_read_effect INT_VAR csr256_b = 0 csr256_ev = 0
+  RET csr256_op csr256_target csr256_power csr256_p1 csr256_p2 csr256_timing
+      csr256_duration csr256_prob1 csr256_prob2 csr256_special csr256_resource BEGIN
+  PATCH_IF csr256_ev BEGIN
+    READ_LONG (csr256_b + 8) csr256_op
+    READ_LONG (csr256_b + 12) csr256_target
+    READ_LONG (csr256_b + 16) csr256_power
+    READ_LONG (csr256_b + 20) csr256_p1
+    READ_LONG (csr256_b + 24) csr256_p2
+    READ_LONG (csr256_b + 28) csr256_timing
+    READ_LONG (csr256_b + 32) csr256_duration
+    READ_SHORT (csr256_b + 36) csr256_prob1
+    READ_SHORT (csr256_b + 38) csr256_prob2
+    READ_ASCII (csr256_b + 40) csr256_resource (8) NULL
+    READ_LONG (csr256_b + 64) csr256_special
+  END ELSE BEGIN
+    READ_SHORT csr256_b csr256_op
+    READ_BYTE (csr256_b + 2) csr256_target
+    READ_BYTE (csr256_b + 3) csr256_power
+    READ_LONG (csr256_b + 4) csr256_p1
+    READ_LONG (csr256_b + 8) csr256_p2
+    READ_BYTE (csr256_b + 12) csr256_timing
+    READ_LONG (csr256_b + 14) csr256_duration
+    READ_BYTE (csr256_b + 18) csr256_prob1
+    READ_BYTE (csr256_b + 19) csr256_prob2
+    READ_ASCII (csr256_b + 20) csr256_resource (8) NULL
+    READ_LONG (csr256_b + 44) csr256_special
+  END
+END
+
+// Tweaks Anthology "Summoned Creatures Clear Fog of War" (cdtweaks #3500)
+// gives every summoned creature a permanent self-cast of CDTFOW, which clears
+// the fog of war only for allies. The clones are hostile encounter actors and
+// leave exactly this shape behind (csr256_identity); any other shape or
+// resource remains an unreviewed donor effect.
+DEFINE_PATCH_FUNCTION csr256_summon_fog_effect INT_VAR csr256_b = 0 csr256_ev = 0
+  RET csr256_summon_fog BEGIN
+  LPF csr256_read_effect INT_VAR csr256_b csr256_ev
+    RET csr256_op csr256_target csr256_power csr256_p1 csr256_p2 csr256_timing
+        csr256_duration csr256_prob1 csr256_prob2 csr256_special csr256_resource END
+  SET csr256_summon_fog =
+    ((csr256_op = 146) AND (~%csr256_resource%~ STRING_EQUAL_CASE ~CDTFOW~) AND
+     csr256_target = 1 AND csr256_power = 0 AND csr256_p1 = 0 AND csr256_p2 = 1 AND
+     csr256_timing = 1 AND csr256_duration = 0 AND
+     csr256_prob1 = 100 AND csr256_prob2 = 0 AND csr256_special = 0)
+END
+
+// Removes every reviewed summon fog effect from a fresh clone and keeps the
+// tables stored after the effect table (usually items and slots) in place.
+DEFINE_PATCH_FUNCTION csr256_drop_summon_fog BEGIN
+  READ_BYTE 0x33 csr256_ev
+  SET csr256_es = 48
+  PATCH_IF csr256_ev BEGIN SET csr256_es = 264 END
+  READ_LONG 0x2c4 csr256_fo
+  READ_LONG 0x2c8 csr256_fc
+  FOR (csr256_i = csr256_fc - 1; csr256_i >= 0; csr256_i -= 1) BEGIN
+    SET csr256_b = csr256_fo + csr256_i * csr256_es
+    LPF csr256_summon_fog_effect INT_VAR csr256_b csr256_ev RET csr256_summon_fog END
+    PATCH_IF csr256_summon_fog BEGIN
+      DELETE_BYTES csr256_b csr256_es
+      WRITE_LONG 0x2c8 (LONG_AT 0x2c8 - 1)
+      PATCH_FOR_EACH csr256_pointer IN 0x2a0 0x2a8 0x2b0 0x2b8 0x2bc BEGIN
+        READ_LONG csr256_pointer csr256_offset
+        PATCH_IF (csr256_offset > csr256_b) BEGIN
+          WRITE_LONG csr256_pointer (csr256_offset - csr256_es)
+        END
+      END
+    END
+  END
+END
+
 DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0
   RET csr256_has_monk_policy BEGIN
   SET csr256_has_monk_policy = 0
@@ -61,43 +133,20 @@ DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0
   END
   // Reviewed chassis infrastructure only. Do not inherit hidden spell grants,
   // contingencies, invulnerability, or arbitrary foreign local variables.
+  // The reviewed summon fog effect is accepted here and dropped from clones.
   READ_LONG 0x2c4 csr256_fo
   READ_LONG 0x2c8 csr256_fc
   FOR (csr256_i = 0; csr256_i < csr256_fc; csr256_i += 1) BEGIN
     SET csr256_b = csr256_fo + csr256_i * csr256_es
-    PATCH_IF csr256_ev BEGIN
-      READ_LONG (csr256_b + 8) csr256_op
-      READ_ASCII (csr256_b + 40) csr256_resource (8) NULL
-    END ELSE BEGIN
-      READ_SHORT csr256_b csr256_op
-      READ_ASCII (csr256_b + 20) csr256_resource (8) NULL
-    END
+    LPF csr256_read_effect INT_VAR csr256_b csr256_ev
+      RET csr256_op csr256_target csr256_power csr256_p1 csr256_p2 csr256_timing
+          csr256_duration csr256_prob1 csr256_prob2 csr256_special csr256_resource END
+    LPF csr256_summon_fog_effect INT_VAR csr256_b csr256_ev RET csr256_summon_fog END
     SET csr256_monk_policy = 0
     PATCH_IF ((csr256_op = 326) AND
               (~%csr256_resource%~ STRING_EQUAL_CASE ~C0PR#MO1~)) BEGIN
       // Artisan's Mystic Monk equipment policy, not a combat spell grant.
       // Retain only the reviewed class-filtered, permanent delivery shape.
-      PATCH_IF csr256_ev BEGIN
-        READ_LONG (csr256_b + 12) csr256_target
-        READ_LONG (csr256_b + 16) csr256_power
-        READ_LONG (csr256_b + 20) csr256_p1
-        READ_LONG (csr256_b + 24) csr256_p2
-        READ_LONG (csr256_b + 28) csr256_timing
-        READ_LONG (csr256_b + 32) csr256_duration
-        READ_SHORT (csr256_b + 36) csr256_prob1
-        READ_SHORT (csr256_b + 38) csr256_prob2
-        READ_LONG (csr256_b + 64) csr256_special
-      END ELSE BEGIN
-        READ_BYTE (csr256_b + 2) csr256_target
-        READ_BYTE (csr256_b + 3) csr256_power
-        READ_LONG (csr256_b + 4) csr256_p1
-        READ_LONG (csr256_b + 8) csr256_p2
-        READ_BYTE (csr256_b + 12) csr256_timing
-        READ_LONG (csr256_b + 14) csr256_duration
-        READ_BYTE (csr256_b + 18) csr256_prob1
-        READ_BYTE (csr256_b + 19) csr256_prob2
-        READ_LONG (csr256_b + 44) csr256_special
-      END
       SET csr256_monk_policy =
         ((BYTE_AT 0x273 = 1 OR BYTE_AT 0x273 = 19) AND
          csr256_target = 0 AND csr256_power = 0 AND
@@ -107,7 +156,7 @@ DEFINE_PATCH_FUNCTION csr256_check_cre INT_VAR expected_class = 0
       PATCH_IF csr256_monk_policy BEGIN SET csr256_has_monk_policy = 1 END
     END
     PATCH_IF NOT ((csr256_op = 233) OR (csr256_op = 293) OR
-      (csr256_op = 187) OR csr256_monk_policy OR
+      (csr256_op = 187) OR csr256_monk_policy OR csr256_summon_fog OR
       ((csr256_op = 326) AND
         ((~%csr256_resource%~ STRING_EQUAL_CASE ~C0PR#AT1~) OR
          (~%csr256_resource%~ STRING_EQUAL_CASE ~C0PR#MF1~) OR
@@ -267,6 +316,8 @@ DEFINE_PATCH_FUNCTION csr256_identity STR_VAR dv = ~~ ai = ~~ BEGIN
   // Opcode187 stores local variables. None of the original encounter's
   // no-combat/prebuff/retreat flags may be carried into a new actor.
   LPF DELETE_EFFECT INT_VAR match_opcode = 187 END
+  // Hostile clones never clear the fog of war for the party.
+  LPF csr256_drop_summon_fog END
   REMOVE_KNOWN_SPELLS
   REMOVE_MEMORIZED_SPELLS
 END
