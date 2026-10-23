@@ -43,26 +43,56 @@
 //   (BD0120.baf:5502-5511) — so False()-gating both (cookbook #7)
 //   kills the scene without touching its actions.
 //
-// Seam 3 — bd0120.bcs gets ONE appended block (baf/exit0120.baf):
-//   bd_plot==50 -> the vanilla intro-launcher recipe
-//   (BD0120.baf:5502-5511) aimed at bdcut00z. WHY NOT chain bdcut00z
-//   straight from the staging block the way BDDEBUG does: the EET
-//   fresh-start Bhaalspawn-ability grants (BD0120.baf:481-573,
+// Seam 3 — bd0120.bcs gets TWO appended blocks (baf/exit0120.baf):
+//   an arm block + the exit launcher aimed at bdcut00z (recipe =
+//   vanilla's own bare launch, BDIMOEN farewell). WHY NOT chain
+//   bdcut00z straight from the staging block the way BDDEBUG does:
+//   the EET fresh-start Bhaalspawn-ability grants (BD0120.baf:481-573,
 //   SPIN101-106 via Switch("K#BhaalSpawnAbilityN")) only fire on an
 //   ordinary BD0120 area-script pass with bd_plot!=0 + K#NewGame=2 —
 //   in vanilla those passes happen during dungeon play, which the
 //   skip removes; a direct cutscene chain silently costs fresh starts
 //   their Bhaalspawn abilities. Appending at the BOTTOM guarantees
 //   the grant blocks (earlier in the script, Continue()-chained) have
-//   fired in the same pass before the exit launches — deterministic,
-//   no timing assumptions. The 1-3 interposed passes run on a black
-//   screen (the intro launcher faded out and nothing fades back in
-//   until BD0103's own palace-night block, BD0103.baf:771; bdcut00z
-//   re-fades to black itself, BDCUT00Z.baf:11). Import flow: the
-//   grants stay false (NEWGAME_SOD unset) and the exit fires on the
-//   first pass. bdcut00z is never reimplemented — it owns the gold
-//   impound, BD_EXTRA_GOLD, BD_SAFEHOUSE_DONE and the bd0103 move
-//   (10b §5).
+//   fired in the same pass before the tail is reached. The grants
+//   QUEUE their AddSpecialAbility instants on Player1 via
+//   ActionOverride, so the exit must NOT launch bdcut00z in that same
+//   pass (whether a same-tick CutSceneId(Player1) takeover preserves
+//   a pending queue is undocumented engine behavior): on fresh starts
+//   the arm block ends the grant pass instead — Player1 drains his
+//   queue that frame — and the exit fires on the NEXT pass. Import
+//   flow (NEWGAME_SOD unset): grants/CAI never fire, nothing is
+//   queued, the arm is skipped and the exit fires on the first pass.
+//   Exactly 1 interposed pass fresh / 0 import — deterministic, no
+//   timing assumptions (PT-1 / issue #4; previously 2 fresh / 1
+//   import, eaten by the vanilla non-Continue() blocks seam 4 now
+//   patches). The interposed pass runs on a black screen (the intro
+//   launcher faded out and nothing fades back in until BD0103's own
+//   palace-night block, BD0103.baf:771; bdcut00z re-fades to black
+//   itself, BDCUT00Z.baf:11). bdcut00z is never reimplemented — it
+//   owns the gold impound, BD_EXTRA_GOLD, BD_SAFEHOUSE_DONE and the
+//   bd0103 move (10b §5).
+//
+// Seam 4 — two vanilla bd0120.bcs blocks get a trailing Continue()
+//   so the post-skip passes flow through to the seam-3 tail instead
+//   of dying on them (each ate one full ~1s pass on black; PT-1
+//   audit of every block that can fire at bd_plot=50 with the skip
+//   state: these two are the only eaters — BD_PDOOR needs Door03
+//   open [starts closed, flags 0x0], Porios_spawn is ~490px from the
+//   party start [Range 12 needs <~200], bd_leaving2_ot is only ever
+//   set in BD0130, mummy/BDSH/C0Aura vars stay 0, the fours-a-crowd
+//   advisors exhaust themselves before the bdintro launcher can ever
+//   fire, and cd_fall_of_sarevok one-shots on the pre-cutscene pass):
+//   - BD_Init_CAI (BD0120.baf:6727): assigns BDDEFAI class AI to
+//     Player1 on fresh starts — still fires identically, same pass
+//     as the grants, drains with them during the arm pass.
+//   - BD_Restin (BD0120.baf:6869): zeroes BD0120's rest-encounter
+//     chances once Korlasz is resolved — fires on both flows since
+//     the staging sets BD_KORLASZ_SURRENDER=1.
+//   Both are one-shot-guarded vanilla blocks; adding Continue()
+//   changes only whether the pass continues, never what they do.
+//   The dungeon is unreachable once 140 is installed, so ordinary
+//   dungeon play never sees the patched blocks.
 //
 // Also: BDSODTRN.bcs (the BG1->SoD transition cutscene, EET and
 // standalone) copies imported ground piles to BD0120 [949.1686]
@@ -211,13 +241,37 @@ COPY_EXISTING ~bdintro.bcs~ ~override~
 BUT_ONLY
 
 // ------------------------------------------------------------
+// Seam 4: Continue() through the two post-skip pass-eaters
+// ------------------------------------------------------------
+// See header. Same fail-loud contract: both anchors verified unique
+// in the dev-install decompile; a mismatch aborts the install.
+COPY_EXISTING ~bd0120.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // BD_Init_CAI (fresh-start default class AI on Player1)
+    LPF csr140_replace_exact STR_VAR csr140_why = ~pass-eater: BD_Init_CAI~
+      csr140_match = ~ActionOverride(Player1,ChangeAIScript("BDDEFAI",CLASS))~
+      csr140_with  = ~ActionOverride(Player1,ChangeAIScript("BDDEFAI",CLASS))
+    Continue()~ END
+    // BD_Restin (rest-encounter zeroing on Korlasz resolution) — the
+    // SetInterrupt(TRUE) alone is not unique; anchor on the adjacent
+    // rest-probability line (single occurrence in the script).
+    LPF csr140_replace_exact STR_VAR csr140_why = ~pass-eater: BD_Restin~
+      csr140_match = EVAL ~SetRestEncounterProbabilityNight(0)[ %TAB%%WNL%%LNL%%MNL%]+SetInterrupt(TRUE)~
+      csr140_with  = ~SetRestEncounterProbabilityNight(0)
+    SetInterrupt(TRUE)
+    Continue()~ END
+  END
+BUT_ONLY
+
+// ------------------------------------------------------------
 // Seam 3: the deterministic exit (see header for why not a chain)
 // ------------------------------------------------------------
 // Appended at the BOTTOM so the K# Bhaalspawn grants earlier in the
 // script have already fired (Continue()-chained) in any pass that
-// reaches it. Trigger bd_plot==50 has no vanilla setter besides
+// reaches the tail. Trigger bd_plot==50 has no vanilla setter besides
 // BDDEBUG's own skip, which launches bdcut00z itself in the same
-// response — no interference.
+// response — no interference. Two blocks (arm + exit): see the file
+// and header for the one-pass fresh-start stagger rationale.
 EXTEND_BOTTOM ~bd0120.bcs~ ~chriz-sod-remix/baf/exit0120.baf~
 
 // Instant black cover on landing: BDSODTRN's pre-MoveToCampaign fade does
