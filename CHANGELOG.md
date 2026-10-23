@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **265** no longer stops the installation after Dark Tidings. A decompiled
+  timer is printed with the name the game's `GTIMES.IDS` gives its value, and
+  Dark Tidings appends `60 ONE_TURN`, so Shadow Aspect's 60-second summon timer
+  then reads `ONE_TURN` instead of `TEN_ROUNDS` and 265 refused the unchanged
+  summon block ("HARDEST summon block differs from the original/corrected
+  contract"). 265 now asks WeiDU which name this game prints for 60 seconds;
+  the rest of its exact check is unchanged. **135, 140, 200, 245, 256 and 266**
+  matched their own timers by vanilla name too, and now read the name the same
+  way, so a mod that names 6, 10, 12, 18 or 30 seconds differently no longer
+  stops them. 200 and 245 write the new 30-second parley timer as the number 30,
+  which compiles to the same script as `FIVE_ROUNDS`.
+
 ## v0.6.15 - 2026-10-23
 
 - **256** now installs alongside Tweaks Anthology's "Summoned Creatures Clear Fog

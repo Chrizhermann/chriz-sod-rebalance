@@ -115,6 +115,14 @@ BEGIN
   REPLACE_TEXTUALLY CASE_SENSITIVE ~%csr140_match%~ ~%csr140_with%~
 END
 
+// The 10-second Ammon timer decompiles with this game's GTIMES.IDS name
+// (TWO_MINUTES in vanilla); a mod may append another name. Ask WeiDU for it.
+LAF csr_gtimes_regexp
+  INT_VAR csr_gtimes_value = 10
+  STR_VAR csr_gtimes_caller = ~chriz-sod-remix #140 [BDINTRO]~
+  RET csr140_ammon_time = csr_gtimes_regexp
+END
+
 // ------------------------------------------------------------
 // Seams 1 + 2: BDINTRO.bcs
 // ------------------------------------------------------------
@@ -172,7 +180,7 @@ COPY_EXISTING ~bdintro.bcs~ ~override~
       csr140_match = ~CreateCreature("bdshimoe",\[881\.1652\],NE)~ END
     // Ammon-quest pacing timer — dungeon-internal, dies with it.
     LPF csr140_replace_exact STR_VAR csr140_why = ~staging: Ammon timer~
-      csr140_match = ~SetGlobalTimer("BD_Ammon_stop","BD0120",TWO_MINUTES)~ END
+      csr140_match = EVAL ~SetGlobalTimer("BD_Ammon_stop","BD0120",%csr140_ammon_time%)~ END
     // Cutscene-breakable rig: its disarm (SetAreaScript(""), flag=0,
     // breakable FALSE) lived in the walk-in blocks we gate off below;
     // arming it here would leave BD0120's OVERRIDE area script stuck

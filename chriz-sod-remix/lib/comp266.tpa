@@ -7,10 +7,17 @@ ACTION_IF NOT FILE_EXISTS_IN_GAME ~BDASHIRU.BCS~ BEGIN
   FAIL ~chriz-sod-remix #266: BDASHIRU.BCS is missing; the Shadow Aspect is unavailable.~
 END
 
+// The 12-second invisibility timer decompiles with this game's GTIMES.IDS name
+// (TWO_ROUNDS in vanilla); a mod may append another name. Ask WeiDU for it.
+LAF csr_gtimes_regexp
+  INT_VAR csr_gtimes_value = 12
+  STR_VAR csr_gtimes_caller = ~chriz-sod-remix #266 [BDASHIRU]~
+  RET csr266_invis_time = csr_gtimes_regexp
+END
 OUTER_SPRINT csr266_nl ~%MNL%?%LNL%~
 OUTER_SPRINT csr266_head ~IF%csr266_nl%  !StateCheck(Myself,STATE_INVISIBLE)%csr266_nl%  Difficulty(HARDEST)%csr266_nl%  !GlobalTimerNotExpired("bd_invis","locals")%csr266_nl%~
 OUTER_SPRINT csr266_response ~THEN%csr266_nl%  RESPONSE #100%csr266_nl%~
-OUTER_SPRINT csr266_actions ~    SetGlobalTimer("bd_invis","locals",TWO_ROUNDS)%csr266_nl%    CreateVisualEffectObject("shair",Myself)%csr266_nl%    ApplySpell(Myself,WIZARD_MISLEAD)%csr266_nl%END~
+OUTER_SPRINT csr266_actions ~    SetGlobalTimer("bd_invis","locals",%csr266_invis_time%)%csr266_nl%    CreateVisualEffectObject("shair",Myself)%csr266_nl%    ApplySpell(Myself,WIZARD_MISLEAD)%csr266_nl%END~
 OUTER_SPRINT csr266_guard ~  Global("CSR266_MISLEAD","LOCALS",0)%csr266_nl%~
 OUTER_SPRINT csr266_used ~    SetGlobal("CSR266_MISLEAD","LOCALS",1)%csr266_nl%~
 OUTER_SPRINT csr266_original ~%csr266_head%%csr266_response%%csr266_actions%~

@@ -11,11 +11,21 @@ END
 OUTER_SPRINT csr265_nl ~%MNL%?%LNL%~
 OUTER_SET csr265_old_item = 0
 OUTER_SET csr265_old_ash = 0
+// BDASHIRU's 60-second summon timer decompiles with this game's GTIMES.IDS name:
+// TEN_ROUNDS in vanilla, ONE_TURN after Dark Tidings. Ask WeiDU for it.
+OUTER_SPRINT csr265_summon_time ~~
+ACTION_IF (csr265_repair240 = 1) BEGIN
+  LAF csr_gtimes_regexp
+    INT_VAR csr_gtimes_value = 60
+    STR_VAR csr_gtimes_caller = ~chriz-sod-remix #265 [BDASHIRU]~
+    RET csr265_summon_time = csr_gtimes_regexp
+  END
+END
 OUTER_SPRINT csr265_item_head ~IF%csr265_nl%  Global("bd_add_mizhena_amulet","bd5000",0)%csr265_nl%THEN%csr265_nl%~
 OUTER_SPRINT csr265_item_response ~  RESPONSE #33%csr265_nl%    SetGlobal("bd_add_mizhena_amulet","bd5000",1)%csr265_nl%~
 OUTER_SPRINT csr265_item_old ~%csr265_item_head%%csr265_item_response%    GiveItemCreate("bdmisc68","Displacer Beast 1",0,0,0)[^%WNL%]*%csr265_nl%%csr265_item_response%    GiveItemCreate("bdmisc68","Displacer Beast 2",0,0,0)[^%WNL%]*%csr265_nl%%csr265_item_response%    GiveItemCreate("bdmisc68","Displacer Beast 3",0,0,0)[^%WNL%]*%csr265_nl%END~
 OUTER_SPRINT csr265_item_current ~%csr265_item_head%%csr265_item_response%%csr265_item_response%%csr265_item_response%END~
-OUTER_SPRINT csr265_ash_head ~IF%csr265_nl%  !StateCheck(Myself,STATE_INVISIBLE)%csr265_nl%  Difficulty(HARDEST)%csr265_nl%  !GlobalTimerNotExpired("bd_summons","locals")%csr265_nl%  See(NearestEnemyOf(Myself))%csr265_nl%THEN%csr265_nl%  RESPONSE #100%csr265_nl%    SetGlobalTimer("bd_summons","locals",TEN_ROUNDS)%csr265_nl%    ApplySpell(Myself,WIZARD_SHADOW_DOOR)%csr265_nl%    ApplySpell(Myself,WIZARD_DARKNESS_15_FOOT)%csr265_nl%    CreateCreatureObject("bdshad04",Myself,1,0,0)[^%WNL%]*%csr265_nl%    CreateCreatureObject("bdshad04",Myself,1,0,0)[^%WNL%]*%csr265_nl%~
+OUTER_SPRINT csr265_ash_head ~IF%csr265_nl%  !StateCheck(Myself,STATE_INVISIBLE)%csr265_nl%  Difficulty(HARDEST)%csr265_nl%  !GlobalTimerNotExpired("bd_summons","locals")%csr265_nl%  See(NearestEnemyOf(Myself))%csr265_nl%THEN%csr265_nl%  RESPONSE #100%csr265_nl%    SetGlobalTimer("bd_summons","locals",%csr265_summon_time%)%csr265_nl%    ApplySpell(Myself,WIZARD_SHADOW_DOOR)%csr265_nl%    ApplySpell(Myself,WIZARD_DARKNESS_15_FOOT)%csr265_nl%    CreateCreatureObject("bdshad04",Myself,1,0,0)[^%WNL%]*%csr265_nl%    CreateCreatureObject("bdshad04",Myself,1,0,0)[^%WNL%]*%csr265_nl%~
 OUTER_SPRINT csr265_soul ~    CreateCreatureObject("bdshsoul",Myself,1,0,0)[^%WNL%]*%csr265_nl%~
 OUTER_SPRINT csr265_ash_tail ~    Continue()%csr265_nl%END~
 

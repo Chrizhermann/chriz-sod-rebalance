@@ -165,6 +165,9 @@ class EffectiveBridgeOrderTests(unittest.TestCase):
         self.addCleanup(game.cleanup)
         (game.root / "world.tp2").write_text('''BACKUP ~world-backup~
 AUTHOR ~test~
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/gtimes_compat.tpa~
+END
 BEGIN ~production256 world seams~ DESIGNATED 256
 OUTER_SET csr256_warning = 123
 INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~

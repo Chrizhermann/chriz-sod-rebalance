@@ -1,0 +1,57 @@
+// GTIMES name helper shared by the components that match decompiled timers
+// (135, 140, 200, 245, 256, 265 and 266).
+//
+// DECOMPILE_AND_PATCH prints a timer argument (SetGlobalTimer, RealSetGlobalTimer,
+// SetGlobalTimerRandom, AdvanceTime: I:Time*GTimes in ACTION.IDS) as a name from
+// the game's GTIMES.IDS, so the printed text depends on that file, not only on
+// the script. WeiDU 249 (src/bcs.ml get_ids_map, make_ids_map, sym_of_int) skips
+// a first line that does not look like "<number> <name>", reads the rest in file
+// order and lets the LAST line with the value win. A name containing . , ( ) or "
+// is wrapped in five quotes; a value without a line is printed as its number.
+// Mods append names: Dark Tidings v3.2 adds "60 ONE_TURN" on every game, so from
+// then on 60 decompiles as ONE_TURN instead of TEN_ROUNDS. A contract that spells
+// the vanilla name then finds nothing and stops the installation.
+//
+// csr_gtimes_regexp asks WeiDU itself: it compiles one SetGlobalTimer action with
+// the value and decompiles it again in this run. That uses the same ACTION.IDS
+// signature, GTIMES.IDS file and cached IDS tables as DECOMPILE_AND_PATCH, so the
+// token is exactly what the target script shows. Nothing is written to the game.
+//
+// RET csr_gtimes_token:  the printed token, for messages.
+// RET csr_gtimes_regexp: the same token as a WeiDU regexp. WeiDU 249's IDS lexer
+// (src/idslexer.mll) allows only letters, digits, spaces and _ # - . ! ' / in a
+// name, and numbers are digits with an optional minus, so "." is the only regexp
+// character that can occur; it becomes [.]. Any other character stops the
+// installation instead of building a pattern that matches different text.
+
+DEFINE_ACTION_FUNCTION csr_gtimes_regexp
+  INT_VAR
+    csr_gtimes_value = 0
+  STR_VAR
+    csr_gtimes_caller = ~chriz-sod-remix~
+  RET
+    csr_gtimes_token
+    csr_gtimes_regexp
+BEGIN
+  OUTER_SET csr_gtimes_hits = 0
+  OUTER_SPRINT csr_gtimes_token ~~
+  OUTER_INNER_PATCH_SAVE csr_gtimes_probe
+    ~IF THEN RESPONSE #100 SetGlobalTimer("csrgtime","LOCALS",%csr_gtimes_value%) END~
+  BEGIN
+    COMPILE_BAF_TO_BCS
+    DECOMPILE_BCS_TO_BAF
+    REPLACE_EVALUATE ~SetGlobalTimer("csrgtime","LOCALS",\([^%WNL%]*\))~ BEGIN
+      SET csr_gtimes_hits += 1
+      SPRINT csr_gtimes_token ~%MATCH1%~
+    END ~%MATCH0%~
+  END
+  ACTION_IF ((csr_gtimes_hits != 1) OR (~%csr_gtimes_token%~ STRING_EQUAL ~~)) BEGIN
+    FAIL ~%csr_gtimes_caller%: a probe timer of %csr_gtimes_value% seconds did not decompile to exactly one SetGlobalTimer argument (found %csr_gtimes_hits%), so the GTIMES.IDS name this game prints for it is unknown.~
+  END
+  ACTION_IF (~%csr_gtimes_token%~ STRING_MATCHES_REGEXP ~[-_0-9A-Za-z#.!/' "]+$~) BEGIN
+    FAIL ~%csr_gtimes_caller%: GTIMES.IDS prints %csr_gtimes_value% seconds as [%csr_gtimes_token%], which contains characters this helper cannot match safely.~
+  END
+  OUTER_INNER_PATCH_SAVE csr_gtimes_regexp ~%csr_gtimes_token%~ BEGIN
+    REPLACE_TEXTUALLY EXACT_MATCH ~.~ ~[.]~
+  END
+END

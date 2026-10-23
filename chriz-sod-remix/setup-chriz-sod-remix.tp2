@@ -4,6 +4,7 @@ VERSION ~v0.6.15~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
+  INCLUDE ~chriz-sod-remix/lib/gtimes_compat.tpa~
 END
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~

@@ -2,6 +2,13 @@
 // All preflight macros operate on read-only COPY_EXISTING - buffers first.
 OUTER_SPRINT csr256_nl ~%MNL%?%LNL%~
 OUTER_SPRINT csr256_comment ~[^%WNL%]*~
+// The 30-second banter timer decompiles with this game's GTIMES.IDS name
+// (FIVE_ROUNDS in vanilla); a mod may append another name. Ask WeiDU for it.
+LAF csr_gtimes_regexp
+  INT_VAR csr_gtimes_value = 30
+  STR_VAR csr_gtimes_caller = ~chriz-sod-remix #256 [BD2000]~
+  RET csr256_banter_time = csr_gtimes_regexp
+END
 
 DEFINE_PATCH_MACRO csr256_world_exact BEGIN
   COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_pattern%~ csr256_hits
@@ -96,7 +103,7 @@ DEFINE_PATCH_MACRO csr256_world_script BEGIN
 
   SPRINT csr256_success_head ~THEN%csr256_nl%  RESPONSE #100%csr256_nl%    SetGlobal("bd_plot","global",293)%csr256_nl%    CreateCreature("bdbence",\[2425.2660\],NW)%csr256_comment%%csr256_nl%\(    CreateCreature("bdskie",\[2485.2655\],NW)%csr256_comment%%csr256_nl%\)?~
   SPRINT csr256_retreat ~    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",\[2425.2485\]))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))%csr256_nl%    ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))%csr256_nl%~
-  SPRINT csr256_success_tail ~    AddJournalEntry([0-9]+,QUEST)%csr256_nl%    SetGlobal("bd_cant_rest","myarea",0)%csr256_nl%    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)%csr256_nl%END~
+  SPRINT csr256_success_tail ~    AddJournalEntry([0-9]+,QUEST)%csr256_nl%    SetGlobal("bd_cant_rest","myarea",0)%csr256_nl%    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",%csr256_banter_time%)%csr256_nl%END~
   SPRINT csr256_success_body ~%csr256_success_head%%csr256_retreat%%csr256_success_tail%~
   SPRINT csr256_portal_conditions ~  GlobalLT("bd_plot","global",293)%csr256_nl%  OR(2)%csr256_nl%    GlobalGT("bd_elemental","bd2000",0)%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%  OR(2)%csr256_nl%    Dead("bdelefir")%csr256_comment%%csr256_nl%    Global("bdsumfir","global",3)%csr256_nl%~
   SPRINT csr256_fixed_conditions ~  GlobalLT("bd_plot","global",293)%csr256_nl%  Global("bd_elemental","bd2000",0)%csr256_nl%  Global("bdsumfir","global",0)%csr256_nl%  !NumDeadLT("bdcrubb",6)%csr256_nl%  Dead("bdcrubbm")%csr256_comment%%csr256_nl%~

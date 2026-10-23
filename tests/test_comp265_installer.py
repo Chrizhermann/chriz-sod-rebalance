@@ -17,6 +17,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'research/scripts'))
 from test_comp291_installer import WEIDU, ROOT, compact, tree, write_fake_game
+from test_gtimes_compat import gtimes_variants
 
 ITEM_BLOCK = '''IF
   Global("bd_add_mizhena_amulet","bd5000",0)
@@ -114,6 +115,10 @@ def containers(data: bytes) -> dict[str, list[bytes]]:
 @unittest.skipUnless(WEIDU.is_file(), 'real WeiDU unavailable; set WEIDU_EXE')
 class Component265InstallerTests(unittest.TestCase):
     def setUp(self):
+        self.make_game()
+
+    def make_game(self, gtimes=None):
+        """A fresh synthetic game; gtimes replaces its whole GTIMES.IDS."""
         self.temp = tempfile.TemporaryDirectory(prefix='csr265-installer-')
         self.addCleanup(self.temp.cleanup)
         self.game = Path(self.temp.name)
@@ -132,9 +137,12 @@ class Component265InstallerTests(unittest.TestCase):
             path = self.override / f'{name}.ids'
             old = path.read_text() if path.exists() else 'IDS V1.0\n'
             path.write_text(old + text, encoding='ascii')
+        if gtimes is not None:
+            (self.override / 'gtimes.ids').write_bytes(gtimes.encode('ascii'))
         (self.game / 'chriz-sod-remix/lib').mkdir(parents=True)
-        shutil.copy2(ROOT / 'chriz-sod-remix/lib/comp265.tpa',
-                     self.game / 'chriz-sod-remix/lib/comp265.tpa')
+        for library in ('comp265.tpa', 'gtimes_compat.tpa'):
+            shutil.copy2(ROOT / 'chriz-sod-remix/lib' / library,
+                         self.game / 'chriz-sod-remix/lib' / library)
         (self.game / 'fixture').mkdir()
         (self.game / 'fixture/setup-fixture.tp2').write_text('''BACKUP ~fixture/backup~
 AUTHOR ~fixture~
@@ -165,6 +173,9 @@ COMPILE ~fixture/bdashiru.baf~
     def repair(self, repair260=1, repair240=1):
         (self.game / 'repair.tp2').write_text(f'''BACKUP ~repair-backup~
 AUTHOR ~fixture~
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/gtimes_compat.tpa~
+END
 BEGIN ~production265 harness~ DESIGNATED 265
 OUTER_SET csr265_repair260 = {repair260}
 OUTER_SET csr265_repair240 = {repair240}
@@ -297,6 +308,44 @@ INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
         self.fixture(); raw=bytearray(area(guardian=True))
         struct.pack_into('<H',raw,0xf4+0x110+0x20,680); self.write('bd5110.are',raw)
         self.assert_failure('expected one Guardian')
+
+    def test_summon_contract_follows_the_gtimes_name_for_sixty_seconds(self):
+        # Dark Tidings appends "60 ONE_TURN", so BDASHIRU then decompiles with
+        # ONE_TURN; the repair must still find and fix the original block.
+        repaired = set()
+        for label, (gtimes, name) in gtimes_variants(60).items():
+            with self.subTest(gtimes=label):
+                self.make_game(gtimes)
+                self.fixture()
+                self.assert_success(self.repair(repair260=0))
+                self.assertEqual(compact(self.decompile('bdashiru.bcs')),
+                                 compact(CURRENT_ASHIRUK.replace('TEN_ROUNDS', name)))
+                repaired.add((self.override/'bdashiru.bcs').read_bytes())
+        # The same compiled script everywhere: the timer stays 60 seconds.
+        self.assertEqual(len(repaired), 1)
+
+    def test_full_repair_and_corrected_noop_under_every_gtimes_name(self):
+        for label, (gtimes, _) in gtimes_variants(60).items():
+            with self.subTest(gtimes=label, script='original'):
+                self.make_game(gtimes)
+                self.fixture()
+                self.assert_success(self.repair())
+                self.assertEqual(compact(self.decompile('bd5000.bcs')),
+                                 compact(FOREIGN+CURRENT_ITEM+FOREIGN))
+                self.assertNotIn('BDSHSOUL', compact(self.decompile('bdashiru.bcs')))
+            with self.subTest(gtimes=label, script='corrected'):
+                self.make_game(gtimes)
+                self.fixture(CURRENT_ITEM, CURRENT_ASHIRUK)
+                self.write('bd5000.are', area(target_items=[item('FOREIGN'), b'BDMISC68'+b'\0'*12]))
+                self.write('bd5110.are', area(guardian=True, guardian_schedule=0))
+                before = tree(self.override)
+                self.assert_success(self.repair())
+                self.assertEqual(tree(self.override), before)
+
+    def test_changed_summon_block_fails_with_an_appended_gtimes_name(self):
+        self.make_game(gtimes_variants(60)['Dark Tidings'][0])
+        self.fixture(ash_script=ASHIRUK.replace(SOUL, '', 1))
+        self.assert_failure('HARDEST summon block differs')
 
 
 if __name__=='__main__':
