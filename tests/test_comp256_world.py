@@ -289,4 +289,13 @@ END
         # One compiled result: the timer stays 30 seconds whatever its name.
         self.assertEqual(len(scripts),1)
 
+    def test_changed_banter_timer_fails_with_an_appended_gtimes_name(self):
+        self.make_game(gtimes_variants(30)['name from another mod'][0])
+        self.fixture(SCRIPT.replace('"GLOBAL",FIVE_ROUNDS)','"GLOBAL",FOUR_ROUNDS)'))
+        before=tree(self.override)
+        result=self.install()
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('[BD2000 portal victory]: expected 1 known seams, found 0',result.stdout+result.stderr)
+        self.assertEqual(tree(self.override),before)
+
 if __name__=='__main__': unittest.main()
