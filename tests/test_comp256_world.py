@@ -10,6 +10,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'research/scripts'))
 from test_comp291_installer import ROOT, WEIDU, write_fake_game, tree, compact
+from test_gtimes_compat import gtimes_variants
 
 ROSTER = '\n'.join(f'    CreateCreature("{ref}",[{x}.{y}],{face})' for ref, x, y, face in [
     ('bdcrubbm',1465,1910,'SE'), ('bdcrubb1',1605,1900,'S'),
@@ -94,6 +95,10 @@ def area():
 @unittest.skipUnless(WEIDU.is_file(),'real WeiDU unavailable; set WEIDU_EXE')
 class BridgeWorldTests(unittest.TestCase):
     def setUp(self):
+        self.make_game()
+
+    def make_game(self,gtimes=None):
+        """A fresh synthetic game; gtimes replaces its whole GTIMES.IDS."""
         tmp=tempfile.TemporaryDirectory(prefix='csr256-world-')
         self.addCleanup(tmp.cleanup)
         self.game=Path(tmp.name)
@@ -124,13 +129,19 @@ class BridgeWorldTests(unittest.TestCase):
         for name,text in ids.items():
             p=self.override/(name+'.ids')
             p.write_text((p.read_text() if p.exists() else 'IDS V1.0\n')+text)
+        if gtimes is not None:
+            (self.override/'gtimes.ids').write_bytes(gtimes.encode('ascii'))
         lib=self.game/'chriz-sod-remix/lib'
         lib.mkdir(parents=True)
         shutil.copy2(ROOT/'chriz-sod-remix/lib/comp256_world.tpa',lib)
+        shutil.copy2(ROOT/'chriz-sod-remix/lib/gtimes_compat.tpa',lib)
         (self.game/'fixture').mkdir()
         (self.game/'fixture/setup-fixture.tp2').write_text('BACKUP ~fixture/backup~\nAUTHOR ~test~\nBEGIN ~source~\nCOMPILE ~fixture/bd2000.baf~\n')
         (self.game/'world.tp2').write_text('''BACKUP ~world-backup~
 AUTHOR ~test~
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/gtimes_compat.tpa~
+END
 BEGIN ~production world patch~ DESIGNATED 256
 OUTER_SET csr256_warning = 123
 INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~
@@ -259,6 +270,32 @@ END
         (self.override/'bd2000.are').write_bytes(area().replace(b'BDBOARB2',b'FOREIGNX'))
         before=tree(self.override)
         self.assertNotEqual(self.install().returncode,0)
+        self.assertEqual(tree(self.override),before)
+
+    def test_victory_contract_follows_the_gtimes_name_for_thirty_seconds(self):
+        # The aftermath's banter timer decompiles with whatever name this
+        # game's GTIMES.IDS gives 30 seconds; another mod may append its own.
+        scripts=set()
+        for label,(gtimes,name) in gtimes_variants(30).items():
+            with self.subTest(gtimes=label):
+                self.make_game(gtimes)
+                self.fixture()
+                result=self.install()
+                self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+                script=compact(self.decompile())
+                self.assertEqual(script.count(f'SETGLOBALTIMER("BD_NPC_BANTER","GLOBAL",{name})'),1)
+                self.assertEqual(script.count('CREATECREATUREOBJECT("BDBENCE",PLAYER1,6,0,0)'),1)
+                scripts.add((self.override/'bd2000.bcs').read_bytes())
+        # One compiled result: the timer stays 30 seconds whatever its name.
+        self.assertEqual(len(scripts),1)
+
+    def test_changed_banter_timer_fails_with_an_appended_gtimes_name(self):
+        self.make_game(gtimes_variants(30)['name from another mod'][0])
+        self.fixture(SCRIPT.replace('"GLOBAL",FIVE_ROUNDS)','"GLOBAL",FOUR_ROUNDS)'))
+        before=tree(self.override)
+        result=self.install()
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('[BD2000 portal victory]: expected 1 known seams, found 0',result.stdout+result.stderr)
         self.assertEqual(tree(self.override),before)
 
 if __name__=='__main__': unittest.main()

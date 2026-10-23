@@ -17,6 +17,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "research/scripts"))
 from test_comp291_installer import WEIDU, tree, write_fake_game
+from test_gtimes_compat import gtimes_variants
 
 
 NATIVE_MISLEAD = '''IF
@@ -189,6 +190,10 @@ END
 @unittest.skipUnless(WEIDU.is_file(), "real WeiDU unavailable; set WEIDU_EXE")
 class Component266InstallerTests(unittest.TestCase):
     def setUp(self):
+        self.make_game()
+
+    def make_game(self, gtimes=None):
+        """A fresh synthetic game; gtimes replaces its whole GTIMES.IDS."""
         self.temp = tempfile.TemporaryDirectory(prefix="csr266-installer-")
         self.addCleanup(self.temp.cleanup)
         self.game = Path(self.temp.name)
@@ -223,9 +228,12 @@ class Component266InstallerTests(unittest.TestCase):
             path = self.override / f"{name}.ids"
             previous = path.read_text(encoding="ascii") if path.exists() else "IDS V1.0\n"
             path.write_text(previous + definitions, encoding="ascii")
+        if gtimes is not None:
+            (self.override / "gtimes.ids").write_bytes(gtimes.encode("ascii"))
         library = self.game / "chriz-sod-remix/lib"
         library.mkdir(parents=True)
-        shutil.copy2(ROOT / "chriz-sod-remix/lib/comp266.tpa", library / "comp266.tpa")
+        for name in ("comp266.tpa", "gtimes_compat.tpa"):
+            shutil.copy2(ROOT / "chriz-sod-remix/lib" / name, library / name)
         (self.game / "fixture").mkdir()
         (self.game / "fixture/setup-fixture.tp2").write_text('''BACKUP ~fixture/backup~
 AUTHOR ~fixture~
@@ -257,6 +265,9 @@ COMPILE ~fixture/expected.baf~
     def repair(self, name="repair"):
         (self.game / f"{name}.tp2").write_text(f'''BACKUP ~{name}-backup~
 AUTHOR ~fixture~
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/gtimes_compat.tpa~
+END
 BEGIN ~production component266 harness~ DESIGNATED 266
 INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
 ''', encoding="ascii")
@@ -374,6 +385,27 @@ INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("BDASHIRU.BCS is missing", result.stdout + result.stderr)
         self.assertEqual(tree(self.override), before)
+
+    def test_mislead_contract_follows_the_gtimes_name_for_twelve_seconds(self):
+        # Dark Tidings renames only 60 seconds, which the adjacent summon blocks
+        # use; another mod may append its own name for 12 seconds.
+        for label, (gtimes, _) in gtimes_variants(12).items():
+            with self.subTest(gtimes=label, script="original"):
+                self.make_game(gtimes)
+                self.fixture()
+                self.assert_success(self.repair())
+                self.assertEqual((self.override / "bdashiru.bcs").read_bytes(),
+                                 (self.override / "expected.bcs").read_bytes())
+            with self.subTest(gtimes=label, script="capped"):
+                self.make_game(gtimes)
+                self.fixture(CAPPED_MISLEAD)
+                before = tree(self.override)
+                self.assert_success(self.repair())
+                self.assertEqual(tree(self.override), before)
+
+    def test_changed_timer_is_rejected_with_an_appended_gtimes_name(self):
+        self.make_game(gtimes_variants(12)["name from another mod"][0])
+        self.assert_rejected(NATIVE_MISLEAD.replace("TWO_ROUNDS", "THREE_ROUNDS"))
 
 
 if __name__ == "__main__":

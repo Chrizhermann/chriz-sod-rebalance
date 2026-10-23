@@ -25,7 +25,8 @@ class StandalonePrerequisiteSourceTests(unittest.TestCase):
         self.assertIn("ADD_TRANS_TRIGGER BDIMOEN 67 ~False()~ DO 1", source)
         self.assertRegex(
             tp2,
-            r'ALWAYS\s+INCLUDE ~chriz-sod-remix/lib/bdscry_compat\.tpa~\s+END',
+            r'ALWAYS\s+INCLUDE ~chriz-sod-remix/lib/bdscry_compat\.tpa~\s+'
+            r'(?:INCLUDE ~chriz-sod-remix/lib/\w+\.tpa~\s+)*END',
         )
         self.assertRegex(
             tp2,

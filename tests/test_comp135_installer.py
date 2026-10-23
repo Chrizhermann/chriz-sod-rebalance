@@ -19,6 +19,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "research/scripts"))
 from test_comp291_installer import WEIDU, tree, write_fake_game
+from test_gtimes_compat import gtimes_variants
 
 
 def block(triggers: str, actions: str) -> str:
@@ -92,6 +93,10 @@ KEEPERS = [FOREIGN[0], INIT, WARNINGS[0], WARNINGS[1], FOREIGN[1],
 @unittest.skipUnless(WEIDU.is_file(), "real WeiDU unavailable; set WEIDU_EXE")
 class Component135InstallerTests(unittest.TestCase):
     def setUp(self) -> None:
+        self.make_game()
+
+    def make_game(self, gtimes: str | None = None) -> None:
+        """A fresh synthetic game; gtimes replaces its whole GTIMES.IDS."""
         self.temp = tempfile.TemporaryDirectory(prefix="csr135-installer-")
         self.addCleanup(self.temp.cleanup)
         self.game = Path(self.temp.name)
@@ -125,6 +130,8 @@ class Component135InstallerTests(unittest.TestCase):
             path = self.override / f"{name}.ids"
             previous = path.read_text(encoding="ascii") if path.exists() else "IDS V1.0\n"
             path.write_text(previous + definitions, encoding="ascii")
+        if gtimes is not None:
+            (self.override / "gtimes.ids").write_bytes(gtimes.encode("ascii"))
         # Real TLK comments include punctuation resembling regex/code. The patch
         # must bind the action structure, not English text or EET strref offsets.
         text = b"Fixture text: (magic) [sound] <CHARNAME>, 100%!"
@@ -135,8 +142,9 @@ class Component135InstallerTests(unittest.TestCase):
         for path in (self.game / "dialog.tlk", self.game / "lang/en_us/dialog.tlk"):
             path.write_bytes(tlk)
         (self.game / "chriz-sod-remix/lib").mkdir(parents=True)
-        shutil.copy2(ROOT / "chriz-sod-remix/lib/comp135.tpa",
-                     self.game / "chriz-sod-remix/lib/comp135.tpa")
+        for library in ("comp135.tpa", "gtimes_compat.tpa"):
+            shutil.copy2(ROOT / "chriz-sod-remix/lib" / library,
+                         self.game / "chriz-sod-remix/lib" / library)
         (self.game / "fixture").mkdir()
         (self.game / "fixture/setup-fixture.tp2").write_text('''BACKUP ~fixture/backup~
 AUTHOR ~fixture~
@@ -146,6 +154,9 @@ COMPILE ~fixture/expected.baf~
 ''', encoding="ascii")
         (self.game / "patch.tp2").write_text('''BACKUP ~patch-backup~
 AUTHOR ~fixture~
+ALWAYS
+  INCLUDE ~chriz-sod-remix/lib/gtimes_compat.tpa~
+END
 BEGIN ~production component 135 harness~ DESIGNATED 135
 INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
 ''', encoding="ascii")
@@ -277,6 +288,22 @@ INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
 
     def test_missing_preserved_warning_rejects_before_write(self):
         self.fixture(keepers=[value for value in KEEPERS if value != WARNINGS[0]])
+        self.assert_rejected(self.snapshot())
+
+    def test_antimagic_contract_follows_the_gtimes_name_for_six_seconds(self):
+        # Another mod may append its own name for 6 seconds; the decompiler
+        # then prints that name, and the original block must still be found.
+        for label, (gtimes, _) in gtimes_variants(6).items():
+            with self.subTest(gtimes=label):
+                self.make_game(gtimes)
+                self.fixture(dead_magic_blocks(aura=True))
+                self.assert_success(self.snapshot())
+
+    def test_changed_antimagic_timer_is_rejected_with_an_appended_gtimes_name(self):
+        self.make_game(gtimes_variants(6)["name from another mod"][0])
+        targets = dead_magic_blocks()
+        targets[0] = targets[0].replace("ONE_ROUND", "TWO_ROUNDS")
+        self.fixture(targets)
         self.assert_rejected(self.snapshot())
 
 

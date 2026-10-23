@@ -94,17 +94,26 @@ BUT_ONLY
 // (bdwforce cast + SPFLESHS VFX + force_wall ambient + hidden
 // force_wall_door, BDCUT14 :397-403) and gives the crusader fight
 // THREE_ROUNDS before Caelar's parley timer fires (:417). User
-// decisions: wall gone, window FIVE_ROUNDS (~167%). GTIMES.IDS
-// carries FIVE_ROUNDS=30 on this install (verified).
+// decisions: wall gone, window FIVE_ROUNDS (~167%). The old timer
+// is matched by the name this game's GTIMES.IDS prints for 18
+// seconds (THREE_ROUNDS in vanilla; a mod may append another), and
+// the new one is written as 30 seconds (vanilla FIVE_ROUNDS), which
+// compiles to the same value whichever names GTIMES.IDS carries.
+
+LAF csr_gtimes_regexp
+  INT_VAR csr_gtimes_value = 18
+  STR_VAR csr_gtimes_caller = ~chriz-sod-remix comp200 [BDCUT14]~
+  RET csr200_parley_time = csr_gtimes_regexp
+END
 
 COPY_EXISTING ~bdcut14.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     COUNT_REGEXP_INSTANCES ~ActionOverride("bdcrus13",ForceSpellPointRES("bdwforce",\[3780\.1110\]))[ %TAB%%LNL%%MNL%]+SmallWait(30)[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3540\.1135\])[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3625\.1195\])[ %TAB%%LNL%%MNL%]+SmallWait(10)[ %TAB%%LNL%%MNL%]+AmbientActivate("force_wall",TRUE)[ %TAB%%LNL%%MNL%]+CloseDoor("force_wall_door")~ csr_cnt_wall
-    COUNT_REGEXP_INSTANCES ~SetGlobalTimer("bd_caelar_timer","bd1000",THREE_ROUNDS)~ csr_cnt_timer
+    COUNT_REGEXP_INSTANCES ~SetGlobalTimer("bd_caelar_timer","bd1000",%csr200_parley_time%)~ csr_cnt_timer
     PATCH_IF NOT ((csr_cnt_wall = 1) AND (csr_cnt_timer = 1)) BEGIN
       PATCH_FAIL ~chriz-sod-remix comp200: BDCUT14.bcs does not match the verified bridge-fight layout (wall block x%csr_cnt_wall%, timer x%csr_cnt_timer%; expected 1 each). Another mod rewrote the cutscene - resolve manually.~
     END
     REPLACE_TEXTUALLY ~ActionOverride("bdcrus13",ForceSpellPointRES("bdwforce",\[3780\.1110\]))[ %TAB%%LNL%%MNL%]+SmallWait(30)[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3540\.1135\])[ %TAB%%LNL%%MNL%]+CreateVisualEffect("SPFLESHS",\[3625\.1195\])[ %TAB%%LNL%%MNL%]+SmallWait(10)[ %TAB%%LNL%%MNL%]+AmbientActivate("force_wall",TRUE)[ %TAB%%LNL%%MNL%]+CloseDoor("force_wall_door")~ ~SmallWait(1)~
-    REPLACE_TEXTUALLY ~SetGlobalTimer("bd_caelar_timer","bd1000",THREE_ROUNDS)~ ~SetGlobalTimer("bd_caelar_timer","bd1000",FIVE_ROUNDS)~
+    REPLACE_TEXTUALLY ~SetGlobalTimer("bd_caelar_timer","bd1000",%csr200_parley_time%)~ ~SetGlobalTimer("bd_caelar_timer","bd1000",30)~
   END
 BUT_ONLY
