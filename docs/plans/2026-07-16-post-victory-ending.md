@@ -134,8 +134,11 @@ missing.
 
 Patch the installed BD4300.BCS in place:
 
-- require exactly 18 `bd_mdd1341a_ot_timer` actions in the plot-586 victory-bark chain and
-  normalize their values to numeric `2`;
+- require every `bd_mdd1341a_ot_timer` writer to be the one `SetGlobalTimer` of a plot-586
+  victory bark, and normalize their values to numeric `2`. (Superseded on 2026-10-29: the plan
+  first counted exactly 18 setters, the 17 vanilla barks plus Aura's. Mods add barks in the same
+  shape, Sirene BG1 among them, so `lib/comp290_barks.tpa` now checks the shape of each block that
+  writes the timer and accepts any number of barks, at least one.);
 - false-gate the Romance6=0 setter and Romance6=1 forced-dialog block for both Corwin and Neera;
 - do not write `bd_CorwinRomance6`, `bd_NeeraRomance6`, or either romance-active global;
 - preserve the convergence that advances plot 586→587 and all unrelated BD4300 blocks.

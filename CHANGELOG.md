@@ -13,6 +13,17 @@
   way, so a mod that names 6, 10, 12, 18 or 30 seconds differently no longer
   stops them. 200 and 245 write the new 30-second parley timer as the number 30,
   which compiles to the same script as `FIVE_ROUNDS`.
+- **290** no longer stops the installation when another mod adds a victory
+  remark of its own. After the Avernus victory, the companions and allies present
+  remark on it one after another (`BD4300`), and 290 shortens the pause after each
+  remark to 2 seconds. It expected exactly the 17 vanilla remarks plus Aura's, so
+  Sirene NPC for BG:EE, which adds one for Sirene in the same shape, stopped it
+  ("expected 17 vanilla timer setters plus zero/one exact C0Aura block; found 18
+  setters"). 290 now checks the shape of every block that sets the remarks'
+  timer, whoever added it, and shortens all of them. Aura is no longer a special
+  case, and everything else in these blocks stays as it was. A block that writes
+  the timer any other way, a remark with two timers, and a script without any
+  remark still stop the installation before anything is written.
 
 ## v0.6.15 - 2026-10-23
 

@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.15~
+VERSION ~v0.6.16~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -790,6 +790,7 @@ REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~120~ ~Component 2
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~130~ ~Component 290 (the direct victory ending) requires component 130 (the chapter rest-dreams removed).~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 290 (the direct victory ending) requires component 185 (Entar Silvershield removed).~
 
+INCLUDE ~chriz-sod-remix/lib/comp290_barks.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp290.tpa~
 
 // ============================================================
