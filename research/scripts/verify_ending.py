@@ -201,14 +201,6 @@ def classify_platform(signatures: tuple[bool, bool, bool], requested: str) -> st
     return detected
 
 
-def expected_timer_count(c0aura_barks: int) -> int:
-    # Audited provenance: native merged SoD has 17 vanilla setters.  The
-    # current target EET resolves to 18 only because C0Aura contributes one
-    # exact plot-586 bark using the same timer; this is content-sensitive, not
-    # intrinsically platform-sensitive.
-    return 17 + c0aura_barks
-
-
 def parse_biff_search_output(output: str) -> set[str]:
     """Parse the verified WeiDU 24600 ``--biff-str`` result-line format."""
 
@@ -969,34 +961,101 @@ def check_root_classification(
     )
 
 
+def _baf_statements(section: str) -> list[str]:
+    """The statements of a decompiled BAF section, without indentation or comments."""
+    statements = []
+    for line in section.splitlines():
+        statement = re.sub(r"\s+//.*$", "", line).strip()
+        if statement:
+            statements.append(statement)
+    return statements
+
+
+def victory_bark_problems(text: str) -> tuple[list[str], list[str]]:
+    """Check every BD4300 block that writes the victory timer, as 290 does.
+
+    The rule of chriz-sod-remix/lib/comp290_barks.tpa: each writer of
+    bd_mdd1341a_ot_timer is the one SetGlobalTimer of a victory bark, a block with
+    one response, the triggers Global("bd_plot","global",586),
+    !GlobalTimerNotExpired(timer) and exactly one one-shot
+    Global("bd_ot2_<name>","bd4300",0) outside OR groups, and an action that sets
+    that flag to 1. Mods add such barks, so their number is not fixed; at least
+    one must exist. Returns the problems and each bark's timer value.
+    """
+    timer = re.compile(r'"bd_mdd1341a_ot_timer"', re.IGNORECASE)
+    setter = re.compile(r'SetGlobalTimer\("bd_mdd1341a_ot_timer","bd4300",([^)]*)\)',
+                        re.IGNORECASE)
+    flag_trigger = re.compile(r'Global\("(bd_ot2_[^"]+)","bd4300",0\)', re.IGNORECASE)
+    flag_setter = re.compile(r'SetGlobal\("(bd_ot2_[^"]+)","bd4300",1\)', re.IGNORECASE)
+    problems: list[str] = []
+    values: list[str] = []
+    seen = 0
+    for number, (trigger_text, action_text) in enumerate(baf_blocks(text), 1):
+        seen += len(timer.findall(trigger_text)) + len(timer.findall(action_text))
+        triggers = _baf_statements(trigger_text)
+        actions = _baf_statements(action_text)
+        writes = [action for action in actions if timer.search(action)]
+        if not writes:
+            continue
+        top: list[str] = []
+        pending = 0
+        for trigger in triggers:
+            if pending:
+                pending -= 1
+                continue
+            top.append(trigger)
+            group = re.fullmatch(r"OR\((\d+)\)", trigger, re.IGNORECASE)
+            if group:
+                pending = int(group.group(1))
+        flags = [match.group(1) for trigger in top
+                 if (match := flag_trigger.fullmatch(trigger))]
+        if len(flags) == 1:
+            label = f"block {number} ({flags[0]})"
+        elif triggers:
+            label = f"block {number} (first trigger {triggers[0]})"
+        else:
+            label = f"block {number} (no triggers)"
+        setters = [match.group(1) for action in writes if (match := setter.fullmatch(action))]
+        responses = [action for action in actions if re.fullmatch(r"RESPONSE #\d+", action)]
+        if len(setters) != len(writes):
+            problems.append(f"{label} writes the timer with another action")
+        elif len(setters) != 1:
+            problems.append(f"{label} has {len(setters)} timer setters")
+        elif len(responses) != 1:
+            problems.append(f"{label} has {len(responses)} responses")
+        elif not any(re.fullmatch(r'Global\("bd_plot","global",586\)', trigger, re.I)
+                     for trigger in top):
+            problems.append(f"{label} lacks the plot-586 trigger outside OR groups")
+        elif not any(re.fullmatch(r'!GlobalTimerNotExpired\("bd_mdd1341a_ot_timer","bd4300"\)',
+                                  trigger, re.I) for trigger in top):
+            problems.append(f"{label} lacks the timer wait outside OR groups")
+        elif len(flags) != 1:
+            problems.append(f"{label} has {len(flags)} one-shot flags")
+        elif not any((match := flag_setter.fullmatch(action))
+                     and match.group(1).lower() == flags[0].lower() for action in actions):
+            problems.append(f"{label} never sets {flags[0]} to 1")
+        else:
+            values.append(setters[0])
+    if seen != len(timer.findall(text)):
+        problems.append("timer mentions outside readable IF/THEN/END blocks")
+    if not values and not problems:
+        problems.append("no victory bark sets the timer")
+    return problems, values
+
+
 def check_bd4300(report: Reporter, text: str, platform: str) -> None:
-    timers = re.findall(
-        r'SetGlobalTimer\s*\(\s*"bd_mdd1341a_ot_timer"\s*,\s*"bd4300"\s*,\s*([^\)]+)\)',
-        text,
-        re.IGNORECASE,
-    )
-    blocks = baf_blocks(text)
-    aura_blocks = [
-        (trigger, actions)
-        for trigger, actions in blocks
-        if re.search(r'Global\s*\(\s*"bd_plot"\s*,\s*"global"\s*,\s*586\s*\)', trigger, re.I)
-        and re.search(r'Global\s*\(\s*"bd_ot2_C0Aura"\s*,\s*"bd4300"\s*,\s*0\s*\)', trigger, re.I)
-        and re.search(r'IsValidForPartyDialogue\s*\(\s*"C0Aura"\s*\)', trigger, re.I)
-        and re.search(r'SetGlobalTimer\s*\(\s*"bd_mdd1341a_ot_timer"', actions, re.I)
-        and re.search(r'SetGlobal\s*\(\s*"bd_ot2_C0Aura"\s*,\s*"bd4300"\s*,\s*1\s*\)', actions, re.I)
-        and re.search(r'DisplayStringHead\s*\(\s*"C0Aura"', actions, re.I)
-    ]
-    expected = expected_timer_count(len(aura_blocks))
+    problems, values = victory_bark_problems(text)
     report.check(
-        "BD4300 has 17 vanilla victory timers plus zero or one exact C0Aura bark",
-        len(aura_blocks) in (0, 1) and len(timers) == expected,
-        f"platform {platform}, timers {len(timers)}, C0Aura anchors {len(aura_blocks)}",
+        "every BD4300 victory-timer writer is the one setter of a victory bark",
+        not problems,
+        f"platform {platform}, barks {len(values)}; " + "; ".join(problems[:4]),
     )
     report.check(
         "every BD4300 victory-bark timer is numeric 2",
-        len(timers) == expected and all(value.strip() == "2" for value in timers),
-        f"values {[value.strip() for value in timers]}",
+        bool(values) and all(value.strip() == "2" for value in values),
+        f"values {[value.strip() for value in values]}",
     )
+    blocks = baf_blocks(text)
 
     convergence = [
         (trigger, actions)
@@ -1484,9 +1543,67 @@ class ContractFixtureTests(unittest.TestCase):
         with self.assertRaises(VerificationError):
             classify_platform((True, True, True), "standalone")
 
-    def test_timer_count_tracks_audited_content_provenance(self) -> None:
-        self.assertEqual(expected_timer_count(1), 18)
-        self.assertEqual(expected_timer_count(0), 17)
+    def test_victory_barks_bind_their_shape_not_their_number(self) -> None:
+        timer = '"bd_mdd1341a_ot_timer","bd4300"'
+
+        def block(triggers: list[str], actions: list[str], responses: int = 1) -> str:
+            body = "".join(
+                "  RESPONSE #100\n" + "".join(f"    {action}\n" for action in actions)
+                for _ in range(responses)
+            )
+            return ("IF\n" + "".join(f"  {trigger}\n" for trigger in triggers)
+                    + "THEN\n" + body + "END\n")
+
+        def bark(name: str, time: str = "2", presence: str | None = None) -> str:
+            return block(
+                ['Global("bd_plot","global",586)', f"!GlobalTimerNotExpired({timer})",
+                 f'Global("bd_ot2_{name}","bd4300",0)',
+                 presence or f'IsValidForPartyDialogue("{name}")  // ~{name}~'],
+                [f"SetGlobalTimer({timer},{time})", f'SetGlobal("bd_ot2_{name}","bd4300",1)',
+                 f'DisplayStringHead("{name}",{len(name)})  // ~Victory!~'],
+            )
+
+        convergence = block(['Global("bd_plot","global",586)', f"GlobalTimerExpired({timer})"],
+                            ['SetGlobal("bd_plot","global",587)'])
+        vanilla = [bark(f"NPC{index}") for index in range(17)]
+        sirene = bark("C0Sirene", "4")
+        aura = bark("C0Aura", "3")
+
+        def check(*blocks: str) -> tuple[list[str], list[str]]:
+            return victory_bark_problems("\n".join([*blocks, convergence]))
+
+        self.assertEqual(check(*vanilla), ([], ["2"] * 17))
+        for extra, count in (([aura], 18), ([sirene], 18), ([sirene, aura], 19)):
+            problems, values = check(*extra, *vanilla)
+            self.assertEqual((problems, len(values)), ([], count))
+        self.assertEqual(check(*vanilla[1:])[0], [])
+        self.assertEqual(check(sirene)[1], ["4"])
+        either = bark("C0Pair", presence='OR(2)\n    InParty("C0One")\n    InParty("C0Two")')
+        self.assertEqual(check(either)[0], [])
+
+        stray = block(['Global("FOREIGN","GLOBAL",0)'], [f"SetGlobalTimer({timer},60)"])
+        self.assertEqual(check(*vanilla, stray)[0],
+                         ['block 18 (first trigger Global("FOREIGN","GLOBAL",0)) '
+                          "lacks the plot-586 trigger outside OR groups"])
+        double = sirene.replace("    SetGlobalTimer(", f"    SetGlobalTimer({timer},9)\n"
+                                "    SetGlobalTimer(")
+        self.assertEqual(check(double)[0], ["block 1 (bd_ot2_C0Sirene) has 2 timer setters"])
+        self.assertEqual(check()[0], ["no victory bark sets the timer"])
+        other = sirene.replace("SetGlobalTimer(", "RealSetGlobalTimer(")
+        self.assertEqual(check(other)[0],
+                         ["block 1 (bd_ot2_C0Sirene) writes the timer with another action"])
+        loose = sirene.replace('  Global("bd_plot","global",586)\n',
+                               '  OR(2)\n    Global("bd_plot","global",586)\n    True()\n')
+        self.assertEqual(check(loose)[0], ["block 1 (bd_ot2_C0Sirene) lacks the plot-586 "
+                                           "trigger outside OR groups"])
+        endless = sirene.replace('    SetGlobal("bd_ot2_C0Sirene","bd4300",1)\n', "")
+        self.assertEqual(check(endless)[0],
+                         ["block 1 (bd_ot2_C0Sirene) never sets bd_ot2_C0Sirene to 1"])
+        split = block(['Global("bd_plot","global",586)', f"!GlobalTimerNotExpired({timer})",
+                       'Global("bd_ot2_C0Split","bd4300",0)'],
+                      ['SetGlobal("bd_ot2_C0Split","bd4300",1)'], responses=2)
+        split = split.replace("  RESPONSE #100\n", f"  RESPONSE #100\n    SetGlobalTimer({timer},3)\n", 1)
+        self.assertEqual(check(split)[0], ["block 1 (bd_ot2_C0Split) has 2 responses"])
 
     def test_biff_search_parser_accepts_verified_weidu_24600_lines(self) -> None:
         fixture = """[C:\\game\\weidu.exe] WeiDU version 24600

@@ -552,15 +552,11 @@ COPY_EXISTING - ~BDCORWIJ.DLG~ ~override~
 // ------------------------------------------------------------
 COPY_EXISTING - ~BD4300.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    SPRINT csr290_what ~BD4300 victory timers~
-    SPRINT csr290_pat ~SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",[^)]*)~
-    COUNT_REGEXP_INSTANCES ~%csr290_pat%~ csr290_timer_count
-    COUNT_REGEXP_INSTANCES ~Global("bd_ot2_C0Aura","bd4300",0)~ csr290_aura_count
-    COUNT_REGEXP_INSTANCES ~DisplayStringHead("C0Aura",309305)~ csr290_aura_bark_count
-    PATCH_IF NOT (((csr290_aura_count = 0) OR (csr290_aura_count = 1)) AND
-                  (csr290_aura_bark_count = csr290_aura_count) AND
-                  (csr290_timer_count = 17 + csr290_aura_count)) BEGIN
-      PATCH_FAIL ~chriz-sod-remix #290 [BD4300 victory timers]: expected 17 vanilla timer setters plus zero/one exact C0Aura block; found %csr290_timer_count% setters, %csr290_aura_count% Aura trigger(s), %csr290_aura_bark_count% Aura bark(s).~
+    // Every writer of the victory timer must be the one setter of a victory
+    // bark, whoever added the bark (comp290_barks.tpa).
+    LAUNCH_PATCH_FUNCTION csr290_victory_barks
+      INT_VAR csr290_normalize = 0
+      RET csr290_bark_count
     END
     SPRINT csr290_what ~BD4300 586-to-587 timer convergence~
     SPRINT csr290_pat ~GlobalTimerExpired("bd_mdd1341a_ot_timer","bd4300")%csr290_nl%THEN%csr290_nl%  RESPONSE #100%csr290_nl%    SetGlobal("bd_plot","global",587)~
@@ -616,12 +612,12 @@ COPY_EXISTING - ~BDPALACE.BCS~ ~override~
 // ------------------------------------------------------------
 COPY_EXISTING ~BD4300.BCS~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    SPRINT csr290_what ~BD4300 victory timer normalization~
-    SPRINT csr290_pat ~SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",[^)]*)~
-    COUNT_REGEXP_INSTANCES ~Global("bd_ot2_C0Aura","bd4300",0)~ csr290_aura_count
-    SET csr290_expect = 17 + csr290_aura_count
-    SPRINT csr290_rep ~SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",2)~
-    LAUNCH_PATCH_MACRO csr290_replace
+    // Each victory bark's timer becomes 2 seconds; the rest of the script,
+    // including the barks' own actions, stays as it was.
+    LAUNCH_PATCH_FUNCTION csr290_victory_barks
+      INT_VAR csr290_normalize = 1
+      RET csr290_bark_count
+    END
     PATCH_FOR_EACH csr290_rom IN Corwin Neera BEGIN
       SPRINT csr290_what ~BD4300 %csr290_rom% Romance6 zero block~
       SPRINT csr290_pat ~%csr290_nl%  Global("bd_%csr290_rom%Romance6","GLOBAL",0)~

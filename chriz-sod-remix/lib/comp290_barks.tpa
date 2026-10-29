@@ -1,0 +1,157 @@
+// ============================================================
+// Component 290 — BD4300 victory barks and their shared timer
+// ============================================================
+// Included by setup-chriz-sod-remix.tp2 before comp290.tpa. Contract:
+// research/scripts/verify_ending.py (victory_bark_problems).
+//
+// When the Avernus victory sets bd_plot to 586, BD4300 lets each present
+// companion bark once. A bark sets the area timer bd_mdd1341a_ot_timer, the
+// next bark waits for it, and one block moves bd_plot to 587 once the timer has
+// run out after the last bark. Vanilla bark timers run up to a minute each, so
+// 290 sets every one to 2 seconds and the ending follows the celebration.
+//
+// Mods add barks of their own in the vanilla shape (Aura, Sirene), so the
+// number of bark blocks depends on the installation. Instead of counting them,
+// csr290_victory_barks checks every block that writes the timer:
+//   triggers, none of them inside an OR group:
+//     Global("bd_plot","global",586)
+//     !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300")
+//     exactly one Global("bd_ot2_<name>","bd4300",0)
+//     any further triggers (the companion's presence)
+//   exactly one RESPONSE, whose actions contain
+//     exactly one SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",<time>)
+//     SetGlobal("bd_ot2_<name>","bd4300",1) for the same <name>
+//     any further actions (the bark itself)
+//   and no other action that names the timer.
+// A timer writer in any other shape would either keep its long timer and delay
+// 587, or be shortened without knowing what it is for. The installation then
+// stops before anything is written. Names and scopes match regardless of case,
+// as in the engine. No bark at all also stops it: 587 would then never come.
+//
+// Patch a buffer from DECOMPILE_AND_PATCH. INT_VAR csr290_normalize = 0 only
+// checks (290.3 preflight); 1 also sets every bark timer to 2 (290.4) and
+// leaves every other byte of the script as it was.
+// RET csr290_bark_count: the number of bark blocks, one timer setter each.
+
+DEFINE_PATCH_FUNCTION csr290_victory_barks
+  INT_VAR
+    csr290_normalize = 0
+  RET
+    csr290_bark_count
+BEGIN
+  SPRINT csr290_bark_nl ~%MNL%?%LNL%~
+  SPRINT csr290_bark_where ~chriz-sod-remix #290 [BD4300 victory barks]~
+  SPRINT csr290_bark_refuse ~The installed script differs from the audited victory-bark shape; refusing to guess.~
+  SET csr290_bark_count = 0
+  SET csr290_bark_number = 0
+  SET csr290_bark_seen = 0
+  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~"bd_mdd1341a_ot_timer"~ csr290_bark_mentions
+  READ_ASCII 0 csr290_bark_script (BUFFER_LENGTH)
+  // Read-only pass over a copy: every IF/THEN/END block, in script order.
+  // WeiDU prints each trigger and RESPONSE line indented by two spaces, each
+  // action by four, and IF, THEN and END on lines of their own.
+  INNER_PATCH ~%csr290_bark_script%~ BEGIN
+    REPLACE_EVALUATE CASE_SENSITIVE ~^IF%csr290_bark_nl%\(\(  [^%LNL%]*%LNL%\)*\)THEN%csr290_bark_nl%\(\(  [^%LNL%]*%LNL%\)*\)END~ BEGIN
+      SET csr290_bark_number += 1
+      SPRINT csr290_bark_triggers ~%MATCH1%~
+      SPRINT csr290_bark_actions ~%MATCH3%~
+      INNER_PATCH ~%csr290_bark_triggers%~ BEGIN
+        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~"bd_mdd1341a_ot_timer"~ csr290_bark_reads
+      END
+      INNER_PATCH ~%csr290_bark_actions%~ BEGIN
+        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~"bd_mdd1341a_ot_timer"~ csr290_bark_writes
+      END
+      SET csr290_bark_seen += csr290_bark_reads + csr290_bark_writes
+      PATCH_IF (csr290_bark_writes > 0) BEGIN
+        // Mark the members of OR groups, so that only top-level triggers count:
+        // each top-level line becomes "  <trigger>", each OR member "  | <trigger>".
+        SET csr290_bark_or = 0
+        SET csr290_bark_lines = 0
+        SPRINT csr290_bark_first ~~
+        INNER_PATCH_SAVE csr290_bark_top ~%csr290_bark_triggers%~ BEGIN
+          REPLACE_EVALUATE CASE_SENSITIVE ~^[ %TAB%]*\([^ %TAB%%WNL%][^%WNL%]*\)~ BEGIN
+            SET csr290_bark_lines += 1
+            SPRINT csr290_bark_line ~%MATCH1%~
+            PATCH_IF (csr290_bark_lines = 1) BEGIN
+              SPRINT csr290_bark_first ~%csr290_bark_line%~
+            END
+            PATCH_IF (csr290_bark_or > 0) BEGIN
+              SET csr290_bark_or -= 1
+              SPRINT csr290_bark_line ~| %csr290_bark_line%~
+            END ELSE BEGIN
+              INNER_PATCH ~%csr290_bark_line%~ BEGIN
+                REPLACE_EVALUATE CASE_INSENSITIVE ~^OR(\([0-9]+\))~ BEGIN
+                  SET csr290_bark_or = MATCH1
+                END ~~
+              END
+            END
+          END ~  %csr290_bark_line%~
+        END
+        SET csr290_bark_flags = 0
+        SPRINT csr290_bark_flag ~~
+        INNER_PATCH ~%csr290_bark_top%~ BEGIN
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^  Global("bd_plot","global",586)~ csr290_bark_plot
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^  !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300")~ csr290_bark_wait
+          REPLACE_EVALUATE CASE_INSENSITIVE ~^  Global("bd_ot2_\([^"%WNL%]+\)","bd4300",0)~ BEGIN
+            SET csr290_bark_flags += 1
+            SPRINT csr290_bark_flag ~bd_ot2_%MATCH1%~
+          END ~~
+        END
+        SET csr290_bark_flag_sets = 0
+        INNER_PATCH ~%csr290_bark_actions%~ BEGIN
+          COUNT_REGEXP_INSTANCES CASE_SENSITIVE ~^  RESPONSE #~ csr290_bark_responses
+          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~^    SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",[^)%WNL%]*)~ csr290_bark_setters
+          REPLACE_EVALUATE CASE_INSENSITIVE ~^    SetGlobal("bd_ot2_\([^"%WNL%]+\)","bd4300",1)~ BEGIN
+            PATCH_IF (~bd_ot2_%MATCH1%~ STRING_EQUAL_CASE ~%csr290_bark_flag%~) BEGIN
+              SET csr290_bark_flag_sets += 1
+            END
+          END ~~
+        END
+        PATCH_IF (csr290_bark_flags = 1) BEGIN
+          SPRINT csr290_bark_label ~block %csr290_bark_number% (%csr290_bark_flag%)~
+        END ELSE PATCH_IF (csr290_bark_lines > 0) BEGIN
+          SPRINT csr290_bark_label ~block %csr290_bark_number% (first trigger %csr290_bark_first%)~
+        END ELSE BEGIN
+          SPRINT csr290_bark_label ~block %csr290_bark_number% (no triggers)~
+        END
+        PATCH_IF (csr290_bark_setters != csr290_bark_writes) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% names bd_mdd1341a_ot_timer in %csr290_bark_writes% action(s), %csr290_bark_setters% of them SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",time). A victory bark writes the timer only with that action. %csr290_bark_refuse%~
+        END
+        PATCH_IF (csr290_bark_setters != 1) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% has %csr290_bark_setters% bd_mdd1341a_ot_timer setters; a victory bark has exactly one. %csr290_bark_refuse%~
+        END
+        PATCH_IF (csr290_bark_responses != 1) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% sets bd_mdd1341a_ot_timer in a block with %csr290_bark_responses% responses; a victory bark has exactly one. %csr290_bark_refuse%~
+        END
+        PATCH_IF (csr290_bark_plot = 0) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% sets bd_mdd1341a_ot_timer without a Global("bd_plot","global",586) trigger outside OR groups, so it is not a victory bark. %csr290_bark_refuse%~
+        END
+        PATCH_IF (csr290_bark_wait = 0) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% sets bd_mdd1341a_ot_timer without a !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300") trigger outside OR groups, so it is not a victory bark. %csr290_bark_refuse%~
+        END
+        PATCH_IF (csr290_bark_flags != 1) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% sets bd_mdd1341a_ot_timer with %csr290_bark_flags% one-shot Global("bd_ot2_<name>","bd4300",0) triggers outside OR groups; a victory bark has exactly one. %csr290_bark_refuse%~
+        END
+        PATCH_IF (csr290_bark_flag_sets = 0) BEGIN
+          PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_label% never sets %csr290_bark_flag% to 1, so it would bark again each time the timer runs out and 587 would never come. %csr290_bark_refuse%~
+        END
+        SET csr290_bark_count += 1
+      END
+    END ~~
+  END
+  PATCH_IF (csr290_bark_seen != csr290_bark_mentions) BEGIN
+    PATCH_FAIL ~%csr290_bark_where%: %csr290_bark_mentions% mention(s) of bd_mdd1341a_ot_timer, but only %csr290_bark_seen% inside IF/THEN/END blocks this check can read. %csr290_bark_refuse%~
+  END
+  PATCH_IF (csr290_bark_count = 0) BEGIN
+    PATCH_FAIL ~%csr290_bark_where%: no victory bark sets bd_mdd1341a_ot_timer, so the 586-to-587 step would never come. %csr290_bark_refuse%~
+  END
+  PATCH_IF (csr290_normalize != 0) BEGIN
+    SET csr290_bark_done = 0
+    REPLACE_EVALUATE CASE_INSENSITIVE ~^\(    SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",\)[^)%WNL%]*)~ BEGIN
+      SET csr290_bark_done += 1
+    END ~%MATCH1%2)~
+    PATCH_IF (csr290_bark_done != csr290_bark_count) BEGIN
+      PATCH_FAIL ~%csr290_bark_where%: set %csr290_bark_done% bark timer(s) to 2 seconds, expected %csr290_bark_count%. %csr290_bark_refuse%~
+    END
+  END
+END
