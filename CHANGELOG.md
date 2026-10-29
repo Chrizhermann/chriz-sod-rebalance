@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.6.16 - 2026-10-29
 
 - **265** no longer stops the installation after Dark Tidings. A decompiled
   timer is printed with the name the game's `GTIMES.IDS` gives its value, and

@@ -4,7 +4,15 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.15**. The component overview below describes this version.
+Current release: **v0.6.16**. The component overview below describes this version.
+
+**v0.6.16 — 290** accepts every victory remark in the vanilla shape, whoever added
+it, such as Sirene NPC for BG:EE's, and shortens the pause after each one to 2
+seconds like the vanilla remarks. Any other way of writing the remarks' timer
+still stops 290 before anything is written. **265, 135, 140, 200, 245, 256 and
+266** read their timer names from the game's own `GTIMES.IDS`, so a mod that
+names a timer value differently, as Dark Tidings does for 60 seconds, no longer
+stops them.
 
 **v0.6.15 — 256** installs alongside Tweaks Anthology's "Summoned Creatures
 Clear Fog of War" (`cdtweaks` 3500): the hostile bridge elementals leave its
@@ -164,7 +172,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.15 exposes **49 declarations in seven install groups**, including
+v0.6.16 exposes **49 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235, 258 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
