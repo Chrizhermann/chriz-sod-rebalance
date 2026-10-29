@@ -1,23 +1,34 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-23).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-29).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
 Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**49 component
-declarations in seven groups** for v0.6.15),
+declarations in seven groups** for v0.6.16),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.15
+## 1. Implemented in source — v0.6.16
 
-Release **v0.6.15**. This section describes release source, not a claim
+Release **v0.6.16**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.16:** 290 checks the shape of every `BD4300` block that sets the victory
+remarks' timer, whoever added it, and shortens all of them to 2 seconds instead of
+expecting exactly the 17 vanilla remarks plus Aura's; a stray or second setter,
+any other write of the timer and a script without remarks still stop the install.
+265, 135, 140, 200, 245, 256 and 266 read their timer names from the game's own
+`GTIMES.IDS`. A Chriz Easy BG lab with Sirene NPC for BG:EE installed and played
+the ending on engine 2.7.3.0. Open: verifier gaps
+([#36](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/36)) and the
+skipped `bdcut61` ([#37](https://github.com/Chrizhermann/chriz-sod-rebalance/issues/37)).
+See [the v0.6.16 report](releases/v0.6.16.md).
 
 **v0.6.15:** 256 accepts Tweaks Anthology's summon fog effect (`CDTFOW`, from
 `cdtweaks` 3500) on its elemental donors and leaves it out of the hostile clones;
@@ -175,7 +186,7 @@ runtime remains pending. See the [runtime record](playtest/2026-09-06-ending-run
 
 ### Meta
 
-`chriz-sod-remix` v0.6.15 release source, tail-installable WeiDU mod: **49 declarations
+`chriz-sod-remix` v0.6.16 release source, tail-installable WeiDU mod: **49 declarations
 in seven install groups**.
 Patches use loud count-guards (PATCH_FAIL on mismatch);
 backup dir `weidu_external/backup/chriz-sod-remix`; EET and standalone BG:EE+SoD both in

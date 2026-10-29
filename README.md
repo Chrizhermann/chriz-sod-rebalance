@@ -1,7 +1,14 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.15**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.16**.
+
+v0.6.16 removes two installation stops caused by other mods. The victory ending
+(**290**) now accepts every victory remark that another mod adds after the battle
+of Avernus, such as Sirene NPC for BG:EE's, and shortens it like the vanilla
+ones. **265** and six more components read their timer names from the game's own
+`GTIMES.IDS`, so a mod that gives a timer value another name no longer stops
+them. See the [release report](docs/releases/v0.6.16.md).
 
 v0.6.15 lets the Boareskyr bridge finale (**256**) install alongside Tweaks
 Anthology's "Summoned Creatures Clear Fog of War" (`cdtweaks` 3500). The
