@@ -1,0 +1,38 @@
+// chriz-sod-remix component 170 - the Korlasz jailbreak
+
+// component name (mirrored here for reference; the tp2 BEGIN uses a literal)
+@17000 = ~龙矛围攻混编：序章——克拉兹越狱事件~
+
+// jailbreak crew names (design docs/design/chapters/01-prologue.md section 2a;
+// csrkorl keeps the chassis name "Korlasz", csrpori keeps "Porios",
+// csrfistd keeps "Flaming Fist Enforcer")
+@17001 = ~哈斯卡主母~
+@17002 = ~瓦斯特~
+@17003 = ~西伦~
+@17004 = ~格里特~
+
+// the dying guard's one line at the stairs-top hint beat
+@17005 = ~克拉兹……她逃出来了……她的追随者来救她了……牢房……快来人……~
+
+// name of the signature sequencer pair (shown as her casting string)
+@17012 = ~法术触发序列~
+
+// Rewritten opener for BDKORLAS state 24 (the BD0116 breakout dialog).
+// Vanilla #245641 ("You are the one who delivered me to this hell!") assumes
+// the PC personally caught her in the dungeon — which the remix removed. New
+// line is unvoiced (drops the mismatched VO) and blames the PC as Sarevok's
+// killer instead; the three existing replies still fit (they reference the
+// Sarevok conspiracy / "this hell" / delivering her to worse).
+@17020 = ~你！你就是砍倒沙洛佛克的人——也毁了我们所有追随他事业的人。他的事业化为废墟，而我被扔进这地狱……他的杀手却在上面的宫殿里逍遥法外。~
+
+// States 25-27, BG2 villain register (user 2026-07-07). @17021 keeps the
+// punish/murder vocabulary for Minsc's interjection (see dlg/csrkorld.d).
+@17021 = ~受罚？沙洛佛克本会把这座城市提升为一个帝国，而你为此谋杀了他。他们在上面的殿堂里为他的杀手斟酒，而他的信徒却在下面的牢房里腐烂。不，<CHARNAME>——这座屋檐下唯一还欠着的惩罚，是你的。~
+
+@17022 = ~你以为会看到我在牢房里哭泣，等着你那些公爵的正义吗？信徒不会抛弃巴尔的血脉——你的狱卒一转头去喝酒，我的人就来找我了。唯一把我留在这里的就是你。一笔债，<CHARNAME>。一座还等着填的坟。~
+
+@17023 = ~你的信徒们本该继续跑。~
+@17024 = ~说实话，我压根就没想过你，克拉兹。现在也没想。~
+@17025 = ~那就来收吧。~
+
+@17026 = ~那我们就没什么好说的了。沙洛佛克看见你血中有一位神在苏醒——让我们看看它会不会流血。~

@@ -1,0 +1,31 @@
+// csr197skie.tra — component 197 new dialogue (Ducal Palace, Skie talk-to-join)
+// Original lines signed off by the user 2026-07-13 (BG1/BG2 register, issue #2 / PT-4).
+// @11 separates the condolence branch after the user's 2026-09-12 playtest report.
+// Context: post-council great hall. Entar died in BG1 ch.7 and stays dead
+// (comp185) — Skie may not blame Caelar for his death.
+
+// Skie — opener (replaces the vanilla "talking to Daddy" meeting)
+@0 = ~你还记得我吗，<CHARNAME>？史姬·银盾。整座城市都在争论这场圣战的时候，他们把我父亲下葬了。所有人都说我该坐在他空荡荡的宅子里哀悼。我不干。~
+
+// Player replies to the opener
+@1 = ~我对你的失去深感遗憾，史姬。银盾公爵是这座城市的栋梁。~
+@2 = ~公爵议会可不是哀悼的地方，史姬。你为什么会在这里？~
+
+// Skie — the ask
+@3 = ~因为你在这里。你要去追凯拉——大家都这么说。带上我。我会开锁，走路悄无声息，而且干什么都比一个人坐在父亲空荡荡的宅子里强。~
+
+// Player — accept / decline
+@4 = ~好吧，史姬。收拾好你的装备——我们很快就要北上了。~
+@5 = ~不行。军营不是你待的地方。留在博德之门。~
+
+// Skie — join / stay behind
+@6 = ~你是说真的？你不会后悔的，<CHARNAME>。趁公爵们还没改变主意，我们快走吧。~
+@7 = ~行。行吧。所有人都替史姬决定什么最好……我就在这儿。要是你改变主意的话。~
+
+// Skie — re-offer if the player comes back to her in the hall
+@8 = ~改变主意了，<CHARNAME>？很好。带上我——这个提议依然有效。~
+@9 = ~好吧，史姬。一起来吧。~
+@10 = ~还不是时候，史姬。~
+
+// Skie — acknowledge the player's condolence before asking to join.
+@11 = ~谢谢你。你要去追凯拉——大家都这么说。带上我。我会开锁，走路悄无声息，而且干什么都比一个人坐在父亲空荡荡的宅子里强。~

@@ -9,6 +9,7 @@ END
 
 AUTO_TRA ~chriz-sod-remix/languages/%s~
 LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
+LANGUAGE ~Simplified Chinese~ ~schinese~ ~chriz-sod-remix/languages/schinese/setup.tra~
 
 // ============================================================
 // chriz-sod-remix — Siege of Dragonspear remix/overhaul

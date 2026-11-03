@@ -1,0 +1,84 @@
+// chriz-sod-remix component 180 — Prologue: celebration + Caelar's proclamation
+// @18000-@18099. All strings pure ASCII (no charset handling needed on EE).
+// Rewritten 2026-07-07 (user, playtest 3): all celebration text is now ours, in
+// the BG1 duchess register — no vanilla SoD strref reuse, no VO.
+
+// Liia's closing line of the celebration beat: (a) Korlasz held in the palace
+// cells awaiting the player's statement (opens journal @18001, the opener of the
+// "Sarevok's Servant" chain that component 170's vanilla entries 261626/261627
+// continue and close), and (b) hands over Caelar's proclamation (csrpam) and
+// notes it is posted across the city.
+@18000 = ~在把你还给庆典之前，还有一件事。法师克拉兹——你同母异父兄弟最后的追随者——正坐在宫殿地下的牢房里等候审判。焰拳会在宣判前听取你的陈述——你得空时去一趟地下室。
+
+还有……有样东西你该看看，<CHARNAME>。凯拉的圣战军把这份宣言贴遍了城里每一个区。仔细读读这一份。上面点了你的名字。~
+
+// Journal opener. First line must stay "Sarevok's Servant" — the EE journal
+// groups entries by title, and 170's kill entry (261627, QUEST_DONE, same title)
+// is what closes this quest group.
+@18001 = ~沙洛佛克的仆从
+
+克拉兹在宫殿牢房中等待审判。
+
+公爵官邸的庆典期间，莉拉·詹纳斯公爵夫人让我去看看克拉兹——沙洛佛克最后的追随者，正被关押在宫殿地下的牢房里。焰拳希望在公爵们宣判前听取我的陈述。我得空时该去一趟宫殿地下室。~
+
+// Player replies to Liia's celebration opener (@18005). The second deliberately
+// claims Sarevok's followers are finished — Liia's closing line then corrects it
+// (the last of them sits in the cells below).
+@18002 = ~我只是做了该做的事。~
+@18003 = ~沙洛佛克已成灰烬，他的追随者也四散而去。这座城市可以安心了。~
+
+// Player's exit line; the transition carries the journal/item/despawn actions.
+@18004 = ~我会去作陈述。好好享受庆典吧，公爵夫人。~
+
+// Liia's celebration opener (BG1 duchess register: formal, warm, measured — the
+// user's style rule after playtest 3; replaces the reused BDLIIA council line
+// that opened the scene with a dangling "them").
+@18005 = ~啊——我们今晚的主宾终于到了。朋友们！请举杯：敬<CHARNAME>，他以钢铁和理智迎击了沙洛佛克的疯狂，把城市还给了我们。
+
+伊尔坦大公爵仍在养伤，所以今晚这些愉快的职责就落到了贝尔特和我身上。博德之门不会忘记它的债务，<CHARNAME>。尤其是这一笔。~
+
+// Belt's toast (soldier-blunt, one line; APPENDed BDBELT state, no VO).
+@18007 = ~我就说短的——演讲是莉拉的拿手武器，不是我的。你做到了焰拳做不到的事，我一半的军官都知道这一点。这座城市能屹立不倒，是因为你。今晚好好喝，<CHARNAME>。这份安宁是你挣来的。~
+
+// csrpam.itm — Caelar's proclamation (BDSHPAM1 clone). Name + description.
+@18010 = ~圣战宣言~
+
+// Description: crusade recruitment framing + the user-approved warning closing
+// (design doc 01-prologue sec. 9: honest about the WHAT — the child of Bhaal is
+// needed — silent about the WHY; the blood-price stays hidden until chapter 12).
+@18011 = ~博德之门的人民！
+
+在蜿蜒河以北，光辉女士正在集结一支剑湾前所未见的军队。她召唤每一位有勇气的人加入她的旗帜：迷途者将被寻回，堕落者将被救赎，凡为这神圣事业献身者，都不会被拒之门外。放下你们的疑虑。与圣战军同行，在光明中被铭记。
+
+至于巴尔之子，这座城市的英雄：我知道你的血管里沉睡着什么。我需要它，而且我会得到它。心甘情愿地北上，在我们的行列中受尊敬——或者留下，而我会来找你。
+
+——凯拉·白银，光辉女士~
+
+// --- Korlasz return beat (user 2026-07-07): Liia meets the player coming back
+// up from the basement after the jailbreak fight. Very short; simple answers.
+@18012 = ~<CHARNAME>——感谢诸神。守卫们说我们脚下发生了战斗。宫殿牢房里刀光剑影、法术横飞，还是在庆典中间！下面发生了什么？~
+
+@18013 = ~克拉兹的追随者闯进来救她。她死了。结束了。~
+@18014 = ~看来你的牢房关不住什么东西。已经处理了。~
+
+@18015 = ~那焰拳会去处理剩下的事。军士——带一队人下去，控制住牢房。
+
+一晚上两次，这座城市都欠了你的情，<CHARNAME>。去吧，享受剩下的夜晚。这你完全应得。~
+
+// Belt's added war-council line (I_C_T after BDBELT 36, before Eltan's "every
+// sword north"). Only plays if the player holds the proclamation.
+@18020 = ~还有一件事，<CHARNAME>，而且直接关系到你。你看到她的圣战军在我们城里到处张贴的宣言了吧。上面点了你的名字。光辉女士要求博德之门的英雄北上——无论愿不愿意。~
+
+// --- Celebration guests: noble congratulations (click-dialog csrnob, random).
+@18030 = ~博德之门的英雄，就在伸手可及之处！原谅我——我一定是今晚第十个说这话的人：我们的感谢，我们的酒杯，都是你的。~
+@18031 = ~他们说你站在沙洛佛克的尸体旁，就在地下城市里。为你的健康，我的朋友——愿博德之门再也不必如此需要你。~
+@18032 = ~敬一杯！敬公爵们，敬博德之门——也敬那位让前者得以立足于后者之上的人。~
+@18033 = ~我的表亲曾随焰拳讨伐那座可怕的神庙。她回家了。我知道该感谢谁，我不会忘记。~
+
+// Flaming Fist guards (click-dialog csrffgd, random).
+@18034 = ~贝尔特公爵今晚把岗哨加倍了，不管你是不是英雄。享受你的酒吧——我们来看门。~
+@18035 = ~变形怪来的那晚，我守的就是宫殿防线。有你在我们这边真好，<CHARNAME>。~
+
+// Component name (reserved for migration into setup.tra as the BEGIN string if
+// the tp2 ever switches this component from a literal name to a tra ref).
+@18099 = ~龙矛围攻混编：序章——庆典与凯拉的宣言~

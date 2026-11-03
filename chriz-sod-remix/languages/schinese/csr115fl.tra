@@ -1,0 +1,12 @@
+// Component 115: unvoiced alternatives for Khalid's carried-party history.
+// Original voiced strings remain in the original-history script branches.
+
+@11580 = ~所——所以沃格林，我只是想谢——谢——谢谢你和我们一起对抗圣战军。~
+
+// Preserve Khalid's existing background; omit the claim that he and Jaheira
+// arrived at Bridgefort before the party. The original biography is unchanged.
+@11581 = ~当被问及过去时，卡立德紧张地透露他出生并成长于卡林珊。从他随口说出的话中，你推测他并不受父母任何一方喜爱，尤其是他的父亲。卡立德一到年龄就加入了城市民兵，并在那里服役了一段时间。
+
+他没有说清自己是如何遇见贾希拉的，但你知道他和妻子都属于一个被称为竖琴手的秘密组织。~
+
+@11582 = ~你在桥头堡的举动令人印象深刻，卡林珊人。当守军需要你时，你毫不退缩。~
