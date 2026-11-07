@@ -106,8 +106,10 @@ class PortalInstallerTests(unittest.TestCase):
         (self.override/'bd4600.are').write_bytes(area())
         (self.override/'ddoorh.vvc').write_bytes(b'PORTAL VFX SENTINEL')
         (self.override/'unrelated.itm').write_bytes(b'FOREIGN ITEM SENTINEL')
+        (self.game/'weidu.log').write_text('')
         (self.game/'fixture').mkdir()
         (self.game/'chriz-sod-remix/lib').mkdir(parents=True)
+        shutil.copy2(ROOT/'chriz-sod-remix/lib/overwrite.tpa', self.game/'chriz-sod-remix/lib/overwrite.tpa')
         shutil.copy2(ROOT/'chriz-sod-remix/lib/comp285_portal.tpa',
                      self.game/'chriz-sod-remix/lib/comp285_portal.tpa')
         (self.game/'fixture/setup-fixture.tp2').write_text('''BACKUP ~fixture/backup~
@@ -124,6 +126,7 @@ COMPILE ~fixture/bdelev01.baf~ ~fixture/bdcut56.baf~ ~fixture/bd4700.baf~
     def assert_ok(self, result):
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
         self.assertNotIn('FATAL ERROR', result.stdout+result.stderr)
+        self.assertNotIn('WARNING', (result.stdout+result.stderr).upper())
 
     def fixture(self, activation=ACTIVATION, arrival=ARRIVAL):
         for name, text in [('bdelev01', FOREIGN+GATHER+activation),
@@ -176,21 +179,58 @@ StartCutSceneEx("bdcut56",FALSE)'''), script)
         self.assert_ok(self.install('second'))
         self.assertEqual(tree(self.override), patched)
 
-    def test_changed_activation_fails_before_any_resource_write(self):
+    def assert_activation(self):
+        script = compact(self.decompile())
+        self.assertEqual(script.count('STARTCUTSCENEEX("BDCUT56",FALSE)'), 1)
+        self.assertIn('SETGLOBAL("BD_HELLEVATOR","GLOBAL",5)', script)
+        self.assertIn(compact(FOREIGN+GATHER), script)
+
+    def test_changed_activation_is_overwritten(self):
         self.fixture(activation=ACTIVATION.replace('"bdcut55"','"foreign"'))
+        self.assert_ok(self.install())
+        self.assert_activation()
+
+    def test_missing_activation_is_created(self):
+        self.fixture(activation='')
+        self.assert_ok(self.install())
+        self.assert_activation()
+
+    def test_duplicate_activation_is_replaced_once(self):
+        self.fixture(activation=ACTIVATION+ACTIVATION)
+        self.assert_ok(self.install())
+        self.assert_activation()
+
+    def test_unowned_arrival_is_preserved(self):
+        self.fixture(arrival=ARRIVAL.replace('    StartCutSceneEx', '    StartCutSceneEx("bdcut57",FALSE)\n    StartCutSceneEx'))
+        before = (self.override/'bdcut56.bcs').read_bytes()
+        self.assert_ok(self.install())
+        self.assert_activation()
+        self.assertEqual((self.override/'bdcut56.bcs').read_bytes(), before)
+
+    def test_missing_switch_and_label_are_created(self):
+        self.fixture()
+        source = bytearray(area())
+        struct.pack_into('<I', source, 0xa4, 0)
+        struct.pack_into('<I', source, 0xc8, 0)
+        (self.override/'bd4600.are').write_bytes(source)
+        self.assert_ok(self.install())
+        result = (self.override/'bd4600.are').read_bytes()
+        self.assertEqual(struct.unpack_from('<I', result, 0xa4)[0], 1)
+        door = struct.unpack_from('<I', result, 0xa8)[0]
+        self.assertEqual(result[door+0x80:door+0x88], b'BDELEV01')
+        self.assertEqual(struct.unpack_from('<I', result, 0xc8)[0], 1)
+        self.assertEqual(struct.unpack_from('<H', result, 0x80)[0], 17)
+        self.assert_activation()
         before = tree(self.override)
-        result = self.install()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('unsupported downstairs activation', result.stdout+result.stderr)
+        self.assert_ok(self.install('second'))
         self.assertEqual(tree(self.override), before)
 
-    def test_second_confrontation_handoff_fails_before_any_resource_write(self):
-        self.fixture(arrival=ARRIVAL.replace('    StartCutSceneEx', '    StartCutSceneEx("bdcut57",FALSE)\n    StartCutSceneEx'))
-        before = tree(self.override)
-        result = self.install()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('upper-arrival cutscene', result.stdout+result.stderr)
-        self.assertEqual(tree(self.override), before)
+    def test_malformed_area_does_not_block_the_portal_script(self):
+        self.fixture()
+        (self.override/'bd4600.are').write_bytes(b'AREAV1.0')
+        self.assert_ok(self.install())
+        self.assertEqual((self.override/'bd4600.are').read_bytes(), b'AREAV1.0')
+        self.assert_activation()
 
 
 if __name__ == '__main__':

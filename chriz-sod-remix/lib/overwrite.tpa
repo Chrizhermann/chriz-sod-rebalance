@@ -1,0 +1,148 @@
+// Shared writers for the states and script blocks owned by the remix.
+// Counts locate records; they never decide whether an authored change applies.
+
+DEFINE_ACTION_FUNCTION csr_ensure_dlg_states
+  INT_VAR count = 0
+  STR_VAR dialog = ~~
+  RET existing_states
+BEGIN
+  OUTER_SPRINT dialog EVALUATE_BUFFER ~%dialog%~
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%dialog%.dlg~ BEGIN
+    COMPILE EVALUATE_BUFFER ~.../csr-new-dialog.d~
+  END
+  OUTER_SET csr_dlg_readable = 0
+  COPY_EXISTING - ~%dialog%.dlg~ ~override~
+    SET csr_dlg_readable = SOURCE_SIZE >= 0x30
+    PATCH_IF csr_dlg_readable BEGIN
+      READ_LONG 0x08 sc READ_LONG 0x0c so READ_LONG 0x10 tc READ_LONG 0x14 tr
+      SET csr_dlg_readable = so + sc * 16 <= SOURCE_SIZE AND tr + tc * 32 <= SOURCE_SIZE
+      FOR (i = 0; csr_dlg_readable AND i < sc; ++i) BEGIN
+        READ_LONG (so + i * 16 + 4) first READ_LONG (so + i * 16 + 8) csr_dlg_n
+        SET csr_dlg_readable = first + csr_dlg_n <= tc
+      END
+      PATCH_FOR_EACH header IN 0x18 0x20 0x28 BEGIN
+        READ_LONG header table READ_LONG (header + 4) csr_dlg_n
+        SET csr_dlg_readable = csr_dlg_readable AND table + csr_dlg_n * 8 <= SOURCE_SIZE
+        FOR (i = 0; csr_dlg_readable AND i < csr_dlg_n; ++i) BEGIN
+          READ_LONG (table + i * 8) text READ_LONG (table + i * 8 + 4) length
+          SET csr_dlg_readable = text + length <= SOURCE_SIZE
+        END
+      END
+    END
+  ACTION_IF NOT csr_dlg_readable BEGIN
+    PRINT ~SoD Remix: %dialog% dialogue is unreadable; recreating the states owned by this component.~
+    COMPILE EVALUATE_BUFFER ~.../csr-new-dialog.d~
+  END
+  COPY_EXISTING - ~%dialog%.dlg~ ~override~ READ_LONG 0x08 csr_existing_states
+  OUTER_SET existing_states = csr_existing_states
+  OUTER_SPRINT csr_missing_states ~~
+  OUTER_FOR (csr_missing_state = csr_existing_states; csr_missing_state < count; ++csr_missing_state) BEGIN
+    OUTER_SPRINT csr_missing_states ~~~~~%csr_missing_states%
+IF ~False()~ THEN BEGIN csr_missing_%csr_missing_state%
+  SAY #0
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+  ACTION_IF csr_existing_states < count BEGIN
+    COMPILE EVALUATE_BUFFER ~.../csr-missing-state.d~
+  END
+END
+
+<<<<<<<< .../csr-new-dialog.d
+BEGIN ~%dialog%~
+>>>>>>>>
+
+// A caller replaces every state it owns immediately after extending the table.
+// Gaps between those states are inert and cannot become dialogue entry points.
+<<<<<<<< .../csr-missing-state.d
+APPEND ~%dialog%~
+%csr_missing_states%
+END
+>>>>>>>>
+
+DEFINE_PATCH_FUNCTION csr_replace_script_blocks
+  INT_VAR append = 0 in_place = 0
+  STR_VAR pattern = ~~ pattern2 = ~~ exclude = ~~ replacement = ~~
+BEGIN
+  SPRINT csr_owned_pattern EVALUATE_BUFFER ~%pattern%~
+  SPRINT csr_owned_replacement EVALUATE_BUFFER ~%replacement%~
+  SPRINT csr_owned_pattern2 EVALUATE_BUFFER ~%pattern2%~
+  SPRINT csr_owned_exclude EVALUATE_BUFFER ~%exclude%~
+  SET csr_inserted = 0
+  SPRINT csr_block_nl ~%MNL%?%LNL%~
+  REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr_block_nl%\(\([ %TAB%][^%WNL%]*%csr_block_nl%\|THEN%csr_block_nl%\|%csr_block_nl%\)*\)END~ BEGIN
+    SPRINT csr_owned_block ~%MATCH0%~
+    PATCH_IF (~%csr_owned_block%~ STRING_CONTAINS_REGEXP ~%csr_owned_pattern%~ = 0)
+      AND ((~%csr_owned_pattern2%~ STRING_EQUAL ~~) OR (~%csr_owned_block%~ STRING_CONTAINS_REGEXP ~%csr_owned_pattern2%~ = 0))
+      AND ((~%csr_owned_exclude%~ STRING_EQUAL ~~) OR (~%csr_owned_block%~ STRING_CONTAINS_REGEXP ~%csr_owned_exclude%~ != 0)) BEGIN
+      SPRINT csr_owned_block ~~
+      PATCH_IF in_place AND NOT csr_inserted BEGIN
+        SPRINT csr_owned_block ~%csr_owned_replacement%~
+        SET csr_inserted = 1
+      END
+    END
+  END ~%csr_owned_block%~
+  PATCH_IF NOT csr_inserted BEGIN
+    SET csr_insert_at = append ? BUFFER_LENGTH : 0
+    INSERT_BYTES csr_insert_at (STRING_LENGTH ~%csr_owned_replacement%~)
+    WRITE_ASCIIE csr_insert_at ~%csr_owned_replacement%~
+  END
+END
+
+// A script we extend may be absent; provide the empty resource before adding our blocks.
+DEFINE_ACTION_FUNCTION csr_ensure_script STR_VAR script = ~~ BEGIN
+  OUTER_SPRINT script EVALUATE_BUFFER ~%script%~
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%script%.bcs~ BEGIN
+    COMPILE EVALUATE_BUFFER ~.../csr-empty-script.baf~
+    COPY ~override/csr-empty-script.bcs~ ~override/%script%.bcs~
+  END
+END
+<<<<<<<< .../csr-empty-script.baf
+>>>>>>>>
+
+// WeiDU requires explicit weights only for a nontrivially ordered DLG.
+// This reads ordering metadata for serialization; it never gates a state write.
+DEFINE_ACTION_FUNCTION csr_dlg_state_weight
+  INT_VAR state = 0
+  STR_VAR dialog = ~~
+  RET clause
+BEGIN
+  OUTER_SPRINT clause ~~
+  COPY_EXISTING - ~%dialog%.dlg~ ~override~
+    READ_LONG 0x08 n READ_LONG 0x0c off
+    SET next = 0 SET nontrivial = 0
+    FOR (i = 0; i < n; ++i) BEGIN
+      READ_SLONG (off + i * 16 + 12) w
+      PATCH_IF w >= 0 BEGIN
+        PATCH_IF w != next BEGIN SET nontrivial = 1 END
+        SET next += 1
+      END
+    END
+    READ_SLONG (off + state * 16 + 12) w
+    PATCH_IF nontrivial AND w >= 0 BEGIN SPRINT clause ~WEIGHT #%w%~ END
+END
+
+// Structural bounds only, for donor copies that edit variable CRE tables.
+DEFINE_ACTION_FUNCTION csr_readable_cre STR_VAR resource = ~~ RET readable BEGIN
+  OUTER_SET readable = 0
+  ACTION_IF FILE_EXISTS_IN_GAME ~%resource%~ BEGIN
+    COPY_EXISTING - ~%resource%~ ~override~
+      SET readable = SOURCE_SIZE >= 0x2d4
+      PATCH_IF readable BEGIN
+        READ_BYTE 0x33 version
+        PATCH_FOR_EACH header IN 0x2a0 0x2a8 0x2b0 0x2bc 0x2c4 BEGIN
+          READ_LONG header table READ_LONG (header + 4) count
+          SET stride = header = 0x2a8 ? 16 : (header = 0x2bc ? 20 : (header = 0x2c4 ? (version ? 264 : 48) : 12))
+          SET readable = readable AND (count = 0 OR (table >= 0x2d4 AND table <= SOURCE_SIZE AND count <= (SOURCE_SIZE - table) / stride))
+        END
+        READ_LONG 0x2b8 slots
+        SET readable = readable AND slots >= 0x2d4 AND slots + 80 <= SOURCE_SIZE
+        READ_LONG 0x2a8 table READ_LONG 0x2ac count READ_LONG 0x2b4 memorized
+        FOR (i = 0; readable AND i < count; ++i) BEGIN
+          READ_LONG (table + i * 16 + 8) first READ_LONG (table + i * 16 + 12) n
+          SET readable = first + n <= memorized
+        END
+      END
+  END
+END

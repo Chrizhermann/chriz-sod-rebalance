@@ -1,0 +1,30 @@
+// Component 115 owns these complete blocks.
+IF
+  Global("csr_kh_carry","GLOBAL",0)
+  Global("bd_khal_spawn","bd2000",0)
+  OR(7)
+    InPartyAllowDead("khalid")
+    Name("khalid",Player1)
+    Name("khalid",Player2)
+    Name("khalid",Player3)
+    Name("khalid",Player4)
+    Name("khalid",Player5)
+    Name("khalid",Player6)
+  GlobalLT("bd_plot","GLOBAL",240)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_carry","GLOBAL",1)
+    Continue()
+END
+
+IF
+  Global("csr_jh_carry","GLOBAL",0)
+  Global("bd_jah_spawn","bd7100",0)
+  InPartyAllowDead("jaheira")
+  GlobalLT("bd_plot","GLOBAL",240)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_jh_carry","GLOBAL",1)
+    Continue()
+END
+

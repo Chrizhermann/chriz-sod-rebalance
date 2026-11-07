@@ -1,0 +1,15 @@
+IF
+  Global("BD_TURNOFF_GEARSCRIPT","BD0120",0)
+  Global("SOD_fromimport","global",1)
+  Global("BD_Imoen_Items","GLOBAL",0)
+  InPartyAllowDead("IMOEN2")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_Imoen_Items","GLOBAL",1)
+    SmallWait(1)
+    ActionOverride("IMOEN2",LeaveParty())
+    ActionOverride("IMOEN2",SetDialogue("csrimoen"))
+    ActionOverride("IMOEN2",ChangeAIScript("csrimoxp",RACE))
+    SetGlobal("CSR_IMOEN_IMPORT","GLOBAL",1)
+END
+

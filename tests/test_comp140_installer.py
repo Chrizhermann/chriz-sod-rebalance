@@ -62,17 +62,8 @@ STAGING_STAGE = '''    JumpToPoint([905.1615])
 STAGING = (STAGING_KEPT_HEAD + STAGING_REMOVED
            + '    SetGlobal("bd_npc_camp_chapter","global",0)\n'
            + STAGING_STAGE + '    SetCutSceneBreakable(TRUE)\nEND\n\n')
-EXPECTED_STAGING = (STAGING_KEPT_HEAD
-                    + '    SetGlobal("bd_npc_camp_chapter","global",1)\n'
-                    + '''    SetGlobal("BD_KORLASZ_SURRENDER","GLOBAL",1)
-    AddJournalEntry(56379,QUEST)
-    AddJournalEntry(59573,QUEST_DONE)
-    AddJournalEntry(69028,QUEST_DONE)
-    SetGlobal("bd_plot","global",50)
-    EndCutSceneMode()
-END
+EXPECTED_STAGING = 'IF\n  True()\nTHEN\n  RESPONSE #100\n    CutSceneId(Player1)\n    SetGlobal("bd_npc_camp_chapter","global",1)\n    SetGlobal("chapter","global",7)\n    SetGlobal("DREAM","GLOBAL",7)\n    SetGlobal("BD_TURNOFF_GEARSCRIPT","BD0120",1)\n    SetGlobal("sprite_is_deadsafana","GLOBAL",0)\n    SetGlobal("sprite_is_deaddynaheir","GLOBAL",0)\n    SetGlobal("sprite_is_deadminsc","GLOBAL",0)\n    SetGlobal("sprite_is_deadrasaad","GLOBAL",0)\n    ApplySpellRES("bdrejuve",Player1)\n    ApplySpellRES("bdrejuve",Player2)\n    ApplySpellRES("bdrejuve",Player3)\n    ApplySpellRES("bdrejuve",Player4)\n    ApplySpellRES("bdrejuve",Player5)\n    ApplySpellRES("bdrejuve",Player6)\n    ChangeAIScript("bdplayer",OVERRIDE)\n    UndoExplore()\n    SetGlobal("BD_KORLASZ_SURRENDER","GLOBAL",1)\n    AddJournalEntry(56379,QUEST)\n    AddJournalEntry(59573,QUEST_DONE)\n    AddJournalEntry(69028,QUEST_DONE)\n    SetGlobal("bd_plot","global",50)\n    EndCutSceneMode()\nEND\n'
 
-''')
 
 
 def walk_in(gate: str) -> str:
@@ -82,14 +73,14 @@ def walk_in(gate: str) -> str:
   Global("bd_walkin","GLOBAL",0)
 THEN
   RESPONSE #100
-    SetGlobal("bd_walkin","GLOBAL",{value})
+    ActionOverride("intro_follower1",SetGlobal("bd_walkin","GLOBAL",{value}))
 END
 
 ''' for trigger, value in (('InMyArea("minsc")', 1), ('!InMyArea("minsc")', 2)))
 
 
 INTRO = FOREIGN + STAGING + walk_in('')
-EXPECTED_INTRO = FOREIGN + EXPECTED_STAGING + walk_in('  False()\n')
+EXPECTED_INTRO = FOREIGN + EXPECTED_STAGING
 AREA_SCRIPT = '''IF
   Global("FOREIGN_0120","GLOBAL",0)
 THEN
@@ -137,6 +128,7 @@ class Component140InstallerTests(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.game = Path(temp.name)
         write_fake_game(self.game)
+        (self.game / "weidu.log").write_text("")
         self.override = self.game / "override"
         extra_ids = {
             "action": '''1 ActionOverride(O:Actor*,A:Action*)
@@ -145,6 +137,9 @@ class Component140InstallerTests(unittest.TestCase):
 84 Face(I:Direction*DIR)
 115 SetGlobalTimer(S:Name*,S:Area*,I:Time*GTimes)
 120 StartCutSceneEx(S:CutScene*,I:evaluateConditions*BOOLEAN)
+64 UndoExplore()
+127 CutSceneId(O:Object*)
+60 ChangeAIScript(S:Script*,I:ScriptLevel*ASCRLEV)
 146 Polymorph(I:AnimationType*Animate)
 160 ApplySpellRES(S:RES*,O:Target)
 173 AddJournalEntry(I:Entry*,I:Type*JourType)
@@ -172,9 +167,9 @@ class Component140InstallerTests(unittest.TestCase):
         mod = self.game / "chriz-sod-remix"
         (mod / "lib").mkdir(parents=True)
         (mod / "baf").mkdir()
-        for library in ("comp140.tpa", "gtimes_compat.tpa"):
+        for library in ("comp140.tpa", "gtimes_compat.tpa", "overwrite.tpa"):
             shutil.copy2(ROOT / "chriz-sod-remix/lib" / library, mod / "lib" / library)
-        for source in ("exit0120.baf", "blk0120.baf"):
+        for source in ("exit0120.baf", "blk0120.baf", "csr140in.baf"):
             shutil.copy2(ROOT / "chriz-sod-remix/baf" / source, mod / "baf" / source)
         fixture = self.game / "fixture"
         fixture.mkdir()
@@ -249,15 +244,26 @@ INCLUDE ~chriz-sod-remix/lib/comp140.tpa~
                 patched.add(self.assert_patched())
         self.assertEqual(len(patched), 1)
 
-    def test_changed_ammon_timer_is_rejected_without_writes(self):
+    def test_changed_ammon_timer_still_gets_the_complete_skip(self):
         self.make_game(gtimes_variants(10)["name from another mod"][0])
         self.fixture(INTRO.replace('"BD0120",TWO_MINUTES)', '"BD0120",12)'))
-        before = tree(self.override)
+        self.assert_patched()
+
+    def test_missing_staging_block_is_created(self):
+        self.fixture(FOREIGN + walk_in(''))
         result = self.install()
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("chriz-sod-remix #140 [staging: Ammon timer]: expected exactly 1 match",
-                      result.stdout + result.stderr)
-        self.assertEqual(tree(self.override), before)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assertIn(b'BD_KORLASZ_SURRENDER', (self.override / 'bdintro.bcs').read_bytes())
+
+    def test_second_tail_install_is_byte_identical(self):
+        self.fixture()
+        first = self.assert_patched()
+        (self.game / 'second.tp2').write_text((self.game / 'patch.tp2').read_text().replace('patch-backup', 'second-backup'))
+        result = self.run_weidu('second.tp2', '--force-install-list', '140')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(tuple((self.override / name).read_bytes() for name in ('bdintro.bcs', 'bd0120.bcs', 'bdsodtrn.bcs')), first)
+
 
 
 if __name__ == "__main__":

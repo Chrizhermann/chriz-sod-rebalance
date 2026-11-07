@@ -35,30 +35,33 @@
 // ------------------------------------------------------------
 // Name-anchored across every map entry in the WMP, so EET's merged
 // worldmap.wmp and standalone's own WORLDMAP.WMP both work.
+ACTION_IF FILE_EXISTS_IN_GAME ~worldmap.wmp~ BEGIN
 COPY_EXISTING ~worldmap.wmp~ ~override~
-  READ_LONG 0x08 csr_nmaps
-  READ_LONG 0x0c csr_moff
-  SET csr_hits = 0
-  FOR (csr_m = 0; csr_m < csr_nmaps; csr_m += 1) BEGIN
-    SET csr_mb = csr_moff + csr_m * 0xb8
-    READ_LONG (csr_mb + 0x20) csr_na
-    READ_LONG (csr_mb + 0x24) csr_ao
-    FOR (csr_i = 0; csr_i < csr_na; csr_i += 1) BEGIN
-      SET csr_ab = csr_ao + csr_i * 0xf0
-      READ_ASCII csr_ab csr_res (8) NULL
-      TO_UPPER csr_res
-      PATCH_IF (~%csr_res%~ STRING_EQUAL_CASE ~BD7000~) BEGIN
-        WRITE_LONG (csr_ab + 0x30) 0
-        SET csr_hits += 1
-      END
+  SET readable = SOURCE_SIZE >= 0x10
+  PATCH_IF readable BEGIN
+    READ_LONG 8 maps READ_LONG 12 mo
+    SET readable = mo + maps * 0xb8 <= SOURCE_SIZE
+  END
+  PATCH_IF readable BEGIN
+    FOR (m = 0; m < maps; ++m) BEGIN
+      SET at = mo + m * 0xb8 READ_LONG (at + 0x20) count READ_LONG (at + 0x24) off
+      PATCH_IF off + count * 0xf0 <= SOURCE_SIZE BEGIN
+        FOR (i = 0; i < count; ++i) BEGIN
+          SET at = off + i * 0xf0 READ_ASCII at name (8) NULL
+          PATCH_IF ~%name%~ STRING_EQUAL_CASE ~BD7000~ BEGIN WRITE_LONG (at + 0x30) 0 END
+        END
+      END ELSE BEGIN PATCH_PRINT ~#210: unreadable worldmap area table; only this map is unchanged.~ END
     END
-  END
-  PATCH_IF (csr_hits = 0) BEGIN
-    PATCH_FAIL ~chriz-sod-remix comp210: no BD7000 area entry found in worldmap.wmp - cannot remove the Coast Way Forest from the map.~
-  END
+  END ELSE BEGIN PATCH_PRINT ~#210: unreadable worldmap header; only this file is unchanged.~ END
 BUT_ONLY
+END ELSE BEGIN PRINT ~#210: worldmap is absent; the recruitment changes still apply.~ END
 
 // ------------------------------------------------------------
 // 210.2 — Rasaad recruits at the camp (BD1000)
 // ------------------------------------------------------------
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+LAF csr_ensure_script STR_VAR script = ~bd1000~ END
+COPY_EXISTING ~bd1000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN LPF csr_replace_script_blocks STR_VAR pattern = ~SetGlobal("bd_rasaad_spawn"\|SetGlobal("CSR_BD7000_GONE"~ END END
+BUT_ONLY
 EXTEND_TOP ~bd1000.bcs~ ~chriz-sod-remix/baf/rasaad1k.baf~

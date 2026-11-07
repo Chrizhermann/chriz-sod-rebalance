@@ -1,0 +1,11 @@
+IF
+  Global("bd_plot","global",586)
+  !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300")
+  Global("bd_ot2_aun","bd4300",0)
+  InMyArea("bdaun")  
+THEN
+  RESPONSE #100
+    SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",2)
+    SetGlobal("bd_ot2_aun","bd4300",1)
+    DisplayStringHead("bdaun",%csr290_s67488%)  
+END

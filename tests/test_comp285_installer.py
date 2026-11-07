@@ -146,6 +146,7 @@ class InstallerFixture(unittest.TestCase):
         self.game = Path(self.temp.name)
         write_fake_game(self.game)
         self.override = self.game / "override"
+        (self.game / "weidu.log").write_text("")
         shutil.copytree(ROOT / "chriz-sod-remix", self.game / "chriz-sod-remix")
 
     def run_weidu(self, *args):
@@ -160,6 +161,7 @@ class InstallerFixture(unittest.TestCase):
     def assert_success(self, result):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("SUCCESSFULLY INSTALLED", result.stdout)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
 
     def protected(self):
         return {name: (self.game / name).read_bytes() for name in (
@@ -220,6 +222,11 @@ class Component285EffectiveTests(InstallerFixture):
         self.source.copy_ids(self.override)
         for name in self.INPUTS:
             self.source.copy(name, self.override)
+            backup = self.source.game / 'weidu_external/backup/chriz-sod-remix/285'
+            if backup.is_dir():
+                original = next((p for p in backup.iterdir() if p.name.upper() == name), None)
+                if original:
+                    (self.override / name.lower()).write_bytes(original.read_bytes())
         # Script references in existing creature slots are inputs, not guesses
         # at SCS's install-specific generated resource names.
         for name in ("BDABIGRE.CRE", "BDABIRED.CRE", "BDERINYE.CRE", "BDBONEFI.CRE", "SHUPOL01.CRE"):
@@ -241,13 +248,6 @@ class Component285EffectiveTests(InstallerFixture):
 
     def script(self, name):
         return compact(self.decompile(name))
-
-    def assert_failure_rollback(self, before, protected, result):
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", result.stdout)
-        self.assertIn("#285", result.stdout + result.stderr)
-        self.assertEqual(tree(self.override), before)
-        self.assertEqual(self.protected(), protected)
 
     def test_public_installer_preserves_foreign_resources_and_encounter_contract(self):
         before = tree(self.override)
@@ -369,20 +369,47 @@ class Component285EffectiveTests(InstallerFixture):
             self.assertNotIn(forbidden, combat)
         self.assertIn("HAVESPELL(", combat)
 
-    def test_ambiguous_portal_activation_rejects_and_restores_everything(self):
-        # Duplicate the actual compiled blocks. This is an unsupported source
-        # collision, not a text-only test of the installer's matching expression.
-        script = self.resource("BDELEV01.BCS")
-        framing = script.replace(b"\r\n", b"\n")
-        self.assertTrue(framing.startswith(b"SC\n") and framing.endswith(b"SC\n"))
-        (self.override / "bdelev01.bcs").write_bytes(framing[:-3] + framing[3:])
-        before, protected = tree(self.override), self.protected()
-        self.assert_failure_rollback(before, protected, self.install())
+    def test_foreign_v2_effect_bytes_survive_owned_movement_replacement(self):
+        from test_comp256_creatures import effect_record
+        boss = bytearray(self.resource("BDBELHIF.CRE"))
+        foreign = effect_record(1, 206, b"FOREIGN", param1=87, param2=9)
+        movement = effect_record(1, 176, b"", param1=43, param2=1)
+        boss[0x33] = 1
+        struct.pack_into("<II", boss, 0x2C4, len(boss), 3)
+        boss.extend(foreign + movement + movement)
+        (self.override / "bdbelhif.cre").write_bytes(boss)
+        self.assert_success(self.install())
+        result = self.resource("BDBELHIF.CRE")
+        base, count = dword(result, 0x2C4), dword(result, 0x2C8)
+        records = [result[base+i*264:base+(i+1)*264] for i in range(count)]
+        self.assertIn(foreign, records)
+        self.assertEqual([dword(f, 20) for f in records if dword(f, 8) == 176], [125])
 
-    def test_truncated_transform_rejects_without_partial_boss_or_portal_changes(self):
+    def test_unreadable_donors_only_omit_the_affected_files(self):
+        (self.override / "bdbelhia.itm").write_bytes(b"ITM")
+        (self.override / "bdabigre.cre").write_bytes(b"CRE")
+        (self.override / "bdfinhep.cre").write_bytes(b"CRE")
+        boss = self.resource("BDBELHIF.CRE")
+        (self.override / "bdbelhif.cre").write_bytes(b"CRE")
+        self.assert_success(self.install())
+        self.assertEqual(self.resource("BDBELHIF.CRE"), b"CRE")
+        self.assertTrue((self.override / "csr285h2.spl").exists())
+        self.assertIn('CSR285_INIT', self.script("BDBELHIF.BCS"))
+        self.assertIn('BDCUT56', self.script("BDELEV01.BCS"))
+
+    def test_duplicate_portal_activation_is_replaced_once(self):
+        script = self.resource("BDELEV01.BCS").replace(b"\r\n", b"\n")
+        (self.override / "bdelev01.bcs").write_bytes(script[:-3] + script[3:])
+        self.assert_success(self.install())
+        self.assertEqual(self.script("BDELEV01.BCS").count('STARTCUTSCENEEX("BDCUT56",FALSE)'), 1)
+
+    def test_truncated_native_transform_does_not_affect_owned_spells(self):
         (self.override / "bdfinhep.spl").write_bytes(b"SPL V1  ")
-        before, protected = tree(self.override), self.protected()
-        self.assert_failure_rollback(before, protected, self.install())
+        self.assert_success(self.install())
+        for name, target in (("CSR285HF.SPL", "CSR285HP"), ("CSR285HX.SPL", "CSR285HI")):
+            forms = [f for f in effects(self.resource(name), "spl") if word(f, 0) == 151]
+            self.assertEqual([resref(f, 20) for f in forms], [target])
+        self.assertEqual(self.resource("BDFINHEP.SPL"), b"SPL V1  ")
 
     def test_native_caster_fallback_still_installs_the_full_encounter(self):
         (self.override / "shupol01.cre").unlink(missing_ok=True)
@@ -398,7 +425,9 @@ BEGIN ~separate tail application~ DESIGNATED 285
 INCLUDE ~chriz-sod-remix/lib/comp285.tpa~
 ''', encoding="ascii")
         result = self.run_weidu("second-tail.tp2", "--force-install-list", "285")
-        self.assert_failure_rollback(before, protected, result)
+        self.assert_success(result)
+        self.assertEqual(tree(self.override), before)
+        self.assertEqual(self.protected(), protected)
 
 
 if __name__ == "__main__":

@@ -64,7 +64,7 @@ END
 
 // BD_SAREVOK_SECRET re-home: the flag feeds the chapter-10 masks quest (BD7230) and
 // its vanilla setter lives in the skipped dungeon. Exact mirror of BD0130.baf:374-381
-// (scope GLOBAL, value 1, journal 264295 QUEST), re-keyed to looting the page from
+// (scope GLOBAL, value 1, journal %csr170_secret% QUEST), re-keyed to looting the page from
 // csrkorl's body here (research 10a: BDSHSARE is P1, zero other copies in the game).
 IF
   Global("BD_SAREVOK_SECRET","GLOBAL",0)
@@ -72,6 +72,6 @@ IF
 THEN
   RESPONSE #100
     SetGlobal("BD_SAREVOK_SECRET","GLOBAL",1)
-    AddJournalEntry(264295,QUEST)
+    AddJournalEntry(%csr170_secret%,QUEST)
     Continue()
 END

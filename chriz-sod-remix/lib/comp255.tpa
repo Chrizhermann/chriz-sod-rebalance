@@ -12,14 +12,10 @@
 // sweep 2026-07-11), and story detonations use Kill(), which
 // bypasses hit points.
 
-COPY_EXISTING ~bdkegx.cre~ ~override~
-  READ_SHORT 0x24 csr_hp
-  READ_SHORT 0x26 csr_maxhp
-  READ_BYTE  0x59 csr_rfire
-  PATCH_IF NOT ((csr_hp = 25) AND (csr_maxhp = 25) AND (csr_rfire = 0)) BEGIN
-    PATCH_FAIL ~chriz-sod-remix comp255: BDKEGX.cre is not the verified vanilla barrel (hp %csr_hp%/%csr_maxhp%, fire resist %csr_rfire%; expected 25/25/0). Another mod already changed it - resolve manually.~
-  END
-  WRITE_SHORT 0x24 120
-  WRITE_SHORT 0x26 120
-  WRITE_BYTE  0x59 75
-BUT_ONLY
+ACTION_IF FILE_EXISTS_IN_GAME ~bdkegx.cre~ BEGIN
+  COPY_EXISTING ~bdkegx.cre~ ~override~
+    PATCH_IF SOURCE_SIZE >= 0x5a BEGIN
+      WRITE_SHORT 0x24 120 WRITE_SHORT 0x26 120 WRITE_BYTE 0x59 75
+    END ELSE BEGIN PATCH_PRINT ~#255: BDKEGX is unreadable; only this creature is unchanged.~ END
+  BUT_ONLY
+END ELSE BEGIN PRINT ~#255: BDKEGX is absent; this optional creature is unavailable.~ END

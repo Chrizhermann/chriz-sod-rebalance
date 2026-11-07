@@ -32,6 +32,7 @@ class SkiePotionTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.game = Path(temporary.name)
         write_skie_xp_fixture(self.game)
+        (self.game / "weidu.log").write_text("")
         for filename, extra in {
             'action.ids': '356 TransformItem(S:OldItem*,S:NewItem*)\n',
             'trigger.ids': ('0x40D3 InPartyAllowDead(O:Object*)\n'
@@ -65,6 +66,7 @@ LAF csr197_install_potion_cleanup END
 
     def assert_success(self, result):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
 
     def test_optional_scs_absent_is_byte_exact_noop(self):
         before = tree(self.game / 'override')
@@ -134,16 +136,14 @@ LAF csr197_install_potion_cleanup END
         self.assert_success(self.install('second.tp2'))
         self.assertEqual(tree(self.game / 'override'), before)
 
-    def test_already_droppable_clone_needs_no_conversion(self):
+    def test_already_droppable_clone_gets_the_same_conversion(self):
         self.pair('10')
         (self.game / 'override/dw#ptn10.itm').write_bytes(potion(0x6c))
-        before = tree(self.game / 'override')
         self.assert_success(self.install())
-        self.assertEqual(tree(self.game / 'override'), before)
+        self.assertIn('TransformItem("dw#ptn10","potn10")', decompile(self.game, 'bdskie.bcs'))
 
-    def test_changed_bytes_after_embedded_zero_abort_without_resource_changes(self):
-        # Prefix/tail, case-only changes, flags and length all matter. This
-        # catches accidentally NUL-terminated or case-folded binary compares.
+    def test_changed_item_bytes_do_not_gate_conversion(self):
+        # The conversion owns the script action, not either item's bytes.
         self.pair('10')
         for offset, value in ((0x12, ord('B')), (0x42, ord('E')), (0x18, 0x7c),
                               (0xff, 1), (0x100, 0)):
@@ -156,37 +156,48 @@ LAF csr197_install_potion_cleanup END
                 (self.game / 'override/potn10.itm').write_bytes(target)
                 before = tree(self.game / 'override')
                 result = self.install()
-                self.assertNotEqual(result.returncode, 0)
-                self.assertIn('differ beyond the droppable flag', result.stdout + result.stderr)
-                self.assertEqual(tree(self.game / 'override'), before)
+                self.assert_success(result)
+                self.assertIn('TransformItem("dw#ptn10","potn10")', decompile(self.game, 'bdskie.bcs'))
+                after = tree(self.game / 'override')
+                for name, digest in before.items():
+                    if name != 'BDSKIE.BCS':
+                        self.assertEqual(after[name], digest)
 
-    def test_second_pair_conflict_rolls_back_first_pair_script_edit(self):
+    def test_changed_second_pair_still_installs_both_conversions(self):
         self.pair('10')
         self.pair('45')
         target = bytearray(potion(0x6c))
         target[0xfe] = 1
         (self.game / 'override/potn45.itm').write_bytes(target)
         before = tree(self.game / 'override')
-        self.assertNotEqual(self.install().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+        self.assert_success(self.install())
+        script = decompile(self.game, 'bdskie.bcs')
+        self.assertIn('TransformItem("dw#ptn10","potn10")', script)
+        for name, digest in before.items():
+            if name != 'BDSKIE.BCS':
+                self.assertEqual(tree(self.game / 'override')[name], digest)
 
-    def test_missing_counterpart_aborts_without_guessing_replacement(self):
+    def test_missing_counterpart_logs_only_the_unavailable_conversion(self):
         (self.game / 'override/dw#ptn10.itm').write_bytes(potion())
         before = tree(self.game / 'override')
         result = self.install()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('exists without potn10.itm', result.stdout + result.stderr)
+        self.assert_success(result)
+        self.assertIn('this potion conversion is unavailable', result.stdout + result.stderr)
         self.assertEqual(tree(self.game / 'override'), before)
 
-    def test_same_non_potion_pair_is_rejected(self):
+    def test_changed_item_type_does_not_gate_conversion(self):
         self.pair('10')
         for name in ('dw#ptn10.itm', 'potn10.itm'):
             target = bytearray((self.game / 'override' / name).read_bytes())
             struct.pack_into('<H', target, 0x1c, 1)
             (self.game / 'override' / name).write_bytes(target)
         before = tree(self.game / 'override')
-        self.assertNotEqual(self.install().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+        self.assert_success(self.install())
+        script = decompile(self.game, 'bdskie.bcs')
+        self.assertIn('TransformItem("dw#ptn10","potn10")', script)
+        for name, digest in before.items():
+            if name != 'BDSKIE.BCS':
+                self.assertEqual(tree(self.game / 'override')[name], digest)
 
     def test_coexists_with_xp_ladder_without_changing_xp_or_cre(self):
         self.pair('10')

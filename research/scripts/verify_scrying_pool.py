@@ -235,19 +235,9 @@ def dialog_states(text: str) -> dict[int, str]:
 
 
 def scry_picker_states(states: dict[int, str]) -> tuple[int, ...]:
-    """Return the picker state for the supported no-Aura BDSCRY layout.
-
-    The current no-Aura target has exactly native states 0..3. Non-contiguous,
-    appended, or truncated dialogs are evidence failures for this bounded build.
-    """
-    numbers = tuple(sorted(states))
-    if numbers != tuple(range(len(numbers))):
-        raise VerificationError(f"BDSCRY states are non-contiguous: {numbers}")
-    if numbers == (0, 1, 2, 3):
-        return (0,)
-    raise VerificationError(
-        f"BDSCRY has {len(numbers)} states; expected the no-Aura four-state graph"
-    )
+    """Find picker routes by their flags without imposing a native graph shape."""
+    return tuple(number for number, body in sorted(states.items())
+                 if re.search(r'(?i)\bGlobal\("bd_sddd12_(?:imoen|caelar|hood)"', body))
 
 
 def trigger_lines(text: str, pattern: str) -> list[str]:

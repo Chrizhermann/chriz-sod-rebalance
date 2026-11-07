@@ -232,8 +232,9 @@ class Component266InstallerTests(unittest.TestCase):
             (self.override / "gtimes.ids").write_bytes(gtimes.encode("ascii"))
         library = self.game / "chriz-sod-remix/lib"
         library.mkdir(parents=True)
-        for name in ("comp266.tpa", "gtimes_compat.tpa"):
+        for name in ("comp266.tpa", "gtimes_compat.tpa", "overwrite.tpa"):
             shutil.copy2(ROOT / "chriz-sod-remix/lib" / name, library / name)
+        (self.game / "weidu.log").write_text("")
         (self.game / "fixture").mkdir()
         (self.game / "fixture/setup-fixture.tp2").write_text('''BACKUP ~fixture/backup~
 AUTHOR ~fixture~
@@ -253,6 +254,7 @@ COMPILE ~fixture/expected.baf~
     def assert_success(self, result):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("SUCCESSFULLY INSTALLED", result.stdout)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
 
     def fixture(self, target=NATIVE_MISLEAD, *, after=NATIVE_AFTER, target_only=False):
         prefix = "" if target_only else FOREIGN + NATIVE_BEFORE
@@ -277,17 +279,16 @@ INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
         return {name: (self.game / name).read_bytes() for name in (
             "chitin.key", "data/csr291.bif", "dialog.tlk", "lang/en_us/dialog.tlk")}
 
-    def assert_rejected(self, target, *, after=NATIVE_AFTER):
+    def assert_overwritten(self, target, *, after=NATIVE_AFTER):
         self.fixture(target, after=after)
-        before = tree(self.override)
         protected = self.protected()
-        result = self.repair()
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("expected one original or one complete capped Insane Mislead block", result.stdout + result.stderr)
-        self.assertEqual(tree(self.override), before)
+        self.assert_success(self.repair())
+        actual = (self.override / "bdashiru.bcs").read_bytes()
+        if target:
+            self.assertEqual(actual, (self.override / "expected.bcs").read_bytes())
+        else:
+            self.assertIn(b'CSR266_MISLEAD', actual)
         self.assertEqual(self.protected(), protected)
-        backups = self.game / "repair-backup/266"
-        self.assertFalse(backups.exists() and any(p.suffix.lower() == ".bcs" for p in backups.iterdir()))
 
     def test_actual_source_shape_changes_only_one_block_and_uninstall_restores(self):
         self.fixture()
@@ -322,6 +323,7 @@ INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
         self.fixture()
         shutil.copytree(ROOT / "chriz-sod-remix", self.game / "chriz-sod-remix",
                         dirs_exist_ok=True)
+        (self.override/'bd0120.are').write_bytes(b'AREAV1.0')
         before = tree(self.override)
         public = "chriz-sod-remix/setup-chriz-sod-remix.tp2"
         self.assert_success(self.run_weidu(public, "--force-install-list", "266"))
@@ -346,45 +348,43 @@ INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
         self.assert_success(self.repair("second-tail"))
         self.assertEqual(tree(self.override), before)
 
-    def test_partial_guard_without_consumption_is_rejected(self):
-        self.assert_rejected(CAPPED_MISLEAD.replace('    SetGlobal("CSR266_MISLEAD","LOCALS",1)\n', ""))
+    def test_partial_guard_without_consumption_is_overwritten(self):
+        self.assert_overwritten(CAPPED_MISLEAD.replace('    SetGlobal("CSR266_MISLEAD","LOCALS",1)\n', ""))
 
-    def test_partial_consumption_without_guard_is_rejected(self):
-        self.assert_rejected(CAPPED_MISLEAD.replace('  Global("CSR266_MISLEAD","LOCALS",0)\n', ""))
+    def test_partial_consumption_without_guard_is_overwritten(self):
+        self.assert_overwritten(CAPPED_MISLEAD.replace('  Global("CSR266_MISLEAD","LOCALS",0)\n', ""))
 
-    def test_wrong_consumed_flag_value_is_rejected(self):
-        self.assert_rejected(CAPPED_MISLEAD.replace('"LOCALS",1)', '"LOCALS",0)'))
+    def test_wrong_consumed_flag_value_is_overwritten(self):
+        self.assert_overwritten(CAPPED_MISLEAD.replace('"LOCALS",1)', '"LOCALS",0)'))
 
-    def test_duplicate_and_mixed_blocks_are_rejected(self):
+    def test_duplicate_and_mixed_blocks_are_overwritten(self):
         for target in (NATIVE_MISLEAD * 2, CAPPED_MISLEAD * 2, NATIVE_MISLEAD + CAPPED_MISLEAD):
             with self.subTest(target=target):
-                self.assert_rejected(target)
+                self.assert_overwritten(target)
 
-    def test_changed_timer_or_extra_native_action_is_rejected(self):
+    def test_changed_timer_or_extra_native_action_is_overwritten(self):
         for target in (NATIVE_MISLEAD.replace("TWO_ROUNDS", "THREE_ROUNDS"),
                        NATIVE_MISLEAD.replace("    ApplySpell", "    Continue()\n    ApplySpell")):
             with self.subTest(target=target):
-                self.assert_rejected(target)
+                self.assert_overwritten(target)
 
-    def test_missing_target_and_empty_compiled_script_are_rejected(self):
-        self.assert_rejected("")
+    def test_missing_target_and_empty_compiled_script_are_written(self):
+        self.assert_overwritten("")
         (self.override / "bdashiru.bcs").write_bytes(b"SC\nSC\n")
-        before = tree(self.override)
-        result = self.repair("empty-script")
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("expected one original or one complete capped", result.stdout + result.stderr)
-        self.assertEqual(tree(self.override), before)
+        self.assert_success(self.repair("empty-script"))
+        self.assertIn(b'CSR266_MISLEAD', (self.override / "bdashiru.bcs").read_bytes())
 
-    def test_foreign_owned_flag_reference_is_rejected(self):
+    def test_foreign_owned_flag_reference_is_overwritten(self):
         foreign = FOREIGN.replace("FOREIGN_BEHAVIOUR", "CSR266_MISLEAD")
-        self.assert_rejected(NATIVE_MISLEAD, after=NATIVE_AFTER + foreign)
+        self.assert_overwritten(NATIVE_MISLEAD + foreign)
 
-    def test_missing_resource_fails_without_writes(self):
-        before = tree(self.override)
+    def test_missing_resource_gets_the_owned_mislead_block(self):
         result = self.repair()
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("BDASHIRU.BCS is missing", result.stdout + result.stderr)
-        self.assertEqual(tree(self.override), before)
+        self.assert_success(result)
+        self.assertIn(b'CSR266_MISLEAD', (self.override/'bdashiru.bcs').read_bytes())
+        first=(self.override/'bdashiru.bcs').read_bytes()
+        self.assert_success(self.repair('missing-second-tail'))
+        self.assertEqual(first,(self.override/'bdashiru.bcs').read_bytes())
 
     def test_mislead_contract_follows_the_gtimes_name_for_twelve_seconds(self):
         # Dark Tidings renames only 60 seconds, which the adjacent summon blocks
@@ -403,9 +403,9 @@ INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
                 self.assert_success(self.repair())
                 self.assertEqual(tree(self.override), before)
 
-    def test_changed_timer_is_rejected_with_an_appended_gtimes_name(self):
+    def test_changed_timer_is_overwritten_with_an_appended_gtimes_name(self):
         self.make_game(gtimes_variants(12)["name from another mod"][0])
-        self.assert_rejected(NATIVE_MISLEAD.replace("TWO_ROUNDS", "THREE_ROUNDS"))
+        self.assert_overwritten(NATIVE_MISLEAD.replace("TWO_ROUNDS", "THREE_ROUNDS"))
 
 
 if __name__ == "__main__":

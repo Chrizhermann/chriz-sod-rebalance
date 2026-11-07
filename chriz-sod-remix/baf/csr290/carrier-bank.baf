@@ -1,0 +1,13 @@
+IF
+  Global("K#FrameDelay","LOCALS",1)
+THEN
+  RESPONSE #100
+    SetGlobal("K#FrameDelay","LOCALS",2)
+    AdvanceTime(ONE_MONTH)
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player1,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player2,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player3,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player4,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player5,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player6,ALL))
+END

@@ -3,8 +3,8 @@ possible per-hour rest-interrupt chance 1..99 to its 5x-felt-reduced value.
 
 Same formula as wave1_rest_table.py (design docs/design/wave1/01):
 felt(c) = 1-(1-c/100)^8 ; new = max(1, round(invert(felt/5))).
-Values >= 100 are never patched (guarded in the tp2) — 100 is the BDNOREST
-"cannot rest" convention and must not be touched.
+This is an offline formula reference. The player installer writes the authored
+30-area values in comp100.tpa; it does not inspect old chances or enabled flags.
 """
 import pathlib
 

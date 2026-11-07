@@ -1,0 +1,8 @@
+REPLACE ~BDKORLAS~
+IF %csr170_weight25% ~~ THEN BEGIN 25
+  SAY @17021
+  IF ~~ THEN GOTO 26
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN EXTERN ~MINSCJ~ 378
+END
+END

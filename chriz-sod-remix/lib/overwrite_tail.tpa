@@ -1,0 +1,32 @@
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+INCLUDE ~chriz-sod-remix/lib/overwrite_2da.tpa~
+<<<<<<<< .../csr-tail-addresses.2da
+2DA V1.0
+***
+ BASE
+>>>>>>>>
+// Persist authored state addresses separately from editable dialogue wording.
+DEFINE_ACTION_FUNCTION csr_claim_dialogue_tail
+  INT_VAR count = 0 first_text = (0 - 1)
+  STR_VAR dialog = ~~ key = ~~
+  RET base
+BEGIN
+  LAF csr_ensure_dlg_states STR_VAR dialog END
+  COPY_EXISTING - ~%dialog%.dlg~ ~override~
+    READ_LONG 8 n READ_LONG 12 off SET base = n
+    FOR (i = 0; i < n AND first_text >= 0; ++i) BEGIN
+      PATCH_IF LONG_AT (off + i * 16) = first_text BEGIN SET base = i SET i = n END
+    END
+  ACTION_IF FILE_EXISTS_IN_GAME ~CSRTAIL.2DA~ BEGIN
+    COPY_EXISTING - ~CSRTAIL.2DA~ ~override~
+      LPF csr_get_2da_cell STR_VAR row = EVAL ~%key%~ column = ~BASE~ RET value found END
+      PATCH_IF found AND IS_AN_INT ~%value%~ BEGIN SET base = %value% END
+  END ELSE BEGIN COPY ~.../csr-tail-addresses.2da~ ~override/CSRTAIL.2DA~ END
+  COPY_EXISTING ~CSRTAIL.2DA~ ~override~
+    LPF csr_set_2da_cell STR_VAR row = EVAL ~%key%~ column = ~BASE~ value = EVAL ~%base%~ END
+  LAF csr_ensure_dlg_states INT_VAR count = base + count STR_VAR dialog RET previous = existing_states END
+  COPY_EXISTING ~%dialog%.dlg~ ~override~
+    READ_LONG 12 off
+    FOR (i = previous; i < base + count; ++i) BEGIN WRITE_LONG (off + i * 16 + 12) 0xffffffff END
+  BUT_ONLY
+END

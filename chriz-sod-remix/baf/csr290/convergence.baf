@@ -1,0 +1,7 @@
+IF
+  Global("bd_plot","global",586)
+  GlobalTimerExpired("bd_mdd1341a_ot_timer","bd4300")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_plot","global",587)
+END

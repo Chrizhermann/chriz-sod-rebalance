@@ -67,3 +67,11 @@ One WeiDU component: `COPY_EXISTING` each listed `BD*.are`, follow the rest-stru
 apply the reduction formula to it (composes with anything another mod set), guarded by
 `enabled && table_count>0`. Pure data patch — no script, no dialogue; safe with SCS/SR/
 CDTweaks/EET and vanilla. Applies to areas not yet visited in a running save.
+
+## Installer policy update (2026-11-08)
+
+The mandatory overwrite policy supersedes the old compatibility sketch above.
+Component 100 now writes the signed-off NEW values from the table directly,
+including when the existing chance or enabled flag differs. It preserves other
+encounter fields. Missing rest records receive native metadata; no new areas or
+new balance values are added.

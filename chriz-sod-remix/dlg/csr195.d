@@ -20,31 +20,31 @@
 // -- BDCORWIN (Schael Corwin) — "you want to turn back?" at the first camp.
 //    Reply 0 (Council of Four) survives; 2/3 left LIVE per user (Caelar still
 //    is our antagonist), all four siblings GOTO 12 so nothing strands.
-ADD_TRANS_TRIGGER BDCORWIN 11 ~False()~ DO 1   // #242095 "Caelar nearly killed me and my friend Imoen."
+ALTER_TRANS BDCORWIN BEGIN 11 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #242095 "Caelar nearly killed me and my friend Imoen."
 
 // -- BDELTAN (Grand Duke Eltan) — palace small-talk. The sibling of 11.1/13.2
 //    that comp150 gated but skipped. Replies 0/2/3 stay; reply 2 also GOTO 11.
-ADD_TRANS_TRIGGER BDELTAN 10 ~False()~ DO 1    // #256002 "people trying to kill me for no apparent reason"
+ALTER_TRANS BDELTAN BEGIN 10 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #256002 "people trying to kill me for no apparent reason"
 
 // -- BDEDWIN (Edwin) — Coast Way recruitment. Eight "Caelar tried to kill me"
 //    replies; reply 0 (the crusade line) is the fallback in every state.
 //    Gating 21.1 orphans Edwin's own backstory state 39 — user OK'd the loss.
-ADD_TRANS_TRIGGER BDEDWIN 21 ~False()~ DO 1    // #242137 "...Caelar Argent seeks my death."
-ADD_TRANS_TRIGGER BDEDWIN 21 ~False()~ DO 2    // #242138 "Caelar Argent tried to kill me..."
-ADD_TRANS_TRIGGER BDEDWIN 21 ~False()~ DO 3    // #242139 "...Caelar Argent tried to kill me. She failed."
-ADD_TRANS_TRIGGER BDEDWIN 31 ~False()~ DO 1    // #242160 "Caelar Argent tried to kill me..."
-ADD_TRANS_TRIGGER BDEDWIN 31 ~False()~ DO 2    // #242161 "...The Shining Lady tried to kill me."
-ADD_TRANS_TRIGGER BDEDWIN 35 ~False()~ DO 2    // #242178 "The Shining Lady tried to kill me. Now it is my turn."
-ADD_TRANS_TRIGGER BDEDWIN 36 ~False()~ DO 1    // #242181 "She tried to kill me, and now I'm trying to kill her back."
-ADD_TRANS_TRIGGER BDEDWIN 36 ~False()~ DO 2    // #242182 "...the Shining Lady has targeted me for death."
+ALTER_TRANS BDEDWIN BEGIN 21 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #242137 "...Caelar Argent seeks my death."
+ALTER_TRANS BDEDWIN BEGIN 21 END BEGIN 2 END BEGIN TRIGGER ~False()~ END// #242138 "Caelar Argent tried to kill me..."
+ALTER_TRANS BDEDWIN BEGIN 21 END BEGIN 3 END BEGIN TRIGGER ~False()~ END// #242139 "...Caelar Argent tried to kill me. She failed."
+ALTER_TRANS BDEDWIN BEGIN 31 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #242160 "Caelar Argent tried to kill me..."
+ALTER_TRANS BDEDWIN BEGIN 31 END BEGIN 2 END BEGIN TRIGGER ~False()~ END// #242161 "...The Shining Lady tried to kill me."
+ALTER_TRANS BDEDWIN BEGIN 35 END BEGIN 2 END BEGIN TRIGGER ~False()~ END// #242178 "The Shining Lady tried to kill me. Now it is my turn."
+ALTER_TRANS BDEDWIN BEGIN 36 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #242181 "She tried to kill me, and now I'm trying to kill her back."
+ALTER_TRANS BDEDWIN BEGIN 36 END BEGIN 2 END BEGIN TRIGGER ~False()~ END// #242182 "...the Shining Lady has targeted me for death."
 
 // -- BDSCHAEL (Corwin) — city-escort banter. Gate the entry reply 167.0, which
 //    orphans state 168 ("assassins Caelar sent after you"). 167 keeps replies
 //    1 (->172) and 2 (->170).
-ADD_TRANS_TRIGGER BDSCHAEL 167 ~False()~ DO 0  // #254918 "Is that really necessary?" -> 168
+ALTER_TRANS BDSCHAEL BEGIN 167 END BEGIN 0 END BEGIN TRIGGER ~False()~ END// #254918 "Is that really necessary?" -> 168
 
 // -- BDDEBUG (dev console) — the now-broken "jump to the assassin scene".
-ADD_TRANS_TRIGGER BDDEBUG 4 ~False()~ DO 1     // #265249 "Skip to assassin attack at Ducal Palace."
+ALTER_TRANS BDDEBUG BEGIN 4 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #265249 "Skip to assassin attack at Ducal Palace."
 
 // ============================================================
 // B. BDSCHAEL 227/228 — the goodnight "crusader poison" line (the one you
@@ -55,7 +55,7 @@ ADD_TRANS_TRIGGER BDDEBUG 4 ~False()~ DO 1     // #265249 "Skip to assassin atta
 //    coming back to the city," so nothing is lost. No new text.
 // ============================================================
 ALTER_TRANS BDSCHAEL BEGIN 227 END BEGIN 0 END BEGIN   // #266837 "Yes. I'm ready to begin the march..."
-  ACTION ~SetGlobal("BD_plot","global",54) SetGlobal("BD_CORWIN_GOODNIGHT","BD0102",1) AddJournalEntry(266840,QUEST)~
+  ACTION ~SetGlobal("BD_plot","global",54) SetGlobal("BD_CORWIN_GOODNIGHT","BD0102",1) AddJournalEntry(%csr195_march%,QUEST)~
   EPILOGUE ~EXIT~
 END
 
@@ -81,14 +81,14 @@ END
 //    resurface if a later rework re-enables a path.
 // ============================================================
 // -- BDELTAN council aftermath (entered only via now-severed EXTERNs)
-ADD_STATE_TRIGGER BDELTAN 1 ~False()~          // #264712 "...the body of one of the assassins. A sun cresting..."
-ADD_STATE_TRIGGER BDELTAN 9 ~False()~          // #264734 "...parchment from one of the assassins' bodies..."
+REPLACE_STATE_TRIGGER BDELTAN 1 ~False()~          // #264712 "...the body of one of the assassins. A sun cresting..."
+REPLACE_STATE_TRIGGER BDELTAN 9 ~False()~          // #264734 "...parchment from one of the assassins' bodies..."
 // -- BDFIST05 palace door-guard ambient barks
-ADD_STATE_TRIGGER BDFIST05 0 ~False()~         // #255915 "Whoever attacked the palace will pay..."
-ADD_STATE_TRIGGER BDFIST05 1 ~False()~         // #255916 "Assassins in the High Hall..."
+REPLACE_STATE_TRIGGER BDFIST05 0 ~False()~         // #255915 "Whoever attacked the palace will pay..."
+REPLACE_STATE_TRIGGER BDFIST05 1 ~False()~         // #255916 "Assassins in the High Hall..."
 // -- BDLIIA bd0103 bedside-triage aftermath (csrarr.baf parks these) + dead council
-ADD_STATE_TRIGGER BDLIIA 0 ~False()~           // #264618 "...dealing with the wounded downstairs..."
-ADD_STATE_TRIGGER BDLIIA 3 ~False()~           // #264626 "...more of our attackers and who sent them."
-ADD_STATE_TRIGGER BDLIIA 8 ~False()~           // #264631 "...speak with Duke Eltan... something of our attackers."
-ADD_STATE_TRIGGER BDLIIA 12 ~False()~          // #264731 "...Caelar's zealots clearly mean to see you dead."
-ADD_TRANS_TRIGGER BDLIIA 10 ~False()~ DO 1     // #264715 "The crusade's assassins paid for their arrogance."
+REPLACE_STATE_TRIGGER BDLIIA 0 ~False()~           // #264618 "...dealing with the wounded downstairs..."
+REPLACE_STATE_TRIGGER BDLIIA 3 ~False()~           // #264626 "...more of our attackers and who sent them."
+REPLACE_STATE_TRIGGER BDLIIA 8 ~False()~           // #264631 "...speak with Duke Eltan... something of our attackers."
+REPLACE_STATE_TRIGGER BDLIIA 12 ~False()~          // #264731 "...Caelar's zealots clearly mean to see you dead."
+ALTER_TRANS BDLIIA BEGIN 10 END BEGIN 1 END BEGIN TRIGGER ~False()~ END// #264715 "The crusade's assassins paid for their arrogance."

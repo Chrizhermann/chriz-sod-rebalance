@@ -1,48 +1,39 @@
-// BDSCRY native-layout helper shared by components 120 and 225.
-//
-// The current no-Aura target has a four-state graph and one picker in
-// state 0. Identify a route by its local once-flag instead of a transition number,
-// then require that exact graph before editing it. This keeps neighboring
-// transitions untouched and fails before mutation if another mod changed BDSCRY.
-
+// Own the disabled routes, identified by their local once-flag. Missing routes
+// are already absent; every matching trigger is disabled, in any dialogue shape.
 DEFINE_ACTION_FUNCTION csr_disable_bdscry_picker_route
-  STR_VAR
-    csr_scry_flag = ~~
-    csr_scry_component = ~~
+  STR_VAR csr_scry_flag = ~~ csr_scry_component = ~~
 BEGIN
+  // Only a programming error in the bundled callers can reach this branch.
   ACTION_IF (~%csr_scry_flag%~ STR_EQ ~~) BEGIN
-    FAIL ~chriz-sod-remix: BDSCRY native-layout patch requires a route flag.~
+    FAIL ~chriz-sod-remix: the scrying route flag must be supplied by its caller.~
   END
-
-  COPY_EXISTING ~bdscry.dlg~ ~override~
-    READ_LONG 0x08 csr_scry_state_count
-    DECOMPILE_DLG_TO_D
-      SPRINT csr_scry_route_re
-        ~Global("%csr_scry_flag%","LOCALS",0)~
-      SPRINT csr_scry_reset_re
-        ~SetGlobal("%csr_scry_flag%","LOCALS",0)~
-      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE
-        ~%csr_scry_route_re%~ csr_scry_route_count
-      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE
-        ~%csr_scry_reset_re%~ csr_scry_reset_count
-      // A SetGlobal(...,0) contains the route text as a substring. None is
-      // present in the verified dialog; reject it so the replacement below
-      // can only touch transition triggers.
-      PATCH_IF (csr_scry_reset_count != 0) BEGIN
-        PATCH_FAIL ~chriz-sod-remix #%csr_scry_component%: BDSCRY unexpectedly resets %csr_scry_flag% to 0; refusing an ambiguous picker patch.~
+  ACTION_IF FILE_EXISTS_IN_GAME ~bdscry.dlg~ BEGIN
+    COPY_EXISTING ~bdscry.dlg~ ~override~
+      SET readable = SOURCE_SIZE >= 0x30
+      PATCH_IF readable BEGIN
+        READ_LONG 0x08 sc READ_LONG 0x0c so READ_LONG 0x10 tc READ_LONG 0x14 tr
+        SET readable = so + sc * 16 <= SOURCE_SIZE AND tr + tc * 32 <= SOURCE_SIZE
+        FOR (i = 0; readable AND i < sc; ++i) BEGIN
+          READ_LONG (so + i * 16 + 4) first READ_LONG (so + i * 16 + 8) count
+          SET readable = first + count <= tc
+        END
+        PATCH_FOR_EACH header IN 0x18 0x20 0x28 BEGIN
+          READ_LONG header table READ_LONG (header + 4) count
+          SET readable = readable AND table + count * 8 <= SOURCE_SIZE
+          FOR (i = 0; readable AND i < count; ++i) BEGIN
+            READ_LONG (table + i * 8) text READ_LONG (table + i * 8 + 4) length
+            SET readable = text + length <= SOURCE_SIZE
+          END
+        END
       END
-      PATCH_IF NOT ((csr_scry_state_count = 4) AND
-                    (csr_scry_route_count = 1)) BEGIN
-        PATCH_FAIL ~chriz-sod-remix #%csr_scry_component%: BDSCRY does not match the current no-Aura four-state picker (expected one %csr_scry_flag% route; found %csr_scry_state_count% states and %csr_scry_route_count% routes).~
-      END
-
-      SPRINT csr_scry_route
-        ~Global("%csr_scry_flag%","LOCALS",0)~
-      SPRINT csr_scry_disabled
-~False()
-Global("%csr_scry_flag%","LOCALS",0)~
-      REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH
-        ~%csr_scry_route%~ ~%csr_scry_disabled%~
-    COMPILE_D_TO_DLG
-  BUT_ONLY
+      PATCH_IF readable BEGIN
+        DECOMPILE_DLG_TO_D
+        // The token boundary excludes SetGlobal actions, including resets.
+        REPLACE_EVALUATE CASE_INSENSITIVE ~\(^\|[^a-zA-Z!]\)\(False()[%WNL% ]+\)*!?\(Global("%csr_scry_flag%","LOCALS",[-0-9]+)\)~ BEGIN
+        END ~%MATCH1%False()
+%MATCH3%~
+        COMPILE_D_TO_DLG
+      END ELSE BEGIN PATCH_PRINT ~#%csr_scry_component%: unreadable BDSCRY dialogue; this file is unchanged.~ END
+    BUT_ONLY
+  END ELSE BEGIN PRINT ~#%csr_scry_component%: BDSCRY is absent; its routes are already unavailable.~ END
 END

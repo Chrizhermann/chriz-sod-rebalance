@@ -1,0 +1,24 @@
+IF
+  Dead("bddm01")
+  Dead("bddm02")
+  Dead("bddm03")
+  Dead("bddm04")
+  Dead("bddm05")
+  Dead("bddm06")
+  Dead("bdkherr")
+  Switch("bd_sdd350_ihj","bd5300")
+THEN
+  RESPONSE #0
+    SetGlobal("bd_sdd350_ihj","bd5300",2)
+    AddexperienceParty(12000)
+    AddexperienceParty(%csr_xp_chunk_270%)
+    AddJournalEntry(%csr270_str261936%,INFO)
+    AddJournalEntry(%csr270_str258042%,QUEST_DONE)
+  RESPONSE #1
+    SetGlobal("bd_sdd350_ihj","bd5300",2)
+    AddexperienceParty(12000)
+    AddexperienceParty(%csr_xp_chunk_270%)
+    AddJournalEntry(%csr270_str261937%,INFO)
+    AddJournalEntry(%csr270_str258043%,QUEST_DONE)
+END
+

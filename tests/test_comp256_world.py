@@ -103,6 +103,7 @@ class BridgeWorldTests(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.game=Path(tmp.name)
         write_fake_game(self.game)
+        (self.game/"weidu.log").write_text("")
         self.override=self.game/'override'
         ids={
           'action': '''0 NoAction()
@@ -134,6 +135,7 @@ class BridgeWorldTests(unittest.TestCase):
         lib=self.game/'chriz-sod-remix/lib'
         lib.mkdir(parents=True)
         shutil.copy2(ROOT/'chriz-sod-remix/lib/comp256_world.tpa',lib)
+        shutil.copy2(ROOT/'chriz-sod-remix/lib/overwrite.tpa',lib)
         shutil.copy2(ROOT/'chriz-sod-remix/lib/gtimes_compat.tpa',lib)
         (self.game/'fixture').mkdir()
         (self.game/'fixture/setup-fixture.tp2').write_text('BACKUP ~fixture/backup~\nAUTHOR ~test~\nBEGIN ~source~\nCOMPILE ~fixture/bd2000.baf~\n')
@@ -253,24 +255,27 @@ END
         self.assertEqual(text.count('CREATECREATUREOBJECT("BDBENCE",PLAYER1,6,0,0)'),1)
         self.assertEqual(text.count('CREATECREATURE("BDBENCE",[2425.2660],NW)'),1)
 
-    def test_changed_roster_fails_before_any_override_write(self):
+    def test_changed_roster_gets_the_owned_encounter(self):
         self.fixture(SCRIPT.replace('[1465.1910]','[1466.1910]',1))
-        before=tree(self.override)
-        self.assertNotEqual(self.install().returncode,0)
-        self.assertEqual(tree(self.override),before)
+        result=self.install()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertIn('CSR256_STAGE',self.decompile())
 
-    def test_changed_aftermath_fails_before_any_override_write(self):
+    def test_changed_aftermath_gets_the_owned_victory(self):
         self.fixture(SCRIPT.replace('    AddJournalEntry(123,QUEST)','    NoAction()\n    AddJournalEntry(123,QUEST)',1))
-        before=tree(self.override)
-        self.assertNotEqual(self.install().returncode,0)
-        self.assertEqual(tree(self.override),before)
+        result=self.install()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertIn('CSR256_STAGE',self.decompile())
 
-    def test_late_area_mismatch_fails_before_script_write(self):
+    def test_changed_region_script_is_cleared(self):
         self.fixture()
         (self.override/'bd2000.are').write_bytes(area().replace(b'BDBOARB2',b'FOREIGNX'))
-        before=tree(self.override)
-        self.assertNotEqual(self.install().returncode,0)
-        self.assertEqual(tree(self.override),before)
+        result=self.install()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertIn('CSR256_STAGE',self.decompile())
 
     def test_victory_contract_follows_the_gtimes_name_for_thirty_seconds(self):
         # The aftermath's banter timer decompiles with whatever name this
@@ -289,13 +294,12 @@ END
         # One compiled result: the timer stays 30 seconds whatever its name.
         self.assertEqual(len(scripts),1)
 
-    def test_changed_banter_timer_fails_with_an_appended_gtimes_name(self):
+    def test_changed_banter_timer_is_overwritten(self):
         self.make_game(gtimes_variants(30)['name from another mod'][0])
         self.fixture(SCRIPT.replace('"GLOBAL",FIVE_ROUNDS)','"GLOBAL",FOUR_ROUNDS)'))
         before=tree(self.override)
         result=self.install()
-        self.assertNotEqual(result.returncode,0)
-        self.assertIn('[BD2000 portal victory]: expected 1 known seams, found 0',result.stdout+result.stderr)
-        self.assertEqual(tree(self.override),before)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertIn('SETGLOBALTIMER("BD_NPC_BANTER","GLOBAL",MOD_FIVE_ROUNDS)',compact(self.decompile()))
 
 if __name__=='__main__': unittest.main()

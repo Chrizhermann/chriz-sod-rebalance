@@ -161,6 +161,7 @@ class SyntheticDialogGame:
         self.root = Path(self.temporary.name) / "game"
         self.root.mkdir()
         (self.root / "override").mkdir()
+        (self.root / "weidu.log").write_text("")
         (self.root / "override/trigger.ids").write_text(
             "IDS V1.0\n"
             "0x400F Global(S:Name*,S:Area*,I:Value*)\n"
@@ -268,6 +269,9 @@ class SyntheticDialogGame:
 
     def install_component_120_dialog_patch(self) -> subprocess.CompletedProcess[str]:
         setup = self.root / "setup-component-120-dialog.tp2"
+        production=(ROOT/'chriz-sod-remix/lib/comp120.tpa').read_text(encoding='utf-8')
+        variables=production[production.index('OUTER_SET csr120_shift'):production.index('LAF csr_ensure_script')]
+        dialog_tail=production[production.index('LAF csr_disable_bdscry_picker_route'):]
         setup.write_text(
             "BACKUP ~weidu_external/backup/component-120-dialog~\n"
             "AUTHOR ~test~\n"
@@ -275,9 +279,8 @@ class SyntheticDialogGame:
             "  INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~\n"
             "END\n"
             "BEGIN ~install component 120 dialog patch~\n"
-            "LAF csr_disable_bdscry_picker_route STR_VAR "
-            "csr_scry_flag = ~bd_sddd12_hood~ csr_scry_component = ~120~ END\n"
-            "COMPILE ~chriz-sod-remix/dlg/csrhood.d~\n",
+            "INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~\n"
+            + variables + dialog_tail,
             encoding="ascii",
             newline="\n",
         )
@@ -375,7 +378,7 @@ class BdscryNativeLayoutTests(unittest.TestCase):
         self.assert_false_gated(game.decompile(), "bd_sddd12_hood", 1)
         self.assertTrue(game.tlks_unchanged(), "dialog gating must stay TLK-neutral")
 
-    def test_no_aura_picker_rejects_a_duplicate_hood_route(self) -> None:
+    def test_all_duplicate_hood_routes_are_disabled(self) -> None:
         game = self._game(
             _dialog_source(
                 extra_hood_choice=True,
@@ -384,11 +387,21 @@ class BdscryNativeLayoutTests(unittest.TestCase):
         original = game.dialog_path().read_bytes()
         result = game.install_patch("bd_sddd12_hood")
         transcript = game.transcript(result)
-        self.assertNotIn("SUCCESSFULLY INSTALLED", transcript, transcript)
-        self.assertIn("does not match the current no-Aura four-state picker", transcript)
-        self.assertEqual(game.dialog_path().read_bytes(), original)
+        self.assertEqual(result.returncode, 0, transcript)
+        self.assertNotIn("WARNING", transcript.upper())
+        self.assert_false_gated(game.decompile(), "bd_sddd12_hood", 2)
 
-    def test_no_aura_picker_rejects_a_missing_hood_route(self) -> None:
+    def test_negated_hand_edited_route_and_reset_are_handled(self) -> None:
+        source = _dialog_source().replace('Global("bd_sddd12_hood","LOCALS",0)',
+                                          '!Global("bd_sddd12_hood","LOCALS",9)')
+        game = self._game(source)
+        result = game.install_patch("bd_sddd12_hood")
+        self.assertEqual(result.returncode, 0, game.transcript(result))
+        dialog = game.decompile()
+        self.assertNotIn("!False()", dialog)
+        self.assertRegex(dialog, r'False\(\)\s+Global\("bd_sddd12_hood","LOCALS",9\)')
+
+    def test_missing_hood_route_is_already_removed(self) -> None:
         game = self._game(
             _dialog_source(
                 omit_hood_choice=True,
@@ -397,16 +410,27 @@ class BdscryNativeLayoutTests(unittest.TestCase):
         original = game.dialog_path().read_bytes()
         result = game.install_patch("bd_sddd12_hood")
         transcript = game.transcript(result)
-        self.assertNotIn("SUCCESSFULLY INSTALLED", transcript, transcript)
-        self.assertIn("does not match the current no-Aura four-state picker", transcript)
+        self.assertEqual(result.returncode, 0, transcript)
+        self.assertNotIn("WARNING", transcript.upper())
         self.assertEqual(game.dialog_path().read_bytes(), original)
+
+    def test_damaged_tables_do_not_stop_other_changes(self) -> None:
+        game = self._game(_dialog_source())
+        original = game.dialog_path().read_bytes()
+        broken = bytearray(original)
+        struct.pack_into('<I', broken, 0x0c, len(broken) + 100)
+        game.dialog_path().write_bytes(broken)
+        result = game.install_patch('bd_sddd12_hood')
+        self.assertEqual(result.returncode, 0, game.transcript(result))
+        self.assertNotIn('WARNING', game.transcript(result).upper())
+        self.assertEqual(game.dialog_path().read_bytes(), broken)
 
     def test_components_use_the_semantic_helper_not_numeric_bdscry_edits(self) -> None:
         self.assertTrue(HELPER.is_file(), "production native-layout helper is missing")
         setup = SETUP.read_text(encoding="utf-8")
         hood = HOOD_SOURCE.read_text(encoding="utf-8")
         omen = OMEN_SOURCE.read_text(encoding="utf-8")
-        self.assertIn("csr_scry_flag = ~bd_sddd12_hood~", setup)
+        self.assertIn("csr_scry_flag = ~bd_sddd12_hood~", (ROOT/"chriz-sod-remix/lib/comp120.tpa").read_text(encoding="utf-8"))
         self.assertIn("csr_scry_flag = ~bd_sddd12_imoen~", omen)
         self.assertIn("csr_scry_flag = ~bd_sddd12_caelar~", omen)
         self.assertNotRegex(setup + hood + omen, r"ADD_TRANS_TRIGGER\s+BDSCRY\s+\d+")
@@ -423,27 +447,24 @@ class BdscryNativeLayoutTests(unittest.TestCase):
             r"REQUIRE_COMPONENT\s+~[^~]+~\s+~220~.*?"
             r"INCLUDE\s+~chriz-sod-remix/lib/comp225\.tpa~",
         )
-        self.assertIn(
-            "$csr_cut_bd1200(~BDWIGHDD@2474@1951~)",
-            cut_lists,
-        )
-        self.assertIn("csr225_schedule != 0", omen)
-        self.assertIn("WRITE_ASCIIE csr225_essence_dst ~BDMISC59~ #8", omen)
-        self.assertIn("WRITE_LONG  (csr225_target + 0x44) 2", omen)
+        # The Deepvein encounter is authored by actor address, independent
+        # of a changed CRE or position; #225 owns the replacement quest loot.
+        import json
+        ownership=json.loads((ROOT/'chriz-sod-remix/data/area-actor-ownership.json').read_text(encoding='utf-8'))
+        deepvein=[row for row in ownership['220']['bd1200'] if row['index']==130]
+        self.assertEqual([(row['name'],row['cut']) for row in deepvein],[('IMBUED_WIGHT_POTION',1)])
+        self.assertIn('~IMBUED_WIGHT_POTION~',cut_lists)
 
 
 class ScryingPoolVerifierLayoutTests(unittest.TestCase):
-    def test_verifier_accepts_no_aura_four_state_layout(self) -> None:
+    def test_verifier_finds_routes_in_any_state(self) -> None:
         verifier = _load_verifier()
-        self.assertEqual(
-            verifier.scry_picker_states({0: "", 1: "", 2: "", 3: ""}),
-            (0,),
-        )
+        state = 'IF ~False() Global("bd_sddd12_hood","LOCALS",0)~ THEN REPLY #0 GOTO 8'
+        self.assertEqual(verifier.scry_picker_states({0: "", 5: state, 8: ""}), (5,))
 
-    def test_verifier_rejects_a_changed_five_state_layout(self) -> None:
+    def test_verifier_accepts_an_absent_picker(self) -> None:
         verifier = _load_verifier()
-        with self.assertRaises(verifier.VerificationError):
-            verifier.scry_picker_states({index: "" for index in range(5)})
+        self.assertEqual(verifier.scry_picker_states({i: "" for i in range(5)}), ())
 
 
 if __name__ == "__main__":

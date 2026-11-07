@@ -1,3 +1,5 @@
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+INCLUDE ~chriz-sod-remix/lib/overwrite_2da.tpa~
 // ============================================================
 // Components 292-294 library — Imoen's handover into Shadows of Amn
 // ============================================================
@@ -62,28 +64,20 @@ END
 DEFINE_ACTION_FUNCTION csr292_chassis_scores
   RET_ARRAY csr292_refs
 BEGIN
-  ACTION_IF NOT FILE_EXISTS_IN_GAME ~imoen2.cre~ BEGIN
-    FAIL ~chriz-sod-remix 292-294: imoen2.cre (Imoen's BG1 chassis) is missing; cannot measure her tome boosts.~
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr292_refs BEGIN
+    STR => 9 INT => 17 WIS => 11 DEX => 18 CON => 16 CHR => 16
   END
-  // A function body does not see the caller's arrays: its own offset table.
   ACTION_DEFINE_ASSOCIATIVE_ARRAY csr292_offsets BEGIN
-    STR => 0x238  INT => 0x23a  WIS => 0x23b  DEX => 0x23c  CON => 0x23d  CHR => 0x23e
+    STR => 0x238 INT => 0x23a WIS => 0x23b DEX => 0x23c CON => 0x23d CHR => 0x23e
   END
-  ACTION_CLEAR_ARRAY csr292_refs
-  COPY_EXISTING - ~imoen2.cre~ ~override~
-    READ_ASCII 0 csr292_sig (8)
-    PATCH_IF NOT (~%csr292_sig%~ STRING_EQUAL_CASE ~CRE V1.0~) BEGIN
-      PATCH_FAIL ~chriz-sod-remix 292-294: imoen2.cre is not a CRE V1.0 file.~
-    END
-    PATCH_PHP_EACH csr292_offsets AS csr292_name => csr292_off BEGIN
-      READ_BYTE csr292_off csr292_value
-      // A zero or out-of-range score would turn every real score into a boost.
-      PATCH_IF ((csr292_value < 1) OR (csr292_value > 25)) BEGIN
-        PATCH_FAIL ~chriz-sod-remix 292-294: imoen2.cre has an invalid %csr292_name% score (%csr292_value%).~
-      END
-      DEFINE_ASSOCIATIVE_ARRAY csr292_refs BEGIN ~%csr292_name%~ => ~%csr292_value%~ END
-    END
-  BUT_ONLY
+  ACTION_IF FILE_EXISTS_IN_GAME ~imoen2.cre~ BEGIN
+    COPY_EXISTING - ~imoen2.cre~ ~override~
+      PATCH_IF SOURCE_SIZE >= 0x23f BEGIN
+        PHP_EACH csr292_offsets AS name => off BEGIN
+          READ_BYTE off value DEFINE_ASSOCIATIVE_ARRAY csr292_refs BEGIN ~%name%~ => ~%value%~ END
+        END
+      END ELSE BEGIN PATCH_PRINT ~#292: Imoen's chassis is unreadable; native ability baselines apply.~ END
+  END ELSE BEGIN PRINT ~#292: Imoen's chassis is absent; native ability baselines apply.~ END
 END
 
 // ------------------------------------------------------------
@@ -96,50 +90,39 @@ END
 // conversation (those with a trigger) as "first" and the space-separated
 // "rest"; all empty when she has no post-party dialog in this game.
 // ------------------------------------------------------------
-DEFINE_ACTION_FUNCTION csr292_post_dialog
-  RET dialog first rest
-BEGIN
-  OUTER_SPRINT dialog ~~
-  OUTER_SPRINT first ~~
-  OUTER_SPRINT rest ~~
+DEFINE_ACTION_FUNCTION csr292_post_dialog RET dialog first rest source BEGIN
+  OUTER_SPRINT dialog ~~ OUTER_SPRINT first ~~ OUTER_SPRINT rest ~~ OUTER_SPRINT source ~~
   ACTION_IF FILE_EXISTS_IN_GAME ~bddialog.2da~ BEGIN
     COPY_EXISTING - ~bddialog.2da~ ~override~
-      SET csr292_found = 0
-      COUNT_2DA_ROWS 4 csr292_rows
-      FOR (csr292_i = 0; csr292_i < csr292_rows; ++csr292_i) BEGIN
-        READ_2DA_ENTRY csr292_i 0 4 csr292_name
-        // The engine uses the first row with her name.
-        PATCH_IF ((csr292_found = 0) AND (~%csr292_name%~ STRING_EQUAL_CASE ~IMOEN2~)) BEGIN
-          SET csr292_found = 1
-          READ_2DA_ENTRY csr292_i 1 4 dialog
-        END
-      END
-    BUT_ONLY
+      LPF csr_get_2da_cell STR_VAR row = ~IMOEN2~ column = ~POST_DIALOG_FILE~ RET dialog = value END
   END
-  ACTION_IF ((~%dialog%~ STRING_EQUAL_CASE ~*~) OR (~%dialog%~ STRING_EQUAL_CASE ~NONE~)
-             OR (NOT FILE_EXISTS_IN_GAME ~%dialog%.dlg~)) BEGIN
-    OUTER_SPRINT dialog ~~
-  END
-  ACTION_IF NOT (~%dialog%~ STRING_EQUAL ~~) BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%dialog%.dlg~ BEGIN
     COPY_EXISTING - ~%dialog%.dlg~ ~override~
-      READ_ASCII 0 csr292_sig (8)
-      PATCH_IF NOT (~%csr292_sig%~ STRING_EQUAL_CASE ~DLG V1.0~) BEGIN
-        PATCH_FAIL ~chriz-sod-remix 292-294: %dialog%.dlg (Imoen's SoD post-party dialog) is not a DLG V1.0 file.~
+      SET readable = SOURCE_SIZE >= 0x20
+      PATCH_IF readable BEGIN
+        READ_LONG 8 count READ_LONG 12 off READ_LONG 24 to READ_LONG 28 tc
+        SET readable = off + count * 16 <= SOURCE_SIZE AND to + tc * 8 <= SOURCE_SIZE
       END
-      READ_LONG 0x08 csr292_count
-      READ_LONG 0x0c csr292_table
-      FOR (csr292_i = 0; csr292_i < csr292_count; ++csr292_i) BEGIN
-        READ_SLONG (csr292_table + csr292_i * 0x10 + 0x0c) csr292_trigger
-        PATCH_IF (csr292_trigger >= 0) BEGIN
-          PATCH_IF (~%first%~ STRING_EQUAL ~~) BEGIN
-            SPRINT first ~%csr292_i%~
-          END ELSE BEGIN
-            SPRINT rest ~%rest% %csr292_i%~
+      PATCH_IF readable BEGIN
+        FOR (i = 0; i < count; ++i) BEGIN
+          READ_SLONG (off + i * 16 + 12) t
+          PATCH_IF t >= 0 AND t < tc BEGIN
+            READ_LONG (to + t * 8) pos READ_LONG (to + t * 8 + 4) len
+            PATCH_IF pos + len <= SOURCE_SIZE BEGIN
+              READ_ASCII pos trigger (len)
+              INNER_PATCH_SAVE trigger ~%trigger%~ BEGIN
+                REPLACE_TEXTUALLY ~OR(2)[ %TAB%%WNL%]*GlobalLT("CSR_IMSOA_PREP","GLOBAL",1)[ %TAB%%WNL%]*GlobalGT("CSR_IMSOA_PREP","GLOBAL",8)~ ~~
+              END
+              SPRINT source ~~~~~%source%
+REPLACE_STATE_TRIGGER ~%dialog%~ %i% ~OR(2) GlobalLT("CSR_IMSOA_PREP","GLOBAL",1) GlobalGT("CSR_IMSOA_PREP","GLOBAL",8)
+%trigger%~
+~~~~~
+              PATCH_IF ~%first%~ STRING_EQUAL ~~ BEGIN SPRINT first ~%i%~ END ELSE BEGIN SPRINT rest ~%rest% %i%~ END
+            END
           END
         END
-      END
-    BUT_ONLY
-  END
+      END ELSE BEGIN PATCH_PRINT ~#292: Imoen's post-party dialogue table is unreadable; only its entry gates are unavailable.~ END
+  END ELSE BEGIN PRINT ~#292: Imoen has no available post-party dialogue to gate.~ END
 END
 
 // ------------------------------------------------------------
@@ -152,8 +135,8 @@ END
 // it and the party does not (at most one copy, as EET imports for the party),
 // and her own copy is destroyed as EET destroys the party's, so it is not also
 // banked. The bank follows in a later pass (her DestroyItem must come first).
-// Every K#IMPORT addition in the script must belong to such a rule; another
-// shape cannot be mirrored faithfully and stops the install.
+// AddStoreItem identifies each imported item even if a prior mod changed the
+// surrounding rule. The original carrier is never rewritten.
 // ------------------------------------------------------------
 DEFINE_ACTION_FUNCTION csr292_skim_blocks
   STR_VAR
@@ -166,29 +149,14 @@ BEGIN
   OUTER_SET csr292_rules = 0
   OUTER_SET csr292_odd = 0
   OUTER_SPRINT blocks ~~
-  COPY_EXISTING - ~%script%~ ~override~
-    DECOMPILE_BCS_TO_BAF
-    REPLACE_TEXTUALLY ~//[^%LNL%%MNL%]*~ ~~
-    REPLACE_TEXTUALLY ~[ %TAB%%LNL%%MNL%]+~ ~~
-    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE EXACT_MATCH ~AddStoreItem("K#IMPORT",~ csr292_adds
-    REPLACE_EVALUATE CASE_INSENSITIVE
-      ~IFGlobal("K#FrameDelay","LOCALS",0)PartyHasItem("\([^"]+\)")THENRESPONSE#100TakePartyItem("\([^"]+\)")DestroyItem("\([^"]+\)")AddStoreItem("K#IMPORT","\([^"]+\)",1,1)Continue()END~
-    BEGIN
-      SPRINT csr292_item ~%MATCH1%~
-      TO_UPPER csr292_item
-      PATCH_IF ((~%MATCH2%~ STRING_EQUAL_CASE ~%csr292_item%~) AND
-                (~%MATCH3%~ STRING_EQUAL_CASE ~%csr292_item%~) AND
-                (~%MATCH4%~ STRING_EQUAL_CASE ~%csr292_item%~)) BEGIN
-        SET csr292_rules += 1
-        DEFINE_ASSOCIATIVE_ARRAY csr292_items BEGIN ~%csr292_item%~ => 1 END
-      END ELSE BEGIN
-        SET csr292_odd += 1
-      END
-    END ~~
-    PATCH_IF ((csr292_odd != 0) OR (csr292_rules != csr292_adds)) BEGIN
-      PATCH_FAIL ~chriz-sod-remix 292-294: %script% has %csr292_adds% K#IMPORT additions but only %csr292_rules% recognised EET import rules; refusing to guess how Imoen's items would be imported.~
-    END
-  BUT_ONLY
+  ACTION_IF FILE_EXISTS_IN_GAME ~%script%~ BEGIN
+    COPY_EXISTING - ~%script%~ ~override~
+      DECOMPILE_BCS_TO_BAF
+      REPLACE_EVALUATE CASE_INSENSITIVE ~AddStoreItem("K#IMPORT","\([^"]+\)"~ BEGIN
+        SPRINT item ~%MATCH1%~ TO_UPPER item
+        DEFINE_ASSOCIATIVE_ARRAY csr292_items BEGIN ~%item%~ => 1 END
+      END ~%MATCH0%~
+  END ELSE BEGIN PRINT ~#292: the import-rule donor is absent; Imoen's gear uses the ordinary bank.~ END
   ACTION_PHP_EACH csr292_items AS csr292_item => csr292_ignored BEGIN
     OUTER_SPRINT blocks ~%blocks%
 IF
@@ -250,9 +218,6 @@ DEFINE_ACTION_FUNCTION csr292_prep_text
     script = ~~
   RET text
 BEGIN
-  ACTION_IF ((choice < 1) OR (choice > 3)) BEGIN
-    FAIL ~chriz-sod-remix 292-294: internal error, unknown Imoen choice %choice%.~
-  END
   LAF csr292_skim_blocks STR_VAR script = EVAL ~%script%~ gate = EVAL ~%gate%~ RET csr292_skims = blocks csr292_skim_count = count END
   OUTER_SET csr292_after_bank = (choice = 1) ? 3 : 4
   OUTER_SPRINT csr292_choice1 ~~
@@ -294,7 +259,7 @@ THEN
     Continue()
 END
 %csr292_reads%~
-    OUTER_SPRINT csr292_left ~CreateCreatureObject("IMOEN10",Myself,0,0,0)
+    OUTER_SPRINT csr292_left ~CreateCreatureObject("CSRIMST",Myself,0,0,0)
     RealSetGlobalTimer("CSR_IMSOA_TIMER","GLOBAL",3)
     SetGlobal("CSR_IMSOA_PREP","GLOBAL",7)~
     OUTER_SPRINT csr292_late ~SetGlobal("CSR_IMSOA_BOOST","GLOBAL",1)
@@ -561,86 +526,43 @@ END
 // its safety guard, which must stay the first block (component 291 checks it),
 // and before every transition rule; until it finishes, the carrier waits.
 // ------------------------------------------------------------
-DEFINE_ACTION_FUNCTION csr292_host_ending
-  INT_VAR choice = 0
-BEGIN
-  ACTION_FOR_EACH csr292_res IN ~CSRETBGT.BCS~ ~BD4300.ARE~ BEGIN
-    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr292_res%~ BEGIN
-      FAIL ~chriz-sod-remix 292-294: component 290 resource %csr292_res% is missing.~
-    END
-  END
-  // The bank container 290 added to BD4300.
-  OUTER_SET csr292_banks = 0
-  COPY_EXISTING - ~BD4300.ARE~ ~override~
-    READ_LONG 0x70 csr292_co
-    READ_SHORT 0x74 csr292_cn
-    FOR (csr292_i = 0; csr292_i < csr292_cn; ++csr292_i) BEGIN
-      READ_ASCII (csr292_co + csr292_i * 0xc0) csr292_name (32) NULL
-      PATCH_IF (~%csr292_name%~ STRING_EQUAL_CASE ~K#ImportContainer~) BEGIN
-        SET csr292_banks += 1
+DEFINE_ACTION_FUNCTION csr292_host_ending INT_VAR choice = 0 BEGIN
+  LAF csr_ensure_script STR_VAR script = ~CSRETBGT~ END
+  OUTER_SET bank_found = 0
+  ACTION_IF FILE_EXISTS_IN_GAME ~bd4300.are~ BEGIN
+    COPY_EXISTING - ~bd4300.are~ ~override~
+      PATCH_IF SOURCE_SIZE >= 0x76 BEGIN
+        READ_LONG 0x70 off READ_SHORT 0x74 count
+        PATCH_IF off + count * 192 <= SOURCE_SIZE BEGIN
+          FOR (i = 0; i < count; ++i) BEGIN
+            READ_ASCII (off + i * 192) name (32) NULL
+            INNER_PATCH_SAVE name ~%name%~ BEGIN REPLACE_TEXTUALLY ~ ~ ~~ END
+            PATCH_IF ~%name%~ STRING_EQUAL_CASE ~K#ImportContainer~ BEGIN SET bank_found = 1 END
+          END
+        END
       END
-    END
-  BUT_ONLY
-  ACTION_IF (csr292_banks != 1) BEGIN
-    FAIL ~chriz-sod-remix 292-294: expected component 290's one K#ImportContainer in BD4300, found %csr292_banks%.~
   END
-  LAF csr292_prep_text
-    INT_VAR choice
-    STR_VAR
-      gate = ~  Global("K#FrameDelay","LOCALS",0)~
-      bank = ~K#ImportContainer~
-      script = ~CSRETBGT.BCS~
-    RET csr292_prep = text
-  END
-  // Same guard expressions as component 291 (original or corrected guard).
-  OUTER_SPRINT csr292_nl ~%MNL%?%LNL%~
-  OUTER_SPRINT csr292_guard ~^IF%csr292_nl%  OR(2)%csr292_nl%    !AreaCheck("BD4300")%csr292_nl%    !Exists("K#ImportContainer")[^%WNL%]*%csr292_nl%THEN%csr292_nl%  RESPONSE #100%csr292_nl%    DisplayStringNoName(Player1,[0-9]+)[^%WNL%]*%csr292_nl%    FadeFromColor(\[1\.0\],0)%csr292_nl%\(    SetCutSceneLite(FALSE)%csr292_nl%\)?    EndCutSceneMode()%csr292_nl%    SetGlobal("CSR_ENDING_FAILED","GLOBAL",1)%csr292_nl%    DestroySelf()%csr292_nl%END~
-  COPY_EXISTING ~CSRETBGT.BCS~ ~override~
+  ACTION_IF NOT bank_found BEGIN INCLUDE ~chriz-sod-remix/lib/comp290_bank.tpa~ END
+  COPY_EXISTING ~CSRETBGT.bcs~ ~override~
     DECOMPILE_AND_PATCH BEGIN
-      COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~CSR_IMSOA_PREP~ csr292_done
-      PATCH_IF (csr292_done != 0) BEGIN
-        PATCH_FAIL ~chriz-sod-remix 292-294: CSRETBGT.BCS already contains an Imoen handover preparation.~
-      END
-      COUNT_REGEXP_INSTANCES ~%csr292_guard%~ csr292_guards
-      READ_ASCII 0 csr292_script (BUFFER_LENGTH)
-      PATCH_IF ((csr292_guards != 1) OR (INDEX(~%csr292_guard%~ ~%csr292_script%~) != 0)) BEGIN
-        PATCH_FAIL ~chriz-sod-remix 292-294: component 290's safety guard is not the single first block of CSRETBGT.BCS; refusing to place the Imoen preparation.~
-      END
-      REPLACE_TEXTUALLY ~\(%csr292_guard%\)~ ~\1
-%csr292_prep%~
+      LPF csr_replace_script_blocks STR_VAR pattern = ~"CSR_IMSOA_\|"CSR_ENDING_FAILED"~ replacement = ~~ END
     END
   BUT_ONLY
+  LAF csr292_prep_text INT_VAR choice STR_VAR gate = ~  Global("K#FrameDelay","LOCALS",0)~ bank = ~K#ImportContainer~ script = ~CSRETBGT.BCS~ RET csr292_prep = text END
+  EXTEND_TOP ~CSRETBGT.bcs~ ~.../csr292skip.baf~ EVALUATE_BUFFER
+  EXTEND_TOP ~CSRETBGT.bcs~ ~chriz-sod-remix/baf/csr290guard.baf~ USING ~chriz-sod-remix/languages/english/csr290guard.tra~
 END
 
-// ------------------------------------------------------------
-// Host 2: component 910's skip helper (phase 1, before its own Imoen rules,
-// which find nothing left to move afterwards). 910's bank chest is moved on
-// to BD6100 by 910 itself; its carrier there is EET's K#TELBGT.
-// ------------------------------------------------------------
-DEFINE_ACTION_FUNCTION csr292_host_skip
-  INT_VAR choice = 0
-BEGIN
+DEFINE_ACTION_FUNCTION csr292_host_skip INT_VAR choice = 0 BEGIN
   ACTION_IF FILE_EXISTS_IN_GAME ~csrskask.bcs~ BEGIN
-    COPY_EXISTING - ~csrskask.bcs~ ~override~
-      DECOMPILE_BCS_TO_BAF
-      COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~CSR_IMSOA_PREP~ csr292_done
-      COUNT_REGEXP_INSTANCES CASE_SENSITIVE EXACT_MATCH ~Global("CSR_SKIP_PHASE","GLOBAL",1)~ csr292_phase1
-      PATCH_IF (csr292_done != 0) BEGIN
-        PATCH_FAIL ~chriz-sod-remix 292-294: csrskask.bcs already contains an Imoen handover preparation.~
-      END
-      PATCH_IF (csr292_phase1 = 0) BEGIN
-        PATCH_FAIL ~chriz-sod-remix 292-294: csrskask.bcs has no skip phase 1; unsupported component 910 helper.~
+    COPY_EXISTING ~csrskask.bcs~ ~override~
+      DECOMPILE_AND_PATCH BEGIN
+        LPF csr_replace_script_blocks STR_VAR pattern = ~"CSR_IMSOA_~ replacement = ~~ END
       END
     BUT_ONLY
-    LAF csr292_prep_text
-      INT_VAR choice
-      STR_VAR
-        gate = ~  Global("CSR_SKIP_PHASE","GLOBAL",1)
-  Global("CSR_SKIP_FAILED","GLOBAL",0)~
-        bank = ~PlayerChest00~
-        script = ~K#TELBGT.BCS~
-      RET csr292_prep = text
-    END
+    LAF csr292_prep_text INT_VAR choice
+      STR_VAR gate = ~  Global("CSR_SKIP_PHASE","GLOBAL",1)
+  Global("CSR_SKIP_FAILED","GLOBAL",0)~ bank = ~PlayerChest00~ script = ~K#TELBGT.BCS~ RET csr292_prep = text END
     EXTEND_TOP ~csrskask.bcs~ ~.../csr292skip.baf~ EVALUATE_BUFFER
   END
 END

@@ -1,0 +1,696 @@
+OUTER_SET csr197_s34219 = 34219 + csr197_shift
+OUTER_SET csr197_s34220 = 34220 + csr197_shift
+OUTER_SET csr197_s34221 = 34221 + csr197_shift
+OUTER_SET csr197_s34222 = 34222 + csr197_shift
+OUTER_SET csr197_s37575 = 37575 + csr197_shift
+OUTER_SET csr197_s37610 = 37610 + csr197_shift
+OUTER_SET csr197_s37611 = 37611 + csr197_shift
+OUTER_SET csr197_s37612 = 37612 + csr197_shift
+OUTER_SET csr197_s37613 = 37613 + csr197_shift
+OUTER_SET csr197_s42391 = 42391 + csr197_shift
+OUTER_SET csr197_s43960 = 43960 + csr197_shift
+OUTER_SET csr197_s43961 = 43961 + csr197_shift
+OUTER_SET csr197_s43962 = 43962 + csr197_shift
+OUTER_SET csr197_s43963 = 43963 + csr197_shift
+OUTER_SET csr197_s43966 = 43966 + csr197_shift
+OUTER_SET csr197_s44069 = 44069 + csr197_shift
+OUTER_SET csr197_s44070 = 44070 + csr197_shift
+OUTER_SET csr197_s44071 = 44071 + csr197_shift
+OUTER_SET csr197_s44072 = 44072 + csr197_shift
+OUTER_SET csr197_s58546 = 58546 + csr197_shift
+OUTER_SET csr197_s58616 = 58616 + csr197_shift
+OUTER_SET csr197_s60233 = 60233 + csr197_shift
+OUTER_SET csr197_s62391 = 62391 + csr197_shift
+OUTER_SET csr197_s62392 = 62392 + csr197_shift
+OUTER_SET csr197_s62393 = 62393 + csr197_shift
+OUTER_SET csr197_s62394 = 62394 + csr197_shift
+OUTER_SET csr197_s65093 = 65093 + csr197_shift
+OUTER_SET csr197_s65094 = 65094 + csr197_shift
+OUTER_SET csr197_s65095 = 65095 + csr197_shift
+OUTER_SET csr197_s65096 = 65096 + csr197_shift
+OUTER_SET csr197_s65105 = 65105 + csr197_shift
+OUTER_SET csr197_s65106 = 65106 + csr197_shift
+OUTER_SET csr197_s65107 = 65107 + csr197_shift
+OUTER_SET csr197_s65108 = 65108 + csr197_shift
+OUTER_SET csr197_s66139 = 66139 + csr197_shift
+OUTER_SET csr197_s66439 = 66439 + csr197_shift
+OUTER_SET csr197_s66440 = 66440 + csr197_shift
+<<<<<<<< .../csr197-fallback.d
+%csr197_fallback%
+>>>>>>>>
+<<<<<<<< .../csr197-transitions.d
+%csr197_transitions%
+>>>>>>>>
+LAF csr_ensure_dlg_states INT_VAR count = 91 STR_VAR dialog = ~BDSKIE~ RET csr197_old_BDSKIE = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 111 STR_VAR dialog = ~BDBENCE~ RET csr197_old_BDBENCE = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 76 STR_VAR dialog = ~BDNEDERL~ RET csr197_old_BDNEDERL = existing_states END
+OUTER_SPRINT csr197_transitions ~~
+ACTION_IF csr197_old_BDSKIE <= 6 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 6 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~~ THEN BEGIN 6
+  SAY #%csr197_s66439%
+  IF ~~ THEN DO ~JoinParty()
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 6 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 6
+  IF ~~ THEN DO ~JoinParty()
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDSKIE <= 7 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 7 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~~ THEN BEGIN 7
+  SAY #%csr197_s66440%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 7 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 7
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDSKIE <= 8 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 8 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~  Global("bd_plot_003","bd0102",2)
+Global("EscapeBD0102","BD0102",0)
+~ THEN BEGIN 8
+  SAY #%csr197_s34219%
+  IF ~~ THEN REPLY #%csr197_s34221%  DO ~SetGlobal("bd_pc_remembers_skie","global",1)
+~ GOTO 9
+  IF ~  !BeenInParty("Skie")
+~ THEN REPLY #%csr197_s34220%  GOTO 11
+  IF ~~ THEN REPLY #%csr197_s34222%  DO ~SetGlobal("bd_pc_remembers_skie","global",1)
+~ GOTO 10
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 8 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 8
+  IF ~~ THEN REPLY #%csr197_s34221%  DO ~SetGlobal("bd_pc_remembers_skie","global",1)
+~ GOTO 9
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 8
+  IF ~  !BeenInParty("Skie")
+~ THEN REPLY #%csr197_s34220%  GOTO 11
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 8
+  IF ~~ THEN REPLY #%csr197_s34222%  DO ~SetGlobal("bd_pc_remembers_skie","global",1)
+~ GOTO 10
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDSKIE <= 34 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 34 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~  Global("bd_plot","global",293)
+~ THEN BEGIN 34
+  SAY #%csr197_s65093%
+  IF ~~ THEN REPLY #%csr197_s65094%  DO ~SetGlobal("bd_plot","global",294)
+~ EXTERN ~BDBENCE~ 28
+  IF ~  IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s65095%  DO ~SetGlobal("bd_plot","global",294)
+SetGlobal("bd_mdd409zjb","locals",1)
+~ EXTERN ~SAFANJ~ 92
+  IF ~  !IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s65095%  DO ~SetGlobal("bd_plot","global",294)
+~ EXTERN ~BDBENCE~ 26
+  IF ~~ THEN REPLY #%csr197_s65096%  DO ~SetGlobal("bd_plot","global",294)
+~ GOTO 35
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 34 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 34
+  IF ~~ THEN REPLY #%csr197_s65094%  DO ~SetGlobal("bd_plot","global",294)
+~ EXTERN ~BDBENCE~ 28
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 34
+  IF ~  IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s65095%  DO ~SetGlobal("bd_plot","global",294)
+SetGlobal("bd_mdd409zjb","locals",1)
+~ EXTERN ~SAFANJ~ 92
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 34
+  IF ~  !IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s65095%  DO ~SetGlobal("bd_plot","global",294)
+~ EXTERN ~BDBENCE~ 26
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 34
+  IF ~~ THEN REPLY #%csr197_s65096%  DO ~SetGlobal("bd_plot","global",294)
+~ GOTO 35
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDSKIE <= 37 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 37 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~  GlobalLT("bd_skie_plot","global",5)
+See([0.0.0.0.HOSTILES4])
+AreaCheck("bd4000")
+~ THEN BEGIN 37
+  SAY #%csr197_s58616%
+  IF ~~ THEN DO ~SetGlobal("bd_skie_plot","global",5)
+~ EXTERN ~BDCRUM30~ 0
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 37 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 37
+  IF ~~ THEN DO ~SetGlobal("bd_skie_plot","global",5)
+~ EXTERN ~BDCRUM30~ 0
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDSKIE <= 39 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 39 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~  GlobalLT("bd_skie_plot","global",10)
+!Range([0.0.0.0.HOSTILES4],30)
+AreaCheck("bd4000")
+~ THEN BEGIN 39
+  SAY #%csr197_s44069%
+  IF ~~ THEN REPLY #%csr197_s44070%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ GOTO 40
+  IF ~~ THEN REPLY #%csr197_s44071%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ GOTO 40
+  IF ~  !IsValidForPartyDialogue("Dorn")
+~ THEN REPLY #%csr197_s44072%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ GOTO 41
+  IF ~  IsValidForPartyDialogue("Dorn")
+~ THEN REPLY #%csr197_s44072%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ EXTERN ~DORNJ~ 1402
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 39 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 39
+  IF ~~ THEN REPLY #%csr197_s44070%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ GOTO 40
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 39
+  IF ~~ THEN REPLY #%csr197_s44071%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ GOTO 40
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 39
+  IF ~  !IsValidForPartyDialogue("Dorn")
+~ THEN REPLY #%csr197_s44072%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ GOTO 41
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 39
+  IF ~  IsValidForPartyDialogue("Dorn")
+~ THEN REPLY #%csr197_s44072%  DO ~SetGlobal("bd_skie_plot","global",10)
+~ EXTERN ~DORNJ~ 1402
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDSKIE <= 53 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 53 STR_VAR dialog = ~BDSKIE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDSKIE~
+IF %csr197_weight% ~  Global("bd_skie_plot","global",10)
+AreaCheck("BD4100")
+~ THEN BEGIN 53
+  SAY #%csr197_s62391%
+  IF ~  !IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62392%  GOTO 54
+  IF ~  IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62392%  EXTERN ~SAFANJ~ 111
+  IF ~  GlobalGT("bd_skie_plot","global",9)
+!IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62393%  GOTO 62
+  IF ~  GlobalGT("bd_skie_plot","global",9)
+IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62393%  EXTERN ~SAFANJ~ 112
+  IF ~~ THEN REPLY #%csr197_s66139%  GOTO 54
+  IF ~~ THEN REPLY #%csr197_s62394%  GOTO 58
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSKIE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 53 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 53
+  IF ~  !IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62392%  GOTO 54
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 53
+  IF ~  IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62392%  EXTERN ~SAFANJ~ 111
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 53
+  IF ~  GlobalGT("bd_skie_plot","global",9)
+!IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62393%  GOTO 62
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 53
+  IF ~  GlobalGT("bd_skie_plot","global",9)
+IsValidForPartyDialogue("safana")
+~ THEN REPLY #%csr197_s62393%  EXTERN ~SAFANJ~ 112
+END
+~~~~~
+  END
+  ACTION_IF nt <= 4 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 53
+  IF ~~ THEN REPLY #%csr197_s66139%  GOTO 54
+END
+~~~~~
+  END
+  ACTION_IF nt <= 5 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDSKIE~ 53
+  IF ~~ THEN REPLY #%csr197_s62394%  GOTO 58
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDBENCE <= 25 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 25 STR_VAR dialog = ~BDBENCE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr197_weight% ~  Global("bd_plot","global",293)
+~ THEN BEGIN 25
+  SAY #%csr197_s42391%
+  IF ~~ THEN DO ~SetGlobal("bd_plot","global",294)
+~ EXTERN ~BDSKIE~ 33
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 25 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 25
+  IF ~~ THEN DO ~SetGlobal("bd_plot","global",294)
+~ EXTERN ~BDSKIE~ 33
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDBENCE <= 30 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 30 STR_VAR dialog = ~BDBENCE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr197_weight% ~~ THEN BEGIN 30
+  SAY #%csr197_s65105%
+  IF ~~ THEN GOTO 32
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 30 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 30
+  IF ~~ THEN GOTO 32
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDBENCE <= 31 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 31 STR_VAR dialog = ~BDBENCE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr197_weight% ~~ THEN BEGIN 31
+  SAY #%csr197_s65106%
+  IF ~~ THEN GOTO 32
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 31 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 31
+  IF ~~ THEN GOTO 32
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDBENCE <= 32 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 32 STR_VAR dialog = ~BDBENCE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr197_weight% ~~ THEN BEGIN 32
+  SAY #%csr197_s65107%
+  IF ~~ THEN DO ~AddJournalEntry(%csr197_s65108%,QUEST)
+CreateCreature("bdffmerc",[1380.1925],NW)
+OpenDoor("Bridge_Barrels")
+ActionOverride("bdskie",EscapeAreaObject("Crusade_camp_exit"))
+EscapeAreaObject("Crusade_camp_exit")
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 32 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 32
+  IF ~~ THEN DO ~AddJournalEntry(%csr197_s65108%,QUEST)
+CreateCreature("bdffmerc",[1380.1925],NW)
+OpenDoor("Bridge_Barrels")
+ActionOverride("bdskie",EscapeAreaObject("Crusade_camp_exit"))
+EscapeAreaObject("Crusade_camp_exit")
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDBENCE <= 33 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 33 STR_VAR dialog = ~BDBENCE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr197_weight% ~  Global("bd_plot","global",310)
+Global("bd_skie_plot","global",0)
+IsValidForPartyDialogue("CORWIN")
+AreaCheck("bd3000")
+~ THEN BEGIN 33
+  SAY #%csr197_s37575%
+  IF ~~ THEN DO ~SetGlobal("bd_skie_plot","global",1)
+~ EXTERN ~BDCORWIJ~ 145
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 33 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 33
+  IF ~~ THEN DO ~SetGlobal("bd_skie_plot","global",1)
+~ EXTERN ~BDCORWIJ~ 145
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDBENCE <= 39 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 39 STR_VAR dialog = ~BDBENCE~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr197_weight% ~  Global("bd_plot","global",310)
+Global("bd_skie_plot","global",0)
+!IsValidForPartyDialogue("CORWIN")
+AreaCheck("bd3000")
+~ THEN BEGIN 39
+  SAY #%csr197_s37610%
+  IF ~~ THEN REPLY #%csr197_s37611%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ GOTO 41
+  IF ~  IsValidForPartyDialogue("GLINT")
+~ THEN REPLY #%csr197_s37612%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ EXTERN ~BDGLINTJ~ 91
+  IF ~  !IsValidForPartyDialogue("GLINT")
+~ THEN REPLY #%csr197_s37612%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ GOTO 41
+  IF ~  IsValidForPartyDialogue("RASAAD")
+~ THEN REPLY #%csr197_s37613%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ EXTERN ~RASAADJ~ 1279
+  IF ~  !IsValidForPartyDialogue("RASAAD")
+~ THEN REPLY #%csr197_s37613%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ GOTO 40
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 39 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 39
+  IF ~~ THEN REPLY #%csr197_s37611%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ GOTO 41
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 39
+  IF ~  IsValidForPartyDialogue("GLINT")
+~ THEN REPLY #%csr197_s37612%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ EXTERN ~BDGLINTJ~ 91
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 39
+  IF ~  !IsValidForPartyDialogue("GLINT")
+~ THEN REPLY #%csr197_s37612%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ GOTO 41
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 39
+  IF ~  IsValidForPartyDialogue("RASAAD")
+~ THEN REPLY #%csr197_s37613%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ EXTERN ~RASAADJ~ 1279
+END
+~~~~~
+  END
+  ACTION_IF nt <= 4 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 39
+  IF ~  !IsValidForPartyDialogue("RASAAD")
+~ THEN REPLY #%csr197_s37613%  DO ~SetGlobal("bd_skie_plot","global",1)
+~ GOTO 40
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDNEDERL <= 30 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 30 STR_VAR dialog = ~BDNEDERL~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDNEDERL~
+IF %csr197_weight% ~  GlobalGT("bd_plot","global",304)
+GlobalLT("bd_plot","global",350)
+AreaCheck("bd3000")
+~ THEN BEGIN 30
+  SAY #%csr197_s43960%
+  IF ~  GlobalGT("bd_skie_plot","global",9)
+GlobalLT("bd_nederlok_skie","locals",2)
+~ THEN REPLY #%csr197_s60233%  DO ~SetGlobal("bd_nederlok_skie","locals",2)
+~ GOTO 38
+  IF ~  Global("SDD303","GLOBAL",1)
+~ THEN REPLY #%csr197_s58546%  GOTO 63
+  IF ~  Global("bd_nederlok_skie","locals",0)
+GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43961%  GOTO 32
+  IF ~  OR(2)
+!Global("bd_nederlok_skie","locals",0)
+!GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43961%  GOTO 31
+  IF ~  Global("bd_nederlok_skie","locals",0)
+GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43962%  GOTO 32
+  IF ~  OR(2)
+!Global("bd_nederlok_skie","locals",0)
+!GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43962%  GOTO 31
+  IF ~  Global("bd_nederlok_skie","locals",0)
+GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43963%  GOTO 32
+  IF ~  OR(2)
+!Global("bd_nederlok_skie","locals",0)
+!GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43963%  GOTO 31
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDNEDERL.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 30 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  GlobalGT("bd_skie_plot","global",9)
+GlobalLT("bd_nederlok_skie","locals",2)
+~ THEN REPLY #%csr197_s60233%  DO ~SetGlobal("bd_nederlok_skie","locals",2)
+~ GOTO 38
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  Global("SDD303","GLOBAL",1)
+~ THEN REPLY #%csr197_s58546%  GOTO 63
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  Global("bd_nederlok_skie","locals",0)
+GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43961%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  OR(2)
+!Global("bd_nederlok_skie","locals",0)
+!GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43961%  GOTO 31
+END
+~~~~~
+  END
+  ACTION_IF nt <= 4 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  Global("bd_nederlok_skie","locals",0)
+GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43962%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 5 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  OR(2)
+!Global("bd_nederlok_skie","locals",0)
+!GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43962%  GOTO 31
+END
+~~~~~
+  END
+  ACTION_IF nt <= 6 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  Global("bd_nederlok_skie","locals",0)
+GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43963%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 7 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 30
+  IF ~  OR(2)
+!Global("bd_nederlok_skie","locals",0)
+!GlobalLT("bd_skie_plot","global",5)
+~ THEN REPLY #%csr197_s43963%  GOTO 31
+END
+~~~~~
+  END
+END
+ACTION_IF csr197_old_BDNEDERL <= 31 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 31 STR_VAR dialog = ~BDNEDERL~ RET csr197_weight = clause END
+  OUTER_SPRINT csr197_fallback ~~~~~
+REPLACE ~BDNEDERL~
+IF %csr197_weight% ~~ THEN BEGIN 31
+  SAY #%csr197_s43966%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr197-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDNEDERL.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 31 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr197_transitions ~~~~~%csr197_transitions%
+EXTEND_BOTTOM ~BDNEDERL~ 31
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+COMPILE EVALUATE_BUFFER ~.../csr197-transitions.d~

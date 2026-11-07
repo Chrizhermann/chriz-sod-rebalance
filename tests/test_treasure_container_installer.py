@@ -124,15 +124,16 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         self.assert_preserved(before, game.tree()["bd1000.are"], payload=expected)
         self.assertEqual(donor, game.tree()["bd7000.are"])
 
-    def test_mixed_identification_donors_report_real_ambiguity_without_area_writes(self):
+    def test_mixed_identification_donors_grant_the_decided_item_unidentified(self):
         game = self.game(area([]))
         (game.root / "override/bd7000.are").write_bytes(area(
             [item("BDDAGG03", flags=0), item("BDDAGG03", flags=1)]))
         before = game.tree()
         result, text = game.install()
-        self.assertNotEqual(0, result.returncode, text)
-        self.assertIn("both identified and unidentified BDDAGG03", text)
-        self.assertEqual(before, game.tree())
+        self.assertEqual(0, result.returncode, text)
+        self.assertNotIn("WARNING", text.upper())
+        self.assert_preserved(before["bd1000.are"], game.tree()["bd1000.are"])
+        self.assertEqual(before["bd7000.are"], game.tree()["bd7000.are"])
 
     def test_empty_source_area_is_a_valid_absent_drop_not_corruption(self):
         before = area([])
@@ -142,7 +143,7 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         (game.root / "override/bd7000.are").write_bytes(donor)
         result, text = game.install()
         self.assertEqual(0, result.returncode, text)
-        self.assertIn("without auto-identification", text)
+        self.assertIn("granting it unidentified", text)
         self.assert_preserved(before, game.tree()["bd1000.are"])
         self.assertEqual(bytes(donor), game.tree()["bd7000.are"])
 
@@ -184,7 +185,7 @@ class TreasureContainerInstallerTests(unittest.TestCase):
                 self.assert_preserved(before, game.tree()["bd1000.are"])
                 self.assertEqual([900], game.installed_components()[-1:])
                 changed = {n for n, value in game.tree().items() if value != game.before.get(n)}
-                self.assertEqual({"bd1000.are"}, changed)
+                self.assertEqual({"bd1000.are", "csr900.2da"}, changed)
                 self.assertEqual(game.tlk_before, (game.root / "lang/en_us/dialog.tlk").read_bytes())
 
     def test_zero_length_item_table_is_valid(self):
@@ -218,7 +219,7 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         self.assertEqual([900, 910], game.installed_components()[-2:])
         self.assert_preserved(before, game.tree()["bd1000.are"])
         changed = {n for n, value in game.tree().items() if value != game.before.get(n)}
-        self.assertEqual({"bd1000.are", "csrskask.cre", "csrskask.bcs", "csrskip.dlg",
+        self.assertEqual({"bd1000.are", "csr900.2da", "csrskask.cre", "csrskask.bcs", "csrskip.dlg",
                           "bd0103.bcs", "bd6100.bcs", "baldur.bcs"}, changed)
 
     def test_treasure_remove_marker_does_not_touch_the_area(self):
@@ -253,17 +254,12 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, text)
         self.assert_preserved(before, game.tree()["bd1000.are"])
 
-    def test_invalid_structures_fail_without_writing_area_or_tlk(self):
+    def test_unreadable_structures_leave_only_that_area_unchanged(self):
         good = area([item("SW1H01")])
         base = 0x11C + 0xC0
         variants = {"short_header": good[:0x100],
                     "wrong_signature": b"AREAV9.9" + good[8:],
-                    "missing_target": area([], target="Elsewhere"),
-                    "duplicate_target": area([], containers=[("Container009", []),
-                                                               ("Container009", [])]),
-                    "aliased_duplicate": area([], containers=[("Container009", []),
-                                                                ("CONTAINER 009", [])]),
-                    "item_count_overflow": area([item("SW1H01")], unused_items=65532)}
+                    }
         for name, pos, value in (
             ("container_table_past_eof", 0x70, len(good)),
             ("container_table_in_header", 0x70, 0x20),
@@ -284,12 +280,59 @@ class TreasureContainerInstallerTests(unittest.TestCase):
             with self.subTest(name=name):
                 game = self.game(data)
                 result, text = game.install()
-                self.assertNotEqual(0, result.returncode, text)
-                self.assertIn("comp900:", text)
-                self.assertIn("NOT INSTALLED DUE TO ERRORS", text)
-                self.assertNotIn(900, game.installed_components())
+                self.assertEqual(0, result.returncode, text)
+                self.assertIn("#900:", text)
+                self.assertNotIn("WARNING", text.upper())
+                self.assertIn(900, game.installed_components())
                 self.assertEqual(game.before, game.tree())
                 self.assertEqual(game.tlk_before, (game.root / "lang/en_us/dialog.tlk").read_bytes())
+
+    def test_missing_target_is_created_without_changing_other_containers(self):
+        before = area([item('FOREIGN')], target='Elsewhere')
+        game = self.game(before)
+        result, text = game.install()
+        self.assertEqual(result.returncode, 0, text)
+        self.assertNotIn('WARNING', text.upper())
+        after = game.tree()['bd1000.are']
+        self.assertEqual(struct.unpack_from('<H', after, 0x74)[0], 4)
+        self.assertEqual(container_records(after, 3), PAYLOAD)
+        for index in range(3): self.assertEqual(container_records(after,index),container_records(before,index))
+
+    def test_aliases_do_not_block_the_first_named_destination(self):
+        before = area([],containers=[('Container009',[item('FIRST')]),('CONTAINER 009',[item('SECOND')])])
+        game = self.game(before)
+        result, text = game.install()
+        self.assertEqual(result.returncode,0,text)
+        self.assertNotIn('WARNING',text.upper())
+        after = game.tree()['bd1000.are']
+        self.assertEqual(container_records(after,0),[item('FIRST')]+PAYLOAD)
+        self.assertEqual(container_records(after,1),[item('SECOND')])
+
+    def test_independent_second_tail_rewrites_only_owned_reward_records(self):
+        game=self.game(area([item('WAND04',charges=(2,3,4)),item('FOREIGN')]))
+        result,text=game.install();self.assertEqual(result.returncode,0,text)
+        before=game.tree()['bd1000.are']
+        p=game.root/'override/bd1000.are';raw=bytearray(before)
+        co=struct.unpack_from('<I',raw,0x70)[0];io=struct.unpack_from('<I',raw,0x78)[0]
+        first,count=struct.unpack_from('<II',raw,co+192+64)
+        raw[io+(first+2)*20:io+(first+3)*20]=item('EDITED')
+        p.write_bytes(raw)
+        (game.root/'second.tp2').write_text('BACKUP ~second-backup~ AUTHOR ~fixture~ BEGIN ~reward again~ OUTER_SET csr_keep_treasure = 1 INCLUDE ~chriz-sod-remix/lib/comp900.tpa~')
+        result=subprocess.run([str(WEIDU),'second.tp2','--force-install-list','0','--no-exit-pause'],cwd=game.root,capture_output=True,text=True,timeout=60)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertEqual(before,p.read_bytes())
+
+    def test_full_table_reclaims_unreferenced_records_without_losing_loot(self):
+        before = area([item('SW1H01')],unused_items=65532)
+        game = self.game(before)
+        result, text = game.install()
+        self.assertEqual(result.returncode,0,text)
+        self.assertNotIn('WARNING',text.upper())
+        after = game.tree()['bd1000.are']
+        self.assertEqual(container_records(after,1),[item('SW1H01')]+PAYLOAD)
+        self.assertEqual(container_records(after,0),container_records(before,0))
+        self.assertEqual(container_records(after,2),container_records(before,2))
 
 
 if __name__ == "__main__":

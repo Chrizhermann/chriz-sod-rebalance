@@ -1,0 +1,112 @@
+// Component 115 owns these complete blocks.
+IF
+  InMyArea(Player1)
+  !ActuallyInCombat()
+  !GlobalTimerNotExpired("BD_BANTER_DELAY","MYAREA")
+  !Global("bd_pbdd037","MYAREA",-1)
+  Switch("bd_pbdd037","MYAREA")
+  OR(2)
+    Global("csr_kh_carry","GLOBAL",1)
+    Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #0
+    DisplayStringHead("DYNAHEIR",@11582)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",10)
+  RESPONSE #1
+    DisplayStringHead("DYNAHEIR",@11582)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",20)
+  RESPONSE #10
+    DisplayStringHead("KHALID",%csr115_s59067%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",4)
+    SetGlobal("bd_pbdd037","MYAREA",101)
+  RESPONSE #20
+    DisplayStringHead("KHALID",%csr115_s59068%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_MINUTE)
+    SetGlobal("bd_pbdd037","MYAREA",30)
+  RESPONSE #30
+    DisplayStringHead("DYNAHEIR",%csr115_s59069%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",TWO_MINUTES)
+    SetGlobal("bd_pbdd037","MYAREA",40)
+  RESPONSE #40
+    DisplayStringHead("KHALID",%csr115_s59070%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",8)
+    SetGlobal("bd_pbdd037","MYAREA",-1)
+  RESPONSE #50
+    DisplayStringHead("DYNAHEIR",%csr115_s59071%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",60)
+  RESPONSE #60
+    DisplayStringHead("KHALID",%csr115_s59072%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",11)
+    SetGlobal("bd_pbdd037","MYAREA",70)
+  RESPONSE #70
+    DisplayStringHead("DYNAHEIR",%csr115_s59073%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_ROUND)
+    SetGlobal("bd_pbdd037","MYAREA",701)
+  RESPONSE #71
+    DisplayStringHead("MINSC",%csr115_s59074%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",11)
+    SetGlobal("bd_pbdd037","MYAREA",-1)
+  RESPONSE #80
+    DisplayStringHead("DYNAHEIR",%csr115_s59075%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",40)
+END
+
+IF
+  InMyArea(Player1)
+  !ActuallyInCombat()
+  !GlobalTimerNotExpired("BD_BANTER_DELAY","MYAREA")
+  !Global("bd_pbdd037","MYAREA",-1)
+  Switch("bd_pbdd037","MYAREA")
+  !Global("csr_kh_carry","GLOBAL",1)
+  !Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #0
+    DisplayStringHead("DYNAHEIR",%csr115_s59066%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",10)
+  RESPONSE #1
+    DisplayStringHead("DYNAHEIR",%csr115_s59066%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",20)
+  RESPONSE #10
+    DisplayStringHead("KHALID",%csr115_s59067%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",4)
+    SetGlobal("bd_pbdd037","MYAREA",101)
+  RESPONSE #20
+    DisplayStringHead("KHALID",%csr115_s59068%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_MINUTE)
+    SetGlobal("bd_pbdd037","MYAREA",30)
+  RESPONSE #30
+    DisplayStringHead("DYNAHEIR",%csr115_s59069%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",TWO_MINUTES)
+    SetGlobal("bd_pbdd037","MYAREA",40)
+  RESPONSE #40
+    DisplayStringHead("KHALID",%csr115_s59070%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",8)
+    SetGlobal("bd_pbdd037","MYAREA",-1)
+  RESPONSE #50
+    DisplayStringHead("DYNAHEIR",%csr115_s59071%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",60)
+  RESPONSE #60
+    DisplayStringHead("KHALID",%csr115_s59072%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",11)
+    SetGlobal("bd_pbdd037","MYAREA",70)
+  RESPONSE #70
+    DisplayStringHead("DYNAHEIR",%csr115_s59073%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_ROUND)
+    SetGlobal("bd_pbdd037","MYAREA",701)
+  RESPONSE #71
+    DisplayStringHead("MINSC",%csr115_s59074%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",11)
+    SetGlobal("bd_pbdd037","MYAREA",-1)
+  RESPONSE #80
+    DisplayStringHead("DYNAHEIR",%csr115_s59075%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",7)
+    SetGlobal("bd_pbdd037","MYAREA",40)
+END
+

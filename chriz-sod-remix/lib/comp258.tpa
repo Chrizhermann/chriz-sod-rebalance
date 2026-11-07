@@ -1,4 +1,4 @@
 // Add the countdown to an existing #256 without uninstalling any component.
-// Fresh #256 already includes it; the shared preflight makes this a safe no-op.
+// Fresh #256 already includes it; the shared writer replaces the same blocks.
 INCLUDE ~chriz-sod-remix/lib/comp256_timer.tpa~
 LAF csr256_timer_install END

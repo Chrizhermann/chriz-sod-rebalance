@@ -106,6 +106,7 @@ def spell_bytes(level: int, cast_range: int = 30, projectile: int = 0) -> bytes:
 
 def write_ai_fixture(game: Path, *, vanilla: bool = False) -> None:
     write_fake_game(game)
+    (game / "weidu.log").write_text("")
     ids = {'action': ACTION_IDS, 'trigger': TRIGGER_IDS,
            'object': 'IDS V1.0\n1 Myself\n10 LastAttackerOf\n12 NearestEnemyOf\n' +
                      ''.join(f'{20+n} Player{n}\n' for n in range(1, 7)),
@@ -227,7 +228,7 @@ class SpellAndCompilationTests(unittest.TestCase):
                 for path, digest in original.items():
                     self.assertEqual(digest, current[path], path)
 
-    def test_missing_or_invalid_spell_fails_before_compilation(self):
+    def test_changed_spell_metadata_and_owned_scripts_do_not_block_compilation(self):
         for fault in ('missing', 'level', 'effects', 'symbol', 'ability', 'projectile', 'collision'):
             with self.subTest(fault=fault), tempfile.TemporaryDirectory() as d:
                 game = Path(d)
@@ -256,8 +257,14 @@ class SpellAndCompilationTests(unittest.TestCase):
                     path.write_bytes(data)
                 original = tree(game / 'override')
                 result = run_weidu(game, 'test.tp2', '--force-install-list', '0')
-                self.assertNotEqual(0, result.returncode)
-                self.assertEqual(original, tree(game / 'override'))
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+                current = tree(game / 'override')
+                for name in ('csr26fma', 'csr26cma', 'csr26mel'):
+                    self.assertTrue((game / 'override' / f'{name}.bcs').is_file())
+                for name, digest in original.items():
+                    if name.lower() != 'csr26fma.bcs':
+                        self.assertEqual(digest, current[name], name)
 
 
 def arguments(text: str) -> list[str]:

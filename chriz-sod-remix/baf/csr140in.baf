@@ -1,0 +1,28 @@
+IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    SetGlobal("bd_npc_camp_chapter","global",1)
+    SetGlobal("chapter","global",7)
+    SetGlobal("DREAM","GLOBAL",7)
+    SetGlobal("BD_TURNOFF_GEARSCRIPT","BD0120",1)
+    SetGlobal("sprite_is_deadsafana","GLOBAL",0)
+    SetGlobal("sprite_is_deaddynaheir","GLOBAL",0)
+    SetGlobal("sprite_is_deadminsc","GLOBAL",0)
+    SetGlobal("sprite_is_deadrasaad","GLOBAL",0)
+    ApplySpellRES("bdrejuve",Player1)
+    ApplySpellRES("bdrejuve",Player2)
+    ApplySpellRES("bdrejuve",Player3)
+    ApplySpellRES("bdrejuve",Player4)
+    ApplySpellRES("bdrejuve",Player5)
+    ApplySpellRES("bdrejuve",Player6)
+    ChangeAIScript("bdplayer",OVERRIDE)
+    UndoExplore()
+    SetGlobal("BD_KORLASZ_SURRENDER","GLOBAL",1)
+    AddJournalEntry(%csr140_j_open%,QUEST)
+    AddJournalEntry(%csr140_j_surr%,QUEST_DONE)
+    AddJournalEntry(%csr140_j_done%,QUEST_DONE)
+    SetGlobal("bd_plot","global",50)
+    EndCutSceneMode()
+END

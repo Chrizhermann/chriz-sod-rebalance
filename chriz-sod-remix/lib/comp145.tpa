@@ -17,6 +17,7 @@
 // Requires 140: the "no starting party" premise only makes sense once the dungeon is
 // skipped; without it the pool creatures would stand idle in the played dungeon.
 
+ACTION_IF FILE_EXISTS_IN_GAME ~bdintro.bcs~ BEGIN
 COPY_EXISTING ~bdintro.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     // The nine pool NPCs whose ONLY JoinPartyOverride is the fresh-pool join
@@ -24,23 +25,19 @@ COPY_EXISTING ~bdintro.bcs~ ~override~
     PATCH_FOR_EACH csr_npc IN
       ~minsc~ ~dorn~ ~khalid~ ~jaheira~ ~viconia~ ~dynaheir~ ~neera~ ~edwin~ ~baeloth~
     BEGIN
-      SET csr_n = 0
-      COUNT_REGEXP_INSTANCES ~ActionOverride("%csr_npc%",JoinPartyOverride())~ csr_n
-      PATCH_IF (csr_n = 1) BEGIN
-        REPLACE_TEXTUALLY ~ActionOverride("%csr_npc%",JoinPartyOverride())~ ~~
-      END ELSE BEGIN
-        PATCH_FAIL ~chriz-sod-remix #145: expected exactly 1 fresh-pool join for %csr_npc% in BDINTRO, found %csr_n% - aborting.~
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~ActionOverride("%csr_npc%",JoinPartyOverride())~ ~~
+    END
+    // The import flag identifies the fresh-start branch; delay values and
+    // surrounding actions do not determine whether its join is removed.
+    SPRINT csr145_nl ~%MNL%?%LNL%~
+    REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr145_nl%\(\([ %TAB%]+[^%WNL%]*%csr145_nl%\|THEN%csr145_nl%\)*\)END~ BEGIN
+      SPRINT csr145_block ~%MATCH0%~
+      PATCH_IF (~%csr145_block%~ STRING_CONTAINS_REGEXP ~Global("SOD_fromimport","GLOBAL",0)~ = 0) BEGIN
+        INNER_PATCH_SAVE csr145_block ~%csr145_block%~ BEGIN
+          REPLACE_TEXTUALLY CASE_INSENSITIVE ~ActionOverride("safana",JoinPartyOverride())~ ~~
+        END
       END
-    END
-    // Safana has THREE JoinPartyOverride (1 fresh + 2 import auto-join). The fresh
-    // one is the only one followed by SmallWait(1) (the import ones are followed by
-    // END), so anchor on that suffix to remove ONLY the fresh join.
-    SET csr_s = 0
-    COUNT_REGEXP_INSTANCES ~ActionOverride("safana",JoinPartyOverride())%MNL%?%LNL% *SmallWait(1)~ csr_s
-    PATCH_IF (csr_s = 1) BEGIN
-      REPLACE_TEXTUALLY ~ActionOverride("safana",JoinPartyOverride())%MNL%?%LNL% *SmallWait(1)~ ~SmallWait(1)~
-    END ELSE BEGIN
-      PATCH_FAIL ~chriz-sod-remix #145: expected exactly 1 fresh-pool Safana join in BDINTRO, found %csr_s% - aborting.~
-    END
+    END ~%csr145_block%~
   END
 BUT_ONLY
+END ELSE BEGIN PRINT ~#145: BDINTRO is absent; its unwanted automatic joins are already unavailable.~ END

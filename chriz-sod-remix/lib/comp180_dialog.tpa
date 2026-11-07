@@ -1,0 +1,46 @@
+<<<<<<<< .../csr180-council.d
+REPLACE ~BDBELT~
+IF %csr180_weight% ~~ THEN BEGIN 36
+  SAY #%csr180_council%
+  IF ~~ THEN EXTERN ~BDELTAN~ 2
+END
+END
+>>>>>>>>
+LAF csr_ensure_dlg_states INT_VAR count = 37 STR_VAR dialog = ~BDBELT~ RET old_states = existing_states END
+ACTION_IF old_states <= 36 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 36 STR_VAR dialog = ~BDBELT~ RET csr180_weight = clause END
+  COMPILE EVALUATE_BUFFER ~.../csr180-council.d~
+END
+OUTER_SET first_text = RESOLVE_STR_REF(@18007)
+LAF csr_claim_dialogue_tail INT_VAR count = 2 first_text STR_VAR dialog = ~BDBELT~ key = ~180_BDBELT~ RET base END
+OUTER_SET csr180_toast = base OUTER_SET csr180_line = base + 1
+LAF csr_dlg_state_weight INT_VAR state = csr180_toast STR_VAR dialog = ~BDBELT~ RET csr180_toast_weight = clause END
+LAF csr_dlg_state_weight INT_VAR state = csr180_line STR_VAR dialog = ~BDBELT~ RET csr180_line_weight = clause END
+OUTER_SPRINT csr180_routes ~~ OUTER_SET found = 0
+COPY_EXISTING - ~bdbelt.dlg~ ~override~
+  READ_LONG 12 so READ_LONG 20 tr READ_LONG 32 triggers READ_LONG 36 nt
+  READ_LONG (so + 36 * 16 + 4) first READ_LONG (so + 36 * 16 + 8) count
+  FOR (j = 0; j < count; ++j) BEGIN
+    SET at = tr + (first + j) * 32 READ_LONG at flags READ_LONG (at + 12) trigger
+    PATCH_IF flags BAND 2 AND trigger < nt BEGIN
+      READ_LONG (triggers + trigger * 8) off READ_LONG (triggers + trigger * 8 + 4) len READ_ASCII off code (len)
+      PATCH_IF ~%code%~ STRING_CONTAINS_REGEXP ~"CSR_CELEB_BELT_LINE"~ = 0 BEGIN
+        SPRINT guard ~Global("CSR_CELEB_BELT_LINE","GLOBAL",0) Global("CSR_CELEB_QUEST","GLOBAL",1)~
+        PATCH_IF found BEGIN SPRINT guard ~False()~ END
+        SPRINT csr180_routes ~~~~~%csr180_routes%
+ALTER_TRANS ~BDBELT~ BEGIN 36 END BEGIN %j% END BEGIN
+  TRIGGER ~%guard%~ ACTION ~SetGlobal("CSR_CELEB_BELT_LINE","GLOBAL",1)~ EPILOGUE ~GOTO %csr180_line%~
+END
+~~~~~
+        SET found = 1
+      END
+    END
+  END
+ACTION_IF NOT found BEGIN
+  OUTER_SPRINT csr180_routes ~~~~~
+EXTEND_BOTTOM ~BDBELT~ 36
+  IF ~Global("CSR_CELEB_BELT_LINE","GLOBAL",0) Global("CSR_CELEB_QUEST","GLOBAL",1)~ THEN DO ~SetGlobal("CSR_CELEB_BELT_LINE","GLOBAL",1)~ GOTO %csr180_line%
+END
+~~~~~
+END
+COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csrcele.d~

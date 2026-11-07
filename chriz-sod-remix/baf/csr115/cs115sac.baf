@@ -1,0 +1,46 @@
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    CreateCreature("cutspy",[1530.746],E)
+    MoveToPoint([1600.705])
+    ActionOverride(Player2,MoveToPoint([1590.510]))
+    ActionOverride(Player3,MoveToPoint([1660.524]))
+    ActionOverride(Player4,MoveToPoint([1629.498]))
+    ActionOverride(Player5,MoveToPoint([1699.509]))
+    ActionOverride(Player6,MoveToPoint([1665.478]))
+    ActionOverride("bdjegg",MoveToPoint([1445.640]))
+    Wait(3)
+    CreateCreature("csr115ad",[1209.1046],E)
+    ActionOverride("csr115ad",SetInterrupt(FALSE))
+    ActionOverride("csr115ad",MoveToPointNoInterrupt([1534.747]))
+    ActionOverride("csr115ad",DisplayStringWait(Myself,%csr115_s46536%))
+    Wait(7)
+    ActionOverride("bdjegg",StartDialogNoSet(Player1))
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    CreateCreature("cutspy",[1530.746],E)
+    MoveToPoint([1600.705])
+    ActionOverride(Player2,MoveToPoint([1590.510]))
+    ActionOverride(Player3,MoveToPoint([1660.524]))
+    ActionOverride(Player4,MoveToPoint([1629.498]))
+    ActionOverride(Player5,MoveToPoint([1699.509]))
+    ActionOverride(Player6,MoveToPoint([1665.478]))
+    ActionOverride("bdjegg",MoveToPoint([1445.640]))
+    Wait(3)
+    CreateCreature("bdbfort",[1209.1046],E)
+    ActionOverride("bdbfort",SetInterrupt(FALSE))
+    ActionOverride("bdbfort",MoveToPointNoInterrupt([1534.747]))
+    ActionOverride("bdbfort",DisplayStringWait(Myself,%csr115_s46536%))
+    Wait(7)
+    ActionOverride("bdjegg",StartDialogNoSet(Player1))
+END
+

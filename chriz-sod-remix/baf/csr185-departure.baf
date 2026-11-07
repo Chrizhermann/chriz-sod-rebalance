@@ -1,0 +1,16 @@
+IF
+  Global("BD_plot","global",55)
+THEN
+  RESPONSE #100
+    SetGlobal("BD_plot","global",56)
+    ApplySpellRES("bddest","bdskie")
+    ApplySpellRES("bddest","bdschael")
+    ActionOverride("BDLIIA",JumpToPoint([806.510]))
+    ActionOverride("BDBELT",JumpToPoint([759.472]))
+    ActionOverride("BDELTAN",DestroySelf())
+    ActionOverride("BDLIIA",FaceObject("BDBELT"))
+
+    ActionOverride("BDELTAN",FaceObject("BDBELT"))
+    TriggerActivation("TranBD0101",TRUE)
+    TriggerActivation("TranBD0010",FALSE)
+END

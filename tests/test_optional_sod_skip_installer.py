@@ -262,23 +262,32 @@ class OptionalSkipInstallerTests(unittest.TestCase):
         self.assertNotIn("AddXPObject", guards[0][1])
         self.assertNotIn("K#TELBGT", guards[0][1])
 
-    def test_rejects_changed_effective_eet_eligibility_instead_of_dropping_conditions(self):
-        game = self.game(extra_predicate=True)
-        _, text = game.install()
-        self.assertIn("unsupported EET rule for MISC47", text)
-        self.assertEqual(game.before, game.tree())
-        self.assertEqual(game.tlk_before, (game.root / "lang/en_us/dialog.tlk").read_bytes())
+    def test_changed_effective_import_rule_still_writes_the_item_handoff(self):
+        game=self.game(extra_predicate=True)
+        result,text=game.install()
+        self.assertEqual(result.returncode,0,text)
+        self.assertNotIn('WARNING',text.upper())
+        self.assertIn('AddStoreItem("K#IMPORT","MISC47",1,1)',game.baf('csrskask'))
 
-    def test_rejects_missing_or_nonempty_staging_chest_without_mutations(self):
-        for kwargs in ({"chest_treasure": True}, {"missing_chest": True}):
+    def test_missing_or_nonempty_staging_chest_installs(self):
+        for kwargs in ({'chest_treasure':True},{'missing_chest':True}):
             with self.subTest(**kwargs):
-                game = self.game(**kwargs)
-                _, text = game.install()
-                self.assertIn("NOT INSTALLED DUE TO ERRORS", text)
-                self.assertEqual(game.before, game.tree())
+                game=self.game(**kwargs);result,text=game.install()
+                self.assertEqual(result.returncode,0,text)
+                self.assertNotIn('WARNING',text.upper())
+                self.assertIn('PlayerChest00',parse_containers(game.tree()['bd0103.are']))
+
+    def test_second_tail_replaces_owned_hooks(self):
+        game=self.game();result,text=game.install();self.assertEqual(result.returncode,0,text)
+        first=game.tree()
+        (game.root/'second.tp2').write_text('BACKUP ~second-backup~ AUTHOR ~fixture~ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/csrskip.tra~ BEGIN ~skip again~ INCLUDE ~chriz-sod-remix/lib/comp910.tpa~')
+        result=subprocess.run([str(WEIDU),'second.tp2','--force-install-list','0','--language','0','--no-exit-pause'],cwd=game.root,capture_output=True,text=True,timeout=60)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertEqual(first,game.tree())
 
     def test_public_platform_and_prerequisite_gates_do_not_mutate_resources(self):
-        for kwargs in ({"eet": False}, {"missing_dependency": 160}, {"missing_dependency": 0}):
+        for kwargs in ({"eet": False}, {"missing_dependency": 160}):
             with self.subTest(**kwargs):
                 game = self.game(**kwargs)
                 _, text = game.install()

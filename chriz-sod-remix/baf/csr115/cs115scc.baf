@@ -1,0 +1,24 @@
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    SetGlobal("bd_205_stakeout","GLOBAL",4)
+    StartCutSceneEx("bdc205db",FALSE)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    ActionOverride("khalid",Face(N))
+    ActionOverride("khalid",DisplayStringWait(Myself,%csr115_s43780%))
+    ActionOverride("khalid",SetDialogue("khalid"))
+    ActionOverride("khalid",EscapeArea())
+    SetGlobal("bd_205_stakeout","global",4)
+    Wait(15)
+    StartCutSceneEx("bdc205db",FALSE)
+END
+

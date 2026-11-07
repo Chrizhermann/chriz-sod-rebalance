@@ -85,92 +85,95 @@ class PrologueXPInstallerTests(unittest.TestCase):
         self.addCleanup(game.cleanup)
         return game
 
-    def assert_protected(self, game, *, changed=False):
+    def assert_unrelated_preserved(self, game):
         after = game.resources()
-        self.assertEqual(after.keys(), game.before.keys())
         for name, data in game.before.items():
-            if not (changed and name == "csrcele.dlg"):
+            if name != "csrcele.dlg":
                 self.assertEqual(after[name], data, name)
         for path, data in game.protected.items():
-            self.assertEqual((game.root / path).read_bytes(), data, path)
+            if not path.endswith("dialog.tlk"):
+                self.assertEqual((game.root / path).read_bytes(), data, path)
+        source = game.decompile("csrcele")
+        self.assertIn('SetGlobal("FOREIGN_QUEST","GLOBAL",1)', source)
+        self.assertIn('AddexperienceParty(24000)', source)
 
     def assert_success(self, result, game):
         output = game.transcript(result)
         self.assertEqual(result.returncode, 0, output)
         self.assertIn("SUCCESSFULLY INSTALLED", output)
+        self.assertNotIn("WARNING", output.upper())
 
-    def assert_rejected(self, game):
-        result = game.install()
-        output = game.transcript(result)
-        self.assertNotEqual(result.returncode, 0, output)
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", output)
-        self.assertIn("comp176", output)
-        self.assertNotIn("Parsing.Parse_error", output)
-        self.assert_protected(game)
-
-    def test_old_award_changes_only_six_numbers_and_preserves_unrelated_24000(self):
-        game = self.game()
+    def assert_reward(self, game):
         self.assert_success(game.install(), game)
-        before = game.before["csrcele.dlg"]
-        # Derive the selected action's extent from the native DLG tables.
-        states, transitions, actions = (struct.unpack_from("<I", before, offset)[0]
-                                        for offset in (0x0C, 0x14, 0x28))
-        first = struct.unpack_from("<I", before, states + 2 * 0x10 + 4)[0]
-        index = struct.unpack_from("<I", before, transitions + first * 0x20 + 0x10)[0]
-        start, length = struct.unpack_from("<II", before, actions + index * 8)
-        expected = (before[:start] + before[start:start + length].replace(b",24000)", b",22000)")
-                    + before[start + length:])
-        self.assertEqual(game.resources()["csrcele.dlg"], expected)
-        self.assertEqual(sum(a != b for a, b in zip(before, expected)), 6)
-        self.assert_protected(game, changed=True)
-
-    def test_already_22000_is_byte_exact_noop(self):
-        game = self.game(award(22000))
-        self.assert_success(game.install(), game)
-        self.assert_protected(game)
-
-    def test_fresh_175_pays_all_six_before_destroyself_then_176_is_noop(self):
-        game = self.game('SetGlobal("CSR_KORL_RET","GLOBAL",2)\nDestroySelf()',
-                         prerequisite=False)
-        self.assert_success(game.install(175), game)
         source = game.decompile("csrcele")
         self.assertEqual(re.findall(r"AddXPObject\(Player([1-6]),(\d+)\)", source),
                          [(str(slot), "22000") for slot in range(1, 7)])
-        start = source.index('SetGlobal("CSR_KORL_RET","GLOBAL",2)')
-        self.assertLess(source.index("AddXPObject(Player6,22000)", start),
-                        source.index("DestroySelf()", start))
-        self.assertNotIn("Difficulty", source)
-        game.before = game.resources()
+        self.assertIn('Global("CSR_KORL_RET","GLOBAL",1)', source)
+        self.assertNotIn('Global("CSR_KORL_RET","GLOBAL",0)', source)
+        self.assertLess(source.index('AddXPObject(Player6,22000)'), source.index('DestroySelf()'))
+        self.assert_unrelated_preserved(game)
+
+    def test_original_award_is_normalized(self):
+        self.assert_reward(self.game())
+
+    def test_current_award_is_written(self):
+        self.assert_reward(self.game(award(22000)))
+
+    def test_fresh_175_and_176_have_the_same_output(self):
+        game = self.game('SetGlobal("CSR_KORL_RET","GLOBAL",2)\nDestroySelf()',
+                         prerequisite=False)
+        self.assert_success(game.install(175), game)
+        first = game.resources()["csrcele.dlg"]
         self.assert_success(game.install(), game)
-        self.assert_protected(game)
+        self.assertEqual(game.resources()["csrcele.dlg"], first)
 
-    def test_unknown_award_rejects(self):
-        self.assert_rejected(self.game(award(21000)))
+    def test_hand_edited_award_is_overwritten(self):
+        self.assert_reward(self.game(award(21000)))
 
-    def test_partial_award_rejects(self):
-        self.assert_rejected(self.game(award().replace("AddXPObject(Player6,24000)", "")))
+    def test_missing_award_is_restored(self):
+        self.assert_reward(self.game(award().replace("AddXPObject(Player6,24000)", "")))
 
-    def test_duplicate_recipient_rejects(self):
-        self.assert_rejected(self.game(award().replace("Player6", "Player5")))
+    def test_extra_recipient_is_normalized(self):
+        self.assert_reward(self.game(award().replace("Player6", "Player5")))
 
-    def test_changed_once_gate_rejects(self):
-        self.assert_rejected(self.game(gate=0))
+    def test_changed_once_gate_is_restored(self):
+        self.assert_reward(self.game(gate=0))
 
-    def test_directly_selectable_terminal_state_rejects(self):
-        self.assert_rejected(self.game(terminal_gate="True()"))
+    def test_terminal_entry_trigger_is_removed(self):
+        self.assert_reward(self.game(terminal_gate="True()"))
 
-    def test_extra_reward_on_reply_rejects(self):
-        self.assert_rejected(self.game(reply_action="DO ~AddXPObject(Player1,24000)~"))
+    def test_extra_reply_reward_is_removed(self):
+        self.assert_reward(self.game(reply_action="DO ~AddXPObject(Player1,24000)~"))
 
-    def test_award_after_destroyself_rejects(self):
-        self.assert_rejected(self.game("DestroySelf()\n" + award().replace("\nDestroySelf()", "")))
+    def test_action_order_is_written(self):
+        self.assert_reward(self.game("DestroySelf()\n" + award().replace("\nDestroySelf()", "")))
+
+    def test_missing_states_are_created(self):
+        game = self.game()
+        (game.root / "fixture/csrcele.d").write_text(
+            'BEGIN ~csrcele~\nIF ~True()~ THEN BEGIN 0 SAY #0 IF ~~ THEN EXIT END\n')
+        setup = game.root / "setup-missing-states.tp2"
+        setup.write_text('BACKUP ~missing-states-backup~\nAUTHOR ~fixture~\n'
+                         'BEGIN ~remove the return states~\nCOMPILE ~fixture/csrcele.d~\n')
+        self.assert_success(game._run(setup), game)
+        self.assert_success(game.install(), game)
+        source = game.decompile("csrcele")
+        self.assertEqual(re.findall(r"AddXPObject\(Player([1-6]),(\d+)\)", source),
+                         [(str(slot), "22000") for slot in range(1, 7)])
+
+    def test_second_install_is_byte_identical(self):
+        game = self.game()
+        self.assert_success(game.install(), game)
+        first = game.resources()["csrcele.dlg"]
+        self.assert_success(game.install(), game)
+        self.assertEqual(game.resources()["csrcele.dlg"], first)
 
     def test_public_component_requires_175(self):
         game = self.game(prerequisite=False)
         result = game.install()
         self.assertIn("SKIPPING", game.transcript(result))
         self.assertNotIn("SUCCESSFULLY INSTALLED", game.transcript(result))
-        self.assert_protected(game)
+        self.assertEqual(game.resources(), game.before)
 
 
 if __name__ == "__main__":

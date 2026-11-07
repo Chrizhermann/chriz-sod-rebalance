@@ -1,0 +1,35 @@
+// Authored class spellbooks from the prior component output. Other spell kinds
+// (including donor innates) are preserved; old table bytes become unreferenced.
+DEFINE_PATCH_FUNCTION csr170_book INT_VAR kind = 1 STR_VAR actor = ~~ BEGIN
+  READ_LONG 0x2a0 ko READ_LONG 0x2a4 kc READ_LONG 0x2a8 io READ_LONG 0x2ac ic READ_LONG 0x2b0 mo
+  SPRINT known ~~ SPRINT info ~~ SPRINT mem ~~
+  FOR (i = 0; i < kc; ++i) BEGIN
+    READ_SHORT (ko + i * 12 + 10) k
+    PATCH_IF k != kind BEGIN READ_ASCII (ko + i * 12) row (12) SPRINT known ~%known%%row%~ END
+  END
+  FOR (i = 0; i < ic; ++i) BEGIN
+    READ_SHORT (io + i * 16 + 6) k
+    PATCH_IF k != kind BEGIN
+      READ_ASCII (io + i * 16) row (16)
+      READ_LONG (io + i * 16 + 8) first READ_LONG (io + i * 16 + 12) count
+      READ_ASCII (mo + first * 12) spells (count * 12)
+      INNER_PATCH_SAVE row ~%row%~ BEGIN WRITE_LONG 8 (STRING_LENGTH ~%mem%~ / 12) END
+      SPRINT info ~%info%%row%~ SPRINT mem ~%mem%%spells%~
+    END
+  END
+  INNER_ACTION BEGIN
+    COPY - ~chriz-sod-remix/data/csr170/%actor%-known.bin~ ~.../csr170-read~ READ_ASCII 0 authored_known (SOURCE_SIZE)
+    COPY - ~chriz-sod-remix/data/csr170/%actor%-info.bin~ ~.../csr170-read~ READ_ASCII 0 authored_info (SOURCE_SIZE)
+    COPY - ~chriz-sod-remix/data/csr170/%actor%-mem.bin~ ~.../csr170-read~ READ_ASCII 0 authored_mem (SOURCE_SIZE)
+  END
+  INNER_PATCH_SAVE authored_info ~%authored_info%~ BEGIN
+    FOR (i = 0; i < BUFFER_LENGTH; i += 16) BEGIN READ_LONG (i + 8) first WRITE_LONG (i + 8) (first + STRING_LENGTH ~%mem%~ / 12) END
+  END
+  SPRINT known ~%known%%authored_known%~ SPRINT info ~%info%%authored_info%~ SPRINT mem ~%mem%%authored_mem%~
+  SET start = BUFFER_LENGTH INSERT_BYTES start (STRING_LENGTH ~%known%~) WRITE_ASCIIE start ~%known%~
+  WRITE_LONG 0x2a0 start WRITE_LONG 0x2a4 (STRING_LENGTH ~%known%~ / 12)
+  SET start = BUFFER_LENGTH INSERT_BYTES start (STRING_LENGTH ~%info%~) WRITE_ASCIIE start ~%info%~
+  WRITE_LONG 0x2a8 start WRITE_LONG 0x2ac (STRING_LENGTH ~%info%~ / 16)
+  SET start = BUFFER_LENGTH INSERT_BYTES start (STRING_LENGTH ~%mem%~) WRITE_ASCIIE start ~%mem%~
+  WRITE_LONG 0x2b0 start WRITE_LONG 0x2b4 (STRING_LENGTH ~%mem%~ / 12)
+END

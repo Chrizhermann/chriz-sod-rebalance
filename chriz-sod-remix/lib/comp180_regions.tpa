@@ -1,0 +1,49 @@
+// Existing travel flags define the state restored after the evening lock.
+// Missing exits receive the native geometry and campaign destination.
+ACTION_IF FILE_EXISTS_IN_GAME ~bd0102.are~ BEGIN
+  COPY_EXISTING ~bd0102.are~ ~override~
+    SET readable = SOURCE_SIZE >= 0xf4
+    PATCH_IF readable BEGIN
+      READ_LONG 0x5c ro READ_SHORT 0x5a rc READ_LONG 0x7c vo READ_SHORT 0x80 vc
+      SET readable = ro + rc * 196 <= SOURCE_SIZE AND vo + vc * 4 <= SOURCE_SIZE
+    END
+    PATCH_IF readable BEGIN
+      PATCH_FOR_EACH name IN ~TranBD0101~ ~TranBD0010~ BEGIN
+        SET target = (0 - 1)
+        FOR (i = 0; i < rc; ++i) BEGIN
+          READ_ASCII (ro + i * 196) current (32) NULL
+          PATCH_IF ~%current%~ STRING_EQUAL_CASE ~%name%~ BEGIN SET target = i END
+        END
+        PATCH_IF target < 0 AND rc < 65535 AND vc <= 65531 BEGIN
+          READ_ASCII ro rows (rc * 196) READ_ASCII vo vertices (vc * 4)
+          SET ro = BUFFER_LENGTH INSERT_BYTES ro ((rc + 1) * 196) WRITE_ASCIIE ro ~%rows%~
+          WRITE_LONG 0x5c ro WRITE_SHORT 0x5a (rc + 1)
+          SET at = ro + rc * 196 SET target = rc SET rc += 1
+          WRITE_ASCIIE at ~%name%~ #32 WRITE_SHORT (at + 0x20) 2
+          WRITE_SHORT (at + 0x22) 320 WRITE_SHORT (at + 0x24) 675 WRITE_SHORT (at + 0x26) 450 WRITE_SHORT (at + 0x28) 830
+          WRITE_SHORT (at + 0x2a) 4 WRITE_LONG (at + 0x2c) vc WRITE_LONG (at + 0x34) 30
+          WRITE_ASCII (at + 0x40) ~Exitbd0102~ #32 WRITE_LONG (at + 0x64) 0xffffffff
+          WRITE_SHORT (at + 0x70) 660 WRITE_SHORT (at + 0x72) 532
+          PATCH_IF ~%name%~ STRING_EQUAL ~TranBD0101~ BEGIN
+            WRITE_ASCII (at + 0x38) ~BD0101~ #8 SET active = ~%csr_door0101%~ STRING_EQUAL ~TRUE~
+          END ELSE BEGIN
+            WRITE_ASCII (at + 0x38) ~BD0010~ #8 WRITE_ASCII (at + 0x7c) ~BDDOOR10~ #8 SET active = ~%csr_door0010%~ STRING_EQUAL ~TRUE~
+          END
+          WRITE_LONG (at + 0x60) (active ? 0x204 : 0x304)
+          SET vo = BUFFER_LENGTH INSERT_BYTES vo ((vc + 4) * 4) WRITE_ASCIIE vo ~%vertices%~
+          WRITE_LONG 0x7c vo WRITE_SHORT 0x80 (vc + 4)
+          WRITE_SHORT (vo + vc * 4) 380 WRITE_SHORT (vo + vc * 4 + 2) 675
+          WRITE_SHORT (vo + vc * 4 + 4) 320 WRITE_SHORT (vo + vc * 4 + 6) 764
+          WRITE_SHORT (vo + vc * 4 + 8) 394 WRITE_SHORT (vo + vc * 4 + 10) 830
+          WRITE_SHORT (vo + vc * 4 + 12) 450 WRITE_SHORT (vo + vc * 4 + 14) 729
+          SET vc += 4
+        END
+        PATCH_IF target >= 0 BEGIN
+          READ_LONG (ro + target * 196 + 0x60) flags SPRINT active ~TRUE~
+          PATCH_IF flags BAND 0x100 BEGIN SPRINT active ~FALSE~ END
+          PATCH_IF ~%name%~ STRING_EQUAL ~TranBD0101~ BEGIN SPRINT csr_door0101 ~%active%~ END ELSE BEGIN SPRINT csr_door0010 ~%active%~ END
+        END ELSE BEGIN PATCH_PRINT ~#180: palace travel table has no representable room for %name%; its exit is unavailable.~ END
+      END
+    END ELSE BEGIN PATCH_PRINT ~#180: palace travel tables are unreadable; only this area is unchanged.~ END
+  BUT_ONLY
+END ELSE BEGIN PRINT ~#180: palace area is absent; the authored celebration resources are still written.~ END

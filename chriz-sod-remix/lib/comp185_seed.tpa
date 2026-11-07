@@ -1,0 +1,186 @@
+OUTER_SET csr185_s34206 = 34206 + csr185_shift
+OUTER_SET csr185_s35243 = 35243 + csr185_shift
+OUTER_SET csr185_s35244 = 35244 + csr185_shift
+OUTER_SET csr185_s35245 = 35245 + csr185_shift
+OUTER_SET csr185_s35246 = 35246 + csr185_shift
+OUTER_SET csr185_s57840 = 57840 + csr185_shift
+OUTER_SET csr185_s57841 = 57841 + csr185_shift
+OUTER_SET csr185_s57842 = 57842 + csr185_shift
+OUTER_SET csr185_s59540 = 59540 + csr185_shift
+OUTER_SET csr185_s64896 = 64896 + csr185_shift
+OUTER_SET csr185_s64901 = 64901 + csr185_shift
+OUTER_SET csr185_s64902 = 64902 + csr185_shift
+<<<<<<<< .../csr185-fallback.d
+%csr185_fallback%
+>>>>>>>>
+<<<<<<<< .../csr185-transitions.d
+%csr185_transitions%
+>>>>>>>>
+LAF csr_ensure_dlg_states INT_VAR count = 40 STR_VAR dialog = ~BDLIIA~ RET csr185_old_BDLIIA = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 67 STR_VAR dialog = ~BDBELT~ RET csr185_old_BDBELT = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 6 STR_VAR dialog = ~BDSERV~ RET csr185_old_BDSERV = existing_states END
+OUTER_SPRINT csr185_transitions ~~
+ACTION_IF csr185_old_BDLIIA <= 9 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 9 STR_VAR dialog = ~BDLIIA~ RET csr185_weight = clause END
+  OUTER_SPRINT csr185_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr185_weight% ~  Global("bd_plot_003","bd0102",0)
+~ THEN BEGIN 9
+  SAY #%csr185_s34206%
+  IF ~~ THEN REPLY #%csr185_s59540%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 4
+  IF ~  False()
+~ THEN REPLY #%csr185_s57840%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 3
+  IF ~  Global("SOD_fromimport","global",1)
+~ THEN REPLY #%csr185_s57841%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 6
+  IF ~~ THEN REPLY #%csr185_s57842%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 5
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr185-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 9 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~~ THEN REPLY #%csr185_s59540%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 4
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~  False()
+~ THEN REPLY #%csr185_s57840%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 3
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~  Global("SOD_fromimport","global",1)
+~ THEN REPLY #%csr185_s57841%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 6
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~~ THEN REPLY #%csr185_s57842%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 5
+END
+~~~~~
+  END
+END
+ACTION_IF csr185_old_BDLIIA <= 31 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 31 STR_VAR dialog = ~BDLIIA~ RET csr185_weight = clause END
+  OUTER_SPRINT csr185_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr185_weight% ~~ THEN BEGIN 31
+  SAY #%csr185_s64902%
+  IF ~~ THEN EXTERN ~BDENTAR~ 42
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr185-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 31 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 31
+  IF ~~ THEN EXTERN ~BDENTAR~ 42
+END
+~~~~~
+  END
+END
+ACTION_IF csr185_old_BDBELT <= 61 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 61 STR_VAR dialog = ~BDBELT~ RET csr185_weight = clause END
+  OUTER_SPRINT csr185_fallback ~~~~~
+REPLACE ~BDBELT~
+IF %csr185_weight% ~  Global("BD_plot","global",56)
+Global("bd_final_speech","global",0)
+~ THEN BEGIN 61
+  SAY #%csr185_s64896%
+  IF ~~ THEN DO ~SetGlobal("bd_final_speech","global",1)
+~ EXTERN ~BDENTAR~ 41
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr185-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 61 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDBELT~ 61
+  IF ~~ THEN DO ~SetGlobal("bd_final_speech","global",1)
+~ EXTERN ~BDENTAR~ 41
+END
+~~~~~
+  END
+END
+ACTION_IF csr185_old_BDBELT <= 62 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 62 STR_VAR dialog = ~BDBELT~ RET csr185_weight = clause END
+  OUTER_SPRINT csr185_fallback ~~~~~
+REPLACE ~BDBELT~
+IF %csr185_weight% ~~ THEN BEGIN 62
+  SAY #%csr185_s64901%
+  IF ~~ THEN EXTERN ~BDENTAR~ 42
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr185-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 62 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDBELT~ 62
+  IF ~~ THEN EXTERN ~BDENTAR~ 42
+END
+~~~~~
+  END
+END
+ACTION_IF csr185_old_BDSERV <= 2 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 2 STR_VAR dialog = ~BDSERV~ RET csr185_weight = clause END
+  OUTER_SPRINT csr185_fallback ~~~~~
+REPLACE ~BDSERV~
+IF %csr185_weight% ~  Global("bd_plot","global",54)
+~ THEN BEGIN 2
+  SAY #%csr185_s35243%
+  IF ~~ THEN REPLY #%csr185_s35244%  GOTO 3
+  IF ~~ THEN REPLY #%csr185_s35245%  GOTO 4
+  IF ~~ THEN REPLY #%csr185_s35246%  GOTO 5
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr185-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSERV.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 2 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDSERV~ 2
+  IF ~~ THEN REPLY #%csr185_s35244%  GOTO 3
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDSERV~ 2
+  IF ~~ THEN REPLY #%csr185_s35245%  GOTO 4
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr185_transitions ~~~~~%csr185_transitions%
+EXTEND_BOTTOM ~BDSERV~ 2
+  IF ~~ THEN REPLY #%csr185_s35246%  GOTO 5
+END
+~~~~~
+  END
+END
+COMPILE EVALUATE_BUFFER ~.../csr185-transitions.d~

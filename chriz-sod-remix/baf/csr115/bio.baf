@@ -1,0 +1,27 @@
+// Component 115 owns these complete biography blocks.
+IF
+  !AreaCheck("bd0120")
+  !AreaCheck("bd0130")
+  Global("csr115_bio","LOCALS",0)
+  OR(2)
+    Global("csr_kh_carry","GLOBAL",1)
+    Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_add_new_bio","LOCALS",1)
+    SetGlobal("csr115_bio","LOCALS",1)
+    SetPlayerSound(Myself,@11581,BIO)
+END
+
+IF
+  !AreaCheck("bd0120")
+  !AreaCheck("bd0130")
+  Global("bd_add_new_bio","LOCALS",0)
+  !Global("csr_kh_carry","GLOBAL",1)
+  !Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_add_new_bio","LOCALS",1)
+    SetPlayerSound(Myself,%csr115_s69603%,BIO)
+END
+

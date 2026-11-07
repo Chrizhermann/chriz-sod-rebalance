@@ -1,0 +1,104 @@
+// Component 115 owns these complete blocks.
+IF
+  Global("bd_bridgefort_plot","global",30)
+  GlobalTimerExpired("bd_bridgefort_charge_timer","bd2000")
+  InMyArea(Player1)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_bridgefort_plot","global",31)
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  Global("bd_bridgefort_plot","global",31)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_bridgefort_plot","global",32)
+    SetGlobal("bd_enemy_gone_hostile","bd2000",1)
+    SetGlobal("bd_bf_attack","global",3)
+    TriggerActivation("drawbridge_info",FALSE)
+    SetGlobalTimer("bd_drawbridge_force_open","bd2000",4)
+    StartCutSceneEx("bdcutdrw",TRUE)
+    Wait(5)
+    DisplayStringHead("bdbfort",@11591)
+    SetGlobal("bd_no_boot_dialog","myarea",0)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  Global("bd_bridgefort_plot","global",31)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_bridgefort_plot","global",32)
+    SetGlobal("bd_enemy_gone_hostile","bd2000",1)
+    SetGlobal("bd_bf_attack","global",3)
+    TriggerActivation("drawbridge_info",FALSE)
+    SetGlobalTimer("bd_drawbridge_force_open","bd2000",4)
+    StartCutSceneEx("bdcutdrw",TRUE)
+    Wait(5)
+    ActionOverride("KHALID",DisplayStringHead(Myself,%csr115_s38223%))
+    SetGlobal("bd_no_boot_dialog","myarea",0)
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  Global("bd_plot","global",250)
+  OR(2)
+    GlobalLT("BD_bridgefort_plot","global",9)
+    Global("BD_bridgefort_plot","global",30)
+  Global("bd_bf_attack","global",0)
+  GlobalGT("bd_crusaders_killed","bd2000",10)
+THEN
+  RESPONSE #100
+    SetGlobal("BD_bridgefort_plot","global",31)
+    DisplayStringHead("bdbfort",@11591)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  Global("bd_plot","global",250)
+  OR(2)
+    GlobalLT("BD_bridgefort_plot","global",9)
+    Global("BD_bridgefort_plot","global",30)
+  Global("bd_bf_attack","global",0)
+  GlobalGT("bd_crusaders_killed","bd2000",10)
+THEN
+  RESPONSE #100
+    SetGlobal("BD_bridgefort_plot","global",31)
+    ActionOverride("KHALID",DisplayStringHead(Myself,%csr115_s45252%))
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  Global("bd_plot","global",250)
+  Global("bd_bf_attack","global",1)
+  !Global("BD_bridgefort_plot","global",9)
+  Global("bd_fists_attack","global",4)
+  GlobalTimerExpired("bd_bf_timer","bd2000")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_bridgefort_plot","global",31)
+    DisplayStringHead("bdbfort",@11591)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  Global("bd_plot","global",250)
+  Global("bd_bf_attack","global",1)
+  !Global("BD_bridgefort_plot","global",9)
+  Global("bd_fists_attack","global",4)
+  GlobalTimerExpired("bd_bf_timer","bd2000")
+THEN
+  RESPONSE #100
+    SetGlobal("BD_bridgefort_plot","global",31)
+    ActionOverride("KHALID",DisplayStringHead(Myself,%csr115_s45252%))
+END
+
+IF
+  Global("bd_crusaders_retreat","bd2000",1)
+  GlobalLT("BD_bridgefort_plot","global",9)
+THEN
+  RESPONSE #100
+    SetGlobal("BD_bridgefort_plot","global",31)
+END
+

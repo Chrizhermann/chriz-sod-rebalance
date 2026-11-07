@@ -1,0 +1,42 @@
+IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId("bdkorlas")
+    MoveViewObject("bdkorlas",INSTANT)
+    Wait(1)
+    MoveToPointNoInterrupt([768.546])
+    Wait(1)
+    DisplayStringHead("bdkorlas",%csr170_s45640%)
+    SmallWait(25)
+    FaceObject("bdfist1a")
+    SmallWait(30)
+    FaceObject([PC])
+    SmallWait(3)
+    StartDialogNoSet([PC])
+END
+
+IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId("bdfist1c")
+    Wait(2)
+    MoveToPointNoInterrupt([673.655])
+    Wait(1)
+    DisplayStringHead(Myself,%csr170_s45638%)
+END
+
+IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId("bdfist1a")
+    Wait(3)
+    SetSequence(SEQ_AWAKE)
+    Wait(1)
+    FaceObject("bdkorlas")
+    Wait(2)
+    DisplayStringHead(Myself,%csr170_s45639%)
+END
+

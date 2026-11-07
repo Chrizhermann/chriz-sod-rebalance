@@ -1,0 +1,827 @@
+OUTER_SET csr195_s42094 = 42094 + csr195_shift
+OUTER_SET csr195_s42095 = 42095 + csr195_shift
+OUTER_SET csr195_s42096 = 42096 + csr195_shift
+OUTER_SET csr195_s42097 = 42097 + csr195_shift
+OUTER_SET csr195_s42135 = 42135 + csr195_shift
+OUTER_SET csr195_s42136 = 42136 + csr195_shift
+OUTER_SET csr195_s42137 = 42137 + csr195_shift
+OUTER_SET csr195_s42138 = 42138 + csr195_shift
+OUTER_SET csr195_s42139 = 42139 + csr195_shift
+OUTER_SET csr195_s42158 = 42158 + csr195_shift
+OUTER_SET csr195_s42159 = 42159 + csr195_shift
+OUTER_SET csr195_s42160 = 42160 + csr195_shift
+OUTER_SET csr195_s42161 = 42161 + csr195_shift
+OUTER_SET csr195_s42175 = 42175 + csr195_shift
+OUTER_SET csr195_s42176 = 42176 + csr195_shift
+OUTER_SET csr195_s42177 = 42177 + csr195_shift
+OUTER_SET csr195_s42178 = 42178 + csr195_shift
+OUTER_SET csr195_s42179 = 42179 + csr195_shift
+OUTER_SET csr195_s42180 = 42180 + csr195_shift
+OUTER_SET csr195_s42181 = 42181 + csr195_shift
+OUTER_SET csr195_s42182 = 42182 + csr195_shift
+OUTER_SET csr195_s54917 = 54917 + csr195_shift
+OUTER_SET csr195_s54918 = 54918 + csr195_shift
+OUTER_SET csr195_s54919 = 54919 + csr195_shift
+OUTER_SET csr195_s54920 = 54920 + csr195_shift
+OUTER_SET csr195_s55915 = 55915 + csr195_shift
+OUTER_SET csr195_s55916 = 55916 + csr195_shift
+OUTER_SET csr195_s56000 = 56000 + csr195_shift
+OUTER_SET csr195_s56001 = 56001 + csr195_shift
+OUTER_SET csr195_s56002 = 56002 + csr195_shift
+OUTER_SET csr195_s56003 = 56003 + csr195_shift
+OUTER_SET csr195_s56004 = 56004 + csr195_shift
+OUTER_SET csr195_s56028 = 56028 + csr195_shift
+OUTER_SET csr195_s56030 = 56030 + csr195_shift
+OUTER_SET csr195_s56031 = 56031 + csr195_shift
+OUTER_SET csr195_s56042 = 56042 + csr195_shift
+OUTER_SET csr195_s58049 = 58049 + csr195_shift
+OUTER_SET csr195_s60734 = 60734 + csr195_shift
+OUTER_SET csr195_s64618 = 64618 + csr195_shift
+OUTER_SET csr195_s64619 = 64619 + csr195_shift
+OUTER_SET csr195_s64626 = 64626 + csr195_shift
+OUTER_SET csr195_s64631 = 64631 + csr195_shift
+OUTER_SET csr195_s64712 = 64712 + csr195_shift
+OUTER_SET csr195_s64713 = 64713 + csr195_shift
+OUTER_SET csr195_s64714 = 64714 + csr195_shift
+OUTER_SET csr195_s64715 = 64715 + csr195_shift
+OUTER_SET csr195_s64731 = 64731 + csr195_shift
+OUTER_SET csr195_s64734 = 64734 + csr195_shift
+OUTER_SET csr195_s64735 = 64735 + csr195_shift
+OUTER_SET csr195_s64736 = 64736 + csr195_shift
+OUTER_SET csr195_s64737 = 64737 + csr195_shift
+OUTER_SET csr195_s64738 = 64738 + csr195_shift
+OUTER_SET csr195_s64745 = 64745 + csr195_shift
+OUTER_SET csr195_s64746 = 64746 + csr195_shift
+OUTER_SET csr195_s65234 = 65234 + csr195_shift
+OUTER_SET csr195_s65236 = 65236 + csr195_shift
+OUTER_SET csr195_s65248 = 65248 + csr195_shift
+OUTER_SET csr195_s65249 = 65249 + csr195_shift
+OUTER_SET csr195_s65250 = 65250 + csr195_shift
+OUTER_SET csr195_s66836 = 66836 + csr195_shift
+OUTER_SET csr195_s66837 = 66837 + csr195_shift
+OUTER_SET csr195_s66838 = 66838 + csr195_shift
+OUTER_SET csr195_s66839 = 66839 + csr195_shift
+<<<<<<<< .../csr195-fallback.d
+%csr195_fallback%
+>>>>>>>>
+<<<<<<<< .../csr195-transitions.d
+%csr195_transitions%
+>>>>>>>>
+LAF csr_ensure_dlg_states INT_VAR count = 57 STR_VAR dialog = ~BDCORWIN~ RET csr195_old_BDCORWIN = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 24 STR_VAR dialog = ~BDELTAN~ RET csr195_old_BDELTAN = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 78 STR_VAR dialog = ~BDEDWIN~ RET csr195_old_BDEDWIN = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 287 STR_VAR dialog = ~BDSCHAEL~ RET csr195_old_BDSCHAEL = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 27 STR_VAR dialog = ~BDDEBUG~ RET csr195_old_BDDEBUG = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 2 STR_VAR dialog = ~BDFIST05~ RET csr195_old_BDFIST05 = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 40 STR_VAR dialog = ~BDLIIA~ RET csr195_old_BDLIIA = existing_states END
+OUTER_SPRINT csr195_transitions ~~
+ACTION_IF csr195_old_BDCORWIN <= 11 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 11 STR_VAR dialog = ~BDCORWIN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDCORWIN~
+IF %csr195_weight% ~~ THEN BEGIN 11
+  SAY #%csr195_s42094%
+  IF ~~ THEN REPLY #%csr195_s60734%  GOTO 12
+  IF ~~ THEN REPLY #%csr195_s42095%  GOTO 12
+  IF ~~ THEN REPLY #%csr195_s42096%  GOTO 12
+  IF ~~ THEN REPLY #%csr195_s42097%  GOTO 12
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDCORWIN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 11 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDCORWIN~ 11
+  IF ~~ THEN REPLY #%csr195_s60734%  GOTO 12
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDCORWIN~ 11
+  IF ~~ THEN REPLY #%csr195_s42095%  GOTO 12
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDCORWIN~ 11
+  IF ~~ THEN REPLY #%csr195_s42096%  GOTO 12
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDCORWIN~ 11
+  IF ~~ THEN REPLY #%csr195_s42097%  GOTO 12
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDELTAN <= 1 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 1 STR_VAR dialog = ~BDELTAN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDELTAN~
+IF %csr195_weight% ~~ THEN BEGIN 1
+  SAY #%csr195_s64712%
+  IF ~~ THEN EXTERN ~BDLIIA~ 10
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDELTAN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 1 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 1
+  IF ~~ THEN EXTERN ~BDLIIA~ 10
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDELTAN <= 9 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 9 STR_VAR dialog = ~BDELTAN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDELTAN~
+IF %csr195_weight% ~~ THEN BEGIN 9
+  SAY #%csr195_s64734%
+  IF ~  PartyHasItem("BDMISC56")
+~ THEN REPLY #%csr195_s64735%  EXTERN ~BDBELT~ 39
+  IF ~  !PartyHasItem("BDMISC56")
+~ THEN REPLY #%csr195_s64736%  EXTERN ~BDBELT~ 39
+  IF ~~ THEN REPLY #%csr195_s64737%  EXTERN ~BDBELT~ 39
+  IF ~~ THEN REPLY #%csr195_s64738%  GOTO 8
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDELTAN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 9 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 9
+  IF ~  PartyHasItem("BDMISC56")
+~ THEN REPLY #%csr195_s64735%  EXTERN ~BDBELT~ 39
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 9
+  IF ~  !PartyHasItem("BDMISC56")
+~ THEN REPLY #%csr195_s64736%  EXTERN ~BDBELT~ 39
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 9
+  IF ~~ THEN REPLY #%csr195_s64737%  EXTERN ~BDBELT~ 39
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 9
+  IF ~~ THEN REPLY #%csr195_s64738%  GOTO 8
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDELTAN <= 10 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 10 STR_VAR dialog = ~BDELTAN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDELTAN~
+IF %csr195_weight% ~  GlobalLT("BD_plot","global",55)
+AreaCheck("bd0102")
+~ THEN BEGIN 10
+  SAY #%csr195_s56000%
+  IF ~~ THEN REPLY #%csr195_s56001%  GOTO 18
+  IF ~~ THEN REPLY #%csr195_s56002%  GOTO 11
+  IF ~~ THEN REPLY #%csr195_s56003%  GOTO 11
+  IF ~~ THEN REPLY #%csr195_s56004%  GOTO 17
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDELTAN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 10 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 10
+  IF ~~ THEN REPLY #%csr195_s56001%  GOTO 18
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 10
+  IF ~~ THEN REPLY #%csr195_s56002%  GOTO 11
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 10
+  IF ~~ THEN REPLY #%csr195_s56003%  GOTO 11
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDELTAN~ 10
+  IF ~~ THEN REPLY #%csr195_s56004%  GOTO 17
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDEDWIN <= 21 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 21 STR_VAR dialog = ~BDEDWIN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDEDWIN~
+IF %csr195_weight% ~~ THEN BEGIN 21
+  SAY #%csr195_s42135%
+  IF ~~ THEN REPLY #%csr195_s42136%  GOTO 32
+  IF ~~ THEN REPLY #%csr195_s42137%  GOTO 39
+  IF ~~ THEN REPLY #%csr195_s42138%  GOTO 32
+  IF ~~ THEN REPLY #%csr195_s42139%  GOTO 32
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDEDWIN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 21 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 21
+  IF ~~ THEN REPLY #%csr195_s42136%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 21
+  IF ~~ THEN REPLY #%csr195_s42137%  GOTO 39
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 21
+  IF ~~ THEN REPLY #%csr195_s42138%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 21
+  IF ~~ THEN REPLY #%csr195_s42139%  GOTO 32
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDEDWIN <= 31 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 31 STR_VAR dialog = ~BDEDWIN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDEDWIN~
+IF %csr195_weight% ~~ THEN BEGIN 31
+  SAY #%csr195_s42158%
+  IF ~~ THEN REPLY #%csr195_s42159%  GOTO 32
+  IF ~~ THEN REPLY #%csr195_s42160%  GOTO 32
+  IF ~~ THEN REPLY #%csr195_s42161%  GOTO 32
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDEDWIN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 31 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 31
+  IF ~~ THEN REPLY #%csr195_s42159%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 31
+  IF ~~ THEN REPLY #%csr195_s42160%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 31
+  IF ~~ THEN REPLY #%csr195_s42161%  GOTO 32
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDEDWIN <= 35 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 35 STR_VAR dialog = ~BDEDWIN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDEDWIN~
+IF %csr195_weight% ~~ THEN BEGIN 35
+  SAY #%csr195_s42175%
+  IF ~~ THEN REPLY #%csr195_s42176%  GOTO 36
+  IF ~~ THEN REPLY #%csr195_s42177%  GOTO 34
+  IF ~~ THEN REPLY #%csr195_s42178%  GOTO 32
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDEDWIN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 35 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 35
+  IF ~~ THEN REPLY #%csr195_s42176%  GOTO 36
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 35
+  IF ~~ THEN REPLY #%csr195_s42177%  GOTO 34
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 35
+  IF ~~ THEN REPLY #%csr195_s42178%  GOTO 32
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDEDWIN <= 36 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 36 STR_VAR dialog = ~BDEDWIN~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDEDWIN~
+IF %csr195_weight% ~~ THEN BEGIN 36
+  SAY #%csr195_s42179%
+  IF ~~ THEN REPLY #%csr195_s42180%  GOTO 32
+  IF ~~ THEN REPLY #%csr195_s42181%  GOTO 32
+  IF ~~ THEN REPLY #%csr195_s42182%  GOTO 32
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDEDWIN.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 36 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 36
+  IF ~~ THEN REPLY #%csr195_s42180%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 36
+  IF ~~ THEN REPLY #%csr195_s42181%  GOTO 32
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDEDWIN~ 36
+  IF ~~ THEN REPLY #%csr195_s42182%  GOTO 32
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDSCHAEL <= 167 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 167 STR_VAR dialog = ~BDSCHAEL~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDSCHAEL~
+IF %csr195_weight% ~  AreaCheck("BD0121")
+NumTimesTalkedTo(0)
+~ THEN BEGIN 167
+  SAY #%csr195_s54917%
+  IF ~~ THEN REPLY #%csr195_s54918%  GOTO 168
+  IF ~~ THEN REPLY #%csr195_s54919%  GOTO 172
+  IF ~~ THEN REPLY #%csr195_s54920%  GOTO 170
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSCHAEL.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 167 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDSCHAEL~ 167
+  IF ~~ THEN REPLY #%csr195_s54918%  GOTO 168
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDSCHAEL~ 167
+  IF ~~ THEN REPLY #%csr195_s54919%  GOTO 172
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDSCHAEL~ 167
+  IF ~~ THEN REPLY #%csr195_s54920%  GOTO 170
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDSCHAEL <= 227 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 227 STR_VAR dialog = ~BDSCHAEL~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDSCHAEL~
+IF %csr195_weight% ~  AreaCheck("BD0102")
+Global("BD_CORWIN_GOODNIGHT","BD0102",0)
+GlobalGT("BD_LEFT_THE_PALACE","GLOBAL",0)
+~ THEN BEGIN 227
+  SAY #%csr195_s66836%
+  IF ~~ THEN REPLY #%csr195_s66837%  GOTO 228
+  IF ~~ THEN REPLY #%csr195_s66838%  GOTO 229
+  IF ~~ THEN REPLY #%csr195_s66839%  GOTO 229
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSCHAEL.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 227 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDSCHAEL~ 227
+  IF ~~ THEN REPLY #%csr195_s66837%  GOTO 228
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDSCHAEL~ 227
+  IF ~~ THEN REPLY #%csr195_s66838%  GOTO 229
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDSCHAEL~ 227
+  IF ~~ THEN REPLY #%csr195_s66839%  GOTO 229
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDDEBUG <= 4 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 4 STR_VAR dialog = ~BDDEBUG~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDDEBUG~
+IF %csr195_weight% ~~ THEN BEGIN 4
+  SAY #%csr195_s65248%
+  IF ~~ THEN REPLY #%csr195_s65236%  GOTO 3
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",51)
+~ THEN REPLY #%csr195_s65249%  DO ~SetGlobal("bd_debug_move_to_bg","global",1)
+SetCutSceneLite(TRUE)
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",55)
+~ THEN REPLY #%csr195_s65250%  DO ~SetGlobal("bd_debug_clear_bgee_party","global",1)
+SetGlobal("bd_debug_move_to_bg_leave","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~~ THEN REPLY #%csr195_s65234%  EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDEBUG.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 4 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 4
+  IF ~~ THEN REPLY #%csr195_s65236%  GOTO 3
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 4
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",51)
+~ THEN REPLY #%csr195_s65249%  DO ~SetGlobal("bd_debug_move_to_bg","global",1)
+SetCutSceneLite(TRUE)
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 4
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",55)
+~ THEN REPLY #%csr195_s65250%  DO ~SetGlobal("bd_debug_clear_bgee_party","global",1)
+SetGlobal("bd_debug_move_to_bg_leave","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 4
+  IF ~~ THEN REPLY #%csr195_s65234%  EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDFIST05 <= 0 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 0 STR_VAR dialog = ~BDFIST05~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDFIST05~
+IF %csr195_weight% ~  RandomNum(2,1)
+~ THEN BEGIN 0
+  SAY #%csr195_s55915%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDFIST05.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 0 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDFIST05~ 0
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDFIST05 <= 1 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 1 STR_VAR dialog = ~BDFIST05~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDFIST05~
+IF %csr195_weight% ~  RandomNum(2,2)
+~ THEN BEGIN 1
+  SAY #%csr195_s55916%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDFIST05.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 1 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDFIST05~ 1
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 0 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 0 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~  GlobalLT("bd_001_plot","bd0103",9)
+AreaCheck("bd0103")
+~ THEN BEGIN 0
+  SAY #%csr195_s64618%
+  IF ~~ THEN REPLY #%csr195_s64619%  DO ~SetGlobal("bd_001_plot","bd0103",9)
+TriggerActivation("TranBD0100a",TRUE)
+TriggerActivation("TranBD0100b",TRUE)
+TriggerActivation("imoeninfo1",TRUE)
+AddMapNoteColor([505.225],264543,GREEN)
+AddMapNoteColor([1275.760],264543,GREEN)
+~ GOTO 1
+  IF ~~ THEN REPLY #%csr195_s64745%  DO ~SetGlobal("bd_001_plot","bd0103",9)
+TriggerActivation("TranBD0100a",TRUE)
+TriggerActivation("TranBD0100b",TRUE)
+TriggerActivation("imoeninfo1",TRUE)
+AddMapNoteColor([505.225],264543,GREEN)
+AddMapNoteColor([1275.760],264543,GREEN)
+~ GOTO 2
+  IF ~~ THEN REPLY #%csr195_s64746%  DO ~SetGlobal("bd_001_plot","bd0103",9)
+TriggerActivation("TranBD0100a",TRUE)
+TriggerActivation("TranBD0100b",TRUE)
+TriggerActivation("imoeninfo1",TRUE)
+AddMapNoteColor([505.225],264543,GREEN)
+AddMapNoteColor([1275.760],264543,GREEN)
+~ GOTO 1
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 0 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 0
+  IF ~~ THEN REPLY #%csr195_s64619%  DO ~SetGlobal("bd_001_plot","bd0103",9)
+TriggerActivation("TranBD0100a",TRUE)
+TriggerActivation("TranBD0100b",TRUE)
+TriggerActivation("imoeninfo1",TRUE)
+AddMapNoteColor([505.225],264543,GREEN)
+AddMapNoteColor([1275.760],264543,GREEN)
+~ GOTO 1
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 0
+  IF ~~ THEN REPLY #%csr195_s64745%  DO ~SetGlobal("bd_001_plot","bd0103",9)
+TriggerActivation("TranBD0100a",TRUE)
+TriggerActivation("TranBD0100b",TRUE)
+TriggerActivation("imoeninfo1",TRUE)
+AddMapNoteColor([505.225],264543,GREEN)
+AddMapNoteColor([1275.760],264543,GREEN)
+~ GOTO 2
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 0
+  IF ~~ THEN REPLY #%csr195_s64746%  DO ~SetGlobal("bd_001_plot","bd0103",9)
+TriggerActivation("TranBD0100a",TRUE)
+TriggerActivation("TranBD0100b",TRUE)
+TriggerActivation("imoeninfo1",TRUE)
+AddMapNoteColor([505.225],264543,GREEN)
+AddMapNoteColor([1275.760],264543,GREEN)
+~ GOTO 1
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 3 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 3 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~~ THEN BEGIN 3
+  SAY #%csr195_s64626%
+  IF ~~ THEN GOTO 4
+  IF ~  Gender(Player1,FEMALE)
+~ THEN GOTO 5
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 3 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 3
+  IF ~~ THEN GOTO 4
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 3
+  IF ~  Gender(Player1,FEMALE)
+~ THEN GOTO 5
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 8 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 8 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~  Global("bd_001_plot","bd0103",9)
+AreaCheck("bd0103")
+~ THEN BEGIN 8
+  SAY #%csr195_s64631%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 8 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 8
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 10 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 10 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~~ THEN BEGIN 10
+  SAY #%csr195_s64713%
+  IF ~~ THEN REPLY #%csr195_s64714%  EXTERN ~BDBELT~ 34
+  IF ~~ THEN REPLY #%csr195_s64715%  EXTERN ~BDENTAR~ 7
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 10 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 10
+  IF ~~ THEN REPLY #%csr195_s64714%  EXTERN ~BDBELT~ 34
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 10
+  IF ~~ THEN REPLY #%csr195_s64715%  EXTERN ~BDENTAR~ 7
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 12 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 12 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~~ THEN BEGIN 12
+  SAY #%csr195_s64731%
+  IF ~~ THEN EXTERN ~BDBELT~ 37
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 12 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 12
+  IF ~~ THEN EXTERN ~BDBELT~ 37
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 13 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 13 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~  GlobalLT("BD_plot","global",55)
+AreaCheck("bd0102")
+~ THEN BEGIN 13
+  SAY #%csr195_s56028%
+  IF ~  False()
+~ THEN REPLY #%csr195_s56030%  GOTO 14
+  IF ~~ THEN REPLY #%csr195_s56031%  GOTO 14
+  IF ~~ THEN REPLY #%csr195_s58049%  GOTO 29
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 13 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 13
+  IF ~  False()
+~ THEN REPLY #%csr195_s56030%  GOTO 14
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 13
+  IF ~~ THEN REPLY #%csr195_s56031%  GOTO 14
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 13
+  IF ~~ THEN REPLY #%csr195_s58049%  GOTO 29
+END
+~~~~~
+  END
+END
+ACTION_IF csr195_old_BDLIIA <= 19 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 19 STR_VAR dialog = ~BDLIIA~ RET csr195_weight = clause END
+  OUTER_SPRINT csr195_fallback ~~~~~
+REPLACE ~BDLIIA~
+IF %csr195_weight% ~~ THEN BEGIN 19
+  SAY #%csr195_s56042%
+  IF ~~ THEN GOTO 20
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr195-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 19 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr195_transitions ~~~~~%csr195_transitions%
+EXTEND_BOTTOM ~BDLIIA~ 19
+  IF ~~ THEN GOTO 20
+END
+~~~~~
+  END
+END
+COMPILE EVALUATE_BUFFER ~.../csr195-transitions.d~

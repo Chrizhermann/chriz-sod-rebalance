@@ -1,0 +1,75 @@
+// Component 115 owns these complete blocks.
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  GlobalLT("bd_plot","global",293)
+  OR(2)
+    GlobalGT("bd_elemental","bd2000",0)
+    Global("bdsumfir","global",3)
+  OR(2)
+    Dead("bdelefir")
+    Global("bdsumfir","global",3)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_plot","global",293)
+    CreateCreature("bdbence",[2425.2660],NW)
+    AddJournalEntry(%csr115_s59772%,QUEST)
+    SetGlobal("bd_cant_rest","myarea",0)
+    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  GlobalLT("bd_plot","global",293)
+  OR(2)
+    GlobalGT("bd_elemental","bd2000",0)
+    Global("bdsumfir","global",3)
+  OR(2)
+    Dead("bdelefir")
+    Global("bdsumfir","global",3)
+THEN
+  RESPONSE #100
+    SetGlobal("bd_plot","global",293)
+    CreateCreature("bdbence",[2425.2660],NW)
+    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",[2425.2485]))
+    ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))
+    ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))
+    AddJournalEntry(%csr115_s59772%,QUEST)
+    SetGlobal("bd_cant_rest","myarea",0)
+    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  GlobalLT("bd_plot","global",293)
+  Global("bd_elemental","bd2000",0)
+  Global("bdsumfir","global",0)
+  !NumDeadLT("bdcrubb",6)
+  Dead("bdcrubbm")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_plot","global",293)
+    CreateCreature("bdbence",[2425.2660],NW)
+    AddJournalEntry(%csr115_s59772%,QUEST)
+    SetGlobal("bd_cant_rest","myarea",0)
+    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  GlobalLT("bd_plot","global",293)
+  Global("bd_elemental","bd2000",0)
+  Global("bdsumfir","global",0)
+  !NumDeadLT("bdcrubb",6)
+  Dead("bdcrubbm")
+THEN
+  RESPONSE #100
+    SetGlobal("bd_plot","global",293)
+    CreateCreature("bdbence",[2425.2660],NW)
+    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",[2425.2485]))
+    ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))
+    ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))
+    AddJournalEntry(%csr115_s59772%,QUEST)
+    SetGlobal("bd_cant_rest","myarea",0)
+    SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)
+END
+

@@ -1,0 +1,16 @@
+// Component 115 owns these complete blocks.
+IF
+  !InPartyAllowDead("jaheira")
+  !Global("csr_jh_carry","GLOBAL",1)
+  Global("bd_jaheira_join","global",0)
+  GlobalLT("bd_plot","global",240)
+  AreaCheck("bd7100")
+  Allegiance(Myself,NEUTRAL)
+  TriggerOverride([PC],See("jaheira"))
+  See([PC])
+  Range(LastSeenBy(Myself),23)
+THEN
+  RESPONSE #100
+    StartDialogNoSet(Player1)
+END
+

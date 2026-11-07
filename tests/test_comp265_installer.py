@@ -140,7 +140,7 @@ class Component265InstallerTests(unittest.TestCase):
         if gtimes is not None:
             (self.override / 'gtimes.ids').write_bytes(gtimes.encode('ascii'))
         (self.game / 'chriz-sod-remix/lib').mkdir(parents=True)
-        for library in ('comp265.tpa', 'gtimes_compat.tpa'):
+        for library in ('comp265.tpa', 'gtimes_compat.tpa', 'overwrite.tpa'):
             shutil.copy2(ROOT / 'chriz-sod-remix/lib' / library,
                          self.game / 'chriz-sod-remix/lib' / library)
         (self.game / 'fixture').mkdir()
@@ -195,15 +195,13 @@ INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
         self.assertIn('SUCCESSFULLY INSTALLED', result.stdout)
 
-    def assert_failure(self, expected):
-        before = tree(self.override)
+    def assert_changed_input_installs(self):
         result = self.repair()
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn(expected, result.stdout+result.stderr)
-        self.assertEqual(tree(self.override), before)
-        backups = self.game / 'repair-backup/265'
-        self.assertFalse(backups.exists() and any(p.suffix.lower() in {'.are','.bcs'}
-                         for p in backups.iterdir()), 'preflight failure began resource writes')
+        self.assert_success(result)
+        self.assertNotIn('WARNING', (result.stdout+result.stderr).upper())
+        self.assertNotIn('BDSHSOUL', compact(self.decompile('bdashiru.bcs')))
+        self.assertNotIn('GIVEITEMCREATE("BDMISC68"', compact(self.decompile('bd5000.bcs')))
+        return (self.override/'bd5000.are').read_bytes()
 
     def test_full_repair_preserves_raw_items_other_tables_quests_and_ai(self):
         self.fixture()
@@ -267,47 +265,56 @@ INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
         self.assert_success(self.repair(0,0))
         self.assertEqual(tree(self.override),before)
 
-    def test_changed_native_grant_branch_fails_before_any_write(self):
+    def test_changed_native_grant_branch_is_overwritten(self):
         self.fixture(ITEM_BLOCK.replace('Displacer Beast 3','Other actor'))
-        self.assert_failure('amulet grant branches differ')
+        self.assert_changed_input_installs()
 
-    def test_changed_summon_block_fails_before_any_write(self):
+    def test_changed_summon_block_is_overwritten(self):
         self.fixture(ash_script=ASHIRUK.replace(SOUL, '', 1))
-        self.assert_failure('HARDEST summon block differs')
+        self.assert_changed_input_installs()
 
-    def test_duplicate_amulet_fails_before_any_write(self):
+    def test_duplicate_amulet_is_overwritten(self):
         self.fixture(); self.write('bd5000.are',area(target_items=[item('BDMISC68'),item('BDMISC68',3)]))
-        self.assert_failure('duplicate amulets already exist')
+        after = self.assert_changed_input_installs()
+        self.assertEqual(sum(raw[:8] == b'BDMISC68' for run in containers(after).values() for raw in run), 1)
 
-    def test_amulet_in_another_container_fails_before_any_write(self):
+    def test_amulet_in_another_container_is_overwritten(self):
         self.fixture(); raw=area().replace(b'AFTER\0\0\0',b'BDMISC68')
         self.write('bd5000.are',raw)
-        self.assert_failure('amulet is outside Dead_fighter')
+        after = self.assert_changed_input_installs()
+        self.assertTrue(any(raw[:8] == b'BDMISC68' for raw in containers(after)['Dead_fighter']))
 
-    def test_active_displacer_fails_before_any_write(self):
+    def test_active_displacer_is_overwritten(self):
         self.fixture(); raw=bytearray(area()); struct.pack_into('<I',raw,0xf4+0x40,0xffffff)
         self.write('bd5000.are',raw)
-        self.assert_failure('not a suppressed displacer beast')
+        after = self.assert_changed_input_installs()
+        self.assertEqual(struct.unpack_from('<I', after, 0xf4+0x40)[0], 0)
 
-    def test_missing_or_moved_container_fails_before_any_write(self):
+    def test_missing_or_moved_container_is_overwritten(self):
         self.fixture(); raw=bytearray(area()); co=struct.unpack_from('<I',raw,0x70)[0]
         struct.pack_into('<H',raw,co+0xc0+0x20,1234); self.write('bd5000.are',raw)
-        self.assert_failure('Dead_fighter moved')
+        after = self.assert_changed_input_installs()
+        self.assertEqual(struct.unpack_from('<H', after, co+0xc0+0x20)[0], 1234)
 
-    def test_out_of_bounds_item_run_fails_before_any_write(self):
+    def test_out_of_bounds_item_run_is_overwritten(self):
         self.fixture(); raw=bytearray(area()); co=struct.unpack_from('<I',raw,0x70)[0]
         struct.pack_into('<I',raw,co+0xc0+0x44,999); self.write('bd5000.are',raw)
-        self.assert_failure('container item run is out of bounds')
+        after = self.assert_changed_input_installs()
+        self.assertEqual(after, raw)
 
-    def test_overlapping_item_ownership_fails_before_any_write(self):
+    def test_overlapping_item_ownership_is_overwritten(self):
         self.fixture(); raw=bytearray(area()); co=struct.unpack_from('<I',raw,0x70)[0]
         struct.pack_into('<I',raw,co+3*0xc0+0x40,2); self.write('bd5000.are',raw)
-        self.assert_failure('container item runs overlap')
+        before = containers(raw)
+        after = self.assert_changed_input_installs()
+        for name in ('Before', 'Empty', 'After'): self.assertEqual(containers(after)[name], before[name])
 
-    def test_missing_guardian_fails_before_any_write(self):
+    def test_missing_guardian_is_overwritten(self):
         self.fixture(); raw=bytearray(area(guardian=True))
         struct.pack_into('<H',raw,0xf4+0x110+0x20,680); self.write('bd5110.are',raw)
-        self.assert_failure('expected one Guardian')
+        self.assert_changed_input_installs()
+        after = (self.override/'bd5110.are').read_bytes()
+        self.assertEqual(struct.unpack_from('<I', after, 0xf4+0x110+0x40)[0], 0)
 
     def test_summon_contract_follows_the_gtimes_name_for_sixty_seconds(self):
         # Dark Tidings appends "60 ONE_TURN", so BDASHIRU then decompiles with
@@ -342,10 +349,10 @@ INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
                 self.assert_success(self.repair())
                 self.assertEqual(tree(self.override), before)
 
-    def test_changed_summon_block_fails_with_an_appended_gtimes_name(self):
+    def test_changed_summon_block_installs_with_an_appended_gtimes_name(self):
         self.make_game(gtimes_variants(60)['Dark Tidings'][0])
         self.fixture(ash_script=ASHIRUK.replace(SOUL, '', 1))
-        self.assert_failure('HARDEST summon block differs')
+        self.assert_changed_input_installs()
 
 
 if __name__=='__main__':

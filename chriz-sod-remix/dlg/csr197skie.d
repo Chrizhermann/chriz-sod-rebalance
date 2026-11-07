@@ -38,11 +38,11 @@
 //      would start the subquest on a party member.
 // 53 = BD4100 "captured Skie" root (bd_skie_plot=10 never happens; gated for
 //      the same in-party-click reason).
-ADD_STATE_TRIGGER ~BDSKIE~ 8  ~False()~
-ADD_STATE_TRIGGER ~BDSKIE~ 34 ~False()~
-ADD_STATE_TRIGGER ~BDSKIE~ 37 ~False()~
-ADD_STATE_TRIGGER ~BDSKIE~ 39 ~False()~
-ADD_STATE_TRIGGER ~BDSKIE~ 53 ~False()~
+REPLACE_STATE_TRIGGER ~BDSKIE~ 8 ~False()~
+REPLACE_STATE_TRIGGER ~BDSKIE~ 34 ~False()~
+REPLACE_STATE_TRIGGER ~BDSKIE~ 37 ~False()~
+REPLACE_STATE_TRIGGER ~BDSKIE~ 39 ~False()~
+REPLACE_STATE_TRIGGER ~BDSKIE~ 53 ~False()~
 
 // ------------------------------------------------------------
 // The new palace meeting: short Entar beat -> talk-to-join.
@@ -58,35 +58,35 @@ ADD_STATE_TRIGGER ~BDSKIE~ 53 ~False()~
 // read; ChangeAIScript mirrors BDPARTY's ChangeAIScript(...,CLASS) idiom —
 // her CLASS slot ships empty and BDSKIEC is the standard BD party combat AI.
 
-APPEND ~BDSKIE~
+REPLACE ~BDSKIE~
 
-IF ~  Global("bd_plot_003","bd0102",2)
+IF %csr197_w_meet% ~  Global("bd_plot_003","bd0102",2)
 Global("EscapeBD0102","BD0102",0)
 Global("CSR_SKIE_PALACE","GLOBAL",0)
 AreaCheck("BD0102")
-~ THEN BEGIN csr197_meet
+~ THEN BEGIN %csr197_meet%
   SAY @0
-  IF ~~ THEN REPLY @1 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO csr197_condolence
-  IF ~~ THEN REPLY @2 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO csr197_ask
+  IF ~~ THEN REPLY @1 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO %csr197_condolence%
+  IF ~~ THEN REPLY @2 DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",1)~ GOTO %csr197_ask%
 END
 
 // A condolence needs an acknowledgement; "Because you're here" only
 // answers the other opening reply's question, "Why are you here?"
-IF ~~ THEN BEGIN csr197_condolence
+IF %csr197_w_condolence% ~~ THEN BEGIN %csr197_condolence%
   SAY @11
   IF ~  !InParty("SKIE")
-~ THEN REPLY @4 GOTO csr197_join
-  IF ~~ THEN REPLY @5 GOTO csr197_stay
+~ THEN REPLY @4 GOTO %csr197_join%
+  IF ~~ THEN REPLY @5 GOTO %csr197_stay%
 END
 
-IF ~~ THEN BEGIN csr197_ask
+IF %csr197_w_ask% ~~ THEN BEGIN %csr197_ask%
   SAY @3
   IF ~  !InParty("SKIE")
-~ THEN REPLY @4 GOTO csr197_join
-  IF ~~ THEN REPLY @5 GOTO csr197_stay
+~ THEN REPLY @4 GOTO %csr197_join%
+  IF ~~ THEN REPLY @5 GOTO %csr197_stay%
 END
 
-IF ~~ THEN BEGIN csr197_join
+IF %csr197_w_join% ~~ THEN BEGIN %csr197_join%
   SAY @6
   IF ~~ THEN DO ~SetGlobal("CSR_SKIE_PALACE","GLOBAL",2)
 SetGlobal("bd_joined","locals",1)
@@ -94,19 +94,19 @@ ChangeAIScript("bdskiec",CLASS)
 JoinParty()~ EXIT
 END
 
-IF ~~ THEN BEGIN csr197_stay
+IF %csr197_w_stay% ~~ THEN BEGIN %csr197_stay%
   SAY @7
   IF ~~ THEN EXIT
 END
 
 // Re-offer while she still waits in the hall (she is cleaned up at the
 // BD_plot=55 departure by the comp197 BD0102 blocks if never recruited).
-IF ~  Global("CSR_SKIE_PALACE","GLOBAL",1)
+IF %csr197_w_again% ~  Global("CSR_SKIE_PALACE","GLOBAL",1)
 AreaCheck("BD0102")
-~ THEN BEGIN csr197_again
+~ THEN BEGIN %csr197_again%
   SAY @8
   IF ~  !InParty("SKIE")
-~ THEN REPLY @9 GOTO csr197_join
+~ THEN REPLY @9 GOTO %csr197_join%
   IF ~~ THEN REPLY @10 EXIT
 END
 
@@ -114,15 +114,15 @@ END
 // would otherwise have nothing to say (the camp cluster 1-4 is area-gated and
 // BDPARTY has no Skie handling — she's a BG1-style "waits where dropped"
 // companion). Reuses the camp-cluster strrefs and JoinParty states verbatim:
-// #266436 "What is it? What do you want now?" -> #266437 rejoin (state 6),
-// #266438 wait (state 7). Scanned after every vanilla state, so at BD0120/
+// #%csr197_field_text% "What is it? What do you want now?" -> #%csr197_join_text% rejoin (state 6),
+// #%csr197_wait_text% wait (state 7). Scanned after every vanilla state, so at BD0120/
 // BD0130 the vanilla cluster still wins.
-IF ~  GlobalGT("bd_joined","locals",0)
+IF %csr197_w_field% ~  GlobalGT("bd_joined","locals",0)
 !InParty(Myself)
-~ THEN BEGIN csr197_field
-  SAY #266436
-  IF ~~ THEN REPLY #266437 GOTO 6
-  IF ~~ THEN REPLY #266438 GOTO 7
+~ THEN BEGIN %csr197_field%
+  SAY #%csr197_field_text%
+  IF ~~ THEN REPLY #%csr197_join_text% GOTO 6
+  IF ~~ THEN REPLY #%csr197_wait_text% GOTO 7
 END
 
 END
@@ -137,20 +137,14 @@ END
 // reproduce state 29's saved/lost branch: unconditional -> 30, gated -> 31
 // (continuation transitions: LAST valid wins — vanilla precedent). The
 // bd_plot 293->294 bookkeeping stays on both paths.
-ALTER_TRANS ~BDBENCE~ BEGIN 25 END BEGIN 0 END BEGIN
-  EPILOGUE ~GOTO 30~
-END
-
-EXTEND_BOTTOM ~BDBENCE~ 25
-  IF ~  !Global("bd_bridgefort_saved","GLOBAL",1)
-~ THEN DO ~SetGlobal("bd_plot","global",294)~ GOTO 31
-END
+ALTER_TRANS ~BDBENCE~ BEGIN 25 END BEGIN 0 END BEGIN TRIGGER ~~ ACTION ~SetGlobal("bd_plot","global",294)~ EPILOGUE ~GOTO 30~ END
+%csr197_bence_route%
 
 // State 32 opens the bridge; its action list EscapeAreaObject'd "bdskie" —
 // a no-op when she was never spawned, but it would eject an in-party Skie
 // from the area. Same action minus the bdskie line.
 ALTER_TRANS ~BDBENCE~ BEGIN 32 END BEGIN 0 END BEGIN
-  ACTION ~AddJournalEntry(265108,QUEST)
+  ACTION ~AddJournalEntry(%csr197_bridge_journal%,QUEST)
 CreateCreature("bdffmerc",[1380.1925],NW)
 OpenDoor("Bridge_Barrels")
 EscapeAreaObject("Crusade_camp_exit")~
@@ -161,8 +155,8 @@ END
 // BDWILCH/BDCRUM30/BDCORWIJ + the BD4000/BD4100 chain). The script starter
 // block in BDBENCE.bcs is False()-gated by comp197.tpa; these gates cover a
 // direct player click at bd_plot=310.
-ADD_STATE_TRIGGER ~BDBENCE~ 33 ~False()~
-ADD_STATE_TRIGGER ~BDBENCE~ 39 ~False()~
+REPLACE_STATE_TRIGGER ~BDBENCE~ 33 ~False()~
+REPLACE_STATE_TRIGGER ~BDBENCE~ 39 ~False()~
 
 // ============================================================
 // C. BDNEDERL — the Marshal never asks you to find Skie

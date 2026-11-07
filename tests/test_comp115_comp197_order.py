@@ -82,13 +82,12 @@ BUT_ONLY
                          world_fixture.compact(after_text))
         return before_files, after_text
 
-    def reject(self, source):
+    def overwrite(self, source):
         self.harness.fixture(source)
-        before = world_fixture.tree(self.harness.override)
         result = self.install_skie()
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("chriz-sod-remix #197", result.stdout + result.stderr)
-        self.assertEqual(world_fixture.tree(self.harness.override), before)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assertNotIn('CREATECREATURE("BDSKIE"', world_fixture.compact(self.harness.decompile()))
 
     def test_native_two_spawns_without_115_preserves_every_other_action(self):
         self.harness.fixture(NATIVE + FOREIGN)
@@ -161,44 +160,44 @@ BUT_ONLY
         _, after = self.remove_only_spawns(2)
         continuity_fixture.assert_victory_routes(self, after)
 
-    def test_four_unforked_spawns_are_rejected(self):
-        self.reject(NATIVE + "\n" + NATIVE)
+    def test_four_unforked_spawns_are_removed(self):
+        self.overwrite(NATIVE + "\n" + NATIVE)
 
-    def test_three_spawn_partial_fork_is_rejected(self):
+    def test_three_spawn_partial_fork_is_removed(self):
         first = next(m.group(0) for m in continuity_fixture.BLOCK.finditer(NATIVE)
                      if continuity_fixture.RETREAT in m.group(0))
-        self.reject(NATIVE.replace(first, continuity_fixture.continuity_script(first), 1))
+        self.overwrite(NATIVE.replace(first, continuity_fixture.continuity_script(first), 1))
 
-    def test_missing_carried_route_is_rejected(self):
+    def test_missing_carried_route_is_removed(self):
         source = continuity_fixture.continuity_script(NATIVE)
         carried = next(m.group(0) for m in continuity_fixture.BLOCK.finditer(source)
                        if SPAWN in m.group(0)
                        and 'Global("csr_kh_fort"' in m.group(0)
                        and '!Global("csr_kh_fort"' not in m.group(0))
-        self.reject(source.replace(carried, "", 1))
+        self.overwrite(source.replace(carried, "", 1))
 
-    def test_two_positive_guards_instead_of_complementary_routes_are_rejected(self):
-        self.reject(continuity_fixture.continuity_script(NATIVE).replace(
+    def test_two_positive_guards_instead_of_complementary_routes_are_removed(self):
+        self.overwrite(continuity_fixture.continuity_script(NATIVE).replace(
             '!Global("csr_kh_fort","GLOBAL",1)',
             'Global("csr_kh_fort","GLOBAL",1)', 1))
 
-    def test_fork_payload_disagreement_is_rejected(self):
-        self.reject(continuity_fixture.continuity_script(NATIVE).replace(
+    def test_fork_payload_disagreement_is_removed(self):
+        self.overwrite(continuity_fixture.continuity_script(NATIVE).replace(
             'AddJournalEntry(123,QUEST)', 'AddJournalEntry(124,QUEST)', 1))
 
-    def test_extra_spawn_outside_known_victories_is_rejected(self):
-        self.reject(continuity_fixture.continuity_script(NATIVE) +
+    def test_extra_spawn_outside_known_victories_is_removed(self):
+        self.overwrite(continuity_fixture.continuity_script(NATIVE) +
                     FOREIGN.replace('    Continue()', SPAWN))
 
-    def test_two_spawns_in_one_native_victory_are_rejected(self):
+    def test_two_spawns_in_one_native_victory_are_removed(self):
         source = NATIVE.replace(SPAWN + "\n", "", 1)
-        self.reject(source.replace(SPAWN, SPAWN + "\n" + SPAWN, 1))
+        self.overwrite(source.replace(SPAWN, SPAWN + "\n" + SPAWN, 1))
 
-    def test_unknown_native_victory_guard_is_rejected(self):
-        self.reject(NATIVE.replace('Dead("bdcrubbm")',
+    def test_unknown_native_victory_guard_is_removed(self):
+        self.overwrite(NATIVE.replace('Dead("bdcrubbm")',
                                    'Dead("foreign")', 1))
 
-    def test_consolidated_pair_payload_disagreement_is_rejected(self):
+    def test_consolidated_pair_payload_disagreement_is_removed(self):
         self.harness.fixture(continuity_fixture.continuity_script(NATIVE))
         self.world()
         source = self.harness.decompile().replace('AddJournalEntry(123,QUEST)',
@@ -216,9 +215,11 @@ COPY_EXISTING ~mutated.bcs~ ~override/bd2000.bcs~
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         before = world_fixture.tree(self.harness.override)
         result = self.install_skie()
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("chriz-sod-remix #197", result.stdout + result.stderr)
-        self.assertEqual(world_fixture.tree(self.harness.override), before)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
+        actual = self.harness.decompile()
+        self.assertNotRegex(actual.lower(), r'createcreature\("bdskie"')
+        self.assertIn('AddJournalEntry(124,QUEST)', actual)
 
     def test_bence_starter_preserves_256_priority_in_both_install_orders(self):
         for world_first in (False, True):

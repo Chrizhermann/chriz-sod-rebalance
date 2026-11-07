@@ -55,6 +55,7 @@ TRIGGER_IDS = '''IDS V1.0
 def write_aftermath_fixture(game):
     """Minimal Bence resources, independent of other component installers."""
     write_fake_game(game)
+    (game / "weidu.log").write_text("")
     for name, content in {
         'action': ACTION_IDS, 'trigger': TRIGGER_IDS,
         'ea': 'IDS V1.0\n0 ANYONE\n2 PC\n', 'gtimes': 'IDS V1.0\n',
@@ -63,6 +64,7 @@ def write_aftermath_fixture(game):
     lib = game / 'chriz-sod-remix' / 'lib'
     lib.mkdir(parents=True)
     shutil.copy2(ROOT / 'chriz-sod-remix/lib/comp256_aftermath.tpa', lib)
+    shutil.copy2(ROOT / 'chriz-sod-remix/lib/overwrite.tpa', lib)
     fixture = game / 'fixture'
     fixture.mkdir()
     (fixture / 'bdbence.baf').write_text(BASE, encoding='ascii')
@@ -338,7 +340,7 @@ END
         result = self.install()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         installed = decompile(self.game, 'BDBENCE.BCS')
-        self.assertTrue(installed.endswith(original))
+        self.assertTrue(installed.endswith(original[:original.rfind("IF")] .rstrip() + "\n\n"))
         model = AftermathDecisions(installed)
         model.actors['PLAYER1'].position = at(30)
         self.assertEqual([
@@ -362,14 +364,14 @@ END
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual(before, tree(self.game / 'override'))
 
-    def test_duplicate_preflight_fails_without_changing_installed_resources(self):
+    def test_second_tail_install_is_byte_identical(self):
         result = self.install()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         before = tree(self.game / 'override')
         protected = self.protected()
         result = self.install('duplicate.tp2')
-        self.assertNotEqual(0, result.returncode)
-        self.assertIn('the owned Bence approach is already installed', result.stdout + result.stderr)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
         self.assertEqual(before, tree(self.game / 'override'))
         self.assertEqual(protected, self.protected())
 

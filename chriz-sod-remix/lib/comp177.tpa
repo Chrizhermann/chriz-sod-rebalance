@@ -1,83 +1,179 @@
+<<<<<<<< .../csr177-greeting.d
+REPLACE ~BDLIIA~
+IF ~GlobalLT("BD_plot","global",55) AreaCheck("bd0102")~ THEN BEGIN 13
+  SAY @17705
+  IF ~~ THEN REPLY @17703 EXIT
+END
+END
+>>>>>>>>
+
+<<<<<<<< .../csr177-departure.d
+REPLACE ~BDLIIA~
+IF ~Global("BD_plot","global",56) Global("bd_final_speech","global",1)~ THEN BEGIN 33
+  SAY @17706
+  IF ~~ THEN REPLY @17703 EXIT
+END
+END
+>>>>>>>>
+
+<<<<<<<< .../csr177-farewell.d
+EXTEND_TOP ~BDLIIA~ 33
+  IF ~~ THEN REPLY @17703 EXIT
+END
+>>>>>>>>
+
 // Liia's Korlasz report remains available after the celebration evening.
 // Append after 175/180 (and 176 if present); no actor or plot state is reset.
 LOAD_TRA ~chriz-sod-remix/languages/english/comp177.tra~
 
-// These are normal conversations, never the council (9) or departure speech
-// (30). Keep every existing reply; state 33's silent exit becomes a farewell.
-COPY_EXISTING - ~bdliia.dlg~ ~override~
-  READ_LONG 0x08 csr177_states
-  READ_LONG 0x0c csr177_so
-  PATCH_IF (csr177_states <= 33) BEGIN
-    PATCH_FAIL ~comp177: BDLIIA is missing the expected normal conversations.~
-  END
-  READ_STRREF (csr177_so + 13 * 16) csr177_greeting
-  READ_STRREF (csr177_so + 33 * 16) csr177_departure
-  PATCH_IF ((~%csr177_greeting%~ STRING_CONTAINS_REGEXP ~glad to see you well~) != 0 OR
-            (~%csr177_departure%~ STRING_CONTAINS_REGEXP ~Leave through the main doors~) != 0) BEGIN
-    PATCH_FAIL ~comp177: Liia's normal greeting or departure-day anchor changed.~
-  END
-  READ_LONG (csr177_so + 33 * 16 + 4) csr177_first
-  READ_LONG (csr177_so + 33 * 16 + 8) csr177_count
-  READ_LONG 0x14 csr177_to
-  READ_LONG (csr177_to + csr177_first * 32) csr177_flags
-  PATCH_IF (csr177_count != 1 OR csr177_flags != 8) BEGIN
-    PATCH_FAIL ~comp177: Liia's departure greeting no longer has its simple EXIT.~
-  END
-
-// Reuse 176's anchored validation and 24,000 -> 22,000 normalization. This
-// supports old 175 installs even when 176 has not separately been installed.
+// The reward writer owns the complete return route. It also recreates missing
+// return states in the private celebration dialogue.
 INCLUDE ~chriz-sod-remix/lib/comp176.tpa~
+LOAD_TRA ~chriz-sod-remix/languages/english/comp177.tra~
+
+// Create missing native entry states with the same greeting and departure text.
+// Existing entry states keep their other quest replies and interjections.
+LAF csr_ensure_dlg_states STR_VAR dialog = ~bdliia~ RET csr177_states = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 34 STR_VAR dialog = ~bdliia~ END
+ACTION_IF csr177_states <= 13 BEGIN
+  COMPILE ~.../csr177-greeting.d~
+END
+ACTION_IF csr177_states <= 33 BEGIN
+  COMPILE ~.../csr177-departure.d~
+END
 
 // Resolve the native completion strref from the specific death-journal block,
 // rather than assuming EET's 200000 offset. Keep its map-note/global actions.
 // A separate once-only journal block handles both new kills and unpaid saves
 // where the old death-journal flag already fired.
-OUTER_SET csr177_done = 0xffffffff
+OUTER_SET csr177_done = RESOLVE_STR_REF(@17704)
 OUTER_SET csr177_pending = RESOLVE_STR_REF(@17700)
 OUTER_SET csr177_complete = RESOLVE_STR_REF(@17704)
 OUTER_SPRINT csr177_nl ~%MNL%?%LNL%~
 OUTER_SPRINT csr177_block ~^IF%csr177_nl%\(\([ %TAB%]+[^%WNL%]*%csr177_nl%\|THEN%csr177_nl%\)*\)END~
+LAF csr_ensure_script STR_VAR script = ~bd0116~ END
 COPY_EXISTING ~bd0116.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    SET csr177_matches = 0
     REPLACE_EVALUATE ~%csr177_block%~ BEGIN
       SPRINT csr177_result ~%MATCH0%~
       INNER_PATCH_SAVE csr177_result ~%csr177_result%~ BEGIN
-        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~Global("bd_sdd011b_korlasz_journal_entry","BD0116",0)~ csr177_here
-        PATCH_IF (csr177_here = 1) BEGIN
-          SET csr177_matches += 1
-          COUNT_REGEXP_INSTANCES ~AddJournalEntry([0-9]+,QUEST_DONE)~ csr177_entries
-          PATCH_IF (csr177_entries != 1) BEGIN
-            PATCH_FAIL ~comp177: Korlasz's death journal is not the expected single completed entry.~
-          END
+        PATCH_IF (~%csr177_result%~ STRING_CONTAINS_REGEXP ~"bd_sdd011b_korlasz_journal_entry"~ = 0) BEGIN
           REPLACE_EVALUATE ~AddJournalEntry(\([0-9]+\),QUEST_DONE)~ BEGIN
             SET csr177_done = ~%MATCH1%~
           END ~~
         END
       END
     END ~%csr177_result%~
-    PATCH_IF (csr177_matches != 1 OR csr177_done = 0xffffffff) BEGIN
-      PATCH_FAIL ~comp177: expected one Korlasz death-journal block in BD0116.~
-    END
   END
 BUT_ONLY
 
-// Register the reminder under the same EE quest as the original completion.
-// The entry's quest id and display metadata are taken from this installation.
+// Reuse the owned report state and replies on a tail install. Their script
+// markers locate ownership; text, old rewards and transition counts do not gate it.
+OUTER_SPRINT csr177_report_verb ~APPEND~
+OUTER_SPRINT csr177_report_label ~csr177_report~
+OUTER_SET csr177_farewell = (0 - 1)
+COPY_EXISTING - ~bdliia.dlg~ ~override~
+  READ_LONG 0x08 sc READ_LONG 0x0c so READ_LONG 0x10 tc READ_LONG 0x14 tr
+  READ_LONG 0x28 actions READ_LONG 0x2c action_count
+  FOR (i = 0; i < sc; ++i) BEGIN
+    READ_LONG (so + i * 16 + 4) first READ_LONG (so + i * 16 + 8) count
+    FOR (j = 0; j < count; ++j) BEGIN
+      SET at = tr + (first + j) * 32 READ_LONG at flags READ_LONG (at + 16) action
+      PATCH_IF ~%csr177_report_verb%~ STRING_EQUAL ~APPEND~ AND (flags BAND 4) AND action < action_count BEGIN
+        READ_LONG (actions + action * 8) text READ_LONG (actions + action * 8 + 4) length
+        READ_ASCII text body (length)
+        PATCH_IF ~%body%~ STRING_CONTAINS_REGEXP ~"CSR177_REPORT"~ = 0 BEGIN
+          SPRINT csr177_report_verb ~REPLACE~ SPRINT csr177_report_label ~%i%~
+          // Preserve the source journal reference after its native award was removed.
+          SET csr177_got_done = 0
+          INNER_PATCH ~%body%~ BEGIN
+            REPLACE_EVALUATE ~EraseJournalEntry(\([0-9]+\))~ BEGIN
+              PATCH_IF NOT csr177_got_done BEGIN SET csr177_done = ~%MATCH1%~ END
+              SET csr177_got_done = 1
+            END ~%MATCH0%~
+          END
+        END
+      END
+      PATCH_IF i = 33 AND csr177_farewell < 0 AND (flags BAND 8) BEGIN SET csr177_farewell = j END
+    END
+  END
+
+// Locate the quest ID through its entry, without requiring a particular Lua
+// layout. The appended writer also creates the quest when its row is missing.
+OUTER_SET csr177_title = RESOLVE_STR_REF(~Sarevok's Servant~)
+OUTER_SPRINT csr177_group ~nil~
 ACTION_IF FILE_EXISTS_IN_GAME ~bgee.lua~ BEGIN
   COPY_EXISTING ~bgee.lua~ ~override~
-    SET csr177_registered = 0
-    REPLACE_EVALUATE ~\(createEntry[ %TAB%]*( *[0-9]+, *-1, *\)%csr177_done%\(, *{}, *[0-9]+ *)\)~ BEGIN
-      SET csr177_registered += 1
-      SPRINT csr177_entry ~%MATCH0%%LNL%%TAB%%MATCH1%%csr177_pending%%MATCH2%%LNL%%TAB%%MATCH1%%csr177_complete%%MATCH2%~
-    END ~%csr177_entry%~
-    PATCH_IF (csr177_registered != 1) BEGIN
-      PATCH_FAIL ~comp177: expected one EE journal registration for Korlasz's completion.~
-    END
-  BUT_ONLY
+    REPLACE_EVALUATE ~createEntry[ %TAB%]*( *\([0-9]+\), *-1, *%csr177_done%, *{}, *\([0-9]+\|nil\) *)~ BEGIN
+      SET csr177_title = ~%MATCH1%~
+      SPRINT csr177_group ~%MATCH2%~
+    END ~%MATCH0%~
+    SPRINT csr177_registration ~
+-- CSR177 journal registration
+CSR177_BuildQuests = CSR177_BuildQuests or buildQuestsTable
+function buildQuestsTable()
+  if CSR177_BuildQuests then CSR177_BuildQuests() end
+  quests = quests or {}
+  userNotes = userNotes or {}
+  looseEntries = looseEntries or {}
+  subGroups = subGroups or {}
+  if not findQuest(%csr177_title%) then createQuest(%csr177_title%) end
+  createEntry(%csr177_title%, -1, %csr177_pending%, {}, %csr177_group%)
+  createEntry(%csr177_title%, -1, %csr177_complete%, {}, %csr177_group%)
+end
+-- CSR177 registration end
+~
+    // These markers address only our own previous writer on a tail install.
+    REPLACE_TEXTUALLY ~-- CSR177 journal registration\(.\|[%WNL%]\)*-- CSR177 registration end~ ~~
+    INSERT_BYTES BUFFER_LENGTH (STRING_LENGTH ~%csr177_registration%~)
+    WRITE_ASCIIE (BUFFER_LENGTH - STRING_LENGTH ~%csr177_registration%~) ~%csr177_registration%~
+END ELSE BEGIN
+  PRINT ~SoD Remix #177: BGEE.LUA is absent; journal UI registration is unavailable.~
 END
+
+ACTION_IF csr177_farewell < 0 BEGIN
+  COMPILE ~.../csr177-farewell.d~
+  OUTER_SET csr177_farewell = 0
+END
+OUTER_SPRINT csr177_guard ~Dead("BDKORLAS") GlobalLT("CSR_KORL_RET","GLOBAL",2) Global("bd_plot_003","BD0102",2)~
+OUTER_SPRINT csr177_routes ~~
+COPY_EXISTING - ~bdliia.dlg~ ~override~
+  READ_LONG 0x0c so READ_LONG 0x14 tr READ_LONG 0x20 triggers READ_LONG 0x24 trigger_count
+  PATCH_FOR_EACH state IN 13 33 BEGIN
+    READ_LONG (so + state * 16 + 4) first READ_LONG (so + state * 16 + 8) count
+    SET seen = 0
+    FOR (j = 0; j < count; ++j) BEGIN
+      SET at = tr + (first + j) * 32 READ_LONG at flags READ_LONG (at + 12) trigger
+      PATCH_IF (flags BAND 2) AND trigger < trigger_count BEGIN
+        READ_LONG (triggers + trigger * 8) text READ_LONG (triggers + trigger * 8 + 4) length
+        READ_ASCII text body (length)
+        PATCH_IF ~%body%~ STRING_CONTAINS_REGEXP ~"CSR_KORL_RET"~ = 0 AND ~%body%~ STRING_CONTAINS_REGEXP ~"BDKORLAS"~ = 0 BEGIN
+          SPRINT guard ~%csr177_guard%~
+          PATCH_IF seen BEGIN SPRINT guard ~False()~ END
+          SPRINT csr177_routes ~~~~~%csr177_routes%
+ALTER_TRANS ~BDLIIA~ BEGIN %state% END BEGIN %j% END BEGIN
+  ~TRIGGER~ ~%guard%~ ~REPLY~ ~@17701~ ~ACTION~ ~~ ~EPILOGUE~ ~GOTO %csr177_report_label%~
+END
+~~~~~
+          SET seen = 1
+        END
+      END
+    END
+    PATCH_IF NOT seen BEGIN
+      SPRINT csr177_routes ~~~~~%csr177_routes%
+EXTEND_BOTTOM ~BDLIIA~ %state%
+  IF ~%csr177_guard%~ THEN REPLY @17701 GOTO %csr177_report_label%
+END
+~~~~~
+    END
+  END
 
 COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr177.d~
   USING ~chriz-sod-remix/languages/english/comp177.tra~
-EXTEND_TOP ~bd0116.bcs~ ~chriz-sod-remix/baf/csr177jr.baf~ EVALUATE_BUFFER
-EXTEND_TOP ~bd0102.bcs~ ~chriz-sod-remix/baf/csr177jr.baf~ EVALUATE_BUFFER
+ACTION_FOR_EACH script IN ~bd0116~ ~bd0102~ BEGIN
+  LAF csr_ensure_script STR_VAR script END
+  COPY_EXISTING ~%script%.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN LPF csr_replace_script_blocks STR_VAR pattern = ~"CSR177_REPORT"~ END END
+  BUT_ONLY
+  EXTEND_TOP ~%script%.bcs~ ~chriz-sod-remix/baf/csr177jr.baf~ EVALUATE_BUFFER
+END

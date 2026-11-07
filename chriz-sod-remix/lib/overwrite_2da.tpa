@@ -1,0 +1,124 @@
+// Address a 2DA cell by row and column label. Missing rows and columns are added.
+// Whitespace is normalized; cells outside the selected row/column are retained.
+DEFINE_PATCH_FUNCTION csr_set_2da_cell
+  STR_VAR row = ~~ column = ~~ value = ~~ new_row_default = ~~
+  RET added_row previous_value found_cell
+BEGIN
+  SPRINT csr2_row EVALUATE_BUFFER ~%row%~
+  SPRINT csr2_column EVALUATE_BUFFER ~%column%~
+  SPRINT csr2_value EVALUATE_BUFFER ~%value%~
+  SPRINT csr2_default ~***~
+  SET csr2_line = 0 SET csr2_rows = 0 SET csr2_columns = 0
+  DEFINE_ASSOCIATIVE_ARRAY csr2_headers BEGIN END
+  DEFINE_ASSOCIATIVE_ARRAY csr2_labels BEGIN END
+  DEFINE_ASSOCIATIVE_ARRAY csr2_cells BEGIN END
+  REPLACE_EVALUATE ~[^%WNL%]+~ BEGIN
+    SPRINT csr2_source ~%MATCH0%~
+    SET csr2_tokens = 0
+    INNER_PATCH ~%csr2_source%~ BEGIN
+      REPLACE_TEXTUALLY ~//.*$~ ~~
+      REPLACE_EVALUATE ~[^ %TAB%]+~ BEGIN
+        SPRINT $csr2_token(~%csr2_tokens%~) ~%MATCH0%~
+        SET csr2_tokens += 1
+      END ~%MATCH0%~
+    END
+    PATCH_IF csr2_tokens > 0 BEGIN
+      PATCH_IF csr2_line = 1 BEGIN
+        SPRINT csr2_default $csr2_token(~0~)
+      END ELSE PATCH_IF csr2_line = 2 BEGIN
+        SET csr2_columns = csr2_tokens
+        FOR (csr2_c = 0; csr2_c < csr2_columns; ++csr2_c) BEGIN
+          SPRINT $csr2_headers(~%csr2_c%~) $csr2_token(~%csr2_c%~)
+        END
+      END ELSE PATCH_IF csr2_line > 2 BEGIN
+        SPRINT $csr2_labels(~%csr2_rows%~) $csr2_token(~0~)
+        FOR (csr2_c = 0; csr2_c < csr2_columns; ++csr2_c) BEGIN
+          SET csr2_t = csr2_c + 1
+          SPRINT $csr2_cells(~%csr2_rows%~ ~%csr2_c%~) ~%csr2_default%~
+          PATCH_IF csr2_t < csr2_tokens BEGIN
+            SPRINT $csr2_cells(~%csr2_rows%~ ~%csr2_c%~) $csr2_token(~%csr2_t%~)
+          END
+        END
+        SET csr2_rows += 1
+      END
+      SET csr2_line += 1
+    END
+  END ~%csr2_source%~
+  SET csr2_selected_column = csr2_columns
+  FOR (csr2_c = 0; csr2_c < csr2_columns; ++csr2_c) BEGIN
+    PATCH_IF $csr2_headers(~%csr2_c%~) STRING_EQUAL_CASE ~%csr2_column%~ BEGIN
+      SET csr2_selected_column = csr2_c
+    END
+  END
+  SET csr2_column_existed = csr2_selected_column < csr2_columns
+  SPRINT previous_value ~~ SET found_cell = 0
+  PATCH_IF csr2_selected_column = csr2_columns BEGIN
+    SPRINT $csr2_headers(~%csr2_columns%~) ~%csr2_column%~
+    FOR (csr2_r = 0; csr2_r < csr2_rows; ++csr2_r) BEGIN
+      SPRINT $csr2_cells(~%csr2_r%~ ~%csr2_columns%~) ~%csr2_default%~
+    END
+    SET csr2_columns += 1
+  END
+  SET added_row = 0
+  SET csr2_selected_row = csr2_rows
+  FOR (csr2_r = 0; csr2_r < csr2_rows; ++csr2_r) BEGIN
+    PATCH_IF $csr2_labels(~%csr2_r%~) STRING_EQUAL_CASE ~%csr2_row%~ BEGIN
+      SET csr2_selected_row = csr2_r
+      SPRINT previous_value $csr2_cells(~%csr2_r%~ ~%csr2_selected_column%~)
+      SET found_cell = csr2_column_existed
+      SPRINT $csr2_cells(~%csr2_r%~ ~%csr2_selected_column%~) ~%csr2_value%~
+    END
+  END
+  PATCH_IF csr2_selected_row = csr2_rows BEGIN
+    SET added_row = 1
+    SPRINT csr2_new_default ~%csr2_default%~
+    PATCH_IF NOT (~%new_row_default%~ STRING_EQUAL ~~) BEGIN SPRINT csr2_new_default ~%new_row_default%~ END
+    SPRINT $csr2_labels(~%csr2_rows%~) ~%csr2_row%~
+    FOR (csr2_c = 0; csr2_c < csr2_columns; ++csr2_c) BEGIN
+      SPRINT $csr2_cells(~%csr2_rows%~ ~%csr2_c%~) ~%csr2_new_default%~
+    END
+    SPRINT $csr2_cells(~%csr2_rows%~ ~%csr2_selected_column%~) ~%csr2_value%~
+    SET csr2_rows += 1
+  END
+  SPRINT csr2_output ~2DA V1.0%LNL%%csr2_default%%LNL%~
+  FOR (csr2_c = 0; csr2_c < csr2_columns; ++csr2_c) BEGIN
+    SPRINT csr2_cell $csr2_headers(~%csr2_c%~)
+    SPRINT csr2_output ~%csr2_output% %csr2_cell%~
+  END
+  SPRINT csr2_output ~%csr2_output%%LNL%~
+  FOR (csr2_r = 0; csr2_r < csr2_rows; ++csr2_r) BEGIN
+    SPRINT csr2_label $csr2_labels(~%csr2_r%~)
+    SPRINT csr2_output ~%csr2_output%%csr2_label%~
+    FOR (csr2_c = 0; csr2_c < csr2_columns; ++csr2_c) BEGIN
+      SPRINT csr2_cell $csr2_cells(~%csr2_r%~ ~%csr2_c%~)
+      SPRINT csr2_output ~%csr2_output% %csr2_cell%~
+    END
+    SPRINT csr2_output ~%csr2_output%%LNL%~
+  END
+  DELETE_BYTES 0 BUFFER_LENGTH
+  INSERT_BYTES 0 (STRING_LENGTH ~%csr2_output%~)
+  WRITE_ASCIIE 0 ~%csr2_output%~
+END
+
+DEFINE_ACTION_FUNCTION csr_ensure_bddialog BEGIN
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~BDDIALOG.2DA~ BEGIN
+    COPY ~.../csr-bddialog.2da~ ~override/BDDIALOG.2DA~
+  END
+END
+<<<<<<<< .../csr-bddialog.2da
+2DA V1.0
+***
+ POST_DIALOG_FILE JOIN_DIALOG_FILE DREAM_SCRIPT_FILE
+>>>>>>>>
+
+// Read an addressed cell without changing the caller's buffer.
+DEFINE_PATCH_FUNCTION csr_get_2da_cell
+  STR_VAR row = ~~ column = ~~
+  RET value found
+BEGIN
+  READ_ASCII 0 csr2_source_copy (BUFFER_LENGTH)
+  INNER_PATCH ~%csr2_source_copy%~ BEGIN
+    LPF csr_set_2da_cell STR_VAR row = EVAL ~%row%~ column = EVAL ~%column%~ value = ~***~
+      RET value = previous_value found = found_cell END
+  END
+END

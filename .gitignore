@@ -4,3 +4,6 @@ research/data/issue16*/
 .worktrees/
 __pycache__/
 *.pyc
+
+# Disposable installer migration fixtures and local audit output.
+.overwrite-*

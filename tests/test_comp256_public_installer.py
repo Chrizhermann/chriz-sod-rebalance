@@ -154,14 +154,10 @@ class PublicBridgeInstallerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
         self.assertEqual(before, tree(self.override))
 
-    def test_failure_helper_collision_prevents_fresh_base_resource_and_string_writes(self):
+    def test_foreign_failure_helper_is_overwritten(self):
         (self.override/'csr26end.bcs').write_bytes(b'FOREIGN COLLAPSE HELPER')
-        before = tree(self.override)
-        tlk = (self.game/'lang/en_us/dialog.tlk').read_bytes()
-        result = self.run_public('--force-install-list', '256')
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertEqual(before, tree(self.override))
-        self.assertEqual(tlk, (self.game/'lang/en_us/dialog.tlk').read_bytes())
+        self.success(self.run_public('--force-install-list', '256'))
+        self.assertIn('GAMEOVER(', '\n'.join(self.script_blocks('csr26end')))
 
     def test_default_scripts_only_differ_from_challenge_by_sequencer_blocks(self):
         self.success(self.run_public('--force-install-list', '256'))
@@ -207,27 +203,27 @@ class PublicBridgeInstallerTests(unittest.TestCase):
         self.assertNotIn('#257', (self.game/'weidu.log').read_text())
         self.assertEqual(tree(self.override), before)
 
-    def test_challenge_rejects_changed_second_mage_before_either_write(self):
+    def test_challenge_writes_both_pointers_despite_changed_second_mage(self):
         self.success(self.run_public('--force-install-list', '256'))
         path = self.override/'csr26cmi.cre'
         mage = bytearray(path.read_bytes())
         mage[0x248:0x250] = b'FOREIGNX'
         path.write_bytes(mage)
-        before = tree(self.override)
+        before = {role: (self.override/f"csr26{role}mi.cre").read_bytes() for role in ("f", "c")}
         tlk = (self.game/'lang/en_us/dialog.tlk').read_bytes()
         result = self.run_public('--force-install-list', '257')
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn('unrecognized Insane bridge mage', result.stdout+result.stderr)
-        self.assertEqual(tree(self.override), before)
+        self.success(result)
+        for role in ('f', 'c'):
+            actual = (self.override/f'csr26{role}mi.cre').read_bytes()
+            expected = bytearray(before[role])
+            expected[0x248:0x250] = f'CSR26{role.upper()}MX'.encode()
+            self.assertEqual(actual, expected)
         self.assertEqual((self.game/'lang/en_us/dialog.tlk').read_bytes(), tlk)
 
-    def test_foreign_challenge_script_prevents_base_install_writes(self):
+    def test_foreign_challenge_script_is_overwritten(self):
         (self.override/'csr26cmx.bcs').write_bytes(b'FOREIGN AI')
-        before = tree(self.override)
-        result = self.run_public('--force-install-list', '256')
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn('owned script name CSR26CMX.BCS already exists', result.stdout+result.stderr)
-        self.assertEqual(tree(self.override), before)
+        self.success(self.run_public('--force-install-list', '256'))
+        self.assertIn('CSR256_SEQUENCE', '\n'.join(self.script_blocks('csr26cmx')))
 
     def test_public_install_and_uninstall_restore_all_original_resources(self):
         original = tree(self.override)
@@ -266,17 +262,22 @@ class PublicBridgeInstallerTests(unittest.TestCase):
         self.assertEqual(tree(self.override), before)
         self.assertIn('#255', (self.game/'weidu.log').read_text())
 
-    def test_late_visual_mismatch_prevents_all_ai_creature_world_text_writes(self):
+    def test_owned_texture_collision_is_overwritten_by_public_install(self):
         (self.override/'b2000n90.pvrz').write_bytes(b'FOREIGN NIGHT TEXTURE PAGE')
-        before = tree(self.override)
-        tlk = (self.game/'lang/en_us/dialog.tlk').read_bytes()
-        result = self.run_public('--force-install-list', '256')
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn('reserved bridge texture page already exists', result.stdout+result.stderr)
-        self.assertEqual(tree(self.override), before)
-        self.assertEqual((self.game/'lang/en_us/dialog.tlk').read_bytes(), tlk)
-        self.assertFalse(any(p.name.lower().startswith('csr26') for p in self.override.iterdir()))
-        self.assertFalse((self.game/'-').exists())
+        self.success(self.run_public('--force-install-list', '256'))
+        self.assertEqual((self.override/'b2000n90.pvrz').read_bytes(),
+                         (self.game/'chriz-sod-remix/art/bridge/CSR256N.PVRZ').read_bytes())
+        self.assertTrue((self.override/'csr26fmi.cre').exists())
+
+    def test_challenge_recreates_missing_owned_mage_and_ai(self):
+        self.success(self.run_public('--force-install-list', '256'))
+        (self.override/'csr26cmi.cre').unlink()
+        (self.override/'csr26cmx.bcs').unlink()
+        self.success(self.run_public('--force-install-list', '257'))
+        mage = (self.override/'csr26cmi.cre').read_bytes()
+        self.assertEqual(mage[0x234], 14)
+        self.assertEqual(mage[0x248:0x250], b'CSR26CMX')
+        self.assertIn('CSR256_SEQUENCE', '\n'.join(self.script_blocks('csr26cmx')))
 
 
 if __name__ == '__main__':

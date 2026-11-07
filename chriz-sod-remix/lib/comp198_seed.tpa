@@ -1,0 +1,493 @@
+// Native SoD interjection addresses; EET appends these to MINSCJ.
+OUTER_SPRINT csr198_minsc_dialog ~BDMINSCJ~
+OUTER_SET csr198_minsc_offset = 0
+ACTION_IF GAME_IS ~eet~ BEGIN
+  OUTER_SPRINT csr198_minsc_dialog ~MINSCJ~
+  OUTER_SET csr198_minsc_offset = 355
+END
+OUTER_SET csr198_minsc20 = 20 + csr198_minsc_offset
+OUTER_SET csr198_minsc21 = 21 + csr198_minsc_offset
+OUTER_SET csr198_minsc22 = 22 + csr198_minsc_offset
+OUTER_SET csr198_s41976 = 41976 + csr198_shift
+OUTER_SET csr198_s41977 = 41977 + csr198_shift
+OUTER_SET csr198_s41978 = 41978 + csr198_shift
+OUTER_SET csr198_s41979 = 41979 + csr198_shift
+OUTER_SET csr198_s41980 = 41980 + csr198_shift
+OUTER_SET csr198_s41981 = 41981 + csr198_shift
+OUTER_SET csr198_s41982 = 41982 + csr198_shift
+OUTER_SET csr198_s41983 = 41983 + csr198_shift
+OUTER_SET csr198_s41984 = 41984 + csr198_shift
+OUTER_SET csr198_s41985 = 41985 + csr198_shift
+OUTER_SET csr198_s41986 = 41986 + csr198_shift
+OUTER_SET csr198_s41987 = 41987 + csr198_shift
+OUTER_SET csr198_s41988 = 41988 + csr198_shift
+OUTER_SET csr198_s41989 = 41989 + csr198_shift
+OUTER_SET csr198_s41990 = 41990 + csr198_shift
+OUTER_SET csr198_s41991 = 41991 + csr198_shift
+OUTER_SET csr198_s41992 = 41992 + csr198_shift
+OUTER_SET csr198_s41993 = 41993 + csr198_shift
+OUTER_SET csr198_s41994 = 41994 + csr198_shift
+OUTER_SET csr198_s41995 = 41995 + csr198_shift
+OUTER_SET csr198_s41996 = 41996 + csr198_shift
+OUTER_SET csr198_s41997 = 41997 + csr198_shift
+OUTER_SET csr198_s41998 = 41998 + csr198_shift
+OUTER_SET csr198_s41999 = 41999 + csr198_shift
+OUTER_SET csr198_s42002 = 42002 + csr198_shift
+OUTER_SET csr198_s42003 = 42003 + csr198_shift
+OUTER_SET csr198_s42004 = 42004 + csr198_shift
+OUTER_SET csr198_s42005 = 42005 + csr198_shift
+OUTER_SET csr198_s60877 = 60877 + csr198_shift
+<<<<<<<< .../csr198-fallback.d
+%csr198_fallback%
+>>>>>>>>
+<<<<<<<< .../csr198-transitions.d
+%csr198_transitions%
+>>>>>>>>
+LAF csr_ensure_dlg_states INT_VAR count = 138 STR_VAR dialog = ~BDSAFANA~ RET csr198_old_BDSAFANA = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 14 STR_VAR dialog = ~BDFRITZ~ RET csr198_old_BDFRITZ = existing_states END
+OUTER_SPRINT csr198_transitions ~~
+ACTION_IF csr198_old_BDSAFANA <= 60 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 60 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~  Global("bd_safana_argument","bd0110",2)
+Global("bd_safana_join","global",0)
+~ THEN BEGIN 60
+  SAY #%csr198_s41976%
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN REPLY #%csr198_s41977%  EXTERN ~%csr198_minsc_dialog%~ %csr198_minsc20%
+  IF ~  !IsValidForPartyDialogue("Minsc")
+Gender(Player1,FEMALE)
+~ THEN REPLY #%csr198_s41977%  GOTO 61
+  IF ~  !IsValidForPartyDialogue("Minsc")
+Gender(Player1,MALE)
+~ THEN REPLY #%csr198_s41977%  GOTO 62
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN REPLY #%csr198_s41978%  EXTERN ~%csr198_minsc_dialog%~ %csr198_minsc21%
+  IF ~  !IsValidForPartyDialogue("Minsc")
+~ THEN REPLY #%csr198_s41978%  GOTO 63
+  IF ~~ THEN REPLY #%csr198_s41979%  GOTO 68
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 60 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 60
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN REPLY #%csr198_s41977%  EXTERN ~%csr198_minsc_dialog%~ %csr198_minsc20%
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 60
+  IF ~  !IsValidForPartyDialogue("Minsc")
+Gender(Player1,FEMALE)
+~ THEN REPLY #%csr198_s41977%  GOTO 61
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 60
+  IF ~  !IsValidForPartyDialogue("Minsc")
+Gender(Player1,MALE)
+~ THEN REPLY #%csr198_s41977%  GOTO 62
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 60
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN REPLY #%csr198_s41978%  EXTERN ~%csr198_minsc_dialog%~ %csr198_minsc21%
+END
+~~~~~
+  END
+  ACTION_IF nt <= 4 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 60
+  IF ~  !IsValidForPartyDialogue("Minsc")
+~ THEN REPLY #%csr198_s41978%  GOTO 63
+END
+~~~~~
+  END
+  ACTION_IF nt <= 5 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 60
+  IF ~~ THEN REPLY #%csr198_s41979%  GOTO 68
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 61 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 61 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 61
+  SAY #%csr198_s41980%
+  IF ~~ THEN REPLY #%csr198_s41981%  GOTO 63
+  IF ~~ THEN REPLY #%csr198_s41982%  GOTO 63
+  IF ~~ THEN REPLY #%csr198_s41983%  GOTO 66
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 61 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 61
+  IF ~~ THEN REPLY #%csr198_s41981%  GOTO 63
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 61
+  IF ~~ THEN REPLY #%csr198_s41982%  GOTO 63
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 61
+  IF ~~ THEN REPLY #%csr198_s41983%  GOTO 66
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 62 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 62 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 62
+  SAY #%csr198_s41984%
+  IF ~~ THEN REPLY #%csr198_s41985%  GOTO 70
+  IF ~~ THEN REPLY #%csr198_s41986%  GOTO 63
+  IF ~~ THEN REPLY #%csr198_s41987%  GOTO 64
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 62 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 62
+  IF ~~ THEN REPLY #%csr198_s41985%  GOTO 70
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 62
+  IF ~~ THEN REPLY #%csr198_s41986%  GOTO 63
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 62
+  IF ~~ THEN REPLY #%csr198_s41987%  GOTO 64
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 63 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 63 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 63
+  SAY #%csr198_s41988%
+  IF ~~ THEN REPLY #%csr198_s41989%  GOTO 69
+  IF ~  Gender(Player1,MALE)
+~ THEN REPLY #%csr198_s41990%  GOTO 67
+  IF ~  Gender(Player1,FEMALE)
+~ THEN REPLY #%csr198_s41991%  GOTO 67
+  IF ~~ THEN REPLY #%csr198_s41992%  GOTO 71
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 63 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 63
+  IF ~~ THEN REPLY #%csr198_s41989%  GOTO 69
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 63
+  IF ~  Gender(Player1,MALE)
+~ THEN REPLY #%csr198_s41990%  GOTO 67
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 63
+  IF ~  Gender(Player1,FEMALE)
+~ THEN REPLY #%csr198_s41991%  GOTO 67
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 63
+  IF ~~ THEN REPLY #%csr198_s41992%  GOTO 71
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 64 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 64 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 64
+  SAY #%csr198_s41993%
+  IF ~~ THEN REPLY #%csr198_s41994%  GOTO 63
+  IF ~~ THEN REPLY #%csr198_s41995%  GOTO 65
+  IF ~~ THEN REPLY #%csr198_s41996%  GOTO 66
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 64 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 64
+  IF ~~ THEN REPLY #%csr198_s41994%  GOTO 63
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 64
+  IF ~~ THEN REPLY #%csr198_s41995%  GOTO 65
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 64
+  IF ~~ THEN REPLY #%csr198_s41996%  GOTO 66
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 65 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 65 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 65
+  SAY #%csr198_s41997%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 65 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 65
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 66 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 66 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 66
+  SAY #%csr198_s41998%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 66 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 66
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 67 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 67 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 67
+  SAY #%csr198_s41999%
+  IF ~~ THEN DO ~SetGlobal("bd_safana_join","global",1)
+SetGlobal("BD_Spoken_Safana","GLOBAL",2)
+RemoveMapNote([922.620],267505)
+JoinParty()
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 67 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 67
+  IF ~~ THEN DO ~SetGlobal("bd_safana_join","global",1)
+SetGlobal("BD_Spoken_Safana","GLOBAL",2)
+RemoveMapNote([922.620],267505)
+JoinParty()
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 68 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 68 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 68
+  SAY #%csr198_s42002%
+  IF ~~ THEN EXIT
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN EXTERN ~%csr198_minsc_dialog%~ %csr198_minsc22%
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 68 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 68
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 68
+  IF ~  IsValidForPartyDialogue("Minsc")
+~ THEN EXTERN ~%csr198_minsc_dialog%~ %csr198_minsc22%
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 69 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 69 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 69
+  SAY #%csr198_s42003%
+  IF ~~ THEN DO ~SetGlobal("bd_safana_join","global",1)
+SetGlobal("BD_Spoken_Safana","GLOBAL",2)
+RemoveMapNote([922.620],267505)
+JoinParty()
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 69 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 69
+  IF ~~ THEN DO ~SetGlobal("bd_safana_join","global",1)
+SetGlobal("BD_Spoken_Safana","GLOBAL",2)
+RemoveMapNote([922.620],267505)
+JoinParty()
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 70 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 70 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 70
+  SAY #%csr198_s42004%
+  IF ~~ THEN GOTO 63
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 70 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 70
+  IF ~~ THEN GOTO 63
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDSAFANA <= 71 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 71 STR_VAR dialog = ~BDSAFANA~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDSAFANA~
+IF %csr198_weight% ~~ THEN BEGIN 71
+  SAY #%csr198_s42005%
+  IF ~~ THEN DO ~SetGlobal("bd_safana_join","global",1)
+SetGlobal("BD_Spoken_Safana","GLOBAL",2)
+RemoveMapNote([922.620],267505)
+JoinParty()
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 71 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDSAFANA~ 71
+  IF ~~ THEN DO ~SetGlobal("bd_safana_join","global",1)
+SetGlobal("BD_Spoken_Safana","GLOBAL",2)
+RemoveMapNote([922.620],267505)
+JoinParty()
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr198_old_BDFRITZ <= 0 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 0 STR_VAR dialog = ~BDFRITZ~ RET csr198_weight = clause END
+  OUTER_SPRINT csr198_fallback ~~~~~
+REPLACE ~BDFRITZ~
+IF %csr198_weight% ~  AreaCheck("BD0104")
+Global("BD_FRITZ_NO_TALK","BD0104",1)
+RealGlobalTimerExpired("BD_FRITZ_GET_OUT","BD0104")
+~ THEN BEGIN 0
+  SAY #%csr198_s60877%
+  IF ~~ THEN DO ~RealSetGlobalTimer("BD_FRITZ_GET_OUT","BD0104",TEN_ROUNDS)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr198-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDFRITZ.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 0 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr198_transitions ~~~~~%csr198_transitions%
+EXTEND_BOTTOM ~BDFRITZ~ 0
+  IF ~~ THEN DO ~RealSetGlobalTimer("BD_FRITZ_GET_OUT","BD0104",TEN_ROUNDS)
+~ EXIT
+END
+~~~~~
+  END
+END
+COMPILE EVALUATE_BUFFER ~.../csr198-transitions.d~

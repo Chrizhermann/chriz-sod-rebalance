@@ -99,6 +99,7 @@ class Component256VisualsTests(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.game = Path(temp.name)
         write_fake_game(self.game)
+        (self.game/"weidu.log").write_text("")
         self.override = self.game/'override'
         (self.game/'chriz-sod-remix/lib').mkdir(parents=True)
         shutil.copy2(ROOT/'chriz-sod-remix/lib/comp256_visuals.tpa',
@@ -131,13 +132,23 @@ LAF csr256_visuals_install END
                                '--use-lang', 'en_US', '--no-exit-pause'],
                               cwd=self.game, capture_output=True, text=True, timeout=90)
 
-    def assert_rejected(self, message):
-        original = tree(self.override)
+    def install_ok(self):
         result = self.run_install()
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn(message, result.stdout+result.stderr)
-        self.assertEqual(tree(self.override), original)
-        self.assertFalse((self.game/'-').exists(), 'Read-only COPY must not write a literal dash file')
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertNotIn('WARNING', (result.stdout+result.stderr).upper())
+        return result
+
+    def primary(self, cell, name='bd2000'):
+        data = (self.override/(name+'.wed')).read_bytes()
+        ov = struct.unpack_from('<I', data, 16)[0]
+        tm, lut = struct.unpack_from('<II', data, ov+16)
+        first = struct.unpack_from('<H', data, tm+cell*10)[0]
+        return struct.unpack_from('<H', data, lut+first*2)[0]
+
+    def assert_tile(self, index, slot, name='bd2000'):
+        data = (self.override/(name+'.tis')).read_bytes()
+        self.assertEqual(struct.unpack_from('<III', data, 24+index*12),
+                         (90, slot%7*64, slot//7*64))
 
     def check_replacement(self, stride):
         for name in ('BD2000.TIS', 'BD2000N.TIS'):
@@ -176,45 +187,107 @@ LAF csr256_visuals_install END
     def test_palette_tis_changes_only_32_binary_records_without_texture_pages(self):
         self.check_replacement(5120)
 
-    def test_foreign_night_page_rejects_before_either_day_or_night_write(self):
+    def test_foreign_night_page_is_overwritten(self):
         self.write('B2000N90.PVRZ', b'FOREIGN_PAGE')
-        self.assert_rejected('reserved bridge texture page already exists')
+        self.install_ok()
+        self.assertEqual((self.override/'b2000n90.pvrz').read_bytes(),
+                         (self.art/'csr256n.pvrz').read_bytes())
 
-    def test_existing_reserved_page_reference_rejects_even_without_page_file(self):
+    def test_existing_page_reference_does_not_gate_owned_art(self):
         data = bytearray(tis())
         struct.pack_into('<I', data, 24, 90)
         self.write('BD2000.TIS', data)
-        self.assert_rejected('already references reserved page 90')
+        self.install_ok()
+        self.assertEqual((self.override/'bd2000.tis').read_bytes()[24:36], data[24:36])
+        self.assert_tile(self.primary(CELLS[0]), 0)
 
-    def test_remapped_closed_tile_rejects(self):
+    def test_remapped_closed_tile_is_written(self):
         data = bytearray(wed())
         struct.pack_into('<H', data, 114+2261*10+4, 4881)
         self.write('BD2000.WED', data)
-        self.assert_rejected('changed closed barrel tile mapping')
+        self.install_ok()
+        self.assert_tile(4881, 10)
 
-    def test_tile_alias_outside_rectangle_rejects(self):
+    def test_shared_tile_is_isolated_and_other_cell_preserved(self):
         data = bytearray(wed())
         struct.pack_into('<H', data, 114+48000, 2258)
         self.write('BD2000.WED', data)
-        self.assert_rejected('shared outside its owned cell')
+        original = tis()[24+2258*12:24+2259*12]
+        self.install_ok()
+        self.assertEqual(self.primary(0), 2258)
+        chosen = self.primary(2258)
+        self.assertGreaterEqual(chosen, 4890)
+        self.assert_tile(chosen, 7)
+        self.assertEqual((self.override/'bd2000.tis').read_bytes()[24+2258*12:24+2259*12], original)
 
-    def test_changed_door_cells_reject(self):
+    def test_changed_door_cell_receives_owned_closed_art(self):
         data = bytearray(wed())
         struct.pack_into('<H', data, 106, 2260)
         self.write('BD2000.WED', data)
-        self.assert_rejected('changed DOOR07 tile cells')
+        self.install_ok()
+        result = (self.override/'bd2000.wed').read_bytes()
+        alternate = struct.unpack_from('<H', result, 114+2260*10+4)[0]
+        self.assert_tile(alternate, 10)
 
-    def test_missing_night_rejects(self):
+    def test_absent_night_only_omits_night_art(self):
         (self.override/'bd2000n.wed').unlink()
-        self.assert_rejected('missing day or night bridge resource')
+        before = (self.override/'bd2000n.tis').read_bytes()
+        self.install_ok()
+        self.assert_tile(self.primary(CELLS[0]), 0)
+        self.assertEqual((self.override/'bd2000n.tis').read_bytes(), before)
 
-    def test_truncated_tile_table_rejects(self):
+    def test_truncated_day_table_only_omits_day_art(self):
         self.write('BD2000.TIS', tis()[:30])
-        self.assert_rejected('truncated TIS tile table')
+        before = (self.override/'bd2000.wed').read_bytes()
+        self.install_ok()
+        self.assertEqual((self.override/'bd2000.wed').read_bytes(), before)
+        self.assertEqual((self.override/'bd2000.tis').read_bytes(), tis()[:30])
+        self.assert_tile(self.primary(CELLS[0], 'bd2000n'), 0, 'bd2000n')
 
-    def test_bad_palette_pack_rejects_before_resource_write(self):
-        (self.art/'csr256n.pal').write_bytes(b'BAD')
-        self.assert_rejected('corrupt palette tile pack')
+    def test_missing_and_extra_primary_frames_write_owned_static_art(self):
+        data = bytearray(wed())
+        struct.pack_into('<H', data, 114+CELLS[0]*10+2, 0)
+        struct.pack_into('<H', data, 114+CELLS[1]*10+2, 2)
+        self.write('BD2000.WED', data)
+        self.install_ok()
+        for slot in (0, 1): self.assert_tile(self.primary(CELLS[slot]), slot)
+
+    def test_different_base_width_uses_coordinates(self):
+        data = bytearray(wed())
+        struct.pack_into('<H', data, 32, 79)
+        self.write('BD2000.WED', data)
+        self.install_ok()
+        self.assert_tile(self.primary(27*79+18), 0)
+
+    def test_small_base_grid_is_extended_for_the_owned_rectangle(self):
+        data = bytearray(wed())
+        struct.pack_into('<HH', data, 32, 20, 20)
+        struct.pack_into('<I', data, 12, 0)
+        self.write('BD2000.WED', data)
+        self.install_ok()
+        result = (self.override/'bd2000.wed').read_bytes()
+        self.assertEqual(struct.unpack_from('<HH', result, 32), (25, 31))
+        self.assert_tile(self.primary(27*25+18), 0)
+
+    def test_other_overlay_sharing_the_tileset_keeps_its_records(self):
+        data = bytearray(wed())
+        data[56:80] = data[32:56]
+        self.write('BD2000.WED', data)
+        before = tis()[24+CELLS[0]*12:24+(CELLS[0]+1)*12]
+        self.install_ok()
+        self.assert_tile(self.primary(CELLS[0]), 0)
+        result = (self.override/'bd2000.tis').read_bytes()
+        self.assertEqual(result[24+CELLS[0]*12:24+(CELLS[0]+1)*12], before)
+
+    def test_second_tail_execution_is_byte_identical(self):
+        self.install_ok()
+        before = tree(self.override)
+        (self.game/'second.tp2').write_text((self.game/'repair.tp2').read_text().replace('repair-backup','second-backup'))
+        result = subprocess.run([str(WEIDU), 'second.tp2', '--force-install-list', '256',
+                                 '--game', str(self.game), '--use-lang', 'en_US', '--no-exit-pause'],
+                                cwd=self.game, capture_output=True, text=True, timeout=90)
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        self.assertEqual(tree(self.override), before)
 
 
 if __name__ == '__main__':

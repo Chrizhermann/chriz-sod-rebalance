@@ -10,8 +10,7 @@
 // wiring, the fresh-flow JoinPartyOverride pool, Safana auto-join,
 // C0Aura/L#BRIST mod hooks; 10b: BDINTRO.baf:1-539) runs untouched.
 // One implementation covers EET import AND fresh start. Only three
-// seams are patched, each single-occurrence-guarded so a text
-// mismatch ABORTS the install instead of half-patching.
+// seams are written as owned blocks, including when native blocks are absent.
 //
 // Seam 1 — BDINTRO staging True() block (10b: BDINTRO.baf:541-582):
 //   drop the walk-in warm-up (intro_follower2), the party JumpToPoint
@@ -88,163 +87,51 @@ OUTER_SET csr140_j_open = csr140_jbase + 56379 // "I must find Korlasz..." (QUES
 OUTER_SET csr140_j_surr = csr140_jbase + 59573 // "Korlasz has surrendered..." (QUEST_DONE)
 OUTER_SET csr140_j_done = csr140_jbase + 69028 // "...return to the Ducal Palace." (QUEST_DONE)
 
-// A wrong base would file garbage strings into the journal — verify
-// the actual TLK content and fail loudly instead.
-ACTION_FOR_EACH csr140_j IN ~%csr140_j_open%~ ~%csr140_j_surr%~ ~%csr140_j_done%~ BEGIN
-  ACTION_GET_STRREF %csr140_j% csr140_jtxt
-  ACTION_IF (~%csr140_jtxt%~ STRING_CONTAINS_REGEXP ~Korlasz~) BEGIN
-    FAIL ~chriz-sod-remix #140: dialog.tlk strref %csr140_j% does not mention Korlasz — the EET +200000 journal-strref assumption does not hold on this install~
-  END
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+COPY ~chriz-sod-remix/baf/csr140in.baf~ ~weidu_external/work/chriz-sod-remix/140/intro.baf~
+  EVALUATE_BUFFER READ_ASCII 0 csr140_intro (BUFFER_LENGTH)
+ACTION_FOR_EACH script IN ~bdintro~ ~bd0120~ ~bdsodtrn~ BEGIN
+  LAF csr_ensure_script STR_VAR script = EVAL ~%script%~ END
 END
-
-// --- fail-loud single-occurrence replace ---
-// Every surgical edit runs through this: exactly one match or the
-// component aborts (quality bar: a mismatch must fail at install
-// time, never silently skip). CASE_SENSITIVE because the patterns
-// were taken verbatim from the dev-install decompile.
-DEFINE_PATCH_FUNCTION ~csr140_replace_exact~
-  STR_VAR
-    csr140_match = ~~
-    csr140_with  = ~~
-    csr140_why   = ~~
-BEGIN
-  COUNT_REGEXP_INSTANCES CASE_SENSITIVE ~%csr140_match%~ csr140_found
-  PATCH_IF (csr140_found != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #140 [%csr140_why%]: expected exactly 1 match of [%csr140_match%] in %SOURCE_RES%, found %csr140_found% — script text differs from the researched install; aborting instead of half-patching~
-  END
-  REPLACE_TEXTUALLY CASE_SENSITIVE ~%csr140_match%~ ~%csr140_with%~
-END
-
-// The 10-second Ammon timer decompiles with this game's GTIMES.IDS name
-// (TWO_MINUTES in vanilla); a mod may append another name. Ask WeiDU for it.
-LAF csr_gtimes_regexp
-  INT_VAR csr_gtimes_value = 10
-  STR_VAR csr_gtimes_caller = ~chriz-sod-remix #140 [BDINTRO]~
-  RET csr140_ammon_time = csr_gtimes_regexp
-END
-
-// ------------------------------------------------------------
-// Seams 1 + 2: BDINTRO.bcs
-// ------------------------------------------------------------
 COPY_EXISTING ~bdintro.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-
-    // Seam 1 — staging block, removals (10b: BDINTRO.baf:546-547,
-    // 563-574, 576-577, 579-580). Deleting only the action text
-    // leaves the decompiler's trailing comments behind as bare
-    // comment lines — valid BAF, same residue component 120 leaves.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: walk-in warm-up (bdslow)~
-      csr140_match = ~ApplySpellRES("bdslow","intro_follower2")~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: walk-in warm-up (polymorph)~
-      csr140_match = ~ActionOverride("intro_follower2",Polymorph(FIGHTER_FEMALE_HUMAN))~ END
-    // bd_plot leaves its vanilla slot; re-added at the tail (see
-    // header: the write must be the last meaningful action).
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: bd_plot out of vanilla slot~
-      csr140_match = ~SetGlobal("bd_plot","global",2)~ END
-    // BDDEBUG parity (BDDEBUG.baf:151-160); BD0103.baf:737 sets the
-    // same value again — harmless.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: camp chapter~
-      csr140_match = ~SetGlobal("bd_npc_camp_chapter","global",0)~
-      csr140_with  = ~SetGlobal("bd_npc_camp_chapter","global",1)~ END
-    // No party staging: the party never plays BD0120, and bdcut00z
-    // re-positions everyone into BD0103 anyway.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P1 jump~
-      csr140_match = ~JumpToPoint(\[905\.1615\])~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P2 jump~
-      csr140_match = ~ActionOverride(Player2,JumpToPoint(\[728\.1602\]))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P3 jump~
-      csr140_match = ~ActionOverride(Player3,JumpToPoint(\[776\.1602\]))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P4 jump~
-      csr140_match = ~ActionOverride(Player4,JumpToPoint(\[776\.1744\]))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P5 jump~
-      csr140_match = ~ActionOverride(Player5,JumpToPoint(\[840\.1746\]))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P6 jump~
-      csr140_match = ~ActionOverride(Player6,JumpToPoint(\[824\.1782\]))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P2 face~
-      csr140_match = ~ActionOverride(Player2,Face(E))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P3 face~
-      csr140_match = ~ActionOverride(Player3,Face(E))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P4 face~
-      csr140_match = ~ActionOverride(Player4,Face(NE))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P5 face~
-      csr140_match = ~ActionOverride(Player5,Face(NE))~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P6 face~
-      csr140_match = ~ActionOverride(Player6,Face(NE))~ END
-    // MUST run after the ActionOverride(...,Face(NE)) removals above:
-    // only then is the bare Player1 Face(NE) the single occurrence.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: P1 face~
-      csr140_match = ~Face(NE)~ END
-    // No escort: bdshimoe belonged to the removed dungeon walkthrough
-    // (design §1: do not create the escort).
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: bdshimoe escort~
-      csr140_match = ~CreateCreature("bdshimoe",\[881\.1652\],NE)~ END
-    // Ammon-quest pacing timer — dungeon-internal, dies with it.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: Ammon timer~
-      csr140_match = EVAL ~SetGlobalTimer("BD_Ammon_stop","BD0120",%csr140_ammon_time%)~ END
-    // Cutscene-breakable rig: its disarm (SetAreaScript(""), flag=0,
-    // breakable FALSE) lived in the walk-in blocks we gate off below;
-    // arming it here would leave BD0120's OVERRIDE area script stuck
-    // on "cutskip" and the breakable flag dangling.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: cutskip area script~
-      csr140_match = ~SetAreaScript("cutskip",OVERRIDE)~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: breakable flag~
-      csr140_match = ~SetGlobal("BD_CUTSCENE_BREAKABLE","GLOBAL",1)~ END
-    // Skip-state tail replaces the rig arm (last vanilla action of
-    // the block): default Korlasz outcome + journal chain (design §1),
-    // then bd_plot=50 as the very last global write, then end the
-    // cutscene so BD0120 area passes resume (seam 3 takes over).
-    LPF csr140_replace_exact STR_VAR csr140_why = ~staging: skip-state tail~
-      csr140_match = ~SetCutSceneBreakable(TRUE)~
-      csr140_with  = EVAL ~SetGlobal("BD_KORLASZ_SURRENDER","GLOBAL",1)
-    AddJournalEntry(%csr140_j_open%,QUEST)
-    AddJournalEntry(%csr140_j_surr%,QUEST_DONE)
-    AddJournalEntry(%csr140_j_done%,QUEST_DONE)
-    SetGlobal("bd_plot","global",50)
-    EndCutSceneMode()~ END
-
-    // Seam 2 — False()-gate both walk-in variants (cookbook #7).
-    // "IF directly followed by InMyArea" is unique to the walk-in
-    // block: the join/wiring blocks put a SOD_fromimport check first.
-    LPF csr140_replace_exact STR_VAR csr140_why = ~walk-in scene, Minsc variant~
-      csr140_match = EVAL ~IF[ %TAB%%WNL%%LNL%%MNL%]+InMyArea("minsc")~
-      csr140_with  = ~IF
-  False()
-  InMyArea("minsc")~ END
-    LPF csr140_replace_exact STR_VAR csr140_why = ~walk-in scene, no-Minsc variant~
-      csr140_match = ~!InMyArea("minsc")~
-      csr140_with  = ~False()
-  !InMyArea("minsc")~ END
-
+    LPF csr_replace_script_blocks INT_VAR in_place = 1 append = 1
+      STR_VAR pattern = ~"bd_npc_camp_chapter"\|"BD_TURNOFF_GEARSCRIPT"\|"BD_KORLASZ_SURRENDER"~
+        replacement = EVAL ~%csr140_intro%~ END
+    // The retired walk-in scene owns the follower staging, independent of
+    // trigger ordering. Recruitment/import blocks do not stage these actors.
+    LPF csr_replace_script_blocks STR_VAR pattern = ~"intro_follower1"\|"intro_follower2"~ END
   END
 BUT_ONLY
 
-// ------------------------------------------------------------
-// Seam 3: the deterministic exit (see header for why not a chain)
-// ------------------------------------------------------------
-// Appended at the BOTTOM so the K# Bhaalspawn grants earlier in the
-// script have already fired (Continue()-chained) in any pass that
-// reaches it. Trigger bd_plot==50 has no vanilla setter besides
-// BDDEBUG's own skip, which launches bdcut00z itself in the same
-// response — no interference.
-EXTEND_BOTTOM ~bd0120.bcs~ ~chriz-sod-remix/baf/exit0120.baf~
-
-// Instant black cover on landing: BDSODTRN's pre-MoveToCampaign fade does
-// not survive the campaign load, so BD0120 renders visibly until a script
-// fades it. EXTEND_TOP makes the fade the FIRST action of the first pass
-// (the vanilla launcher's fade sits below ~5500 bootstrap lines).
-EXTEND_TOP ~bd0120.bcs~ ~chriz-sod-remix/baf/blk0120.baf~
-
-// ------------------------------------------------------------
-// Ground piles: BDSODTRN copy target BD0120 -> BD0103
-// ------------------------------------------------------------
-// 10b §3 item 7: imported BG1 ground loot lands at BD0120 [949.1686],
-// unreachable once the dungeon is skipped. [190.540] sits between the
-// bdcut00z player landing points [179.544] and [202.567]
-// (BDCUT00Z.baf:24-30) — guaranteed-walkable floor at the guest beds.
+// Refresh our black cover and exit while retaining the earlier import/bootstrap blocks.
+COPY ~chriz-sod-remix/baf/blk0120.baf~ ~weidu_external/work/chriz-sod-remix/140/black.baf~
+  READ_ASCII 0 csr140_black (BUFFER_LENGTH)
+COPY ~chriz-sod-remix/baf/exit0120.baf~ ~weidu_external/work/chriz-sod-remix/140/exit.baf~
+  READ_ASCII 0 csr140_exit (BUFFER_LENGTH)
+COPY_EXISTING ~bd0120.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~"bd_plot"~ pattern2 = ~FadeToColor(~ exclude = ~StartCutScene~ replacement = EVAL ~%csr140_black%~ END
+    LPF csr_replace_script_blocks INT_VAR append = 1 STR_VAR pattern = ~StartCutSceneEx("bdcut00z"~ replacement = EVAL ~%csr140_exit%~ END
+  END
+BUT_ONLY
 COPY_EXISTING ~bdsodtrn.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    LPF csr140_replace_exact STR_VAR csr140_why = ~BG1 ground-pile copy target~
-      csr140_match = ~CopyGroundPilesTo("BD0120",\[949\.1686\])~
-      csr140_with  = ~CopyGroundPilesTo("BD0103",[190.540])~ END
+    SET csr140_copy_written = 0
+    REPLACE_EVALUATE CASE_INSENSITIVE ~CopyGroundPilesTo("[^"]*",\[[0-9]+\.[0-9]+\])~ BEGIN
+      SET csr140_copy_written = 1
+    END ~CopyGroundPilesTo("BD0103",[190.540])~
+    PATCH_IF NOT csr140_copy_written BEGIN
+      SPRINT csr140_copy ~IF
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId(Player1)
+    CopyGroundPilesTo("BD0103",[190.540])
+END
+
+~
+      INSERT_BYTES 0 (STRING_LENGTH ~%csr140_copy%~) WRITE_ASCIIE 0 ~%csr140_copy%~
+    END
   END
 BUT_ONLY

@@ -78,14 +78,11 @@ class SyntheticBridgeOrderTests(unittest.TestCase):
         result = self.harness.install()
         return before, result
 
-    def reject(self, script):
+    def overwrite(self, script):
         before, result = self.install(script)
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("chriz-sod-remix #256", result.stdout + result.stderr)
-        self.assertEqual(tree(self.harness.override), before)
-        backup = self.harness.game / "world-backup/256"
-        self.assertFalse(backup.exists() and any(
-            p.suffix.lower() in {".bcs", ".are"} for p in backup.iterdir()))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        assert_victory_routes(self, self.harness.decompile())
 
     def test_115_first_retains_both_victory_routes_and_unrelated_branches(self):
         foreign = '''IF
@@ -117,31 +114,31 @@ END
         for _, actions in routes:
             self.assertEqual(actions.count('createcreature("bdskie",[2485.2655],nw)'), 1)
 
-    def test_missing_carried_branch_is_rejected_before_writes(self):
+    def test_missing_carried_branch_is_rebuilt(self):
         source = continuity_script()
         carried = next(m.group(0) for m in BLOCK.finditer(source)
                        if 'Global("csr_kh_fort"' in m.group(0)
                        and '!Global("csr_kh_fort"' not in m.group(0))
-        self.reject(source.replace(carried, "", 1))
+        self.overwrite(source.replace(carried, "", 1))
 
-    def test_only_one_native_victory_forked_is_rejected(self):
+    def test_only_one_native_victory_forked_is_overwritten(self):
         first = next(m.group(0) for m in BLOCK.finditer(SCRIPT) if RETREAT in m.group(0))
-        self.reject(SCRIPT.replace(first, continuity_script(first), 1))
+        self.overwrite(SCRIPT.replace(first, continuity_script(first), 1))
 
-    def test_carried_and_ordinary_payload_disagreement_is_rejected(self):
-        self.reject(continuity_script().replace('AddJournalEntry(123,QUEST)',
+    def test_carried_and_ordinary_payload_disagreement_is_overwritten(self):
+        self.overwrite(continuity_script().replace('AddJournalEntry(123,QUEST)',
                                                'AddJournalEntry(124,QUEST)', 1))
 
-    def test_unknown_added_action_even_in_both_copies_is_rejected(self):
-        self.reject(continuity_script(SCRIPT.replace('    AddJournalEntry(123,QUEST)',
+    def test_unknown_added_action_even_in_both_copies_is_overwritten(self):
+        self.overwrite(continuity_script(SCRIPT.replace('    AddJournalEntry(123,QUEST)',
             '    NoAction()\n    AddJournalEntry(123,QUEST)')))
 
-    def test_duplicate_carried_branch_is_rejected(self):
+    def test_duplicate_carried_branch_is_overwritten(self):
         source = continuity_script()
         carried = next(m.group(0) for m in BLOCK.finditer(source)
                        if 'Global("csr_kh_fort"' in m.group(0)
                        and '!Global("csr_kh_fort"' not in m.group(0))
-        self.reject(source + carried)
+        self.overwrite(source + carried)
 
 
 @unittest.skipUnless(WEIDU.is_file(), "real WeiDU unavailable; set WEIDU_EXE")
