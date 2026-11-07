@@ -2,10 +2,10 @@ IF
   Global("bd_plot","global",586)
   !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300")
   Global("bd_ot2_Dorn","bd4300",0)
-  IsValidForPartyDialogue("DORN")  
+  IsValidForPartyDialogue("DORN")
 THEN
   RESPONSE #100
     SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",2)
     SetGlobal("bd_ot2_Dorn","bd4300",1)
-    DisplayStringHead("DORN",%csr290_s39334%)  
+    DisplayStringHead("DORN",%csr290_s39334%)
 END

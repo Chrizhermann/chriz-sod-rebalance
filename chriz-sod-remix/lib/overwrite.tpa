@@ -15,17 +15,36 @@ BEGIN
     SET csr_dlg_readable = SOURCE_SIZE >= 0x30
     PATCH_IF csr_dlg_readable BEGIN
       READ_LONG 0x08 sc READ_LONG 0x0c so READ_LONG 0x10 tc READ_LONG 0x14 tr
-      SET csr_dlg_readable = so + sc * 16 <= SOURCE_SIZE AND tr + tc * 32 <= SOURCE_SIZE
+      READ_LONG 0x1c stc READ_LONG 0x24 ttc READ_LONG 0x2c ac
+      SET csr_dlg_readable = so >= 0 AND sc >= 0 AND so <= SOURCE_SIZE AND sc <= (SOURCE_SIZE - so) / 16
+        AND tr >= 0 AND tc >= 0 AND tr <= SOURCE_SIZE AND tc <= (SOURCE_SIZE - tr) / 32
       FOR (i = 0; csr_dlg_readable AND i < sc; ++i) BEGIN
         READ_LONG (so + i * 16 + 4) first READ_LONG (so + i * 16 + 8) csr_dlg_n
-        SET csr_dlg_readable = first + csr_dlg_n <= tc
+        READ_SLONG (so + i * 16 + 12) trigger
+        SET csr_dlg_readable = first >= 0 AND csr_dlg_n >= 0 AND first <= tc AND csr_dlg_n <= tc - first
+          AND (trigger = (0 - 1) OR (trigger >= 0 AND trigger < stc))
       END
       PATCH_FOR_EACH header IN 0x18 0x20 0x28 BEGIN
         READ_LONG header table READ_LONG (header + 4) csr_dlg_n
-        SET csr_dlg_readable = csr_dlg_readable AND table + csr_dlg_n * 8 <= SOURCE_SIZE
+        SET csr_dlg_readable = csr_dlg_readable AND table >= 0 AND csr_dlg_n >= 0
+          AND table <= SOURCE_SIZE AND csr_dlg_n <= (SOURCE_SIZE - table) / 8
         FOR (i = 0; csr_dlg_readable AND i < csr_dlg_n; ++i) BEGIN
           READ_LONG (table + i * 8) text READ_LONG (table + i * 8 + 4) length
-          SET csr_dlg_readable = text + length <= SOURCE_SIZE
+          SET csr_dlg_readable = text >= 0 AND length >= 0 AND text <= SOURCE_SIZE AND length <= SOURCE_SIZE - text
+        END
+      END
+      // Table spans alone do not make indexed trigger/action reads safe.
+      // Check only references the DLG format marks as present; -1 is the
+      // state's no-trigger sentinel, not an index into its trigger table.
+      FOR (i = 0; csr_dlg_readable AND i < tc; ++i) BEGIN
+        READ_LONG (tr + i * 32) flags
+        PATCH_IF flags BAND 2 BEGIN
+          READ_SLONG (tr + i * 32 + 12) trigger
+          SET csr_dlg_readable = trigger >= 0 AND trigger < ttc
+        END
+        PATCH_IF flags BAND 4 BEGIN
+          READ_SLONG (tr + i * 32 + 16) action
+          SET csr_dlg_readable = csr_dlg_readable AND action >= 0 AND action < ac
         END
       END
     END

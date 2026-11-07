@@ -93,4 +93,3 @@ THEN
     SetGlobalTimer("BD_BANTER_DELAY","MYAREA",TWO_MINUTES)
     SetGlobal("bd_pbdd103","MYAREA",-1)
 END
-

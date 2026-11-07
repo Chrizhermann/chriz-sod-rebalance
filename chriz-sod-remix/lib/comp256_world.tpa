@@ -4,6 +4,7 @@ OUTER_SPRINT csr256_nl ~%MNL%?%LNL%~
 
 DEFINE_PATCH_MACRO csr256_world_script BEGIN
   SET csr256_entry_written = 0
+  SET csr256_clocked = (INDEX_BUFFER (~"CSR256_CLOCK"~) >= 0)
   SET csr256_115 = MOD_IS_INSTALLED ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ 115 OR (INDEX_BUFFER (~SetGlobal("csr_kh_fort"~) >= 0)
   SET csr256_journal = 59772
   PATCH_IF GAME_IS ~eet~ BEGIN SET csr256_journal += 200000 END
@@ -18,8 +19,6 @@ DEFINE_PATCH_MACRO csr256_world_script BEGIN
         REPLACE_EVALUATE CASE_INSENSITIVE ~CreateCreature("bdskie",[^%WNL%]*)~ BEGIN SPRINT csr256_skie ~    %MATCH0%~ END ~%MATCH0%~
         REPLACE_EVALUATE CASE_INSENSITIVE ~"csr_kh_fort"~ BEGIN SET csr256_115 = 1 END ~%MATCH0%~
       END
-      SPRINT block ~~
-    END ELSE PATCH_IF (~%block%~ STRING_CONTAINS_REGEXP ~"CSR256_REQUEST"\|"CSR256_STAGE"~ = 0) AND (~%block%~ STRING_CONTAINS_REGEXP ~SetGlobal("bd_bridge_plot"~ != 0) BEGIN
       SPRINT block ~~
     END ELSE PATCH_IF ~%block%~ STRING_CONTAINS_REGEXP ~CreateCreature("bdcrubb[12m]"\|SetGlobal("bd_bridge_plot","bd2000",2)~ = 0 BEGIN
       INNER_PATCH_SAVE block ~%block%~ BEGIN
@@ -71,6 +70,11 @@ END
     StateCheck("%dv%",STATE_STONE_DEATH)
 ~
   END
+  // A later #115 tail keeps the installed countdown's victory prerequisite.
+  PATCH_IF csr256_clocked BEGIN
+    SPRINT csr256_guard ~%csr256_guard%  Global("CSR256_CLOCK","BD2000",2)
+~
+  END
   SPRINT retreat ~    ActionOverride("khalid",SaveLocation("LOCALS","bd_default_loc",[2425.2485]))
     ActionOverride("khalid",SetGlobal("bd_no_retreat","locals",0))
     ActionOverride("khalid",SetGlobal("bd_retreat","locals",1))
@@ -98,7 +102,7 @@ END
 
 ~
   END
-  // Put victory ahead of unrelated area work but below the encounter controller.
+  // The full world install prepends its encounter controller after this writer.
   INSERT_BYTES 0 (STRING_LENGTH ~%victory%~) WRITE_ASCIIE 0 ~%victory%~
 END
 
@@ -175,7 +179,17 @@ DEFINE_ACTION_FUNCTION csr256_world_preflight BEGIN END
 
 DEFINE_ACTION_FUNCTION csr256_world_install BEGIN
   LAF csr_ensure_script STR_VAR script = ~BD2000~ END
-  COPY_EXISTING ~BD2000.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN LPM csr256_world_script END BUT_ONLY
+  COPY_EXISTING ~BD2000.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LPM csr256_world_script
+      // Only this full install replaces the spawn/stage controllers below.
+      // #115 and the timer helper call the shared victory writer on its own.
+      LPF csr_replace_script_blocks
+        STR_VAR pattern = ~"CSR256_REQUEST"\|"CSR256_STAGE"~
+          exclude = ~SetGlobal("bd_bridge_plot"\|SetGlobal("CSR256_STAGE","BD2000",3)~
+      END
+    END
+  BUT_ONLY
   ACTION_IF FILE_EXISTS_IN_GAME ~BD2000.ARE~ BEGIN
     COPY_EXISTING ~BD2000.ARE~ ~override~ LPM csr256_world_area BUT_ONLY
   END ELSE BEGIN PRINT ~#256: BD2000.ARE is absent; its scenery is unchanged.~ END

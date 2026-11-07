@@ -53,4 +53,3 @@ THEN
     CreateCreatureEffect("CSR285D2","DDOORH",[1300.1325],N)
     SetInterrupt(TRUE)
 END
-

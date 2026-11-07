@@ -39,4 +39,3 @@ THEN
     Wait(2)
     DisplayStringHead(Myself,%csr170_s45639%)
 END
-

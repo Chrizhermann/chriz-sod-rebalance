@@ -12,4 +12,3 @@ THEN
     ActionOverride("IMOEN2",ChangeAIScript("csrimoxp",RACE))
     SetGlobal("CSR_IMOEN_IMPORT","GLOBAL",1)
 END
-

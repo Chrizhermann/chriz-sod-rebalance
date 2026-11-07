@@ -13,4 +13,3 @@ THEN
   RESPONSE #100
     StartDialogNoSet(Player1)
 END
-

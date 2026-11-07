@@ -68,4 +68,3 @@ THEN
     SetGlobal("CSR285_INVIS","LOCALS",1)
     ForceSpell(Myself,WIZARD_IMPROVED_INVISIBILITY)
 END
-

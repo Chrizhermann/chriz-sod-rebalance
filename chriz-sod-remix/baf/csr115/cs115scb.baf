@@ -21,4 +21,3 @@ THEN
     Wait(3)
     ActionOverride("bdjegg",StartDialogNoSet(Player1))
 END
-

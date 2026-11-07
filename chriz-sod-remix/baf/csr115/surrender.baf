@@ -104,4 +104,3 @@ THEN
     Wait(2)
     ActionOverride("bdbarghe",StartDialogNoSet(Player1))
 END
-

@@ -21,4 +21,3 @@ THEN
     AddJournalEntry(%csr270_str261937%,INFO)
     AddJournalEntry(%csr270_str258043%,QUEST_DONE)
 END
-

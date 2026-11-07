@@ -21,4 +21,3 @@ THEN
     Wait(15)
     StartCutSceneEx("bdc205db",FALSE)
 END
-

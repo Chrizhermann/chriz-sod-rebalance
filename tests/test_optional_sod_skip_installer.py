@@ -277,6 +277,44 @@ class OptionalSkipInstallerTests(unittest.TestCase):
                 self.assertNotIn('WARNING',text.upper())
                 self.assertIn('PlayerChest00',parse_containers(game.tree()['bd0103.are']))
 
+    def test_missing_or_damaged_cutspy_uses_a_minimal_owned_helper(self):
+        for damaged in (False, True):
+            with self.subTest(damaged=damaged):
+                game = self.game()
+                donor = game.root / "override/cutspy.cre"
+                if damaged:
+                    donor.write_bytes(b"CRE V1.0")
+                else:
+                    donor.unlink()
+                before = game.tree()
+                result, text = game.install()
+                self.assertEqual(result.returncode, 0, text)
+                self.assertNotIn("WARNING", text.upper())
+                after = game.tree()
+                creature = after["csrskask.cre"]
+                self.assertEqual(len(creature), 0x324)
+                self.assertEqual(creature[:8], b"CRE V1.0")
+                self.assertEqual(struct.unpack_from("<HHI", creature, 0x24), (1, 1, 0xd300))
+                for offset in (0x2a4, 0x2ac, 0x2b4, 0x2c0, 0x2c8):
+                    self.assertEqual(struct.unpack_from("<I", creature, offset)[0], 0)
+                slots = struct.unpack_from("<I", creature, 0x2b8)[0]
+                self.assertEqual(struct.unpack_from("<40H", creature, slots), (0xffff,) * 39 + (0,))
+                self.assertEqual(creature[0x248:0x250], b"csrskask")
+                self.assertEqual(creature[0x250:0x270], bytes(32))
+                self.assertEqual(creature[0x2cc:0x2d4], b"csrskip\0")
+                self.assertIn("StartDialogueNoSet(Player1)", game.baf("csrskask"))
+                for name in ("cutspy.cre", "k#telbgt.cre", "k#telbgt.bcs", "bd6100.are"):
+                    self.assertEqual(after.get(name), before.get(name), name)
+                (game.root / "minimal-tail.tp2").write_text(
+                    'BACKUP ~minimal-tail-backup~ AUTHOR ~fixture~ '
+                    'LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/csrskip.tra~ '
+                    'BEGIN ~skip again~ INCLUDE ~chriz-sod-remix/lib/comp910.tpa~', encoding="ascii")
+                result = subprocess.run([str(WEIDU), "minimal-tail.tp2", "--force-install-list", "0",
+                    "--language", "0", "--no-exit-pause"], cwd=game.root, capture_output=True, text=True, timeout=60)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
+                self.assertEqual(after, game.tree())
+
     def test_second_tail_replaces_owned_hooks(self):
         game=self.game();result,text=game.install();self.assertEqual(result.returncode,0,text)
         first=game.tree()

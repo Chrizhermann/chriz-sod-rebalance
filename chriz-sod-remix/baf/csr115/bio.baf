@@ -24,4 +24,3 @@ THEN
     SetGlobal("bd_add_new_bio","LOCALS",1)
     SetPlayerSound(Myself,%csr115_s69603%,BIO)
 END
-

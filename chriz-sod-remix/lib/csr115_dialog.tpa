@@ -77,10 +77,11 @@ DEFINE_ACTION_FUNCTION csr115_dialog_apply BEGIN
   OUTER_SET csr115_have_quest = 0
   COPY_EXISTING - ~%csr115_kh_j%.dlg~ ~override~
     READ_LONG 0x08 csr115_party_count READ_LONG 0x0c off READ_LONG 0x18 triggers
+    READ_LONG 0x1c trigger_count
     SET csr115_kh_delta = csr115_party_count - 174
     FOR (i = 0; i < csr115_party_count; ++i) BEGIN
       READ_SLONG (off + i * 16 + 12) trigger
-      PATCH_IF trigger >= 0 BEGIN
+      PATCH_IF trigger >= 0 AND trigger < trigger_count BEGIN
         READ_LONG (triggers + trigger * 8) pos READ_LONG (triggers + trigger * 8 + 4) len
         READ_ASCII pos script (len)
         PATCH_IF ~%script%~ STRING_CONTAINS_REGEXP ~Global("BD_SDD223","GLOBAL",0)~ = 0 BEGIN

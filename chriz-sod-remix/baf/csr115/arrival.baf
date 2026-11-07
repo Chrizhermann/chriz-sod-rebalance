@@ -63,4 +63,3 @@ THEN
     AddJournalEntry(%csr115_s66863%,QUEST_DONE)
     ActionOverride("bdbfort",StartDialogNoSet(Player1))
 END
-

@@ -323,6 +323,39 @@ class TreasureContainerInstallerTests(unittest.TestCase):
         self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
         self.assertEqual(before,p.read_bytes())
 
+    def test_legacy_reward_without_metadata_is_replaced_without_duplication(self):
+        foreign = item("WAND04", expiration=41, charges=(1, 2, 3), flags=0x82)
+        changed = [item(row[:8].rstrip(b"\0").decode("ascii"), expiration=17,
+                        charges=(8, 7, 6), flags=0x81) for row in reversed(PAYLOAD)]
+        variants = (
+            ("legacy_nine", [foreign] + PAYLOAD, 0),
+            ("reordered_and_interleaved", [foreign] + changed[:3] + [item("FOREIGN")] + changed[3:], 0),
+            ("full_item_table", [foreign] + PAYLOAD, 65524),
+        )
+        for name, contents, unused in variants:
+            with self.subTest(name=name):
+                before = area(contents, unused_items=unused)
+                game = self.game(before)
+                self.assertNotIn("csr900.2da", game.tree())
+                result, text = game.install()
+                self.assertEqual(result.returncode, 0, text)
+                self.assertNotIn("WARNING", text.upper())
+                after = game.tree()["bd1000.are"]
+                unowned = [foreign] + ([item("FOREIGN")] if name == "reordered_and_interleaved" else [])
+                self.assertEqual(container_records(after, 1), unowned + PAYLOAD)
+                for index in (0, 2):
+                    self.assertEqual(container_records(after, index), container_records(before, index))
+                self.assertIn("csr900.2da", game.tree())
+                (game.root / "legacy-tail.tp2").write_text(
+                    'BACKUP ~legacy-tail-backup~ AUTHOR ~fixture~ BEGIN ~legacy reward again~ '
+                    'OUTER_SET csr_keep_treasure = 1 INCLUDE ~chriz-sod-remix/lib/comp900.tpa~',
+                    encoding="ascii")
+                result = subprocess.run([str(WEIDU), "legacy-tail.tp2", "--force-install-list", "0",
+                    "--no-exit-pause"], cwd=game.root, capture_output=True, text=True, timeout=60)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
+                self.assertEqual(after, game.tree()["bd1000.are"])
+
     def test_full_table_reclaims_unreferenced_records_without_losing_loot(self):
         before = area([item('SW1H01')],unused_items=65532)
         game = self.game(before)

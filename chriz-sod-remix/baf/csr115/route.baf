@@ -64,4 +64,3 @@ THEN
     SetGlobal("csr_kh_fort","GLOBAL",2)
     Continue()
 END
-

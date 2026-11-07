@@ -339,7 +339,19 @@ class Component285EffectiveTests(InstallerFixture):
         moderate = self.resource("CSR285HP.CRE")
         insane = self.resource("CSR285HI.CRE")
         native = originals["BDFINHEP.CRE"]
-        for creature in (moderate, insane):
+        for creature, healing_copies in ((moderate, 1), (insane, 2)):
+            healing = Path(self.spells["CLERIC_CURE_SERIOUS_WOUNDS"]).stem.upper()
+            memorized = dword(creature, 0x2B0)
+            healing_entries = [memorized + index * 12 for index in range(dword(creature, 0x2B4))
+                               if resref(creature, memorized + index * 12) == healing]
+            self.assertEqual(len(healing_entries), healing_copies)
+            for entry in healing_entries:
+                self.assertEqual(dword(creature, entry + 8), 1, "healing is memorized and available")
+            known = dword(creature, 0x2A0)
+            self.assertEqual([(word(creature, known + index * 12 + 8),
+                               word(creature, known + index * 12 + 10))
+                              for index in range(dword(creature, 0x2A4))
+                              if resref(creature, known + index * 12) == healing], [(3, 0)])
             self.assertEqual(creature[0x273], 14, "cleric/mage class")
             self.assertEqual(creature[0x234:0x237], bytes((14, 14, 0)))
             self.assertEqual(creature[0x28:0x2C], native[0x28:0x2C], "devil animation")
@@ -368,6 +380,22 @@ class Component285EffectiveTests(InstallerFixture):
         for forbidden in ("FORCESPELL", "SPELLNODEC", "REST(", "APPLYSPELL", "CREATECREATURE"):
             self.assertNotIn(forbidden, combat)
         self.assertIn("HAVESPELL(", combat)
+
+    def test_adapted_donor_keeps_healing_actions_and_both_difficulty_allocations(self):
+        # SHUPOL01 selects the installed cleric/mage AI; its ordinary healing
+        # blocks consume spell 1401 just like the native donor does.
+        donor = bytearray(self.resource("BDFINHEP.CRE"))
+        donor[0x268:0x270] = b"dw#cm3\0\0"
+        (self.override / "shupol01.cre").write_bytes(donor)
+        (self.game / "dw#cm3.baf").write_text(
+            'IF HaveSpell(1401) THEN RESPONSE #100 Spell(Myself,1401) END', encoding="ascii")
+        result = self.run_weidu("dw#cm3.baf", "--out", "override")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.test_public_installer_preserves_foreign_resources_and_encounter_contract()
+        combat = self.script("CSR285HC.BCS")
+        spell = r'(?:1401|CLERIC_CURE_SERIOUS_WOUNDS)'
+        self.assertRegex(combat, rf'HAVESPELL\({spell}\)')
+        self.assertRegex(combat, rf'SPELL\(MYSELF,{spell}\)')
 
     def test_foreign_v2_effect_bytes_survive_owned_movement_replacement(self):
         from test_comp256_creatures import effect_record

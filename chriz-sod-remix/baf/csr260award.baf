@@ -57,4 +57,3 @@ THEN
     SetCutSceneLite(TRUE)
     EndCutSceneMode()
 END
-

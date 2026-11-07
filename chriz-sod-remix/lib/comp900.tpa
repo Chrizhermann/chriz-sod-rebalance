@@ -105,8 +105,31 @@ ACTION_IF (csr_keep_treasure = 1) BEGIN
       PATCH_IF target >= 0 AND writable BEGIN
         READ_LONG (co + target * 0xc0 + 0x40) first READ_LONG (co + target * 0xc0 + 0x44) count
       END
-      SET compact = ic + count + 8 > 65535
-      SET writable = writable AND (NOT compact OR active + 8 <= 65535)
+      SET csr900_reuse = csr900_base >= 0 AND count >= csr900_base + 8
+      SET csr900_legacy = 0
+      CLEAR_ARRAY csr900_owned
+      PATCH_IF writable AND NOT csr900_reuse BEGIN
+        // Older releases did not write CSR900.2DA. Locate their reward by
+        // item identity, ignoring charges, flags and order. Search from the
+        // end so pre-existing copies of common items remain untouched.
+        SET matched = 0
+        FOR (j = 0; j < 8; ++j) BEGIN
+          TEXT_SPRINT res $csr_pay(~%j%~)
+          SET owned = (0 - 1)
+          FOR (i = count - 1; i >= 0 AND owned < 0; --i) BEGIN
+            READ_ASCII (io + (first + i) * 20) old_res (8) NULL
+            PATCH_IF (~%old_res%~ STRING_EQUAL_CASE ~%res%~) AND NOT VARIABLE_IS_SET $csr900_owned(~%i%~) BEGIN
+              SET owned = i SET $csr900_owned(~%i%~) = 1 SET matched += 1
+            END
+          END
+        END
+        // A partial set can be ordinary chest contents. It never suppresses
+        // the authored reward: without its full identity, append all eight.
+        SET csr900_legacy = matched = 8
+      END
+      SET added = (csr900_reuse OR csr900_legacy) ? 0 : 8
+      SET compact = ic + count + added > 65535
+      SET writable = writable AND (csr900_reuse OR NOT compact OR active + added <= 65535)
         AND (target >= 0 OR (cc < 65535 AND vc <= 65526 AND vo + vc * 4 <= SOURCE_SIZE))
     END
     PATCH_IF writable BEGIN
@@ -140,11 +163,22 @@ ACTION_IF (csr_keep_treasure = 1) BEGIN
           WRITE_SHORT (vo + (vc + point_0) * 4) point_1 WRITE_SHORT (vo + (vc + point_0) * 4 + 2) y
         END
       END
-      PATCH_IF csr900_base >= 0 AND count >= csr900_base + 8 BEGIN
+      PATCH_IF csr900_reuse BEGIN
         // Persistent record address: a second tail overwrites its eight items.
         WRITE_ASCIIE (io + (first + csr900_base) * 20) ~%payload%~
         SET csr900_written = 1
       END ELSE BEGIN
+      READ_ASCII (io + first * 20) csr900_target_items (count * 20)
+      PATCH_IF csr900_legacy BEGIN
+        SPRINT csr900_target_items ~~
+        FOR (i = 0; i < count; ++i) BEGIN
+          PATCH_IF NOT VARIABLE_IS_SET $csr900_owned(~%i%~) BEGIN
+            READ_ASCII (io + (first + i) * 20) item (20)
+            SPRINT csr900_target_items ~%csr900_target_items%%item%~
+          END
+        END
+        SET count -= 8
+      END
       SET csr900_base = count
       PATCH_IF compact BEGIN
         // Unreferenced records remain in the old padding. The new live table
@@ -154,6 +188,7 @@ ACTION_IF (csr_keep_treasure = 1) BEGIN
           SET at = co + i * 0xc0
           READ_LONG (at + 0x40) old_first READ_LONG (at + 0x44) old_count
           READ_ASCII (io + old_first * 20) run (old_count * 20)
+          PATCH_IF i = target BEGIN SPRINT run ~%csr900_target_items%~ SET old_count = count END
           WRITE_LONG (at + 0x40) total
           SPRINT items ~%items%%run%~ SET total += old_count
           PATCH_IF i = target BEGIN
@@ -162,8 +197,7 @@ ACTION_IF (csr_keep_treasure = 1) BEGIN
         END
       END ELSE BEGIN
         READ_ASCII io items (ic * 20)
-        READ_ASCII (io + first * 20) run (count * 20)
-        SPRINT items ~%items%%run%%payload%~ SET total = ic + count + 8
+        SPRINT items ~%items%%csr900_target_items%%payload%~ SET total = ic + count + 8
         WRITE_LONG (co + target * 0xc0 + 0x40) ic WRITE_LONG (co + target * 0xc0 + 0x44) (count + 8)
       END
       SET io = BUFFER_LENGTH INSERT_BYTES io (total * 20)

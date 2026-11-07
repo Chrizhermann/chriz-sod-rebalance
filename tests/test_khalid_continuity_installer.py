@@ -425,6 +425,57 @@ class KhalidContinuityInstallerTests(unittest.TestCase):
         self.assertEqual(2, len(jegg[25].transitions))
         self.assertIn('actionoverride("csr115ad",escapearea())', jegg[25].transitions[0].action)
 
+    def test_bad_dialogue_indexes_rebuild_only_the_damaged_file_and_log_once(self):
+        normal = self.installed_game().tree()
+        variants = ("state_one_past", "state_far_past", "state_negative",
+                    "transition_trigger", "transition_action")
+        for variant in variants:
+            with self.subTest(variant=variant):
+                game = self.game()
+                path = game.root / "override/khalij.dlg"
+                data = bytearray(path.read_bytes())
+                states, transitions = (struct.unpack_from("<I", data, pos)[0] for pos in (0x0c, 0x14))
+                if variant.startswith("state"):
+                    count = struct.unpack_from("<I", data, 0x1c)[0]
+                    index = {"state_one_past": count, "state_far_past": 0x7fffffff,
+                             "state_negative": -2}[variant]
+                    struct.pack_into("<i", data, states + 12, index)
+                else:
+                    flag, index_offset, count_offset = ((2, 12, 0x24) if variant == "transition_trigger"
+                                                       else (4, 16, 0x2c))
+                    flags = struct.unpack_from("<I", data, transitions)[0]
+                    count = struct.unpack_from("<I", data, count_offset)[0]
+                    struct.pack_into("<I", data, transitions, flags | flag)
+                    struct.pack_into("<I", data, transitions + index_offset, count)
+                path.write_bytes(data)
+                result, transcript = game.install()
+                self.assertEqual(result.returncode, 0, transcript)
+                self.assertIn("SUCCESSFULLY INSTALLED", transcript)
+                self.assertNotIn("WARNING", transcript.upper())
+                notices = [line for line in result.stdout.splitlines() if "dialogue is unreadable" in line]
+                self.assertEqual(len(notices), 1, notices)
+                self.assertIn("khalij dialogue is unreadable", notices[0].lower())
+                after = game.tree()
+                states = dialog_states(after["khalij.dlg"])
+                self.assertTrue(any('global("bd_sdd223","global",0)' in state.trigger for state in states))
+                self.assertTrue(any('takepartyitem("bdsilk01")' in t.action for s in states for t in s.transitions))
+                # Independent resources receive their normal authored output;
+                # only dialogues referring into this rebuilt graph may differ.
+                for name in ("bd2000.bcs", "bdcut24.bcs", "bdkhalid.bcs", "bdjegg.dlg"):
+                    self.assertEqual(after[name], normal[name], name)
+                normal_party = dialog_states(normal["khalij.dlg"])
+                for old, new in zip(dialog_states(normal["bdneera.dlg"]), dialog_states(after["bdneera.dlg"]), strict=True):
+                    self.assertEqual((old.text, old.trigger), (new.text, new.trigger))
+                    for old_link, new_link in zip(old.transitions, new.transitions, strict=True):
+                        if old_link.destination == "khalij":
+                            self.assertEqual(replace(old_link, state=0), replace(new_link, state=0))
+                            if old_link.state != new_link.state:
+                                self.assertEqual(normal_party[old_link.state].text, states[new_link.state].text)
+                        else:
+                            self.assertEqual(old_link, new_link)
+                for name, original in game.protected_before.items():
+                    self.assertEqual((game.root / name).read_bytes(), original, name)
+
     def test_missing_party_segment_is_created_without_replacing_other_states(self):
         game = self.game()
         path = game.root / "override/khalij.dlg"

@@ -27,4 +27,3 @@ THEN
     SetGlobal("csr_jh_carry","GLOBAL",1)
     Continue()
 END
-

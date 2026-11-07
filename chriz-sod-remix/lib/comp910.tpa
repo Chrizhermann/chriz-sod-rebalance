@@ -58,7 +58,28 @@ END
 
 LAF csr_readable_cre STR_VAR resource = ~cutspy.cre~ RET readable END
 ACTION_IF readable BEGIN COPY_EXISTING ~cutspy.cre~ ~override/csrskask.cre~ END
-ELSE BEGIN COPY ~chriz-sod-remix/data/csr910-cutspy.cre~ ~override/csrskask.cre~ END
+ELSE BEGIN
+  // Minimal owned actor: an invisible animation, live HP and empty tables.
+  // No installed equipment, effects or foreign resource references are bundled.
+  <<<<<<<< .../csr910-empty.cre
+>>>>>>>>
+  COPY ~.../csr910-empty.cre~ ~override/csrskask.cre~
+    INSERT_BYTES 0 0x324
+    WRITE_ASCII 0 ~CRE V1.0~ #8
+    WRITE_LONG 0x08 0xffffffff WRITE_LONG 0x0c 0xffffffff
+    WRITE_SHORT 0x24 1 WRITE_SHORT 0x26 1
+    WRITE_LONG 0x28 0xd300 // invisible CUTSPY animation
+    WRITE_SHORT 0x46 10 WRITE_BYTE 0x52 19 WRITE_BYTE 0x53 1
+    FOR (at = 0xa4; at < 0x234; at += 4) BEGIN WRITE_LONG at 0xffffffff END
+    WRITE_BYTE 0x234 1
+    PATCH_FOR_EACH at IN 0x238 0x23a 0x23b 0x23c 0x23d 0x23e BEGIN WRITE_BYTE at 9 END
+    WRITE_BYTE 0x23f 10 WRITE_BYTE 0x240 5 WRITE_SHORT 0x242 60
+    WRITE_BYTE 0x271 1 WRITE_BYTE 0x272 255 WRITE_BYTE 0x273 255 WRITE_BYTE 0x275 4
+    WRITE_LONG 0x27c 0xffffffff
+    PATCH_FOR_EACH at IN 0x2a0 0x2a8 0x2b0 0x2bc 0x2c4 BEGIN WRITE_LONG at 0x324 END
+    WRITE_LONG 0x2b8 0x2d4
+    FOR (slot = 0; slot < 39; ++slot) BEGIN WRITE_SHORT (0x2d4 + slot * 2) 0xffff END
+END
 COPY_EXISTING ~csrskask.cre~ ~override~
   // CUTSPY's avatar-removal effect blocks ordinary actions. Retain only its
   // invisible animation, never its effects, equipment, or unrelated scripts.
@@ -72,7 +93,8 @@ COPY_EXISTING ~csrskask.cre~ ~override~
   WRITE_ASCII 0x280 ~csrskask~ #32
   WRITE_ASCII 0x2cc ~csrskip~ #8
   WRITE_BYTE 0x270 128
-  LPF DELETE_CRE_ITEM STR_VAR item_to_delete = ~.*~ END
+  // The generated fallback already has empty inventory and spell tables.
+  PATCH_IF readable BEGIN LPF DELETE_CRE_ITEM STR_VAR item_to_delete = ~.*~ END END
 
 // Hold the existing impound until a confirmed No. Fresh SoD starts retain the
 // untouched native behavior. Do not set BD_PARTY_ITEMS on the skip branch.

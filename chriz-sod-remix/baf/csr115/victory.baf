@@ -72,4 +72,3 @@ THEN
     SetGlobal("bd_cant_rest","myarea",0)
     SetGlobalTimer("BD_NPC_BANTER","GLOBAL",FIVE_ROUNDS)
 END
-
