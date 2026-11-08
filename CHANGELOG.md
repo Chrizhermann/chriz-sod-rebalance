@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.6.17 - 2026-11-08
+
+- **Every component writes its decided result, whatever the game files hold.**
+  Edited values, missing dialogue states or placements, occupied script slots and
+  other mods' versions of the same resources no longer stop the installation,
+  print a warning or skip a component. The component writes what it decided over
+  them: missing owned dialogue states are recreated, and its script blocks are
+  replaced or added whole. Still required: the game type and the components a
+  component builds on.
+- The mandatory components **177, 198 and 285** follow the same rule.
+
 ## v0.6.16 - 2026-10-29
 
 - **265** no longer stops the installation after Dark Tidings. A decompiled

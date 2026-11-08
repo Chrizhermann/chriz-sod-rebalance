@@ -4,7 +4,12 @@ WeiDU tail-mod for the Siege of Dragonspear remix/overhaul. Research and design 
 parent repo (`docs/`); every component ships only after explicit sign-off
 (`docs/design/wave1/` carries the DECIDED/OPEN state per component).
 
-Current release: **v0.6.16**. The component overview below describes this version.
+Current release: **v0.6.17**. The component overview below describes this version.
+
+**v0.6.17 — every component** writes its decided result, whatever the game files
+hold: edited values, missing dialogue states, occupied script slots and other mods'
+versions of the same resources no longer stop, warn or skip it. Only the game type
+and the components a component builds on are still required.
 
 **v0.6.16 — 290** accepts every victory remark in the vanilla shape, whoever added
 it, such as Sirene NPC for BG:EE's, and shortens the pause after each one to 2
@@ -172,7 +177,7 @@ close the game and any mod manager using that directory, then run:
 setup-chriz-sod-remix.exe
 ```
 
-v0.6.16 exposes **49 declarations in seven install groups**, including
+v0.6.17 exposes **49 declarations in seven install groups**, including
 the optional Extra Challenge group. Select according to prerequisites and installed
 history; 176, 235, 258 and 291 update older components, while fresh versions include
 those corrections. Choose one of `900`/`901`; `257` and EET-only `910` are optional.
