@@ -217,6 +217,7 @@ class BridgeCreatureTests(unittest.TestCase):
         self.game = Path(self.temp.name)
         write_fake_game(self.game)
         self.ov = self.game/'override'
+        (self.game/'weidu.log').write_text('')
         self.donors = {}
         for ref in ('BDOLONEI BDCRUE45 BDELFIRL BDELFIRM BDELFIRG '
                     'ELEARL01 ELEAR01 ELEARG01').split():
@@ -272,6 +273,7 @@ LAF csr256_creatures_preflight END
 
     def assert_success(self, **kwargs):
         self.assertEqual(self.run_install(**kwargs), 0, self.output)
+        self.assertNotIn("WARNING", self.output.upper())
 
     def test_approved_books_are_finite_and_old_spells_removed(self):
         self.assert_success()
@@ -394,11 +396,12 @@ LAF csr256_creatures_preflight END
         self.assertEqual(u(fist, u(fist, 0x64)+0x18, 'H'), 2)
         self.assertEqual(self.resource('ELEAR.ITM').read_bytes(), self.donors['ELEAR.ITM'])
 
-    def test_missing_preferred_and_fallback_donor_fails_before_any_write(self):
+    def test_missing_donor_omits_only_its_clones(self):
         self.resource('ELEARL01.CRE').unlink()
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('SUMELEAR.CRE', self.output)
-        self.assertFalse(self.owned_resources())
+        self.assert_success()
+        self.assertIn('SUMELEAR', self.output)
+        self.assertFalse(self.resource('CSR26E1L.CRE').exists())
+        self.assertTrue(self.resource('CSR256FM.CRE').exists())
 
     def test_owned_scripts_identity_and_stale_locals(self):
         self.assert_success()
@@ -456,56 +459,36 @@ LAF csr256_creatures_preflight END
         self.assertTrue(gear['SW2H02'][1] & 8)
         self.assertFalse(gear['POTN52'][1] & 8)
 
-    def test_other_spell_level_drift_fails_before_any_owned_resource(self):
-        self.assertNotEqual(self.run_install(levels={'mirrorimage': 3}), 0)
-        self.assertIn('changed spell level', self.output)
-        self.assertFalse(self.owned_resources())
+    def test_changed_spell_levels_receive_the_authored_book(self):
+        self.assert_success(levels={'mirrorimage': 3, 'dispel': 4, 'sequencer': 6})
+        self.assertEqual(book(self.read('CSR256FM')), BASE_FIRE_BOOK)
+        self.assertEqual(book(self.read('CSR256CM')), BASE_EARTH_BOOK)
+        self.assertEqual(s(self.read('CSR26FMI'), u(self.read('CSR26FMI'), 0x2b0)
+                           + spell_slots(self.read('CSR26FMI'))[6][4]*12), 'SPWI710')
 
-    def test_namespace_collision_is_preserved_and_stops_install(self):
-        collision = b'existing foreign resource'
-        path = self.resource('CSR256CM.CRE')
-        path.write_bytes(collision)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('already exists', self.output)
-        self.assertEqual(path.read_bytes(), collision)
-        self.assertEqual(self.owned_resources(), [path])
+    def test_owned_resources_are_overwritten(self):
+        for ref in ('CSR256CM', 'CSR26FMI', 'CSR26CMI'):
+            self.resource(ref+'.CRE').write_bytes(b'hand-edited owned resource')
+        self.assert_success()
+        self.assertEqual(book(self.read('CSR256CM')), BASE_EARTH_BOOK)
+        self.assertEqual(self.read('CSR26FMI')[0x234], 14)
+        self.assertEqual(self.read('CSR26CMI')[0x234], 14)
 
-    def test_insane_namespace_collisions_fail_before_any_owned_write(self):
-        for ref in ('CSR26FMI', 'CSR26CMI'):
-            with self.subTest(ref=ref):
-                path = self.resource(ref+'.CRE')
-                collision = b'existing foreign Insane resource'
-                path.write_bytes(collision)
-                self.assertNotEqual(self.run_install(), 0)
-                self.assertIn('already exists', self.output)
-                self.assertEqual(path.read_bytes(), collision)
-                self.assertEqual(self.owned_resources(), [path])
-                for name, original in self.donors.items():
-                    self.assertEqual(self.resource(name).read_bytes(), original, name)
-                path.unlink()
-
-    def test_insane_payload_level_drift_fails_before_any_owned_write(self):
-        for key, level in (('dispel', 4), ('sequencer', 6)):
-            with self.subTest(spell=key):
-                self.assertNotEqual(self.run_install(levels={key: level}), 0)
-                self.assertIn('changed spell level', self.output)
-                self.assertFalse(self.owned_resources())
-
-    def test_overlapping_tables_fail_before_any_owned_resource(self):
+    def test_overlapping_old_spell_tables_are_replaced(self):
         b = bytearray(self.donors['BDOLONEI.CRE'])
         struct.pack_into('<I', b, 0x2a0, u(b, 0x2b0))
         self.resource('BDOLONEI.CRE').write_bytes(b)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('overlapping', self.output)
-        self.assertFalse(self.owned_resources())
+        self.assert_success()
+        self.assertEqual(book(self.read('CSR256FM')), BASE_FIRE_BOOK)
+        self.assert_tables_valid(self.read('CSR256FM'))
 
-    def test_unknown_effect_fails_before_any_owned_resource(self):
+    def test_extra_spell_grant_is_removed_from_the_finite_caster(self):
         b = bytearray(self.donors['BDOLONEI.CRE'])
         struct.pack_into('<I', b, u(b, 0x2c4)+8, 171)
         self.resource('BDOLONEI.CRE').write_bytes(b)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('unreviewed donor effect', self.output)
-        self.assertFalse(self.owned_resources())
+        self.assert_success()
+        self.assertEqual(book(self.read('CSR256FM')), BASE_FIRE_BOOK)
+        self.assertFalse(effects(self.read('CSR256FM')))
 
     def seed_monk_policy(self, row='0x10d -1 1', count=106):
         for ref in ('C0PR#MO1.SPL', 'C0PR#MO2.SPL'):
@@ -537,63 +520,34 @@ LAF csr256_creatures_preflight END
     def test_v2_monk_policy_is_preserved_byte_exact_in_both_mages(self):
         self.assert_monk_policy_preserved(1)
 
-    def test_monk_policy_signature_drift_fails_before_owned_writes(self):
-        self.seed_monk_policy()
+    def test_other_mod_policy_effects_are_preserved_without_shape_checks(self):
         for version in (0, 1):
             for key, value in dict(target=1, power=1, param1=2, param2=104,
                                    timing=9, duration=1, prob1=99, prob2=1,
                                    special=1).items():
                 with self.subTest(version=version, field=key):
-                    b = monk_policy_creature(version, **{key: value})
-                    self.resource('BDOLONEI.CRE').write_bytes(b)
-                    self.assertNotEqual(self.run_install(), 0)
-                    self.assertIn('unreviewed donor effect', self.output)
-                    self.assertFalse(self.owned_resources())
+                    donor = monk_policy_creature(version, **{key: value})
+                    self.resource('BDOLONEI.CRE').write_bytes(donor)
+                    self.assert_success()
+                    self.assertEqual(effects(self.read('CSR256FM')), [effects(donor)[i] for i in (0, 2, 3)])
+                    self.assertEqual(book(self.read('CSR256FM')), BASE_FIRE_BOOK)
 
-    def test_monk_policy_rejects_non_caster_and_unknown_helper(self):
-        self.seed_monk_policy()
-        b = bytearray(monk_policy_creature())
-        b[0x273] = 2
-        self.resource('BDCRUE45.CRE').write_bytes(b)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('unreviewed donor effect', self.output)
-        self.assertFalse(self.owned_resources())
-        self.resource('BDCRUE45.CRE').write_bytes(self.donors['BDCRUE45.CRE'])
-        self.resource('BDOLONEI.CRE').write_bytes(monk_policy_creature().replace(b'C0PR#MO1', b'C0PR#MOX'))
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('unreviewed donor effect', self.output)
-        self.assertFalse(self.owned_resources())
+    def test_foreign_helper_and_class_do_not_block_the_owned_build(self):
+        donor = bytearray(monk_policy_creature().replace(b'C0PR#MO1', b'C0PR#MOX'))
+        donor[0x273] = 2
+        self.resource('BDOLONEI.CRE').write_bytes(donor)
+        self.assert_success()
+        self.assertEqual(self.read('CSR256FM')[0x273], 1)
+        self.assertEqual(effects(self.read('CSR256FM')), [effects(donor)[i] for i in (0, 2, 3)])
 
-    def test_v2_monk_policy_checks_special_after_the_save_bonus(self):
-        self.seed_monk_policy()
-        b = bytearray(monk_policy_creature())
-        # Independent mutation: embedded EFF V2 special is at +0x40,
-        # after save type (+0x38) and save bonus (+0x3c).
-        struct.pack_into('<I', b, u(b, 0x2c4) + 2*264 + 0x40, 1)
-        self.resource('BDOLONEI.CRE').write_bytes(b)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('unreviewed donor effect', self.output)
-        self.assertFalse(self.owned_resources())
-
-    def test_monk_policy_requires_its_helpers_and_class_filter(self):
+    def test_foreign_helpers_and_tables_are_not_prerequisites(self):
         self.resource('BDOLONEI.CRE').write_bytes(monk_policy_creature())
-        for missing in ('C0PR#MO1.SPL', 'C0PR#MO2.SPL', 'SPLPROT.2DA'):
-            with self.subTest(missing=missing):
-                self.seed_monk_policy()
-                self.resource(missing).unlink()
-                self.assertNotEqual(self.run_install(), 0)
-                self.assertIn('monk equipment policy is missing', self.output)
-                self.assertFalse(self.owned_resources())
-        for row in ('0x10c -1 1', '0x10d 1 1', '0x10d -1 5'):
-            with self.subTest(row=row):
-                self.seed_monk_policy(row)
-                self.assertNotEqual(self.run_install(), 0)
-                self.assertIn('changed semantics', self.output)
-                self.assertFalse(self.owned_resources())
-        self.seed_monk_policy(count=105)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('requires SPLPROT row 105', self.output)
-        self.assertFalse(self.owned_resources())
+        self.assert_success()
+        self.seed_monk_policy(row='0x10d -1 5', count=106)
+        original = self.resource('SPLPROT.2DA').read_bytes()
+        self.assert_success()
+        self.assertEqual(self.resource('SPLPROT.2DA').read_bytes(), original)
+        self.assertEqual(book(self.read('CSR256FM')), BASE_FIRE_BOOK)
 
     def assert_tables_valid(self, b):
         size = 264 if b[0x33] else 48
@@ -641,28 +595,26 @@ LAF csr256_creatures_preflight END
             self.assertEqual((b[0x237], b[0x275]), (1, 4))
         self.assertEqual(self.resource('SUMELEAR.CRE').read_bytes(), donor)
 
-    def test_summon_fog_variants_stay_unreviewed(self):
+    def test_summon_fog_is_removed_regardless_effect_fields(self):
         variants = dict(target=2, power=1, param1=1, param2=0, timing=0,
                         duration=1, prob1=99, prob2=1, special=1)
         for version in (0, 1):
-            for key, value in [*variants.items(), ('resource', b'CDTFOX')]:
+            for key, value in variants.items():
                 with self.subTest(version=version, field=key):
-                    if key == 'resource':
-                        donor = summon_donor(version, fog={}, resource=value)
-                    else:
-                        donor = summon_donor(version, fog={key: value})
+                    donor = summon_donor(version, fog={key: value})
                     self.resource('BDELFIRM.CRE').write_bytes(donor)
-                    self.assertNotEqual(self.run_install(), 0)
-                    self.assertIn('unreviewed donor effect 146', self.output)
-                    self.assertFalse(self.owned_resources())
+                    self.assert_success()
+                    self.assertEqual(effects(self.read('CSR26F1S')), [effects(donor)[i] for i in (0, 2)])
+                    self.assert_tables_valid(self.read('CSR26F1S'))
 
-    def test_malformed_tables_fail_before_any_owned_resource(self):
+    def test_unreadable_effect_table_is_not_copied_into_the_clone(self):
         b = bytearray(self.donors['BDOLONEI.CRE'])
         struct.pack_into('<I', b, 0x2c4, len(b)+1)
         self.resource('BDOLONEI.CRE').write_bytes(b)
-        self.assertNotEqual(self.run_install(), 0)
-        self.assertIn('out of bounds', self.output)
-        self.assertFalse(self.owned_resources())
+        self.assert_success()
+        self.assertIn('unreadable donor effect table', self.output)
+        self.assertEqual(book(self.read('CSR256FM')), BASE_FIRE_BOOK)
+        self.assert_tables_valid(self.read('CSR256FM'))
 
 
 if __name__ == '__main__':

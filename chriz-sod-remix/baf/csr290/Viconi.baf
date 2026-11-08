@@ -1,0 +1,11 @@
+IF
+  Global("bd_plot","global",586)
+  !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300")
+  Global("bd_ot2_Viconi","bd4300",0)
+  IsValidForPartyDialogue("VICONIA")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",2)
+    SetGlobal("bd_ot2_Viconi","bd4300",1)
+    DisplayStringHead("VICONIA",%csr290_s39329%)
+END

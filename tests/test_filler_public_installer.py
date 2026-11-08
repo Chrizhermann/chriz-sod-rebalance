@@ -62,6 +62,10 @@ class FillerPublicInstallerTests(unittest.TestCase):
         }.items():
             path = self.override / f'{name}.ids'
             path.write_text(path.read_text() + definitions, encoding='ascii')
+        actions = '63 Wait(I:Time*)\n83 SmallWait(I:Time*)\n121 StartCutSceneMode()\n122 EndCutSceneMode()\n123 ClearAllActions()\n143 OpenDoor(O:Object*)\n160 ApplySpellRES(S:RES*,O:Target)\n173 AddJournalEntry(I:Entry*,I:Type*JourType)\n177 TriggerActivation(O:Object*,I:State*Boolean)\n202 FadeToColor(P:Point*,I:Blue*)\n301 AmbientActivate(O:Object*,I:State*BOOLEAN)\n308 AddMapNoteColor(P:Position*,I:StringRef*,I:Color*Mapnotes)\n316 SoundActivate(O:Object*,I:State*BOOLEAN)\n332 AddAreaFlag(I:Type*AREAFLAG)\n338 SetCutSceneLite(I:BOOL*BOOLEAN)\n373 AddWorldmapAreaFlag(S:Area*,I:Type*WMPFLAG)\n'
+        with (self.override/'action.ids').open('a') as f: f.write(actions)
+        with (self.override/'gtimes.ids').open('a') as f: f.write('3600 TWELVE_HOURS\n')
+        (self.override/'jourtype.ids').write_text('IDS V1.0\n4 INFO\n')
         path = self.game / 'fixture/setup-fixture.tp2'
         path.write_text(path.read_text() + 'COMPILE ~fixture/bd4000.baf~\nCOMPILE ~fixture/bd0063.baf~\n')
 
@@ -98,21 +102,19 @@ class FillerPublicInstallerTests(unittest.TestCase):
 
     def assert_xp_contract(self):
         actual = corrective.compact(self.fixture_game.decompile('bd4000.bcs'))
-        self.assertEqual(actual, corrective.compact(ORIGINAL_XP.replace(
-            'AddexperienceParty(103600)', 'AddexperienceParty(106800)')))
+        self.assertIn(corrective.compact(FOREIGN_XP), actual)
+        self.assertIn('INCREMENTCHAPTER("CHPTXT11")', actual)
+        self.assertIn('SETGLOBAL("BD_NPC_CAMP_CHAPTER","GLOBAL",5)', actual)
+        self.assertIn('ENDCUTSCENEMODE()', actual)
         for member in range(1, 7):
             self.assertEqual(actual.count(f'ADDXPOBJECT(PLAYER{member},20000)'), 1)
         self.assertEqual(actual.count('ADDEXPERIENCEPARTY(106800)'), 1)
         self.assertNotIn('ADDEXPERIENCEPARTY(3200)', actual)
 
-    def assert_failed_and_rolled_back(self):
-        result = self.install()
-        self.assertNotEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn('NOT INSTALLED DUE TO ERRORS', result.stdout)
-        self.assertIn('comp265', result.stdout+result.stderr)
-        self.assert_preserved(set())
-        self.assertNotIn(265, self.installed_components())
-        self.assertNotIn(135, self.installed_components())
+    def assert_changed_xp_is_written(self):
+        self.fixture_game.assert_success(self.install())
+        self.assert_xp_contract()
+        self.assertIn(265, self.installed_components())
 
     def test_public265_with240_applies_all_repairs_and_future_xp_only(self):
         self.prepare()
@@ -143,43 +145,39 @@ class FillerPublicInstallerTests(unittest.TestCase):
         self.assert_preserved(set())
         self.assertEqual(self.installed_components(), [240])
 
-    def test_unknown_xp_amount_rolls_back_corrective_resources(self):
+    def test_unknown_xp_amount_is_overwritten(self):
         self.prepare(ORIGINAL_XP.replace('103600','103601'))
-        self.assert_failed_and_rolled_back()
+        self.assert_changed_xp_is_written()
 
-    def test_missing_xp_anchor_rolls_back_corrective_resources(self):
+    def test_missing_xp_anchor_is_written(self):
         self.prepare(ORIGINAL_XP.replace('    AddexperienceParty(103600)\n',''))
-        self.assert_failed_and_rolled_back()
+        self.assert_changed_xp_is_written()
 
-    def test_missing_xp_resource_is_skipped_before_resource_writes(self):
+    def test_missing_xp_resource_is_created(self):
         self.prepare(); (self.override/'bd4000.bcs').unlink()
-        self.before = corrective.tree(self.override)
-        result = self.install()
-        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn('SKIPPING', result.stdout)
-        self.assert_preserved(set())
-        self.assertNotIn(265, self.installed_components())
+        self.fixture_game.assert_success(self.install())
+        actual = corrective.compact(self.fixture_game.decompile('bd4000.bcs'))
+        self.assertEqual(actual.count('ADDEXPERIENCEPARTY(106800)'), 1)
+        self.assertIn('INCREMENTCHAPTER("CHPTXT11")', actual)
 
-    def test_missing_ashiruk_without240_is_skipped_before_resource_writes(self):
+    def test_missing_ashiruk_without240_is_created(self):
         self.prepare(prerequisites=(260,)); (self.override/'bdashiru.bcs').unlink()
-        self.before = corrective.tree(self.override)
-        result = self.install()
-        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
-        self.assertIn('SKIPPING', result.stdout)
-        self.assert_preserved(set())
-        self.assertEqual(self.installed_components(), [260])
+        self.fixture_game.assert_success(self.install())
+        actual = corrective.compact(self.fixture_game.decompile('bdashiru.bcs'))
+        self.assertEqual(actual.count('CREATECREATUREOBJECT("BDSHAD04"'), 4)
+        self.assertNotIn('BDSHSOUL', actual)
 
-    def test_already_corrected_xp_rejects_an_unrecorded_second_delta(self):
+    def test_already_corrected_xp_keeps_one_future_payout(self):
         self.prepare(ORIGINAL_XP.replace('103600','106800'))
-        self.assert_failed_and_rolled_back()
+        self.assert_changed_xp_is_written()
 
-    def test_two_original_xp_anchors_are_rejected(self):
+    def test_two_original_xp_blocks_are_replaced_once(self):
         self.prepare(ORIGINAL_XP + CHAPTER_XP)
-        self.assert_failed_and_rolled_back()
+        self.assert_changed_xp_is_written()
 
-    def test_original_and_corrected_xp_anchors_together_are_rejected(self):
+    def test_original_and_corrected_xp_blocks_are_replaced_once(self):
         self.prepare(ORIGINAL_XP + CHAPTER_XP.replace('103600','106800'))
-        self.assert_failed_and_rolled_back()
+        self.assert_changed_xp_is_written()
 
 
 if __name__ == '__main__':

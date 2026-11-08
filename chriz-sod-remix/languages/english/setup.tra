@@ -84,3 +84,7 @@ Weight: %csr256_bwoosh_weight%~
 @9000 = ~Siege of Dragonspear content not found in this game (loose BD* files required - SoD, or EET with SoD imported).~
 @910 = ~Offer to skip SoD at palace arrival (EET, experimental)~
 @9001 = ~This repair requires EET's complete SoD-to-BG2 handoff resources.~
+
+@28502 = ~Shapeshift: Natural Form~
+@28503 = ~Shapeshift: Natural Form
+This ability causes the character to return to <PRO_HISHER> natural shape and ends the polymorph effect.~

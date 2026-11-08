@@ -1,0 +1,35 @@
+IF
+  False()
+  Global("bd_unnamed_ugr","bd5100",0)
+  Global("bd_ugr_south_10","bd5100",1)
+  Global("bd_ugr_north_30","bd5100",0)
+  GlobalLT("bd_plot","global",400)
+  !ActuallyInCombat()
+THEN
+  RESPONSE #100
+    SetGlobal("bd_unnamed_ugr","bd5100",1)
+    ClearAllActions()
+    SetCutSceneLite(TRUE)
+    CreateCreature("bdireni",[2230.1670],SW)
+    CreateCreatureImpassable("cutspy",[2088.1865],S)
+    MoveViewPoint([2145.1790],BD_SWIFT)
+    ActionOverride("bdireni",MoveToPoint([2145.1790]))
+END
+
+IF
+  False()
+  Global("bd_unnamed_ugr","bd5100",0)
+  Global("bd_ugr_north_10","bd5100",1)
+  Global("bd_ugr_south_30","bd5100",0)
+  GlobalLT("bd_plot","global",400)
+  !ActuallyInCombat()
+THEN
+  RESPONSE #100
+    SetGlobal("bd_unnamed_ugr","bd5100",1)
+    ClearAllActions()
+    SetCutSceneLite(TRUE)
+    CreateCreature("bdireni",[1860.1995],NE)
+    CreateCreatureImpassable("cutspy",[2088.1865],S)
+    MoveViewPoint([2045.1940],BD_SWIFT)
+    ActionOverride("bdireni",MoveToPoint([2045.1940]))
+END

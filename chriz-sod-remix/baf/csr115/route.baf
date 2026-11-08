@@ -1,0 +1,66 @@
+// Component 115 owns these complete blocks.
+IF
+  Global("csr_kh_fort","GLOBAL",0)
+  GlobalLT("bd_bridgefort_plot","GLOBAL",5)
+  GlobalLT("bd_plot","GLOBAL",240)
+  OR(7)
+    InPartyAllowDead("khalid")
+    Name("khalid",Player1)
+    Name("khalid",Player2)
+    Name("khalid",Player3)
+    Name("khalid",Player4)
+    Name("khalid",Player5)
+    Name("khalid",Player6)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_fort","GLOBAL",1)
+    SetGlobal("csr_kh_carry","GLOBAL",1)
+    SetGlobal("bd_khal_spawn","bd2000",1)
+    Continue()
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",0)
+  GlobalLT("bd_bridgefort_plot","GLOBAL",5)
+  GlobalLT("bd_plot","GLOBAL",240)
+  !InPartyAllowDead("khalid")
+  !Name("khalid",Player1)
+  !Name("khalid",Player2)
+  !Name("khalid",Player3)
+  !Name("khalid",Player4)
+  !Name("khalid",Player5)
+  !Name("khalid",Player6)
+  OR(2)
+    NumInPartyLT(1)
+    InMyArea(Player1)
+  OR(2)
+    NumInPartyLT(2)
+    InMyArea(Player2)
+  OR(2)
+    NumInPartyLT(3)
+    InMyArea(Player3)
+  OR(2)
+    NumInPartyLT(4)
+    InMyArea(Player4)
+  OR(2)
+    NumInPartyLT(5)
+    InMyArea(Player5)
+  OR(2)
+    NumInPartyLT(6)
+    InMyArea(Player6)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_fort","GLOBAL",2)
+    Continue()
+END
+
+IF
+  Global("csr_kh_fort","GLOBAL",0)
+  OR(2)
+    GlobalGT("bd_bridgefort_plot","GLOBAL",4)
+    GlobalGT("bd_plot","GLOBAL",239)
+THEN
+  RESPONSE #100
+    SetGlobal("csr_kh_fort","GLOBAL",2)
+    Continue()
+END

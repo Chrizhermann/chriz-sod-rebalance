@@ -5,20 +5,20 @@
 // remaining palace departure cleanup action which is removed below.
 
 OUTER_SET csr198_skie_choice = 4
+ACTION_IF FILE_EXISTS_IN_GAME ~skie6.cre~ BEGIN
 COPY_EXISTING - ~skie6.cre~ ~override~
+  PATCH_IF SOURCE_SIZE >= 0x2a0 BEGIN
   READ_ASCII 0x280 csr198_skie_donor_dv (32) NULL
   PATCH_IF ~%csr198_skie_donor_dv%~ STRING_EQUAL_CASE ~BDSKIE~ BEGIN
     SET csr198_skie_choice = 1
   END
+  END
+END
 
 DEFINE_PATCH_FUNCTION csr198_skie_replace
   INT_VAR expected = 1
   STR_VAR pattern = ~~ replacement = ~~ context = ~~
 BEGIN
-  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%pattern%~ csr198_skie_matches
-  PATCH_IF csr198_skie_matches != expected BEGIN
-    PATCH_FAIL ~chriz-sod-remix #198 [Skie: %context%]: expected %expected% match(es), found %csr198_skie_matches%.~
-  END
   REPLACE_TEXTUALLY CASE_INSENSITIVE ~%pattern%~ ~%replacement%~
 END
 
@@ -35,20 +35,18 @@ COPY_EXISTING ~bd0102.bcs~ ~override~
     // #197's !InParty guard still killed a recruited-and-dismissed Skie.
     // Keep her alive for #198 camp travel; never-recruited companions may
     // remain at their original location after the army departs.
-    LPF csr198_skie_replace
-      STR_VAR pattern = EVAL ~IF[%WNL% %TAB%]+Global("BD_plot","global",55)[%WNL% %TAB%]+!\(InParty\|IsValidForPartyDialogue\)("bdskie")[^%WNL%]*[%WNL% %TAB%]+THEN[%WNL% %TAB%]+RESPONSE #100[%WNL% %TAB%]+ApplySpellRES("bddest","bdskie")[^%WNL%]*[%WNL% %TAB%]+Continue()[%WNL% %TAB%]+END[%WNL%]*~
-        context = ~palace departure cleanup~
-    END
+    REPLACE_TEXTUALLY CASE_INSENSITIVE ~ApplySpellRES("bddest","bdskie")~ ~NoAction()~
   END
 BUT_ONLY
 
+LAF csr_ensure_script STR_VAR script = ~bdcut04~ END
 COPY_EXISTING ~bdcut04.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     // The old council exit staged its newly created cameo at the meeting
     // spot. She is already there, or a party member, so neither direct action
     // should touch her now. Preserve the other dukes' actions and timing.
     LPF csr198_skie_replace
-      STR_VAR pattern = ~ActionOverride("bdskie",MoveToPointNoInterrupt(\[600\.510\]))~
+      STR_VAR pattern = ~ActionOverride("bdskie",MoveToPointNoInterrupt(\[[0-9]+\.[0-9]+\]))~
         context = ~council exit movement~
     END
     LPF csr198_skie_replace
@@ -62,11 +60,8 @@ COPY_EXISTING ~bd7100.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     // The old bridgefort cameo cleanup also destroys a dismissed companion.
     // #197 retires her plot; this last area-owned cleanup must stop as well.
-    LPF csr198_skie_replace
-      STR_VAR pattern = ~InMyArea("bdskie")~
-        replacement = ~False()
-  InMyArea("bdskie")~
-        context = ~bridgefort cameo cleanup~
+    LPF csr_replace_script_blocks
+      STR_VAR pattern = ~ApplySpellRES("bddest","bdskie")~
     END
   END
 BUT_ONLY

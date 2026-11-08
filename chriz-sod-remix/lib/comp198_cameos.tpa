@@ -1,3 +1,4 @@
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
 // #198: replace the three city cameos with the shared recruitment system.
 // The saved party actor wins. Never remove a currently/previously recruited
 // BDCORAN, BDGARRIC or BDTIAX: those aliases can be adopted by the dispatcher.
@@ -6,10 +7,6 @@ DEFINE_PATCH_FUNCTION csr198_cameo_replace
   INT_VAR expected = 1
   STR_VAR pattern = ~~ replacement = ~~ context = ~~
 BEGIN
-  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%pattern%~ csr198_cameo_matches
-  PATCH_IF csr198_cameo_matches != expected BEGIN
-    PATCH_FAIL ~chriz-sod-remix #198 [%context%]: expected %expected% match(es), found %csr198_cameo_matches%.~
-  END
   REPLACE_TEXTUALLY CASE_INSENSITIVE ~%pattern%~ ~%replacement%~
 END
 
@@ -28,27 +25,32 @@ END
 ACTION_FOR_EACH csr198_cameo IN ~BDCORAN~ ~BDGARRIC~ ~BDTIAX~ BEGIN
   ACTION_IF (~%csr198_cameo%~ STRING_EQUAL_CASE ~BDCORAN~) BEGIN
     OUTER_SPRINT csr198_cameo_area ~BD0110~
+    OUTER_SPRINT csr198_cameo_actor ~Coran~
   END ELSE ACTION_IF (~%csr198_cameo%~ STRING_EQUAL_CASE ~BDGARRIC~) BEGIN
     OUTER_SPRINT csr198_cameo_area ~BD0109~
+    OUTER_SPRINT csr198_cameo_actor ~Garrick~
   END ELSE BEGIN
     OUTER_SPRINT csr198_cameo_area ~BD0104~
+    OUTER_SPRINT csr198_cameo_actor ~Tiax~
   END
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr198_cameo_area%.are~ BEGIN
   COPY_EXISTING ~%csr198_cameo_area%.are~ ~override~
+    PATCH_IF SOURCE_SIZE >= 0x5a BEGIN
     READ_LONG 0x54 csr198_actors
     READ_SHORT 0x58 csr198_actor_count
-    SET csr198_cameo_count = 0
-    FOR (csr198_actor = 0; csr198_actor < csr198_actor_count; ++csr198_actor) BEGIN
+    FOR (csr198_actor = 0; csr198_actor < csr198_actor_count AND csr198_actors + (csr198_actor + 1) * 0x110 <= SOURCE_SIZE; ++csr198_actor) BEGIN
       SET csr198_record = csr198_actors + csr198_actor * 0x110
-      READ_ASCII (csr198_record + 0x80) csr198_actor_cre (8) NULL
-      PATCH_IF (~%csr198_actor_cre%~ STRING_EQUAL_CASE ~%csr198_cameo%~) BEGIN
+      READ_ASCII csr198_record csr198_actor_name (32) NULL
+      PATCH_IF (~%csr198_actor_name%~ STRING_EQUAL_CASE ~%csr198_cameo_actor%~) BEGIN
         WRITE_LONG (csr198_record + 0x40) 0
-        SET csr198_cameo_count += 1
       END
     END
-    PATCH_IF csr198_cameo_count != 1 BEGIN
-      PATCH_FAIL ~chriz-sod-remix #198: expected one %csr198_cameo% cameo in %csr198_cameo_area%, found %csr198_cameo_count%.~
-    END
+    END ELSE BEGIN PATCH_PRINT ~#198: unreadable cameo area; its actor schedule is unchanged.~ END
   BUT_ONLY
+  END ELSE BEGIN PRINT ~#198: cameo area %csr198_cameo_area% is absent.~ END
+  COPY_EXISTING ~%csr198_cameo_area%.bcs~ ~override~ DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = EVAL ~ActionOverride("%csr198_cameo%",DestroySelf())~ END
+  END BUT_ONLY
   // Schedule edits cover new area loads; this covers an already visited area.
   EXTEND_TOP ~%csr198_cameo_area%.bcs~ ~.../csr198-cameo.baf~ EVALUATE_BUFFER
 END
@@ -59,8 +61,8 @@ COPY_EXISTING ~bd0110.bcs~ ~override~
     // only the argument block, whose ending targets Coran directly. The
     // separate argument global must also reach 2 or Safana's click dialogue
     // selects state 18 and tries to speak to the removed cameo.
-    LPF csr198_cameo_replace
-      STR_VAR pattern = EVAL ~IF[%WNL% %TAB%]+Global("BD_SPAWN_SAFANA","BD0110",1)[%WNL% %TAB%]+CombatCounter(0)[%WNL% %TAB%]+THEN[%WNL% %TAB%]+RESPONSE #100[%WNL% %TAB%]+\(.\|[%WNL%]\)*ActionOverride("SAFANA",StartDialogNoSet("BDCORAN"))[%WNL% %TAB%]+END~
+    LPF csr_replace_script_blocks
+      STR_VAR pattern = ~StartDialogNoSet("BDCORAN")\|"bd_safana_argument"~
         replacement = ~IF
   Global("BD_SPAWN_SAFANA","BD0110",1)
   CombatCounter(0)
@@ -68,8 +70,9 @@ THEN
   RESPONSE #100
     SetGlobal("BD_SPAWN_SAFANA","BD0110",2)
     SetGlobal("bd_safana_argument","BD0110",2)
-END~
-        context = ~Safana and Coran argument~
+END
+
+~
     END
   END
 BUT_ONLY
@@ -90,6 +93,7 @@ COPY_EXISTING ~bd0109.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
     // The adopted BDGARRIC alias is a companion, not an actor the tavern may
     // silence or turn hostile. Keep every other staff/crowd action intact.
+    LPF csr_replace_script_blocks STR_VAR pattern = ~SetGlobal("BD_Garrick_Play","BD0109",6)~ END
     LPF csr198_cameo_replace
       STR_VAR pattern = ~ActionOverride("BDGARRIC",DialogueInterrupt(FALSE))~
         context = ~Garrick initial conversation lock~
@@ -117,34 +121,91 @@ EXTEND_TOP ~bd0109.bcs~ ~.../csr198-garrick.baf~
 // Fritz grants access through the door without any permission global. Once
 // Tiax joins, suppress only the repeated 'get out' nuisance; preserve Fritz's
 // refugee/murder conversations and the other prisoners' stories.
+LAF csr_ensure_script STR_VAR script = ~bdfritz~ END
 COPY_EXISTING ~bdfritz.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    LPF csr198_cameo_replace
-      STR_VAR pattern = ~RealGlobalTimerExpired("BD_FRITZ_GET_OUT","BD0104")~
-        replacement = ~RealGlobalTimerExpired("BD_FRITZ_GET_OUT","BD0104")
-  Global("CSR198_TIAX_JOINED","GLOBAL",0)~
-        context = ~Fritz post-recruitment forced talk~
-    END
+    LPF csr_replace_script_blocks INT_VAR in_place = 1
+      STR_VAR pattern = ~"BD_FRITZ_GET_OUT"~ replacement = ~IF
+  See([PC])
+  Global("BD_Spoken_Tiax","GLOBAL",1)
+  RealGlobalTimerExpired("BD_FRITZ_GET_OUT","BD0104")
+  Global("CSR198_TIAX_JOINED","GLOBAL",0)
+  Global("BD_FRITZ_NO_TALK","BD0104",1)
+  Range([PC],15)
+THEN
+  RESPONSE #100
+    SmallWait(5)
+    StartDialogNoSet([PC])
+END
+~ END
   END
 BUT_ONLY
 
+<<<<<<<< .../csr198-disable-recollection.d
+ALTER_TRANS ~BDSAFANA~ BEGIN 63 END BEGIN %reply% END BEGIN
+  ~TRIGGER~ ~False()~
+END
+>>>>>>>>
+
 <<<<<<<< .../csr198-cameos.d
-ADD_STATE_TRIGGER ~BDFRITZ~ 0 ~Global("CSR198_TIAX_JOINED","GLOBAL",0)~
+REPLACE_STATE_TRIGGER ~BDFRITZ~ 0 ~%csr198_fritz_root%
+Global("CSR198_TIAX_JOINED","GLOBAL",0)~
 
 // The skipped argument cannot remain a player recollection or a reason to
 // recruit Safana, especially now that Coran can accompany her. Preserve the
 // native join actions, interjections and the ordinary persuasion choices.
-ADD_TRANS_TRIGGER ~BDSAFANA~ 63 ~False()~ DO 1
-ADD_TRANS_TRIGGER ~BDSAFANA~ 63 ~False()~ DO 2
 REPLACE_SAY ~BDSAFANA~ 69 ~Very well. A change of scenery would do me good. I'm with you.~
 REPLACE_SAY ~BDSAFANA~ 71 ~Very well. A change of scenery would do me good. I'm with you.~
 
 // State 60 is the not-yet-joined city recruitment hub. The removed opening
 // used to set this marker; successful native join actions still advance it
 // to 2. Retain the city conversation counter even if the player declines.
-ADD_TRANS_ACTION ~BDSAFANA~ BEGIN 60 END BEGIN END ~SetGlobal("BD_Spoken_Safana","GLOBAL",1)~
+%csr198_safana_join%
 >>>>>>>>
-COMPILE ~.../csr198-cameos.d~
+LAF csr_ensure_dlg_states INT_VAR count = 1 STR_VAR dialog = ~BDFRITZ~ END
+LAF csr_ensure_dlg_states INT_VAR count = 72 STR_VAR dialog = ~BDSAFANA~ END
+OUTER_SPRINT csr198_fritz_root ~~
+COPY_EXISTING - ~BDFRITZ.DLG~ ~override~
+  READ_LONG 0x0c states READ_SLONG (states + 12) trigger
+  READ_LONG 0x18 table READ_LONG 0x1c count
+  PATCH_IF trigger >= 0 AND trigger < count BEGIN
+    READ_LONG (table + trigger * 8) text READ_LONG (table + trigger * 8 + 4) length
+    READ_ASCII text csr198_fritz_root (length)
+    INNER_PATCH_SAVE csr198_fritz_root ~%csr198_fritz_root%~ BEGIN
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~Global("CSR198_TIAX_JOINED","GLOBAL",[-0-9]+)[ %TAB%%WNL%]*~ ~~
+    END
+  END
+OUTER_SPRINT csr198_safana_join ~~
+COPY_EXISTING - ~BDSAFANA.DLG~ ~override~
+  READ_LONG 0x0c states READ_LONG 0x14 transitions
+  READ_LONG 0x28 actions READ_LONG 0x2c action_count
+  READ_LONG (states + 60 * 16 + 4) first READ_LONG (states + 60 * 16 + 8) count
+  FOR (reply = 0; reply < count; ++reply) BEGIN
+    SET at = transitions + (first + reply) * 32
+    READ_LONG at flags READ_LONG (at + 16) action
+    SPRINT body ~~
+    PATCH_IF (flags BAND 4) AND action < action_count BEGIN
+      READ_LONG (actions + action * 8) text READ_LONG (actions + action * 8 + 4) length
+      READ_ASCII text body (length)
+      INNER_PATCH_SAVE body ~%body%~ BEGIN
+        REPLACE_TEXTUALLY CASE_INSENSITIVE ~SetGlobal("BD_Spoken_Safana","GLOBAL",[-0-9]+)[ %TAB%%WNL%]*~ ~~
+      END
+    END
+    SPRINT csr198_safana_join ~~~~~%csr198_safana_join%
+ALTER_TRANS ~BDSAFANA~ BEGIN 60 END BEGIN %reply% END BEGIN
+  ~ACTION~ ~%body%
+SetGlobal("BD_Spoken_Safana","GLOBAL",1)~
+END
+~~~~~
+  END
+COPY_EXISTING - ~BDSAFANA.DLG~ ~override~
+  READ_LONG 0x0c states
+  READ_LONG (states + 63 * 16 + 8) replies
+// An absent reply is already removed. Existing recollection replies are disabled.
+OUTER_FOR (reply = 1; reply < replies AND reply < 3; ++reply) BEGIN
+  COMPILE EVALUATE_BUFFER ~.../csr198-disable-recollection.d~
+END
+COMPILE EVALUATE_BUFFER ~.../csr198-cameos.d~
 
 <<<<<<<< .../csr198-tiax.baf
 IF

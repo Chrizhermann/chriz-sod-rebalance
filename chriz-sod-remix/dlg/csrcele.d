@@ -19,8 +19,8 @@ BEGIN ~csrcele~
 // The celebration beat (first hall entry, plot-50 evening).
 IF ~Global("CSR_CELEB_QUEST","GLOBAL",0)~ THEN BEGIN praise
   SAY @18005
-  IF ~~ THEN REPLY @18002 EXTERN ~BDBELT~ csr180_praise1
-  IF ~~ THEN REPLY @18003 EXTERN ~BDBELT~ csr180_praise1
+  IF ~~ THEN REPLY @18002 EXTERN ~BDBELT~ %csr180_toast%
+  IF ~~ THEN REPLY @18003 EXTERN ~BDBELT~ %csr180_toast%
 END
 
 // The Korlasz return beat (spawner block 4 in csrceleb.baf sets CSR_KORL_RET=1).
@@ -54,25 +54,16 @@ ActionOverride("BDBELT",DestroySelf())
 DestroySelf()~ EXIT
 END
 
-// Belt's toast, custom text (no VO), reachable only from csrcele.praise.
-APPEND ~BDBELT~
-
-IF ~~ THEN BEGIN csr180_praise1
+REPLACE ~BDBELT~
+IF %csr180_toast_weight% ~~ THEN BEGIN %csr180_toast%
   SAY @18007
   IF ~~ THEN EXTERN ~csrcele~ closing
 END
-
 END
-
-// Council reference (design sec. 9 delivery 2): one Belt line inserted after his
-// last crusade-report state 36 ("...dispatched a hundred Flaming Fists...march on
-// Caelar's stronghold", text-anchored at install time in comp180.tpa), falling
-// through to BDELTAN 2 ("every sword north") via the copied transition -- so the
-// proclamation mention lands directly before Eltan's pitch. This survives
-// component 150's council re-points, which touch BDELTAN 4 -> BDBELT 35,
-// BDBELT 38 -> 39 and BDLIIA 11 replies only (research 11a sec. 2/3); state 36's
-// outgoing transition is not among them. Gated on CSR_CELEB_QUEST so the line
-// only plays when the player actually holds the proclamation.
-INTERJECT_COPY_TRANS ~BDBELT~ 36 CSR_CELEB_BELT_LINE
-  == ~BDBELT~ IF ~Global("CSR_CELEB_QUEST","GLOBAL",1)~ THEN @18020
+REPLACE ~BDBELT~
+IF %csr180_line_weight% ~~ THEN BEGIN %csr180_line%
+  SAY @18020
+  IF ~~ THEN EXTERN ~BDELTAN~ 2
 END
+END
+%csr180_routes%

@@ -114,7 +114,8 @@ def write_timer_package(game):
     """Copy the real clock library into a synthetic game of either size."""
     mod = game / 'chriz-sod-remix'
     (mod / 'lib').mkdir(parents=True, exist_ok=True)
-    shutil.copy2(ROOT / 'chriz-sod-remix/lib/comp256_timer.tpa', mod / 'lib')
+    for library in ('comp256_timer.tpa', 'comp256_world.tpa', 'overwrite.tpa'):
+        shutil.copy2(ROOT / 'chriz-sod-remix/lib' / library, mod / 'lib')
     (mod / 'languages/english').mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / 'chriz-sod-remix/languages/english/setup.tra',
                  mod / 'languages/english')
@@ -133,6 +134,7 @@ END
 
 def write_timer_fixture(game, source=BASE):
     write_fake_game(game)
+    (game / "weidu.log").write_text("")
     write_timer_ids(game)
     write_timer_package(game)
     (game / 'fixture').mkdir()
@@ -470,24 +472,26 @@ class TimerInstallerSafetyTests(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.game = Path(temp.name)
 
-    def test_unknown_ready_seam_is_rejected_without_resource_or_string_writes(self):
+    def test_changed_ready_seam_is_overwritten(self):
         write_timer_fixture(self.game, BASE.replace('DisplayStringNoName(Player1,123)', 'NoAction()'))
         before = tree(self.game / 'override')
         tlk = (self.game / 'lang/en_us/dialog.tlk').read_bytes()
         result = run_weidu(self.game, 'timer.tp2', '--force-install-list', '258')
-        self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertEqual(before, tree(self.game / 'override'))
-        self.assertEqual(tlk, (self.game / 'lang/en_us/dialog.tlk').read_bytes())
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assertIn('CSR256_TIMER_V2', decompile(self.game, 'bd2000.bcs'))
+        self.assertIn('GameOver(', decompile(self.game, 'csr26end.bcs'))
 
-    def test_failure_helper_collision_is_rejected_before_writes(self):
+    def test_owned_failure_helper_is_overwritten(self):
         write_timer_fixture(self.game)
         (self.game / 'override/csr26end.bcs').write_bytes(b'FOREIGN HELPER')
         before = tree(self.game / 'override')
         tlk = (self.game / 'lang/en_us/dialog.tlk').read_bytes()
         result = run_weidu(self.game, 'timer.tp2', '--force-install-list', '258')
-        self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertEqual(before, tree(self.game / 'override'))
-        self.assertEqual(tlk, (self.game / 'lang/en_us/dialog.tlk').read_bytes())
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assertIn('CSR256_TIMER_V2', decompile(self.game, 'bd2000.bcs'))
+        self.assertIn('GameOver(', decompile(self.game, 'csr26end.bcs'))
 
     def test_second_application_is_byte_exact_noop_and_uninstall_restores_original(self):
         write_timer_fixture(self.game)

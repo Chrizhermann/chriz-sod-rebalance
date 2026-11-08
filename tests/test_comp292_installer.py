@@ -290,7 +290,7 @@ class ImoenSoAInstallerTests(unittest.TestCase):
 
     def test_each_choice_changes_only_its_owned_resources(self):
         expected = {
-            292: {"csretbgt.bcs", "baldur.bcs", "csrimstr.spl", "csrimoen.dlg"},
+            292: {"csretbgt.bcs", "baldur.bcs", "csrimstr.spl", "csrimst.cre", "csrimoen.dlg"},
             293: {"csretbgt.bcs", "baldur.bcs", "csrimoen.dlg"},
             294: {"csretbgt.bcs", "baldur.bcs", "m_csrimd.lua", "csrimoen.dlg"},
         }
@@ -579,7 +579,7 @@ class ImoenSoAInstallerTests(unittest.TestCase):
         # Once she has left the area, a stand-in is made from IMOEN10.CRE; nothing
         # is queued on "IMOEN2" until it is seen here, so a failed creation leaves
         # nothing behind on her (EET's AR0602 would run it when it carries her over).
-        create = [(i, t, a) for i, t, a in step(5) if 'CreateCreatureObject("IMOEN10",Myself,0,0,0)' in a]
+        create = [(i, t, a) for i, t, a in step(5) if 'CreateCreatureObject("CSRIMST",Myself,0,0,0)' in a]
         self.assertEqual(1, len(create))
         _, trigger, action = create[0]
         self.assertIn('!InMyArea("IMOEN2")', trigger)
@@ -614,19 +614,14 @@ class ImoenSoAInstallerTests(unittest.TestCase):
         self.assertEqual(2, sum(a.count("DestroySelf()") for a in actions[strip:end]))
         self.assertNotIn('CSR_IMSOA_FAILED","GLOBAL",2', game.baf("csretbgt") + game.baf("baldur"))
 
-    def test_choice1_refuses_an_imoen10_that_cannot_stand_in_for_her(self):
-        cases = (({"imoen10_script_name": "Imoen10"}, 'script name is "Imoen10"'),
-                 ({"imoen10_flags": 0x8000}, "marked as having been in the party"))
-        for kwargs, message in cases:
+    def test_choice1_private_standin_writes_identity_and_party_flag(self):
+        for kwargs in ({'imoen10_script_name':'Imoen10'},{'imoen10_flags':0x8000}):
             with self.subTest(**kwargs):
-                game = self.game(**kwargs)
-                _, text = game.install_component(292)
-                self.assertIn("NOT INSTALLED DUE TO ERRORS", text)
-                self.assertIn(message, text)
-                self.assertEqual(game.before, game.tree())
-        for number in (293, 294):
-            with self.subTest(component=number):
-                self.installed(number, imoen10_script_name="Imoen10")
+                game=self.installed(292,**kwargs)
+                raw=game.tree()['csrimst.cre']
+                self.assertEqual(raw[0x280:0x2a0].split(b'\0')[0],b'IMOEN2')
+                self.assertFalse(struct.unpack_from('<I',raw,0x10)[0]&0x8000)
+                self.assertEqual(game.before['imoen10.cre'],game.tree()['imoen10.cre'])
 
     def test_strip_spell_removes_every_ability_score_effect(self):
         game = self.installed(292)
@@ -728,35 +723,32 @@ class ImoenSoAInstallerTests(unittest.TestCase):
 
     # ---- refusals leave the game untouched ------------------------------------
 
-    def test_refusals_do_not_mutate_the_game(self):
-        cases = (
-            ({"odd_ending_rule": True}, "refusing to guess"),
-            ({"guard": "late"}, "safety guard is not the single first block"),
-            ({"bank": False}, "K#ImportContainer in BD4300"),
-            ({"arrival_marker": False}, "never marks Imoen's arrival"),
-        )
-        for kwargs, message in cases:
+    def test_changed_host_rules_guard_bank_and_arrival_do_not_refuse(self):
+        for kwargs in ({'odd_ending_rule':True},{'guard':'late'},{'bank':False},{'arrival_marker':False}):
             with self.subTest(**kwargs):
-                game = self.game(**kwargs)
-                _, text = game.install_component(293)
-                self.assertIn("NOT INSTALLED DUE TO ERRORS", text)
-                self.assertIn(message, text)
-                self.assertEqual(game.before, game.tree())
+                game=self.installed(293,**kwargs)
+                self.assertIn('CSR_IMSOA_PREP',game.baf('csretbgt'))
+                self.assertIn('K#ImportContainer',probe.parse_containers(game.tree()['bd4300.are']))
 
-    def test_refuses_a_game_without_next_trigger_object(self):
-        for number in (292, 293, 294):
+    def test_missing_official_trigger_symbol_is_added(self):
+        for number in (292,293,294):
             with self.subTest(component=number):
-                game = self.game(next_trigger_object=False)
-                _, text = game.install_component(number)
-                self.assertIn("NOT INSTALLED DUE TO ERRORS", text)
-                self.assertIn("NextTriggerObject", text)
-                self.assertEqual(game.before, game.tree())
+                game=self.installed(number,next_trigger_object=False)
+                self.assertIn(b'NextTriggerObject',game.tree()['trigger.ids'])
 
-    def test_choice1_refuses_eet_without_its_fresh_imoen(self):
-        game = self.game(fresh_imoen10=False)
-        _, text = game.install_component(292)
-        self.assertIn("does not create IMOEN10", text)
-        self.assertEqual(game.before, game.tree())
+    def test_changed_eet_arrival_keeps_owned_output_and_original_script(self):
+        game=self.installed(292,fresh_imoen10=False)
+        self.assertIn('csrimst.cre',game.tree())
+        self.assertEqual(game.before['ar0602.bcs'],game.tree()['ar0602.bcs'])
+
+    def test_second_tail_replaces_preparation_arrival_and_dialog_gate(self):
+        game=self.installed(292)
+        before=game.tree()
+        (game.root/'second.tp2').write_text('BACKUP ~second-backup~ AUTHOR ~fixture~ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~ BEGIN ~Imoen again~ OUTER_SET csr292_choice = 1 INCLUDE ~chriz-sod-remix/lib/comp292.tpa~')
+        result=subprocess.run([str(WEIDU),'second.tp2','--force-install-list','0','--language','0','--no-exit-pause'],cwd=game.root,capture_output=True,text=True,timeout=120)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertEqual(before,game.tree())
 
     def test_prerequisites_gate_without_mutation(self):
         for missing in (160, 290):

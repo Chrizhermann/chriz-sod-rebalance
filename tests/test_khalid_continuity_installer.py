@@ -258,7 +258,7 @@ class EffectiveKhalidGame:
             path.write_bytes(tlk)
         shutil.copytree(ROOT / "chriz-sod-remix", self.root / "chriz-sod-remix")
         # A fabricated prerequisite applies only to this disposable fake game.
-        (self.root / "WeiDU.log").write_text(
+        (self.root / "weidu.log").write_text(
             "~CHRIZ-SOD-REMIX/SETUP-CHRIZ-SOD-REMIX.TP2~ #0 #110 // fixture prerequisite\n"
             if prerequisite else "")
         self.before = self.tree()
@@ -351,15 +351,25 @@ class KhalidContinuityInstallerTests(unittest.TestCase):
         self.assertIn("SKIPPING:", transcript)
         self.assert_untouched_failure(game, game.before, transcript)
 
-    def test_missing_required_dialog_fails_without_partial_resources_or_tlk(self):
+    def assert_success(self, game):
+        result, transcript = game.install()
+        self.assertEqual(0, result.returncode, transcript)
+        self.assertIn("SUCCESSFULLY INSTALLED", transcript)
+        self.assertNotIn("WARNING:", transcript)
+        return game.tree()
+
+    def test_missing_defender_dialogue_gets_the_complete_carried_command_route(self):
         game = self.game()
         (game.root / "override/bdbfort.dlg").unlink()
-        before = game.tree()
-        _, transcript = game.install()
-        self.assert_untouched_failure(game, before, transcript)
-        self.assertRegex(transcript, r"SKIPPING:|NOT INSTALLED DUE TO ERRORS")
+        after = self.assert_success(game)
+        states = dialog_states(after["bdbfort.dlg"])
+        entries = [s for s in states if s.trigger.startswith('global("csr_kh_fort","global",1)')]
+        self.assertEqual(3, len(entries))
+        actions = ''.join(t.action for s in states for t in s.transitions)
+        self.assertIn('setglobal("bd_bridgefort_plot","global",30)', actions)
+        self.assertIn('setglobal("bd_bridgefort_plot","global",6)', actions)
 
-    def test_changed_original_fort_route_is_rejected_before_publishing(self):
+    def test_changed_original_fort_route_is_overwritten(self):
         game = self.game()
         path = game.root / "override/bdbfort.dlg"
         data = bytearray(path.read_bytes())
@@ -367,34 +377,145 @@ class KhalidContinuityInstallerTests(unittest.TestCase):
         transition_offset = struct.unpack_from("<I", data, 0x14)[0]
         first_transition = struct.unpack_from("<I", data, state_offset + 2 * 16 + 4)[0]
         destination = transition_offset + first_transition * 32 + 20
-        self.assertEqual(b"BDKHALID", data[destination:destination + 8].upper())
-        # Fixture-only simulation of a prior mod replacing the initial handoff.
         data[destination:destination + 8] = b"CSRTEST0"
         path.write_bytes(data)
-        before = game.tree()
-        _, transcript = game.install()
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", transcript)
-        self.assert_untouched_failure(game, before, transcript)
+        after = self.assert_success(game)
+        handoff = dialog_states(after["bdbfort.dlg"])[2]
+        self.assertEqual("bdkhalid", handoff.transitions[0].destination)
+        self.assertEqual(27, handoff.transitions[0].state)
+        self.assertIn('!global("csr_kh_fort","global",1)', handoff.trigger)
 
-    def test_changed_arrival_staging_fails_before_any_patch_is_written(self):
+    def test_changed_arrival_staging_gets_both_authored_routes(self):
         game = self.game()
         path = game.root / "override/bdcut24.bcs"
-        original = path.read_bytes()
-        self.assertIn(b"1460 1025", original)
-        path.write_bytes(original.replace(b"1460 1025", b"1460 1024", 1))
-        before = game.tree()
-        _, transcript = game.install()
-        self.assertIn("first-arrival Khalid staging actions", transcript)
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", transcript)
-        self.assert_untouched_failure(game, before, transcript)
+        path.write_bytes(path.read_bytes().replace(b"1460 1025", b"1460 1024"))
+        self.assert_success(game)
+        source = game.decompile("bdcut24.bcs")["bdcut24.bcs"]
+        self.assertNotIn("1460.1024", source)
+        self.assertIn("1460.1025", source)
+        carried = [a for t, a in baf_blocks(source) if t.startswith('global("csr_kh_fort"')]
+        self.assertEqual(1, len(carried))
+        self.assertNotIn('"khalid"', carried[0])
+        self.assertEqual(6, carried[0].count("addxpobject("))
 
-    def test_private_scene_actor_collision_is_not_overwritten(self):
+    def test_private_scene_actor_collision_is_overwritten(self):
         game = self.game()
-        (game.root / "override/csr115ad.cre").write_bytes(b"another mod owns this name")
-        before = game.tree()
-        _, transcript = game.install()
-        self.assertIn("private resource CSR115AD.CRE already exists", transcript)
-        self.assert_untouched_failure(game, before, transcript)
+        (game.root / "override/csr115ad.cre").write_bytes(b"foreign private-name payload")
+        after = self.assert_success(game)
+        self.assertEqual(b"csr115ad", after["csr115ad.cre"][0x280:0x2a0].rstrip(b"\0"))
+        self.assertEqual(2, len(dialog_states(after["csr115ad.dlg"])))
+
+    def test_missing_blocks_scripts_and_dialogue_transitions_are_created(self):
+        game = self.game()
+        for name in ("bd2000.bcs", "bdcut24.bcs", "bdban103.bcs", "bdban037.bcs"):
+            (game.root / "override" / name).unlink()
+        path = game.root / "override/bdjegg.dlg"
+        data = bytearray(path.read_bytes())
+        off = struct.unpack_from("<I", data, 0x0c)[0]
+        for state in (3, 20, 25):
+            struct.pack_into("<I", data, off + state * 16, 0)
+            struct.pack_into("<I", data, off + state * 16 + 8, 0)
+        path.write_bytes(data)
+        after = self.assert_success(game)
+        source = game.decompile("bd2000.bcs")["bd2000.bcs"]
+        self.assertIn('SetGlobal("csr_kh_fort","GLOBAL",1)', source)
+        self.assertIn('DisplayStringHead("bdbfort",', source)
+        jegg = dialog_states(after["bdjegg.dlg"])
+        self.assertEqual(4, len(jegg[20].transitions))
+        self.assertEqual(2, len(jegg[25].transitions))
+        self.assertIn('actionoverride("csr115ad",escapearea())', jegg[25].transitions[0].action)
+
+    def test_bad_dialogue_indexes_rebuild_only_the_damaged_file_and_log_once(self):
+        normal = self.installed_game().tree()
+        variants = ("state_one_past", "state_far_past", "state_negative",
+                    "transition_trigger", "transition_action")
+        for variant in variants:
+            with self.subTest(variant=variant):
+                game = self.game()
+                path = game.root / "override/khalij.dlg"
+                data = bytearray(path.read_bytes())
+                states, transitions = (struct.unpack_from("<I", data, pos)[0] for pos in (0x0c, 0x14))
+                if variant.startswith("state"):
+                    count = struct.unpack_from("<I", data, 0x1c)[0]
+                    index = {"state_one_past": count, "state_far_past": 0x7fffffff,
+                             "state_negative": -2}[variant]
+                    struct.pack_into("<i", data, states + 12, index)
+                else:
+                    flag, index_offset, count_offset = ((2, 12, 0x24) if variant == "transition_trigger"
+                                                       else (4, 16, 0x2c))
+                    flags = struct.unpack_from("<I", data, transitions)[0]
+                    count = struct.unpack_from("<I", data, count_offset)[0]
+                    struct.pack_into("<I", data, transitions, flags | flag)
+                    struct.pack_into("<I", data, transitions + index_offset, count)
+                path.write_bytes(data)
+                result, transcript = game.install()
+                self.assertEqual(result.returncode, 0, transcript)
+                self.assertIn("SUCCESSFULLY INSTALLED", transcript)
+                self.assertNotIn("WARNING", transcript.upper())
+                notices = [line for line in result.stdout.splitlines() if "dialogue is unreadable" in line]
+                self.assertEqual(len(notices), 1, notices)
+                self.assertIn("khalij dialogue is unreadable", notices[0].lower())
+                after = game.tree()
+                states = dialog_states(after["khalij.dlg"])
+                self.assertTrue(any('global("bd_sdd223","global",0)' in state.trigger for state in states))
+                self.assertTrue(any('takepartyitem("bdsilk01")' in t.action for s in states for t in s.transitions))
+                # Independent resources receive their normal authored output;
+                # only dialogues referring into this rebuilt graph may differ.
+                for name in ("bd2000.bcs", "bdcut24.bcs", "bdkhalid.bcs", "bdjegg.dlg"):
+                    self.assertEqual(after[name], normal[name], name)
+                normal_party = dialog_states(normal["khalij.dlg"])
+                for old, new in zip(dialog_states(normal["bdneera.dlg"]), dialog_states(after["bdneera.dlg"]), strict=True):
+                    self.assertEqual((old.text, old.trigger), (new.text, new.trigger))
+                    for old_link, new_link in zip(old.transitions, new.transitions, strict=True):
+                        if old_link.destination == "khalij":
+                            self.assertEqual(replace(old_link, state=0), replace(new_link, state=0))
+                            if old_link.state != new_link.state:
+                                self.assertEqual(normal_party[old_link.state].text, states[new_link.state].text)
+                        else:
+                            self.assertEqual(old_link, new_link)
+                for name, original in game.protected_before.items():
+                    self.assertEqual((game.root / name).read_bytes(), original, name)
+
+    def test_missing_party_segment_is_created_without_replacing_other_states(self):
+        game = self.game()
+        path = game.root / "override/khalij.dlg"
+        data = bytearray(path.read_bytes())
+        off = struct.unpack_from("<I", data, 0x0c)[0]
+        # Removing its entry makes the owned quest segment absent; BG1 remains.
+        struct.pack_into("<i", data, off + 233 * 16 + 12, -1)
+        path.write_bytes(data)
+        before = dialog_states(data)
+        after = dialog_states(self.assert_success(game)["khalij.dlg"])
+        self.assertEqual(before[:174], after[:174])
+        self.assertTrue(any('global("bd_sdd223","global",0)' in st.trigger for st in after[174:]))
+        self.assertTrue(any('takepartyitem("bdsilk01")' in t.action for st in after[174:] for t in st.transitions))
+
+    def test_reordered_party_table_and_second_independent_tail(self):
+        game = self.game()
+        path = game.root / "override/bddialog.2da"
+        path.write_text("2DA V1.0\n0\n JOIN_DIALOG_FILE EXTRA POST_DIALOG_FILE\nKHALID KHALIJ custom BDKHALID\n", encoding="ascii")
+        first = self.assert_success(game)
+        # Our state-address registry survives edits to every authored tail line.
+        for name, start in (("bdbfort", 13), ("bdkhalid", 126), ("bdjaheir", 104), ("khalij", 272)):
+            path = game.root / "override" / (name + ".dlg")
+            data = bytearray(path.read_bytes())
+            count, off = struct.unpack_from("<II", data, 8)
+            for i in range(start, count): struct.pack_into("<I", data, off + i * 16, 0)
+            path.write_bytes(data)
+        (game.root / "repeat115.tp2").write_text(
+            "BACKUP ~repeat-backup~\nAUTHOR ~fixture~\nBEGIN ~repeat~\n"
+            "INCLUDE ~chriz-sod-remix/lib/comp115.tpa~\n", encoding="ascii")
+        result = subprocess.run([str(WEIDU), "repeat115.tp2", "--force-install-list", "0",
+            "--noautoupdate", "--no-exit-pause", "--use-lang", "en_us"],
+            cwd=game.root, capture_output=True, text=True, errors="replace", timeout=60)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertNotIn("WARNING:", result.stdout + result.stderr)
+        second = game.tree()
+        for name in first:
+            if name.endswith(".dlg"):
+                self.assertEqual(dialog_states(first[name]), dialog_states(second[name]), name)
+        for name in ("bd2000.bcs", "bdcut24.bcs", "bdkhalid.bcs", "bdban037.bcs"):
+            self.assertEqual(first[name], second[name], name)
 
     def test_personal_quest_progression_items_timers_and_rewards_remain_intact(self):
         game = self.installed_game()
@@ -680,7 +801,7 @@ class KhalidContinuityInstallerTests(unittest.TestCase):
             "bdcut24.bcs", "bdkhalid.bcs", "bdban037.bcs", "bdban103.bcs",
             "bdbarghe.dlg", "bdbfort.dlg", "bdjaheir.dlg", "bdjegg.dlg", "bdkhalid.dlg",
             "bdneera.dlg", "bdwynan.dlg", "bdvoghil.dlg", "bdvoghil.bcs", "khalij.dlg",
-            "csr115ad.cre", "csr115ad.dlg",
+            "csr115ad.cre", "csr115ad.dlg", "csr115s.2da",
             *(f"bdc205{suffix}.bcs" for suffix in ("aa", "ab", "ac", "ad", "ae", "ca", "cb", "cc")),
             *(f"cs115s{suffix}.bcs" for suffix in ("aa", "ab", "ac", "ad", "ae", "ca", "cb", "cc")),
         }

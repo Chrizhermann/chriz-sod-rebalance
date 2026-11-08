@@ -1,0 +1,41 @@
+// #120 owns the vision exit scenes and removes the hooded man's midgame appearances.
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+OUTER_SET csr120_shift = 0
+ACTION_IF GAME_IS ~eet~ BEGIN OUTER_SET csr120_shift = 200000 END
+OUTER_SET csr120_s35301 = 35301 + csr120_shift
+OUTER_SET csr120_s35302 = 35302 + csr120_shift
+OUTER_SET csr120_s35304 = 35304 + csr120_shift
+OUTER_SET csr120_s55721 = 55721 + csr120_shift
+OUTER_SET csr120_s56974 = 56974 + csr120_shift
+OUTER_SET csr120_s66864 = 66864 + csr120_shift
+OUTER_SET csr120_s66865 = 66865 + csr120_shift
+OUTER_SET csr120_s70646 = 70646 + csr120_shift
+
+LAF csr_ensure_script STR_VAR script = ~BD0103~ END
+COPY_EXISTING ~BD0103.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    // This is a removal: no actor is the decided result when the action is absent.
+    REPLACE_TEXTUALLY CASE_INSENSITIVE ~^[ %TAB%]*[^%WNL%]*CreateCreature[^ (]*("bdireni",[^%WNL%]*%MNL%?%LNL%~ ~~
+  END
+BUT_ONLY
+COPY ~chriz-sod-remix/baf/csr120/bdcut10.baf~ ~override/BDCUT10.bcs~ EVALUATE_BUFFER COMPILE_BAF_TO_BCS
+LAF csr_ensure_script STR_VAR script = ~BDCUT28~ END
+COPY_EXISTING ~BDCUT28.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    INNER_ACTION BEGIN COPY - ~chriz-sod-remix/baf/csr120/bdcut28.baf~ ~.../csr120-read~ READ_ASCII 0 scene (SOURCE_SIZE) END
+    LPF csr_replace_script_blocks INT_VAR in_place = 1 STR_VAR pattern = ~StartMovie("sodcin02")\|CloseDoor("Bhaal_Skull")\|CreateCreature("bdireni"~ replacement = EVAL ~%scene%~ END
+  END
+BUT_ONLY
+LAF csr_ensure_script STR_VAR script = ~BD5100~ END
+COPY_EXISTING ~BD5100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    INNER_ACTION BEGIN COPY - ~chriz-sod-remix/baf/csr120/bd5100.baf~ ~.../csr120-read~ READ_ASCII 0 scene (SOURCE_SIZE) END
+    LPF csr_replace_script_blocks INT_VAR in_place = 1 STR_VAR pattern = ~"bd_unnamed_ugr"~ replacement = EVAL ~%scene%~ END
+  END
+BUT_ONLY
+LAF csr_disable_bdscry_picker_route
+  STR_VAR csr_scry_flag = ~bd_sddd12_hood~ csr_scry_component = ~120~
+END
+LAF csr_ensure_dlg_states INT_VAR count = 77 STR_VAR dialog = ~BDIMOEN~ END
+LAF csr_dlg_state_weight INT_VAR state = 67 STR_VAR dialog = ~BDIMOEN~ RET csr120_weight = clause END
+COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csrhood.d~

@@ -1,0 +1,72 @@
+// #110 owns the party-retention gates at the native recruitment sites.
+LAF csr_ensure_script STR_VAR script = ~BD0101~ END
+COPY - ~chriz-sod-remix/baf/skip0101.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD0101.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("bd_viconia_spawn",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD0108~ END
+COPY - ~chriz-sod-remix/baf/skip0108.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD0108.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("BD_MINSC",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead\|Global("BD_DYNAHEIR",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD0110~ END
+COPY - ~chriz-sod-remix/baf/skip0110.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD0110.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("BD_SPAWN_SAFANA",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD0111~ END
+COPY - ~chriz-sod-remix/baf/skip0111.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD0111.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("BD_SPAWN_RASAAD",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD1000~ END
+COPY - ~chriz-sod-remix/baf/skip1000.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD1000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("bd_edwin_spawn",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead\|Global("BD_BAELOTH_SPAWN",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD2000~ END
+COPY - ~chriz-sod-remix/baf/skip2000.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD2000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("bd_khal_spawn",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead\|Global("bd_dorn_spawn",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD2100~ END
+COPY - ~chriz-sod-remix/baf/skip2100.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD2100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("BD_NEERA",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD7000~ END
+COPY - ~chriz-sod-remix/baf/skip7000.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD7000.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("bd_rasaad_spawn",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY
+
+LAF csr_ensure_script STR_VAR script = ~BD7100~ END
+COPY - ~chriz-sod-remix/baf/skip7100.baf~ ~.../csr110-read~ READ_ASCII 0 sites (SOURCE_SIZE)
+COPY_EXISTING ~BD7100.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~Global("bd_jah_spawn",[^%WNL%]*%MNL%?%LNL%  InPartyAllowDead~ replacement = EVAL ~%sites%~ END
+  END
+BUT_ONLY

@@ -1,0 +1,95 @@
+// Component 115 owns these complete blocks.
+IF
+  InMyArea(Player1)
+  !ActuallyInCombat()
+  !GlobalTimerNotExpired("BD_BANTER_DELAY","MYAREA")
+  !Global("bd_pbdd103","MYAREA",-1)
+  Switch("bd_pbdd103","MYAREA")
+  OR(2)
+    Global("csr_kh_carry","GLOBAL",1)
+    Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #0
+    DisplayStringHead("KHALID",@11580)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",8)
+    SetGlobal("bd_pbdd103","MYAREA",10)
+  RESPONSE #10
+    DisplayStringHead("VOGHILN",%csr115_s59467%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",9)
+    SetGlobal("bd_pbdd103","MYAREA",20)
+  RESPONSE #11
+    DisplayStringHead("VOGHILN",%csr115_s59468%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",9)
+    SetGlobal("bd_pbdd103","MYAREA",20)
+  RESPONSE #20
+    DisplayStringHead("KHALID",%csr115_s59469%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_ROUND)
+    SetGlobal("bd_pbdd103","MYAREA",30)
+  RESPONSE #30
+    DisplayStringHead("VOGHILN",%csr115_s59470%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_MINUTE)
+    SetGlobal("bd_pbdd103","MYAREA",40)
+  RESPONSE #40
+    DisplayStringHead("KHALID",%csr115_s59471%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",2)
+    SetGlobal("bd_pbdd103","MYAREA",-1)
+  RESPONSE #41
+    DisplayStringHead("JAHEIRA",%csr115_s59472%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",4)
+    SetGlobal("bd_pbdd103","MYAREA",42)
+  RESPONSE #42
+    DisplayStringHead("KHALID",%csr115_s59473%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_ROUND)
+    SetGlobal("bd_pbdd103","MYAREA",43)
+  RESPONSE #43
+    DisplayStringHead("VOGHILN",%csr115_s59474%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",TWO_MINUTES)
+    SetGlobal("bd_pbdd103","MYAREA",-1)
+END
+
+IF
+  InMyArea(Player1)
+  !ActuallyInCombat()
+  !GlobalTimerNotExpired("BD_BANTER_DELAY","MYAREA")
+  !Global("bd_pbdd103","MYAREA",-1)
+  Switch("bd_pbdd103","MYAREA")
+  !Global("csr_kh_carry","GLOBAL",1)
+  !Global("csr_kh_fort","GLOBAL",1)
+THEN
+  RESPONSE #0
+    DisplayStringHead("KHALID",%csr115_s59466%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",8)
+    SetGlobal("bd_pbdd103","MYAREA",10)
+  RESPONSE #10
+    DisplayStringHead("VOGHILN",%csr115_s59467%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",9)
+    SetGlobal("bd_pbdd103","MYAREA",20)
+  RESPONSE #11
+    DisplayStringHead("VOGHILN",%csr115_s59468%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",9)
+    SetGlobal("bd_pbdd103","MYAREA",20)
+  RESPONSE #20
+    DisplayStringHead("KHALID",%csr115_s59469%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_ROUND)
+    SetGlobal("bd_pbdd103","MYAREA",30)
+  RESPONSE #30
+    DisplayStringHead("VOGHILN",%csr115_s59470%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_MINUTE)
+    SetGlobal("bd_pbdd103","MYAREA",40)
+  RESPONSE #40
+    DisplayStringHead("KHALID",%csr115_s59471%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",2)
+    SetGlobal("bd_pbdd103","MYAREA",-1)
+  RESPONSE #41
+    DisplayStringHead("JAHEIRA",%csr115_s59472%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",4)
+    SetGlobal("bd_pbdd103","MYAREA",42)
+  RESPONSE #42
+    DisplayStringHead("KHALID",%csr115_s59473%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",ONE_ROUND)
+    SetGlobal("bd_pbdd103","MYAREA",43)
+  RESPONSE #43
+    DisplayStringHead("VOGHILN",%csr115_s59474%)
+    SetGlobalTimer("BD_BANTER_DELAY","MYAREA",TWO_MINUTES)
+    SetGlobal("bd_pbdd103","MYAREA",-1)
+END

@@ -23,6 +23,14 @@ areas, XP ledger updates all decided there). **Implementation/testing happens on
 game copy** (user maintains copies; dev-target path TBD) — never on the live install below.
 The user works sparring-style: no unsolicited decisions; designs list DECIDED vs OPEN.
 
+## Installer ownership
+
+Follow the mandatory [We overwrite policy](~/.agents/skills/bg-modding/references/compatibility-policy.md).
+Write the decided fields, effects, descriptions and behavior regardless of old content.
+Missing owned script blocks or dialogue states are created. Game data never stops,
+warns or rolls back a component. Tests verify the authored output on changed inputs.
+This does not authorize writes to live games or reference installations.
+
 ## Install matrix
 - **Dev/test target (install + test mods HERE):**
   `C:\Games\Baldur's Gate II Enhanced Edition modded - dev eet install\` — clone of the live

@@ -1,25 +1,21 @@
 // Bence must complete his existing wrap before the door opens and the Bhaal
 // crossing advances the story. Bring him to the party after victory.
-DEFINE_ACTION_FUNCTION csr256_aftermath_preflight BEGIN
-  COPY_EXISTING - ~BDBENCE.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CSR256_BENCE_TRY~ csr256_bence_hits
-    // WeiDU reports -1 for an empty decompiled script; only real hits conflict.
-    PATCH_IF csr256_bence_hits > 0 BEGIN
-      PATCH_FAIL ~#256: the owned Bence approach is already installed.~
-    END
-  END
-END
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+DEFINE_ACTION_FUNCTION csr256_aftermath_preflight BEGIN END
 
 DEFINE_ACTION_FUNCTION csr256_aftermath_install BEGIN
-  // Our pending-wrap wait suppresses lower script blocks. Preserve the native
-  // one-time AI initialization first, copying its existing block only when the
-  // reviewed shape is present; do not impose these settings on foreign scripts.
+  LAF csr_ensure_script STR_VAR script = ~BDBENCE~ END
   OUTER_SPRINT csr256_bence_init ~~
-  COPY_EXISTING - ~BDBENCE.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN
-    REPLACE_EVALUATE CASE_INSENSITIVE ~IF[%WNL% ]+Global("bd_ai_controls","locals",0)[%WNL% ]+OR(2)[%WNL% ]+AreaCheck("bd2000")[%WNL% ]+AreaCheck("bd4300")[%WNL% ]+THEN[%WNL% ]+RESPONSE #100[%WNL% ]+SetGlobal("bd_ai_controls","locals",1)[%WNL% ]+SetGlobal("bd_no_assist","locals",2)[%WNL% ]+SetGlobal("bd_no_combat","locals",1)[%WNL% ]+SetGlobal("bd_no_search","locals",1)[%WNL% ]+END~ BEGIN
-      SPRINT csr256_bence_init ~%MATCH0%~
-    END ~%MATCH0%~
-  END
+  COPY_EXISTING ~BDBENCE.BCS~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LPF csr_replace_script_blocks STR_VAR pattern = ~^[ %TAB%]+Global("CSR256_STAGE"\|"CSR256_BENCE_TRY"~ END
+      // Move the installed initialization ahead of our pending-wrap wait, with
+      // all its actions intact. Its shape does not decide whether we install.
+      REPLACE_EVALUATE CASE_INSENSITIVE ~^IF[%WNL% ]+\(Global("bd_ai_controls","locals",[-0-9]+)[^%WNL%]*[%WNL%]+\)\(\([ %TAB%]+[^%WNL%]*[%WNL%]+\|THEN[%WNL%]+\)*\)END~ BEGIN
+        SPRINT csr256_bence_init ~%MATCH0%~
+      END ~~
+    END
+  BUT_ONLY
   <<<<<<<< .../csr256_bence.baf
 %csr256_bence_init%
 

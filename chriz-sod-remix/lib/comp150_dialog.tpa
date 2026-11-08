@@ -1,0 +1,1607 @@
+<<<<<<<< .../csr150-fallback.d
+%csr150_fallback%
+>>>>>>>>
+
+<<<<<<<< .../csr150-seed.d
+%csr150_seed%
+>>>>>>>>
+
+OUTER_SET csr150_ref_34206 = 34206 + csr150_tlk_shift
+OUTER_SET csr150_ref_34238 = 34238 + csr150_tlk_shift
+OUTER_SET csr150_ref_34239 = 34239 + csr150_tlk_shift
+OUTER_SET csr150_ref_34240 = 34240 + csr150_tlk_shift
+OUTER_SET csr150_ref_34300 = 34300 + csr150_tlk_shift
+OUTER_SET csr150_ref_34317 = 34317 + csr150_tlk_shift
+OUTER_SET csr150_ref_34318 = 34318 + csr150_tlk_shift
+OUTER_SET csr150_ref_34319 = 34319 + csr150_tlk_shift
+OUTER_SET csr150_ref_34515 = 34515 + csr150_tlk_shift
+OUTER_SET csr150_ref_34516 = 34516 + csr150_tlk_shift
+OUTER_SET csr150_ref_34517 = 34517 + csr150_tlk_shift
+OUTER_SET csr150_ref_34518 = 34518 + csr150_tlk_shift
+OUTER_SET csr150_ref_34592 = 34592 + csr150_tlk_shift
+OUTER_SET csr150_ref_34593 = 34593 + csr150_tlk_shift
+OUTER_SET csr150_ref_34594 = 34594 + csr150_tlk_shift
+OUTER_SET csr150_ref_34595 = 34595 + csr150_tlk_shift
+OUTER_SET csr150_ref_34596 = 34596 + csr150_tlk_shift
+OUTER_SET csr150_ref_34597 = 34597 + csr150_tlk_shift
+OUTER_SET csr150_ref_34598 = 34598 + csr150_tlk_shift
+OUTER_SET csr150_ref_34599 = 34599 + csr150_tlk_shift
+OUTER_SET csr150_ref_34600 = 34600 + csr150_tlk_shift
+OUTER_SET csr150_ref_34607 = 34607 + csr150_tlk_shift
+OUTER_SET csr150_ref_34608 = 34608 + csr150_tlk_shift
+OUTER_SET csr150_ref_34609 = 34609 + csr150_tlk_shift
+OUTER_SET csr150_ref_34610 = 34610 + csr150_tlk_shift
+OUTER_SET csr150_ref_34629 = 34629 + csr150_tlk_shift
+OUTER_SET csr150_ref_34630 = 34630 + csr150_tlk_shift
+OUTER_SET csr150_ref_34631 = 34631 + csr150_tlk_shift
+OUTER_SET csr150_ref_34632 = 34632 + csr150_tlk_shift
+OUTER_SET csr150_ref_34635 = 34635 + csr150_tlk_shift
+OUTER_SET csr150_ref_34636 = 34636 + csr150_tlk_shift
+OUTER_SET csr150_ref_34637 = 34637 + csr150_tlk_shift
+OUTER_SET csr150_ref_34638 = 34638 + csr150_tlk_shift
+OUTER_SET csr150_ref_34639 = 34639 + csr150_tlk_shift
+OUTER_SET csr150_ref_34640 = 34640 + csr150_tlk_shift
+OUTER_SET csr150_ref_34641 = 34641 + csr150_tlk_shift
+OUTER_SET csr150_ref_34642 = 34642 + csr150_tlk_shift
+OUTER_SET csr150_ref_34701 = 34701 + csr150_tlk_shift
+OUTER_SET csr150_ref_34702 = 34702 + csr150_tlk_shift
+OUTER_SET csr150_ref_34703 = 34703 + csr150_tlk_shift
+OUTER_SET csr150_ref_34704 = 34704 + csr150_tlk_shift
+OUTER_SET csr150_ref_34749 = 34749 + csr150_tlk_shift
+OUTER_SET csr150_ref_34750 = 34750 + csr150_tlk_shift
+OUTER_SET csr150_ref_34751 = 34751 + csr150_tlk_shift
+OUTER_SET csr150_ref_34752 = 34752 + csr150_tlk_shift
+OUTER_SET csr150_ref_34771 = 34771 + csr150_tlk_shift
+OUTER_SET csr150_ref_34772 = 34772 + csr150_tlk_shift
+OUTER_SET csr150_ref_34773 = 34773 + csr150_tlk_shift
+OUTER_SET csr150_ref_34906 = 34906 + csr150_tlk_shift
+OUTER_SET csr150_ref_34907 = 34907 + csr150_tlk_shift
+OUTER_SET csr150_ref_34908 = 34908 + csr150_tlk_shift
+OUTER_SET csr150_ref_34909 = 34909 + csr150_tlk_shift
+OUTER_SET csr150_ref_34910 = 34910 + csr150_tlk_shift
+OUTER_SET csr150_ref_35021 = 35021 + csr150_tlk_shift
+OUTER_SET csr150_ref_35022 = 35022 + csr150_tlk_shift
+OUTER_SET csr150_ref_35023 = 35023 + csr150_tlk_shift
+OUTER_SET csr150_ref_35024 = 35024 + csr150_tlk_shift
+OUTER_SET csr150_ref_38728 = 38728 + csr150_tlk_shift
+OUTER_SET csr150_ref_38729 = 38729 + csr150_tlk_shift
+OUTER_SET csr150_ref_38730 = 38730 + csr150_tlk_shift
+OUTER_SET csr150_ref_38731 = 38731 + csr150_tlk_shift
+OUTER_SET csr150_ref_44522 = 44522 + csr150_tlk_shift
+OUTER_SET csr150_ref_44525 = 44525 + csr150_tlk_shift
+OUTER_SET csr150_ref_44526 = 44526 + csr150_tlk_shift
+OUTER_SET csr150_ref_52675 = 52675 + csr150_tlk_shift
+OUTER_SET csr150_ref_52676 = 52676 + csr150_tlk_shift
+OUTER_SET csr150_ref_52677 = 52677 + csr150_tlk_shift
+OUTER_SET csr150_ref_52810 = 52810 + csr150_tlk_shift
+OUTER_SET csr150_ref_52811 = 52811 + csr150_tlk_shift
+OUTER_SET csr150_ref_52812 = 52812 + csr150_tlk_shift
+OUTER_SET csr150_ref_55930 = 55930 + csr150_tlk_shift
+OUTER_SET csr150_ref_55931 = 55931 + csr150_tlk_shift
+OUTER_SET csr150_ref_55932 = 55932 + csr150_tlk_shift
+OUTER_SET csr150_ref_55933 = 55933 + csr150_tlk_shift
+OUTER_SET csr150_ref_55934 = 55934 + csr150_tlk_shift
+OUTER_SET csr150_ref_55935 = 55935 + csr150_tlk_shift
+OUTER_SET csr150_ref_55936 = 55936 + csr150_tlk_shift
+OUTER_SET csr150_ref_55937 = 55937 + csr150_tlk_shift
+OUTER_SET csr150_ref_55938 = 55938 + csr150_tlk_shift
+OUTER_SET csr150_ref_55939 = 55939 + csr150_tlk_shift
+OUTER_SET csr150_ref_55940 = 55940 + csr150_tlk_shift
+OUTER_SET csr150_ref_55941 = 55941 + csr150_tlk_shift
+OUTER_SET csr150_ref_55942 = 55942 + csr150_tlk_shift
+OUTER_SET csr150_ref_55962 = 55962 + csr150_tlk_shift
+OUTER_SET csr150_ref_55963 = 55963 + csr150_tlk_shift
+OUTER_SET csr150_ref_55964 = 55964 + csr150_tlk_shift
+OUTER_SET csr150_ref_55965 = 55965 + csr150_tlk_shift
+OUTER_SET csr150_ref_55966 = 55966 + csr150_tlk_shift
+OUTER_SET csr150_ref_55967 = 55967 + csr150_tlk_shift
+OUTER_SET csr150_ref_55968 = 55968 + csr150_tlk_shift
+OUTER_SET csr150_ref_55969 = 55969 + csr150_tlk_shift
+OUTER_SET csr150_ref_55970 = 55970 + csr150_tlk_shift
+OUTER_SET csr150_ref_55971 = 55971 + csr150_tlk_shift
+OUTER_SET csr150_ref_55972 = 55972 + csr150_tlk_shift
+OUTER_SET csr150_ref_55973 = 55973 + csr150_tlk_shift
+OUTER_SET csr150_ref_55974 = 55974 + csr150_tlk_shift
+OUTER_SET csr150_ref_56005 = 56005 + csr150_tlk_shift
+OUTER_SET csr150_ref_56006 = 56006 + csr150_tlk_shift
+OUTER_SET csr150_ref_56007 = 56007 + csr150_tlk_shift
+OUTER_SET csr150_ref_56008 = 56008 + csr150_tlk_shift
+OUTER_SET csr150_ref_56014 = 56014 + csr150_tlk_shift
+OUTER_SET csr150_ref_56015 = 56015 + csr150_tlk_shift
+OUTER_SET csr150_ref_56016 = 56016 + csr150_tlk_shift
+OUTER_SET csr150_ref_56017 = 56017 + csr150_tlk_shift
+OUTER_SET csr150_ref_56028 = 56028 + csr150_tlk_shift
+OUTER_SET csr150_ref_56030 = 56030 + csr150_tlk_shift
+OUTER_SET csr150_ref_56031 = 56031 + csr150_tlk_shift
+OUTER_SET csr150_ref_56387 = 56387 + csr150_tlk_shift
+OUTER_SET csr150_ref_56548 = 56548 + csr150_tlk_shift
+OUTER_SET csr150_ref_57840 = 57840 + csr150_tlk_shift
+OUTER_SET csr150_ref_57841 = 57841 + csr150_tlk_shift
+OUTER_SET csr150_ref_57842 = 57842 + csr150_tlk_shift
+OUTER_SET csr150_ref_57853 = 57853 + csr150_tlk_shift
+OUTER_SET csr150_ref_58049 = 58049 + csr150_tlk_shift
+OUTER_SET csr150_ref_58134 = 58134 + csr150_tlk_shift
+OUTER_SET csr150_ref_58135 = 58135 + csr150_tlk_shift
+OUTER_SET csr150_ref_58136 = 58136 + csr150_tlk_shift
+OUTER_SET csr150_ref_58137 = 58137 + csr150_tlk_shift
+OUTER_SET csr150_ref_59540 = 59540 + csr150_tlk_shift
+OUTER_SET csr150_ref_59617 = 59617 + csr150_tlk_shift
+OUTER_SET csr150_ref_64711 = 64711 + csr150_tlk_shift
+OUTER_SET csr150_ref_64720 = 64720 + csr150_tlk_shift
+OUTER_SET csr150_ref_64721 = 64721 + csr150_tlk_shift
+OUTER_SET csr150_ref_64722 = 64722 + csr150_tlk_shift
+OUTER_SET csr150_ref_64733 = 64733 + csr150_tlk_shift
+OUTER_SET csr150_ref_64741 = 64741 + csr150_tlk_shift
+OUTER_SET csr150_ref_66841 = 66841 + csr150_tlk_shift
+OUTER_SET csr150_ref_67277 = 67277 + csr150_tlk_shift
+OUTER_SET csr150_ref_67278 = 67278 + csr150_tlk_shift
+OUTER_SET csr150_ref_67279 = 67279 + csr150_tlk_shift
+OUTER_SET csr150_ref_67280 = 67280 + csr150_tlk_shift
+// Supply absent states/transitions; existing unowned replies and text stay.
+LAF csr_ensure_dlg_states INT_VAR count = 39 STR_VAR dialog = ~BDLIIA~ RET csr150_old_BDLIIA = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 65 STR_VAR dialog = ~BDBELT~ RET csr150_old_BDBELT = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 24 STR_VAR dialog = ~BDELTAN~ RET csr150_old_BDELTAN = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 287 STR_VAR dialog = ~BDSCHAEL~ RET csr150_old_BDSCHAEL = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 57 STR_VAR dialog = ~BDGARRIC~ RET csr150_old_BDGARRIC = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 138 STR_VAR dialog = ~BDSAFANA~ RET csr150_old_BDSAFANA = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 104 STR_VAR dialog = ~BDRASAAD~ RET csr150_old_BDRASAAD = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 77 STR_VAR dialog = ~BDDYNAHE~ RET csr150_old_BDDYNAHE = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 15 STR_VAR dialog = ~BDAUDAM~ RET csr150_old_BDAUDAM = existing_states END
+OUTER_SPRINT csr150_seed ~~
+ACTION_IF csr150_old_BDLIIA <= 9 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 9 STR_VAR dialog = ~BDLIIA~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDLIIA~
+IF %csr150_weight% ~  Global("bd_plot_003","bd0102",0)
+~ THEN BEGIN 9
+  SAY #%csr150_ref_34206%
+  IF ~~ THEN REPLY #%csr150_ref_59540%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 4
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_57840%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 3
+  IF ~  Global("SOD_fromimport","global",1)
+~ THEN REPLY #%csr150_ref_57841%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 6
+  IF ~~ THEN REPLY #%csr150_ref_57842%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 5
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 9 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~~ THEN REPLY #%csr150_ref_59540%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 4
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_57840%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDELTAN~ 3
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~  Global("SOD_fromimport","global",1)
+~ THEN REPLY #%csr150_ref_57841%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 6
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 9
+  IF ~~ THEN REPLY #%csr150_ref_57842%  DO ~SetGlobal("bd_plot_003","bd0102",1)
+~ EXTERN ~BDENTAR~ 5
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDLIIA <= 11 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 11 STR_VAR dialog = ~BDLIIA~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDLIIA~
+IF %csr150_weight% ~~ THEN BEGIN 11
+  SAY #%csr150_ref_34300%
+  IF ~~ THEN REPLY #%csr150_ref_64720%  EXTERN ~BDBELT~ 38
+  IF ~~ THEN REPLY #%csr150_ref_64721%  EXTERN ~BDELTAN~ 8
+  IF ~~ THEN REPLY #%csr150_ref_64722%  EXTERN ~BDELTAN~ 8
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 11 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 11
+  IF ~~ THEN REPLY #%csr150_ref_64720%  EXTERN ~BDBELT~ 38
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 11
+  IF ~~ THEN REPLY #%csr150_ref_64721%  EXTERN ~BDELTAN~ 8
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 11
+  IF ~~ THEN REPLY #%csr150_ref_64722%  EXTERN ~BDELTAN~ 8
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDLIIA <= 13 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 13 STR_VAR dialog = ~BDLIIA~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDLIIA~
+IF %csr150_weight% ~  GlobalLT("BD_plot","global",55)
+AreaCheck("bd0102")
+~ THEN BEGIN 13
+  SAY #%csr150_ref_56028%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_56030%  GOTO 14
+  IF ~~ THEN REPLY #%csr150_ref_56031%  GOTO 14
+  IF ~~ THEN REPLY #%csr150_ref_58049%  GOTO 29
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDLIIA.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 13 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 13
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_56030%  GOTO 14
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 13
+  IF ~~ THEN REPLY #%csr150_ref_56031%  GOTO 14
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDLIIA~ 13
+  IF ~~ THEN REPLY #%csr150_ref_58049%  GOTO 29
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 38 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 38 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~~ THEN BEGIN 38
+  SAY #%csr150_ref_64733%
+  IF ~~ THEN GOTO 39
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 38 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 38
+  IF ~~ THEN GOTO 39
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 40 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 40 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~~ THEN BEGIN 40
+  SAY #%csr150_ref_34317%
+  IF ~~ THEN REPLY #%csr150_ref_34318%  EXTERN ~BDSCHAEL~ 22
+  IF ~~ THEN REPLY #%csr150_ref_34319%  EXTERN ~BDSCHAEL~ 20
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_57853%  EXTERN ~BDSCHAEL~ 21
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 40 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 40
+  IF ~~ THEN REPLY #%csr150_ref_34318%  EXTERN ~BDSCHAEL~ 22
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 40
+  IF ~~ THEN REPLY #%csr150_ref_34319%  EXTERN ~BDSCHAEL~ 20
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 40
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_57853%  EXTERN ~BDSCHAEL~ 21
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 41 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 41 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~~ THEN BEGIN 41
+  SAY #%csr150_ref_64741%
+  IF ~~ THEN DO ~SetGlobal("bd_plot_003","bd0102",2)
+AddJournalEntry(%csr150_ref_56387%,INFO)
+AddJournalEntry(%csr150_ref_59617%,QUEST)
+AddJournalEntry(@15010,QUEST_DONE)
+ClearAllActions()
+StartCutSceneMode()
+StartCutSceneEx("bdcut04",FALSE)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 41 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 41
+  IF ~~ THEN DO ~SetGlobal("bd_plot_003","bd0102",2)
+AddJournalEntry(%csr150_ref_56387%,INFO)
+AddJournalEntry(%csr150_ref_59617%,QUEST)
+AddJournalEntry(@15010,QUEST_DONE)
+ClearAllActions()
+StartCutSceneMode()
+StartCutSceneEx("bdcut04",FALSE)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 42 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 42 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+GlobalLT("BD_plot","global",55)
+AreaCheck("bd0100")
+~ THEN BEGIN 42
+  SAY #%csr150_ref_55930%
+  IF ~  Global("SOD_fromimport","global",1)
+~ THEN REPLY #%csr150_ref_55932%  GOTO 47
+  IF ~~ THEN REPLY #%csr150_ref_55931%  GOTO 45
+  IF ~~ THEN REPLY #%csr150_ref_55933%  GOTO 51
+  IF ~  CheckStatGT(Player1,14,INT)
+~ THEN REPLY #%csr150_ref_55934%  GOTO 44
+  IF ~~ THEN REPLY #%csr150_ref_55935%  GOTO 43
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 42 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 42
+  IF ~  Global("SOD_fromimport","global",1)
+~ THEN REPLY #%csr150_ref_55932%  GOTO 47
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 42
+  IF ~~ THEN REPLY #%csr150_ref_55931%  GOTO 45
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 42
+  IF ~~ THEN REPLY #%csr150_ref_55933%  GOTO 51
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 42
+  IF ~  CheckStatGT(Player1,14,INT)
+~ THEN REPLY #%csr150_ref_55934%  GOTO 44
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 4 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 42
+  IF ~~ THEN REPLY #%csr150_ref_55935%  GOTO 43
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 43 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 43 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 43
+  SAY #%csr150_ref_55936%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 43 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 43
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 44 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 44 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 44
+  SAY #%csr150_ref_55937%
+  IF ~~ THEN GOTO 45
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 44 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 44
+  IF ~~ THEN GOTO 45
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 45 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 45 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 45
+  SAY #%csr150_ref_55938%
+  IF ~~ THEN REPLY #%csr150_ref_55939%  GOTO 51
+  IF ~~ THEN REPLY #%csr150_ref_55940%  GOTO 56
+  IF ~~ THEN REPLY #%csr150_ref_55941%  GOTO 46
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 45 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 45
+  IF ~~ THEN REPLY #%csr150_ref_55939%  GOTO 51
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 45
+  IF ~~ THEN REPLY #%csr150_ref_55940%  GOTO 56
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 45
+  IF ~~ THEN REPLY #%csr150_ref_55941%  GOTO 46
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 46 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 46 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 46
+  SAY #%csr150_ref_55942%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 46 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 46
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 55 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 55 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 55
+  SAY #%csr150_ref_55962%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 55 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 55
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 56 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 56 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 56
+  SAY #%csr150_ref_55963%
+  IF ~~ THEN REPLY #%csr150_ref_55964%  GOTO 51
+  IF ~  OR(12)
+Class(Player1,FIGHTER)
+Kit(Player1,BARBARIAN)
+Class(Player1,RANGER)
+Class(Player1,PALADIN)
+Class(Player1,THIEF)
+Class(Player1,FIGHTER_MAGE)
+Class(Player1,FIGHTER_CLERIC)
+Class(Player1,FIGHTER_THIEF)
+Class(Player1,FIGHTER_MAGE_THIEF)
+Class(Player1,FIGHTER_DRUID)
+Class(Player1,FIGHTER_MAGE_CLERIC)
+Class(Player1,MONK)
+~ THEN REPLY #%csr150_ref_55965%  GOTO 57
+  IF ~  OR(9)
+Class(Player1,CLERIC)
+Class(Player1,DRUID)
+Class(Player1,MAGE)
+CheckStatGT(Player1,0,IS_BARD_CLASS)
+Class(Player1,SORCERER)
+Class(Player1,MAGE_THIEF)
+Class(Player1,CLERIC_MAGE)
+Class(Player1,CLERIC_THIEF)
+Class(Player1,CLERIC_RANGER)
+~ THEN REPLY #%csr150_ref_55965%  GOTO 58
+  IF ~~ THEN REPLY #%csr150_ref_55966%  GOTO 55
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 56 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 56
+  IF ~~ THEN REPLY #%csr150_ref_55964%  GOTO 51
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 56
+  IF ~  OR(12)
+Class(Player1,FIGHTER)
+Kit(Player1,BARBARIAN)
+Class(Player1,RANGER)
+Class(Player1,PALADIN)
+Class(Player1,THIEF)
+Class(Player1,FIGHTER_MAGE)
+Class(Player1,FIGHTER_CLERIC)
+Class(Player1,FIGHTER_THIEF)
+Class(Player1,FIGHTER_MAGE_THIEF)
+Class(Player1,FIGHTER_DRUID)
+Class(Player1,FIGHTER_MAGE_CLERIC)
+Class(Player1,MONK)
+~ THEN REPLY #%csr150_ref_55965%  GOTO 57
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 56
+  IF ~  OR(9)
+Class(Player1,CLERIC)
+Class(Player1,DRUID)
+Class(Player1,MAGE)
+CheckStatGT(Player1,0,IS_BARD_CLASS)
+Class(Player1,SORCERER)
+Class(Player1,MAGE_THIEF)
+Class(Player1,CLERIC_MAGE)
+Class(Player1,CLERIC_THIEF)
+Class(Player1,CLERIC_RANGER)
+~ THEN REPLY #%csr150_ref_55965%  GOTO 58
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 56
+  IF ~~ THEN REPLY #%csr150_ref_55966%  GOTO 55
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 57 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 57 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 57
+  SAY #%csr150_ref_55967%
+  IF ~~ THEN REPLY #%csr150_ref_55968%  GOTO 55
+  IF ~~ THEN REPLY #%csr150_ref_55969%  GOTO 60
+  IF ~~ THEN REPLY #%csr150_ref_55970%  GOTO 59
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 57 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 57
+  IF ~~ THEN REPLY #%csr150_ref_55968%  GOTO 55
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 57
+  IF ~~ THEN REPLY #%csr150_ref_55969%  GOTO 60
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 57
+  IF ~~ THEN REPLY #%csr150_ref_55970%  GOTO 59
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDBELT <= 58 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 58 STR_VAR dialog = ~BDBELT~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDBELT~
+IF %csr150_weight% ~  False()
+~ THEN BEGIN 58
+  SAY #%csr150_ref_55971%
+  IF ~~ THEN REPLY #%csr150_ref_55972%  GOTO 55
+  IF ~~ THEN REPLY #%csr150_ref_55973%  GOTO 60
+  IF ~~ THEN REPLY #%csr150_ref_55974%  GOTO 59
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBELT.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 58 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 58
+  IF ~~ THEN REPLY #%csr150_ref_55972%  GOTO 55
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 58
+  IF ~~ THEN REPLY #%csr150_ref_55973%  GOTO 60
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDBELT~ 58
+  IF ~~ THEN REPLY #%csr150_ref_55974%  GOTO 59
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDELTAN <= 4 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 4 STR_VAR dialog = ~BDELTAN~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDELTAN~
+IF %csr150_weight% ~~ THEN BEGIN 4
+  SAY #%csr150_ref_34238%
+  IF ~~ THEN REPLY #%csr150_ref_34239%  EXTERN ~BDBELT~ 35
+  IF ~~ THEN REPLY #%csr150_ref_34240%  EXTERN ~BDBELT~ 35
+  IF ~~ THEN REPLY #%csr150_ref_64711%  EXTERN ~BDBELT~ 35
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDELTAN.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 4 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 4
+  IF ~~ THEN REPLY #%csr150_ref_34239%  EXTERN ~BDBELT~ 35
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 4
+  IF ~~ THEN REPLY #%csr150_ref_34240%  EXTERN ~BDBELT~ 35
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 4
+  IF ~~ THEN REPLY #%csr150_ref_64711%  EXTERN ~BDBELT~ 35
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDELTAN <= 11 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 11 STR_VAR dialog = ~BDELTAN~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDELTAN~
+IF %csr150_weight% ~~ THEN BEGIN 11
+  SAY #%csr150_ref_56005%
+  IF ~~ THEN REPLY #%csr150_ref_56006%  GOTO 19
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_56007%  GOTO 12
+  IF ~~ THEN REPLY #%csr150_ref_56008%  GOTO 15
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDELTAN.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 11 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 11
+  IF ~~ THEN REPLY #%csr150_ref_56006%  GOTO 19
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 11
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_56007%  GOTO 12
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 11
+  IF ~~ THEN REPLY #%csr150_ref_56008%  GOTO 15
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDELTAN <= 13 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 13 STR_VAR dialog = ~BDELTAN~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDELTAN~
+IF %csr150_weight% ~~ THEN BEGIN 13
+  SAY #%csr150_ref_56014%
+  IF ~~ THEN REPLY #%csr150_ref_56015%  GOTO 22
+  IF ~~ THEN REPLY #%csr150_ref_56016%  GOTO 23
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_56017%  GOTO 14
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDELTAN.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 13 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 13
+  IF ~~ THEN REPLY #%csr150_ref_56015%  GOTO 22
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 13
+  IF ~~ THEN REPLY #%csr150_ref_56016%  GOTO 23
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDELTAN~ 13
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_56017%  GOTO 14
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDSCHAEL <= 46 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 46 STR_VAR dialog = ~BDSCHAEL~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDSCHAEL~
+IF %csr150_weight% ~  OR(4)
+AreaCheck("bd0020")
+AreaCheck("bd0030")
+AreaCheck("bd0040")
+AreaCheck("bd0050")
+Global("bd_visited_three_areas","GLOBAL",3)
+GlobalLT("bd_visited_three_npcs","GLOBAL",3)
+~ THEN BEGIN 46
+  SAY #%csr150_ref_67277%
+  IF ~~ THEN REPLY #%csr150_ref_67278%  GOTO 47
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_67279%  GOTO 49
+  IF ~~ THEN REPLY #%csr150_ref_67280%  GOTO 48
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSCHAEL.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 46 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 46
+  IF ~~ THEN REPLY #%csr150_ref_67278%  GOTO 47
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 46
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_67279%  GOTO 49
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 46
+  IF ~~ THEN REPLY #%csr150_ref_67280%  GOTO 48
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDSCHAEL <= 162 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 162 STR_VAR dialog = ~BDSCHAEL~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDSCHAEL~
+IF %csr150_weight% ~  AreaCheck("bd0106")
+NumTimesTalkedToGT(0)
+~ THEN BEGIN 162
+  SAY #%csr150_ref_34701%
+  IF ~~ THEN REPLY #%csr150_ref_34702%  GOTO 163
+  IF ~  !Dead("Dynaheir")
+!Dead("Minsc")
+IsGabber(Player1)
+GlobalGT("bd_minsc_followup","global",0)
+!IsValidForPartyDialogue("Minsc")
+!IsValidForPartyDialogue("Dynaheir")
+Global("bd_drinks_corwin","global",0)
+~ THEN REPLY #%csr150_ref_34703%  GOTO 164
+  IF ~  IsGabber(Player1)
+OR(2)
+IsValidForPartyDialogue("Minsc")
+IsValidForPartyDialogue("Dynaheir")
+Global("bd_drinks_corwin","global",0)
+~ THEN REPLY #%csr150_ref_52675%  GOTO 164
+  IF ~  IsGabber(Player1)
+Global("bd_drinks_corwin","global",0)
+~ THEN REPLY #%csr150_ref_52676%  GOTO 164
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34704%  GOTO 166
+  IF ~~ THEN REPLY #%csr150_ref_52677%  GOTO 165
+  IF ~  Global("bd_heard_seditious_talk","GLOBAL",1)
+!Dead("bdmaxwel")
+!Dead("bdtherto")
+!Dead("bdaraya")
+~ THEN REPLY #%csr150_ref_44522%  DO ~SetGlobal("bd_heard_seditious_talk","GLOBAL",2)
+~ GOTO 181
+  IF ~  Global("bd_heard_seditious_talk","GLOBAL",0)
+PartyHasItem("bdscrl01")
+!Dead("bdmaxwel")
+!Dead("bdtherto")
+!Dead("bdaraya")
+~ THEN REPLY #%csr150_ref_44525%  DO ~SetGlobal("bd_heard_seditious_talk","GLOBAL",3)
+TakePartyItemNum("BDSCRL01",1)
+~ GOTO 184
+  IF ~  PartyHasItem("bdscrl01")
+Dead("bdmaxwel")
+Dead("bdtherto")
+Dead("bdaraya")
+~ THEN REPLY #%csr150_ref_44526%  DO ~SetGlobal("bd_heard_seditious_talk","GLOBAL",2)
+TakePartyItemNum("BDSCRL01",1)
+~ GOTO 185
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSCHAEL.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 162 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~~ THEN REPLY #%csr150_ref_34702%  GOTO 163
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  !Dead("Dynaheir")
+!Dead("Minsc")
+IsGabber(Player1)
+GlobalGT("bd_minsc_followup","global",0)
+!IsValidForPartyDialogue("Minsc")
+!IsValidForPartyDialogue("Dynaheir")
+Global("bd_drinks_corwin","global",0)
+~ THEN REPLY #%csr150_ref_34703%  GOTO 164
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  IsGabber(Player1)
+OR(2)
+IsValidForPartyDialogue("Minsc")
+IsValidForPartyDialogue("Dynaheir")
+Global("bd_drinks_corwin","global",0)
+~ THEN REPLY #%csr150_ref_52675%  GOTO 164
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  IsGabber(Player1)
+Global("bd_drinks_corwin","global",0)
+~ THEN REPLY #%csr150_ref_52676%  GOTO 164
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 4 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34704%  GOTO 166
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 5 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~~ THEN REPLY #%csr150_ref_52677%  GOTO 165
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 6 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  Global("bd_heard_seditious_talk","GLOBAL",1)
+!Dead("bdmaxwel")
+!Dead("bdtherto")
+!Dead("bdaraya")
+~ THEN REPLY #%csr150_ref_44522%  DO ~SetGlobal("bd_heard_seditious_talk","GLOBAL",2)
+~ GOTO 181
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 7 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  Global("bd_heard_seditious_talk","GLOBAL",0)
+PartyHasItem("bdscrl01")
+!Dead("bdmaxwel")
+!Dead("bdtherto")
+!Dead("bdaraya")
+~ THEN REPLY #%csr150_ref_44525%  DO ~SetGlobal("bd_heard_seditious_talk","GLOBAL",3)
+TakePartyItemNum("BDSCRL01",1)
+~ GOTO 184
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 8 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSCHAEL~ 162
+  IF ~  PartyHasItem("bdscrl01")
+Dead("bdmaxwel")
+Dead("bdtherto")
+Dead("bdaraya")
+~ THEN REPLY #%csr150_ref_44526%  DO ~SetGlobal("bd_heard_seditious_talk","GLOBAL",2)
+TakePartyItemNum("BDSCRL01",1)
+~ GOTO 185
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDGARRIC <= 38 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 38 STR_VAR dialog = ~BDGARRIC~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDGARRIC~
+IF %csr150_weight% ~~ THEN BEGIN 38
+  SAY #%csr150_ref_34515%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34516%  GOTO 39
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34517%  GOTO 39
+  IF ~~ THEN REPLY #%csr150_ref_34518%  GOTO 42
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDGARRIC.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 38 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDGARRIC~ 38
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34516%  GOTO 39
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDGARRIC~ 38
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34517%  GOTO 39
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDGARRIC~ 38
+  IF ~~ THEN REPLY #%csr150_ref_34518%  GOTO 42
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDSAFANA <= 22 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 22 STR_VAR dialog = ~BDSAFANA~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDSAFANA~
+IF %csr150_weight% ~~ THEN BEGIN 22
+  SAY #%csr150_ref_34906%
+  IF ~~ THEN REPLY #%csr150_ref_34907%  GOTO 23
+  IF ~~ THEN REPLY #%csr150_ref_34908%  GOTO 27
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34909%  GOTO 31
+  IF ~~ THEN REPLY #%csr150_ref_34910%  GOTO 33
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 22 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 22
+  IF ~~ THEN REPLY #%csr150_ref_34907%  GOTO 23
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 22
+  IF ~~ THEN REPLY #%csr150_ref_34908%  GOTO 27
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 22
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34909%  GOTO 31
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 22
+  IF ~~ THEN REPLY #%csr150_ref_34910%  GOTO 33
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDSAFANA <= 44 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 44 STR_VAR dialog = ~BDSAFANA~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDSAFANA~
+IF %csr150_weight% ~~ THEN BEGIN 44
+  SAY #%csr150_ref_35021%
+  IF ~~ THEN REPLY #%csr150_ref_35022%  GOTO 52
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_35023%  GOTO 46
+  IF ~~ THEN REPLY #%csr150_ref_35024%  GOTO 54
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDSAFANA.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 44 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 44
+  IF ~~ THEN REPLY #%csr150_ref_35022%  GOTO 52
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 44
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_35023%  GOTO 46
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDSAFANA~ 44
+  IF ~~ THEN REPLY #%csr150_ref_35024%  GOTO 54
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 21 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 21 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 21
+  SAY #%csr150_ref_34592%
+  IF ~~ THEN REPLY #%csr150_ref_34593%  GOTO 36
+  IF ~~ THEN REPLY #%csr150_ref_34594%  GOTO 33
+  IF ~~ THEN REPLY #%csr150_ref_34595%  GOTO 34
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34596%  GOTO 25
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 21 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 21
+  IF ~~ THEN REPLY #%csr150_ref_34593%  GOTO 36
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 21
+  IF ~~ THEN REPLY #%csr150_ref_34594%  GOTO 33
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 21
+  IF ~~ THEN REPLY #%csr150_ref_34595%  GOTO 34
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 21
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34596%  GOTO 25
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 22 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 22 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 22
+  SAY #%csr150_ref_34597%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34598%  GOTO 23
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34599%  GOTO 44
+  IF ~~ THEN REPLY #%csr150_ref_34600%  GOTO 24
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 22 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 22
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34598%  GOTO 23
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 22
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34599%  GOTO 44
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 22
+  IF ~~ THEN REPLY #%csr150_ref_34600%  GOTO 24
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 28 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 28 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 28
+  SAY #%csr150_ref_52810%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34636%  GOTO 39
+  IF ~~ THEN REPLY #%csr150_ref_52811%  GOTO 26
+  IF ~~ THEN REPLY #%csr150_ref_52812%  GOTO 29
+  IF ~~ THEN REPLY #%csr150_ref_56548%  GOTO 54
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 28 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 28
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34636%  GOTO 39
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 28
+  IF ~~ THEN REPLY #%csr150_ref_52811%  GOTO 26
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 28
+  IF ~~ THEN REPLY #%csr150_ref_52812%  GOTO 29
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 28
+  IF ~~ THEN REPLY #%csr150_ref_56548%  GOTO 54
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 32 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 32 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 32
+  SAY #%csr150_ref_34607%
+  IF ~~ THEN REPLY #%csr150_ref_34608%  GOTO 36
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34609%  GOTO 37
+  IF ~~ THEN REPLY #%csr150_ref_34610%  GOTO 34
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 32 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 32
+  IF ~~ THEN REPLY #%csr150_ref_34608%  GOTO 36
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 32
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34609%  GOTO 37
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 32
+  IF ~~ THEN REPLY #%csr150_ref_34610%  GOTO 34
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 36 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 36 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 36
+  SAY #%csr150_ref_34629%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34630%  GOTO 44
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34631%  GOTO 35
+  IF ~~ THEN REPLY #%csr150_ref_34632%  GOTO 27
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 36 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 36
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34630%  GOTO 44
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 36
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34631%  GOTO 35
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 36
+  IF ~~ THEN REPLY #%csr150_ref_34632%  GOTO 27
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 38 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 38 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 38
+  SAY #%csr150_ref_34635%
+  IF ~~ THEN REPLY #%csr150_ref_34636%  GOTO 39
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34637%  GOTO 40
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34638%  GOTO 25
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 38 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 38
+  IF ~~ THEN REPLY #%csr150_ref_34636%  GOTO 39
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 38
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34637%  GOTO 40
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 38
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34638%  GOTO 25
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDRASAAD <= 39 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 39 STR_VAR dialog = ~BDRASAAD~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDRASAAD~
+IF %csr150_weight% ~~ THEN BEGIN 39
+  SAY #%csr150_ref_34639%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34640%  GOTO 40
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34641%  GOTO 40
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34642%  GOTO 40
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRASAAD.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 39 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 39
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34640%  GOTO 40
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 39
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34641%  GOTO 40
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDRASAAD~ 39
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34642%  GOTO 40
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDDYNAHE <= 23 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 23 STR_VAR dialog = ~BDDYNAHE~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDDYNAHE~
+IF %csr150_weight% ~~ THEN BEGIN 23
+  SAY #%csr150_ref_34749%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34750%  GOTO 24
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34751%  GOTO 24
+  IF ~~ THEN REPLY #%csr150_ref_34752%  GOTO 24
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDYNAHE.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 23 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 23
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34750%  GOTO 24
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 23
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34751%  GOTO 24
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 23
+  IF ~~ THEN REPLY #%csr150_ref_34752%  GOTO 24
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDDYNAHE <= 30 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 30 STR_VAR dialog = ~BDDYNAHE~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDDYNAHE~
+IF %csr150_weight% ~~ THEN BEGIN 30
+  SAY #%csr150_ref_34771%
+  IF ~~ THEN REPLY #%csr150_ref_34772%  GOTO 23
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34773%  GOTO 31
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDYNAHE.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 30 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 30
+  IF ~~ THEN REPLY #%csr150_ref_34772%  GOTO 23
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 30
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_34773%  GOTO 31
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDDYNAHE <= 33 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 33 STR_VAR dialog = ~BDDYNAHE~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDDYNAHE~
+IF %csr150_weight% ~~ THEN BEGIN 33
+  SAY #%csr150_ref_38728%
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_38729%  GOTO 34
+  IF ~~ THEN REPLY #%csr150_ref_38730%  GOTO 34
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_38731%  GOTO 35
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDYNAHE.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 33 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 33
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_38729%  GOTO 34
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 33
+  IF ~~ THEN REPLY #%csr150_ref_38730%  GOTO 34
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDDYNAHE~ 33
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_38731%  GOTO 35
+END
+~~~~~
+  END
+END
+ACTION_IF csr150_old_BDAUDAM <= 10 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 10 STR_VAR dialog = ~BDAUDAM~ RET csr150_weight = clause END
+  OUTER_SPRINT csr150_fallback ~~~~~REPLACE ~BDAUDAM~
+IF %csr150_weight% ~  True()
+~ THEN BEGIN 10
+  SAY #%csr150_ref_58134%
+  IF ~~ THEN REPLY #%csr150_ref_58135%  GOTO 13
+  IF ~  Global("bd_MDD009a_met_audamar","bd0101",0)
+~ THEN REPLY #%csr150_ref_66841%  DO ~SetGlobal("bd_MDD009a_met_audamar","bd0101",1)
+~ GOTO 11
+  IF ~~ THEN REPLY #%csr150_ref_58136%  GOTO 14
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_58137%  GOTO 14
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr150-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDAUDAM.dlg~ ~override~ READ_LONG 0x0c off READ_LONG (off + 10 * 16 + 8) csr150_transitions
+  ACTION_IF csr150_transitions <= 0 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDAUDAM~ 10
+  IF ~~ THEN REPLY #%csr150_ref_58135%  GOTO 13
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 1 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDAUDAM~ 10
+  IF ~  Global("bd_MDD009a_met_audamar","bd0101",0)
+~ THEN REPLY #%csr150_ref_66841%  DO ~SetGlobal("bd_MDD009a_met_audamar","bd0101",1)
+~ GOTO 11
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 2 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDAUDAM~ 10
+  IF ~~ THEN REPLY #%csr150_ref_58136%  GOTO 14
+END
+~~~~~
+  END
+  ACTION_IF csr150_transitions <= 3 BEGIN
+    OUTER_SPRINT csr150_seed ~~~~~%csr150_seed%
+EXTEND_BOTTOM ~BDAUDAM~ 10
+  IF ~  False()
+~ THEN REPLY #%csr150_ref_58137%  GOTO 14
+END
+~~~~~
+  END
+END
+COMPILE EVALUATE_BUFFER ~.../csr150-seed.d~

@@ -46,13 +46,13 @@ def dialogue(data):
     return states
 
 
-def source(*, bad_root=False, bad_join=False, bad_wait=False, foreign=False):
+def source(*, bad_root=False, bad_join=False, bad_wait=False, foreign=False, states=7):
     root = ('OR(2) AreaCheck("BD0120") AreaCheck("BD0130") '
             'Global("bd_joined","locals",0)')
     if bad_root:
         root = root.replace('BD0130', 'BD0102')
     parts = ['BEGIN ~BDSHARTE~']
-    for state in range(7):
+    for state in range(states):
         trigger = root if state == 4 else ('True()' if state == 0 else '')
         if state == 4:
             transitions = ('IF ~~ THEN REPLY ~Travel with me again?~ GOTO 5\n'
@@ -109,9 +109,13 @@ LAF csr110_sharteel_field_rejoin END
         states = dialogue((self.game / 'override/bdsharte.dlg').read_bytes())
         self.assertEqual(states[:-1], self.original)
         say, trigger, transitions = states[-1]
-        self.assertEqual(say, states[4][0])
-        self.assertEqual(transitions, states[4][2])
-        self.assertEqual(compact(states[5][2][0][4]), 'JOINPARTY()')
+        if len(self.original) > 4:
+            self.assertEqual(say, states[4][0])
+            self.assertEqual([t[1] for t in transitions], [t[1] for t in states[4][2]])
+        self.assertEqual([(t[5], t[6]) for t in transitions], [('CSR110SH', 0), ('CSR110SH', 1)])
+        endpoints = dialogue((self.game / 'override/csr110sh.dlg').read_bytes())
+        self.assertEqual(compact(endpoints[0][2][0][4]), 'JOINPARTY()')
+        self.assertEqual(endpoints[1][2][0][4], '')
         self.assertEqual(compact(trigger), compact('''Name("sharteel",Myself)
 BeenInParty("sharteel") !InPartyAllowDead(Myself) !AreaCheck("BD0120") !AreaCheck("BD0130")
 GlobalGT("chapter","GLOBAL",6) GlobalLT("chapter","GLOBAL",14)'''))
@@ -123,7 +127,7 @@ GlobalGT("chapter","GLOBAL",6) GlobalLT("chapter","GLOBAL",14)'''))
         result = self.repair()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         after = tree(self.game / 'override')
-        self.assertEqual(before.keys(), after.keys())
+        self.assertEqual(set(after) - set(before), {"CSR110SH.DLG"})
         self.assertEqual({p for p in before if before[p] != after[p]}, {'BDSHARTE.DLG'})
         self.assertEqual((self.game / 'lang/en_us/dialog.tlk').read_bytes(), tlk)
         self.assert_route()
@@ -153,20 +157,33 @@ GlobalGT("chapter","GLOBAL",6) GlobalLT("chapter","GLOBAL",14)'''))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(tree(self.game / 'override'), before)
 
-    def test_changed_crypt_root_fails_without_writes(self):
+    def test_changed_crypt_root_keeps_field_route(self):
         before = self.fixture(bad_root=True)
-        self.assertNotEqual(self.repair().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assert_route()
 
-    def test_changed_join_action_fails_without_writes(self):
+    def test_changed_join_action_cannot_reach_field_route(self):
         before = self.fixture(bad_join=True)
-        self.assertNotEqual(self.repair().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assert_route()
 
-    def test_changed_wait_action_fails_without_writes(self):
+    def test_changed_wait_action_cannot_kill_field_recruit(self):
         before = self.fixture(bad_wait=True)
-        self.assertNotEqual(self.repair().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assert_route()
+
+    def test_missing_native_states_get_complete_owned_endpoints(self):
+        self.fixture(states=1)
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assert_route()
 
     def test_missing_optional_dialogue_is_noop(self):
         before = tree(self.game / 'override')

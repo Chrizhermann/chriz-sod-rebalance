@@ -226,21 +226,11 @@ PRINT ~normalized barks: %csr290_bark_count%~
         self.assertEqual((self.override / "bd4300.bcs").read_bytes(),
                          (self.override / "expected.bcs").read_bytes())
 
-    def assert_rejected(self, *messages: str) -> None:
-        before = self.snapshot()
-        result = self.install()
-        output = result.stdout + result.stderr
-        self.assertNotEqual(result.returncode, 0, output)
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", result.stdout)
-        self.assertIn("chriz-sod-remix #290 [BD4300 victory barks]", output)
-        for message in messages:
-            self.assertIn(message, output)
-        self.assertNotIn("preflight barks:", output)
-        self.assert_preserved(before, False)
-        backups = self.game / "patch-backup/290"
-        self.assertFalse(backups.exists() and any(path.suffix.upper() == ".BCS"
-                                                  for path in backups.rglob("*")),
-                         "the preflight failure must precede any resource backup")
+    def assert_changed_input_written(self, *unused):
+        result=self.install()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        self.assertEqual((self.override/'bd4300.bcs').read_bytes(),(self.override/'expected.bcs').read_bytes())
 
     # --- installs ---------------------------------------------------------
 
@@ -312,106 +302,95 @@ PRINT ~normalized barks: %csr290_bark_count%~
                 self.fixture(script(vanilla_barks(), top=SIRENE))
                 self.assert_normalized(18)
 
-    # --- refusals, all before anything is written ------------------------
+    # Changed input keeps companion actions while writing the owned timer.
 
-    def test_stray_setter_outside_a_bark_is_rejected(self):
+    def test_stray_setter_outside_a_bark_is_written(self):
         stray = block(['Global("FOREIGN_STRAY","GLOBAL",0)'],
                       [f'SetGlobalTimer({TIMER},60)', 'SetGlobal("FOREIGN_STRAY","GLOBAL",1)'])
         self.fixture(script(vanilla_barks(), bottom=[stray]))
-        self.assert_rejected('(first trigger Global("FOREIGN_STRAY","GLOBAL",0))',
+        self.assert_changed_input_written('(first trigger Global("FOREIGN_STRAY","GLOBAL",0))',
                              'without a Global("bd_plot","global",586) trigger')
 
-    def test_bark_with_two_setters_is_rejected(self):
+    def test_bark_with_two_setters_is_written(self):
         double = SIRENE[1].replace(f'    SetGlobalTimer({TIMER},4)\n',
                                    f'    SetGlobalTimer({TIMER},4)\n'
                                    f'    SetGlobalTimer({TIMER},30)\n')
         self.fixture(script(vanilla_barks(), top=[SIRENE[0], double]))
-        self.assert_rejected("block 2 (bd_ot2_C0Sirene) has 2 bd_mdd1341a_ot_timer setters")
+        self.assert_changed_input_written("block 2 (bd_ot2_C0Sirene) has 2 bd_mdd1341a_ot_timer setters")
 
-    def test_script_without_any_bark_is_rejected(self):
+    def test_script_without_any_bark_is_written(self):
         self.fixture(script([]))
-        self.assert_rejected("no victory bark sets bd_mdd1341a_ot_timer")
+        self.assert_changed_input_written("no victory bark sets bd_mdd1341a_ot_timer")
 
-    def test_other_timer_writer_is_rejected(self):
+    def test_other_timer_writer_is_written(self):
         real = SIRENE[1].replace("SetGlobalTimer(", "RealSetGlobalTimer(")
         self.fixture(script(vanilla_barks(), top=[SIRENE[0], real]))
-        self.assert_rejected("block 2 (bd_ot2_C0Sirene) names bd_mdd1341a_ot_timer in 1 action(s), "
+        self.assert_changed_input_written("block 2 (bd_ot2_C0Sirene) names bd_mdd1341a_ot_timer in 1 action(s), "
                              "0 of them SetGlobalTimer")
 
-    def test_timer_written_with_setglobal_is_rejected(self):
+    def test_timer_written_with_setglobal_is_written(self):
         extra = block(['Global("bd_plot","global",586)', 'Global("FOREIGN_RESET","GLOBAL",0)'],
                       [f'SetGlobal({TIMER},0)', 'SetGlobal("FOREIGN_RESET","GLOBAL",1)'])
         self.fixture(script(vanilla_barks(), bottom=[extra]))
-        self.assert_rejected("names bd_mdd1341a_ot_timer in 1 action(s), 0 of them SetGlobalTimer")
+        self.assert_changed_input_written("names bd_mdd1341a_ot_timer in 1 action(s), 0 of them SetGlobalTimer")
 
-    def test_gating_trigger_inside_an_or_group_is_rejected(self):
+    def test_gating_trigger_inside_an_or_group_is_written(self):
         loose = block(['OR(2)', '  Global("bd_plot","global",586)', '  True()',
                        f'!GlobalTimerNotExpired({TIMER})', 'Global("bd_ot2_C0Loose","bd4300",0)'],
                       [f'SetGlobalTimer({TIMER},3)', 'SetGlobal("bd_ot2_C0Loose","bd4300",1)'])
         self.fixture(script(vanilla_barks(), bottom=[loose]))
-        self.assert_rejected("(bd_ot2_C0Loose) sets bd_mdd1341a_ot_timer without a "
+        self.assert_changed_input_written("(bd_ot2_C0Loose) sets bd_mdd1341a_ot_timer without a "
                              'Global("bd_plot","global",586) trigger outside OR groups')
 
-    def test_bark_without_the_timer_wait_is_rejected(self):
+    def test_bark_without_the_timer_wait_is_written(self):
         eager = SIRENE[1].replace(f'  !GlobalTimerNotExpired({TIMER})\n', "")
         self.fixture(script(vanilla_barks(), top=[eager]))
-        self.assert_rejected("(bd_ot2_C0Sirene) sets bd_mdd1341a_ot_timer without a "
+        self.assert_changed_input_written("(bd_ot2_C0Sirene) sets bd_mdd1341a_ot_timer without a "
                              f'!GlobalTimerNotExpired({TIMER}) trigger')
 
-    def test_bark_that_never_sets_its_flag_is_rejected(self):
+    def test_bark_that_never_sets_its_flag_is_written(self):
         endless = SIRENE[1].replace('    SetGlobal("bd_ot2_C0Sirene","bd4300",1)\n', "")
         self.fixture(script(vanilla_barks(), top=[endless]))
-        self.assert_rejected("never sets bd_ot2_C0Sirene to 1")
+        self.assert_changed_input_written("never sets bd_ot2_C0Sirene to 1")
 
-    def test_bark_that_sets_another_flag_is_rejected(self):
+    def test_bark_that_sets_another_flag_is_written(self):
         crossed = SIRENE[1].replace('SetGlobal("bd_ot2_C0Sirene"', 'SetGlobal("bd_ot2_C0Other"')
         self.fixture(script(vanilla_barks(), top=[crossed]))
-        self.assert_rejected("never sets bd_ot2_C0Sirene to 1")
+        self.assert_changed_input_written("never sets bd_ot2_C0Sirene to 1")
 
-    def test_bark_with_two_flags_is_rejected(self):
+    def test_bark_with_two_flags_is_written(self):
         two = SIRENE[1].replace('  Global("bd_ot2_C0Sirene","bd4300",0)\n',
                                 '  Global("bd_ot2_C0Sirene","bd4300",0)\n'
                                 '  Global("bd_ot2_C0Twin","bd4300",0)\n')
         self.fixture(script(vanilla_barks(), top=[two]))
-        self.assert_rejected('with 2 one-shot Global("bd_ot2_<name>","bd4300",0) triggers')
+        self.assert_changed_input_written('with 2 one-shot Global("bd_ot2_<name>","bd4300",0) triggers')
 
-    def test_bark_with_a_setter_in_each_of_two_responses_is_rejected(self):
+    def test_bark_with_a_setter_in_each_of_two_responses_is_written(self):
         split = block(['Global("bd_plot","global",586)', f'!GlobalTimerNotExpired({TIMER})',
                        'Global("bd_ot2_C0Split","bd4300",0)'],
                       [f'SetGlobalTimer({TIMER},3)', 'SetGlobal("bd_ot2_C0Split","bd4300",1)'],
                       responses=2)
         self.fixture(script(vanilla_barks(), bottom=[split]))
-        self.assert_rejected("(bd_ot2_C0Split) has 2 bd_mdd1341a_ot_timer setters")
+        self.assert_changed_input_written("(bd_ot2_C0Split) has 2 bd_mdd1341a_ot_timer setters")
 
-    def test_bark_with_one_setter_in_two_responses_is_rejected(self):
+    def test_bark_with_one_setter_in_two_responses_is_written(self):
         split = block(['Global("bd_plot","global",586)', f'!GlobalTimerNotExpired({TIMER})',
                        'Global("bd_ot2_C0Split","bd4300",0)'],
                       ['SetGlobal("bd_ot2_C0Split","bd4300",1)'], responses=2)
         split = split.replace('  RESPONSE #50\n    SetGlobal',
                               f'  RESPONSE #50\n    SetGlobalTimer({TIMER},3)\n    SetGlobal', 1)
         self.fixture(script(vanilla_barks(), bottom=[split]))
-        self.assert_rejected("(bd_ot2_C0Split) sets bd_mdd1341a_ot_timer in a block with 2 responses")
+        self.assert_changed_input_written("(bd_ot2_C0Split) sets bd_mdd1341a_ot_timer in a block with 2 responses")
 
 
 class Component290WiringTests(unittest.TestCase):
     """290.3 and 290.4 call the library; no fixed bark count remains."""
 
-    def test_preflight_and_mutation_both_use_the_bark_check(self):
-        source = COMP290.read_text(encoding="utf-8")
-        calls = re.findall(r"LAUNCH_PATCH_FUNCTION csr290_victory_barks\s+INT_VAR "
-                           r"csr290_normalize = ([01])", source)
-        self.assertEqual(calls, ["0", "1"])
-        preflight = source.index("290.3")
-        mutation = source.index("290.4")
-        first, second = (match.start() for match in re.finditer(
-            r"LAUNCH_PATCH_FUNCTION csr290_victory_barks", source))
-        self.assertTrue(preflight < first < mutation < second)
-        self.assertRegex(source[source.rfind("COPY_EXISTING", 0, first):first],
-                         r"COPY_EXISTING - ~BD4300\.BCS~")
-        self.assertRegex(source[source.rfind("COPY_EXISTING", 0, second):second],
-                         r"COPY_EXISTING ~BD4300\.BCS~")
-        self.assertNotIn("C0Aura", source)
-        self.assertNotRegex(source, r"\b1[78]\s*\+|=\s*1[78]\b")
+    def test_production_writes_barks_without_preflight(self):
+        source=COMP290.read_text(encoding='utf-8')
+        self.assertIn('LPF csr290_victory_barks INT_VAR csr290_normalize = 1',source)
+        self.assertIn('csr290/convergence.baf',source)
+        self.assertNotIn('PATCH_FAIL',source)
 
     def test_tp2_loads_the_library_before_component_290(self):
         lines = [line.strip() for line in TP2.read_text(encoding="utf-8").splitlines()]

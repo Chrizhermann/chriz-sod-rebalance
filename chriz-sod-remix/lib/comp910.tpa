@@ -2,43 +2,9 @@
 // handoff. No pickup worker, private area, ground sweep, or EEex dependency.
 // Loose-loot recovery was explicitly deferred by Christopher on 2026-09-06.
 
-ACTION_FOR_EACH csr910_file IN ~bd0103.are~ ~bd0103.bcs~ ~bd6100.are~
-  ~bd6100.bcs~ ~baldur.bcs~ ~K#TELBGT.bcs~ ~K#TELBGT.cre~
-  ~K#IMPORT.sto~ ~cutspy.cre~ BEGIN
-  ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr910_file%~ BEGIN
-    FAIL ~Optional SoD skip: missing %csr910_file%. Install after EET_end and the required remix components.~
-  END
-END
-ACTION_FOR_EACH csr910_file IN ~csrskask.bcs~ ~csrskask.cre~ ~csrskip.dlg~ BEGIN
-  ACTION_IF FILE_EXISTS_IN_GAME ~%csr910_file%~ BEGIN
-    FAIL ~Optional SoD skip: reserved resource %csr910_file% already exists.~
-  END
-END
-
-COPY_EXISTING - ~bd0103.are~ ~override~
-  READ_LONG 0x70 csr910_co
-  READ_SHORT 0x74 csr910_cn
-  SET csr910_chests = 0
-  FOR (i = 0; i < csr910_cn; ++i) BEGIN
-    READ_ASCII (csr910_co + i * 0xc0) csr910_name (32) NULL
-    PATCH_IF (~%csr910_name%~ STRING_EQUAL_CASE ~PlayerChest00~) BEGIN
-      SET csr910_chests += 1
-      READ_LONG (csr910_co + i * 0xc0 + 0x44) csr910_items
-      PATCH_IF csr910_items != 0 BEGIN
-        PATCH_FAIL ~Optional SoD skip: PlayerChest00 must start empty; refusing to import unrelated palace treasure.~
-      END
-    END
-  END
-  PATCH_IF csr910_chests != 1 BEGIN PATCH_FAIL ~Optional SoD skip: expected one PlayerChest00.~ END
-COPY_EXISTING - ~bd6100.are~ ~override~
-  READ_LONG 0x70 csr910_co
-  READ_SHORT 0x74 csr910_cn
-  SET csr910_chests = 0
-  FOR (i = 0; i < csr910_cn; ++i) BEGIN
-    READ_ASCII (csr910_co + i * 0xc0) csr910_name (32) NULL
-    PATCH_IF (~%csr910_name%~ STRING_EQUAL_CASE ~K#ImportContainer~) BEGIN SET csr910_chests += 1 END
-  END
-  PATCH_IF csr910_chests != 1 BEGIN PATCH_FAIL ~Optional SoD skip: expected EET's BD6100 import chest.~ END
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+INCLUDE ~chriz-sod-remix/lib/comp910_chest.tpa~
+ACTION_FOR_EACH script IN bd0103 bd6100 baldur BEGIN LAF csr_ensure_script STR_VAR script END END
 
 // The sole exception to carried-party gear is the imported Imoen, whom SoD
 // temporarily dismisses. Read the effective EET rules without modifying them.
@@ -46,29 +12,16 @@ COPY_EXISTING - ~bd6100.are~ ~override~
 // helper. HasItem and GiveItem also search her carried bags (native actions).
 // The rest of her equipment is bulk-banked; party equipment stays carried.
 ACTION_CLEAR_ARRAY csr910_imports
-COPY_EXISTING - ~K#TELBGT.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~PartyHasItem("~ csr910_predicates
-    COUNT_REGEXP_INSTANCES ~AddStoreItem("K#IMPORT",~ csr910_adds
-    REPLACE_EVALUATE CASE_INSENSITIVE
-      ~PartyHasItem("\([^"]+\)")~ BEGIN
-        DEFINE_ASSOCIATIVE_ARRAY csr910_imports BEGIN ~%MATCH1%~ => 1 END
-      END ~PartyHasItem("%MATCH1%")~
-    PATCH_IF csr910_predicates = 0 OR csr910_predicates != csr910_adds BEGIN
-      PATCH_FAIL ~Optional SoD skip: unsupported effective EET item-import script.~
-    END
-  END
+ACTION_IF FILE_EXISTS_IN_GAME ~K#TELBGT.bcs~ BEGIN
+  COPY_EXISTING - ~K#TELBGT.bcs~ ~override~
+    DECOMPILE_BCS_TO_BAF
+    REPLACE_EVALUATE CASE_INSENSITIVE ~AddStoreItem("K#IMPORT","\([^"]+\)"~ BEGIN
+      DEFINE_ASSOCIATIVE_ARRAY csr910_imports BEGIN ~%MATCH1%~ => 1 END
+    END ~%MATCH0%~
+END ELSE BEGIN PRINT ~#910: EET import rules are absent; Imoen's equipment uses the ordinary bank.~ END
 OUTER_SET csr910_index = 0
 OUTER_SPRINT csr910_imoen_baf ~~
 ACTION_PHP_EACH csr910_imports AS item => ignored BEGIN
-  COPY_EXISTING - ~K#TELBGT.bcs~ ~override~
-    DECOMPILE_BCS_TO_BAF
-    REPLACE_TEXTUALLY ~//[^%LNL%%MNL%]*~ ~~
-    REPLACE_TEXTUALLY ~[ %TAB%%LNL%%MNL%]+~ ~~
-    COUNT_REGEXP_INSTANCES ~IFGlobal("K#FrameDelay","LOCALS",0)PartyHasItem("%item%")THENRESPONSE#100TakePartyItem("%item%")DestroyItem("%item%")AddStoreItem("K#IMPORT","%item%",1,1)Continue()END~ csr910_rule
-    PATCH_IF csr910_rule != 1 BEGIN
-      PATCH_FAIL ~Optional SoD skip: unsupported EET rule for %item%.~
-    END
   OUTER_SPRINT csr910_imoen_baf ~%csr910_imoen_baf%
 IF
   Global("CSR_SKIP_PHASE","GLOBAL",1)
@@ -103,7 +56,31 @@ END
   OUTER_SET csr910_index += 1
 END
 
-COPY_EXISTING ~cutspy.cre~ ~override/csrskask.cre~
+LAF csr_readable_cre STR_VAR resource = ~cutspy.cre~ RET readable END
+ACTION_IF readable BEGIN COPY_EXISTING ~cutspy.cre~ ~override/csrskask.cre~ END
+ELSE BEGIN
+  // Minimal owned actor: an invisible animation, live HP and empty tables.
+  // No installed equipment, effects or foreign resource references are bundled.
+  <<<<<<<< .../csr910-empty.cre
+>>>>>>>>
+  COPY ~.../csr910-empty.cre~ ~override/csrskask.cre~
+    INSERT_BYTES 0 0x324
+    WRITE_ASCII 0 ~CRE V1.0~ #8
+    WRITE_LONG 0x08 0xffffffff WRITE_LONG 0x0c 0xffffffff
+    WRITE_SHORT 0x24 1 WRITE_SHORT 0x26 1
+    WRITE_LONG 0x28 0xd300 // invisible CUTSPY animation
+    WRITE_SHORT 0x46 10 WRITE_BYTE 0x52 19 WRITE_BYTE 0x53 1
+    FOR (at = 0xa4; at < 0x234; at += 4) BEGIN WRITE_LONG at 0xffffffff END
+    WRITE_BYTE 0x234 1
+    PATCH_FOR_EACH at IN 0x238 0x23a 0x23b 0x23c 0x23d 0x23e BEGIN WRITE_BYTE at 9 END
+    WRITE_BYTE 0x23f 10 WRITE_BYTE 0x240 5 WRITE_SHORT 0x242 60
+    WRITE_BYTE 0x271 1 WRITE_BYTE 0x272 255 WRITE_BYTE 0x273 255 WRITE_BYTE 0x275 4
+    WRITE_LONG 0x27c 0xffffffff
+    PATCH_FOR_EACH at IN 0x2a0 0x2a8 0x2b0 0x2bc 0x2c4 BEGIN WRITE_LONG at 0x324 END
+    WRITE_LONG 0x2b8 0x2d4
+    FOR (slot = 0; slot < 39; ++slot) BEGIN WRITE_SHORT (0x2d4 + slot * 2) 0xffff END
+END
+COPY_EXISTING ~csrskask.cre~ ~override~
   // CUTSPY's avatar-removal effect blocks ordinary actions. Retain only its
   // invisible animation, never its effects, equipment, or unrelated scripts.
   WRITE_LONG 0x20 0
@@ -116,22 +93,17 @@ COPY_EXISTING ~cutspy.cre~ ~override/csrskask.cre~
   WRITE_ASCII 0x280 ~csrskask~ #32
   WRITE_ASCII 0x2cc ~csrskip~ #8
   WRITE_BYTE 0x270 128
-  LPF DELETE_CRE_ITEM STR_VAR item_to_delete = ~.*~ END
+  // The generated fallback already has empty inventory and spell tables.
+  PATCH_IF readable BEGIN LPF DELETE_CRE_ITEM STR_VAR item_to_delete = ~.*~ END END
 
 // Hold the existing impound until a confirmed No. Fresh SoD starts retain the
 // untouched native behavior. Do not set BD_PARTY_ITEMS on the skip branch.
 COPY_EXISTING ~bd0103.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~Global("BD_PARTY_ITEMS","BD0103",0)~ csr910_impounds
-    PATCH_IF csr910_impounds != 1 BEGIN
-      PATCH_FAIL ~Optional SoD skip: expected one native backpack impound trigger.~
-    END
-    REPLACE_TEXTUALLY ~Global("BD_PARTY_ITEMS","BD0103",0)~
-      ~Global("BD_PARTY_ITEMS","BD0103",0)
-  OR(2)
-    !Global("SOD_fromimport","GLOBAL",1)
-    Global("CSR_SKIP_CHOICE","GLOBAL",2)~
+    INNER_ACTION BEGIN COPY - ~chriz-sod-remix/baf/csr910-impound.baf~ ~.../csr910-read~ READ_ASCII 0 authored (SOURCE_SIZE) END
+    LPF csr_replace_script_blocks INT_VAR in_place = 1 STR_VAR pattern = ~SetGlobal("BD_PARTY_ITEMS","BD0103"~ replacement = EVAL ~%authored%~ END
   END
+BUT_ONLY
 
 <<<<<<<< .../csr910-arrival.baf
 IF
@@ -290,10 +262,20 @@ END
 
 COMPILE ~chriz-sod-remix/dlg/csrskip.d~
 COMPILE EVALUATE_BUFFER ~.../csrskask.baf~ USING ~chriz-sod-remix/languages/english/csrskip.tra~
+ACTION_FOR_EACH script IN bd0103 bd6100 baldur BEGIN
+  COPY_EXISTING ~%script%.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      PATCH_IF ~%script%~ STRING_EQUAL_CASE ~bd0103~ BEGIN SPRINT pattern ~"CSR_SKIP_OFFER"~ END
+      ELSE PATCH_IF ~%script%~ STRING_EQUAL_CASE ~bd6100~ BEGIN SPRINT pattern ~"CSR_SKIP_PHASE"~ END
+      ELSE BEGIN SPRINT pattern ~"CSR_SKIP_XP"~ END
+      LPF csr_replace_script_blocks STR_VAR pattern replacement = ~~ END
+    END
+  BUT_ONLY
+END
 EXTEND_TOP ~BD0103.bcs~ ~.../csr910-arrival.baf~
 EXTEND_TOP ~BD6100.bcs~ ~.../csr910-handoff.baf~ USING ~chriz-sod-remix/languages/english/csrskip.tra~
 EXTEND_TOP ~BALDUR.bcs~ ~.../csr910-xp.baf~
-PRINT ~Optional bedroom skip: original EET carried-inventory handoff; %csr910_index% effective rules checked for imported Imoen. Loose ground loot is not collected. Start before the first palace arrival.~
+PRINT ~Optional bedroom skip: original EET carried-inventory handoff; %csr910_index% effective item addresses read for imported Imoen. Loose ground loot is not collected. Start before the first palace arrival.~
 
 // Components 292-294 (Imoen in Shadows of Amn) installed earlier: run their
 // SoD-end preparation in this helper too. Installed later, they add it here.

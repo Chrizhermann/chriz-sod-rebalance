@@ -1,0 +1,1151 @@
+OUTER_SET csr290_s39346 = 39346 + csr290_shift
+OUTER_SET csr290_s39347 = 39347 + csr290_shift
+OUTER_SET csr290_s39348 = 39348 + csr290_shift
+OUTER_SET csr290_s39349 = 39349 + csr290_shift
+OUTER_SET csr290_s39350 = 39350 + csr290_shift
+OUTER_SET csr290_s39351 = 39351 + csr290_shift
+OUTER_SET csr290_s39352 = 39352 + csr290_shift
+OUTER_SET csr290_s39353 = 39353 + csr290_shift
+OUTER_SET csr290_s39354 = 39354 + csr290_shift
+OUTER_SET csr290_s39360 = 39360 + csr290_shift
+OUTER_SET csr290_s39361 = 39361 + csr290_shift
+OUTER_SET csr290_s39362 = 39362 + csr290_shift
+OUTER_SET csr290_s39363 = 39363 + csr290_shift
+OUTER_SET csr290_s39364 = 39364 + csr290_shift
+OUTER_SET csr290_s39366 = 39366 + csr290_shift
+OUTER_SET csr290_s39367 = 39367 + csr290_shift
+OUTER_SET csr290_s39373 = 39373 + csr290_shift
+OUTER_SET csr290_s39374 = 39374 + csr290_shift
+OUTER_SET csr290_s39375 = 39375 + csr290_shift
+OUTER_SET csr290_s39376 = 39376 + csr290_shift
+OUTER_SET csr290_s39378 = 39378 + csr290_shift
+OUTER_SET csr290_s39379 = 39379 + csr290_shift
+OUTER_SET csr290_s44320 = 44320 + csr290_shift
+OUTER_SET csr290_s44321 = 44321 + csr290_shift
+OUTER_SET csr290_s44322 = 44322 + csr290_shift
+OUTER_SET csr290_s44323 = 44323 + csr290_shift
+OUTER_SET csr290_s44324 = 44324 + csr290_shift
+OUTER_SET csr290_s44329 = 44329 + csr290_shift
+OUTER_SET csr290_s44330 = 44330 + csr290_shift
+OUTER_SET csr290_s44332 = 44332 + csr290_shift
+OUTER_SET csr290_s59855 = 59855 + csr290_shift
+OUTER_SET csr290_s59856 = 59856 + csr290_shift
+OUTER_SET csr290_s61429 = 61429 + csr290_shift
+OUTER_SET csr290_s65234 = 65234 + csr290_shift
+OUTER_SET csr290_s65236 = 65236 + csr290_shift
+OUTER_SET csr290_s65262 = 65262 + csr290_shift
+OUTER_SET csr290_s65263 = 65263 + csr290_shift
+OUTER_SET csr290_s65264 = 65264 + csr290_shift
+OUTER_SET csr290_s65669 = 65669 + csr290_shift
+OUTER_SET csr290_s65670 = 65670 + csr290_shift
+OUTER_SET csr290_s65671 = 65671 + csr290_shift
+OUTER_SET csr290_s65672 = 65672 + csr290_shift
+OUTER_SET csr290_s65673 = 65673 + csr290_shift
+OUTER_SET csr290_s65674 = 65674 + csr290_shift
+OUTER_SET csr290_s65675 = 65675 + csr290_shift
+OUTER_SET csr290_s65676 = 65676 + csr290_shift
+OUTER_SET csr290_s65677 = 65677 + csr290_shift
+OUTER_SET csr290_s65678 = 65678 + csr290_shift
+OUTER_SET csr290_s65679 = 65679 + csr290_shift
+OUTER_SET csr290_s65680 = 65680 + csr290_shift
+OUTER_SET csr290_s65681 = 65681 + csr290_shift
+OUTER_SET csr290_s65682 = 65682 + csr290_shift
+OUTER_SET csr290_s65694 = 65694 + csr290_shift
+OUTER_SET csr290_s65812 = 65812 + csr290_shift
+OUTER_SET csr290_s66908 = 66908 + csr290_shift
+OUTER_SET csr290_s67030 = 67030 + csr290_shift
+OUTER_SET csr290_s67031 = 67031 + csr290_shift
+OUTER_SET csr290_s67056 = 67056 + csr290_shift
+OUTER_SET csr290_s67057 = 67057 + csr290_shift
+OUTER_SET csr290_s67090 = 67090 + csr290_shift
+OUTER_SET csr290_s67091 = 67091 + csr290_shift
+OUTER_SET csr290_s70530 = 70530 + csr290_shift
+<<<<<<<< .../csr290-fallback.d
+%csr290_fallback%
+>>>>>>>>
+<<<<<<<< .../csr290-transitions.d
+%csr290_transitions%
+>>>>>>>>
+LAF csr_ensure_dlg_states INT_VAR count = 111 STR_VAR dialog = ~BDBENCE~ RET csr290_old_BDBENCE = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 105 STR_VAR dialog = ~BDDELANC~ RET csr290_old_BDDELANC = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 4 STR_VAR dialog = ~BDDAZZO~ RET csr290_old_BDDAZZO = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 38 STR_VAR dialog = ~BDRUMOR3~ RET csr290_old_BDRUMOR3 = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 27 STR_VAR dialog = ~BDDEBUG~ RET csr290_old_BDDEBUG = existing_states END
+LAF csr_ensure_dlg_states INT_VAR count = 336 STR_VAR dialog = ~BDCORWIJ~ RET csr290_old_BDCORWIJ = existing_states END
+OUTER_SPRINT csr290_transitions ~~
+ACTION_IF csr290_old_BDBENCE <= 6 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 6 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~  Global("bd_plot","global",590)
+~ THEN BEGIN 6
+  SAY #%csr290_s39373%
+  IF ~  Gender(Player1,FEMALE)
+~ THEN REPLY #%csr290_s39374%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 7
+  IF ~  Gender(Player1,MALE)
+~ THEN REPLY #%csr290_s39374%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 8
+  IF ~~ THEN REPLY #%csr290_s39375%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 9
+  IF ~~ THEN REPLY #%csr290_s39376%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 9
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 6 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 6
+  IF ~  Gender(Player1,FEMALE)
+~ THEN REPLY #%csr290_s39374%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 7
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 6
+  IF ~  Gender(Player1,MALE)
+~ THEN REPLY #%csr290_s39374%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 8
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 6
+  IF ~~ THEN REPLY #%csr290_s39375%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 9
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 6
+  IF ~~ THEN REPLY #%csr290_s39376%  DO ~SetGlobal("bd_plot","global",591)
+~ GOTO 9
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 9 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 9 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 9
+  SAY #%csr290_s39378%
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60b",TRUE)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 9 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 9
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60b",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 10 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 10 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 10
+  SAY #%csr290_s39379%
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60b",TRUE)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 10 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 10
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60b",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 64 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 64 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 64
+  SAY #%csr290_s39367%
+  IF ~~ THEN DO ~PlaySound("AMBDWWON")
+~ GOTO 65
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 64 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 64
+  IF ~~ THEN DO ~PlaySound("AMBDWWON")
+~ GOTO 65
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 65 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 65 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 65
+  SAY #%csr290_s65812%
+  IF ~~ THEN GOTO 66
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 65 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 65
+  IF ~~ THEN GOTO 66
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 67 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 67 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~  Global("bd_plot","global",591)
+!ReputationLT(Player1,10)
+~ THEN BEGIN 67
+  SAY #%csr290_s44320%
+  IF ~~ THEN DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 68
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 67 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 67
+  IF ~~ THEN DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 68
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 68 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 68 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~  Global("bd_plot","global",591)
+ReputationLT(Player1,10)
+~ THEN BEGIN 68
+  SAY #%csr290_s44321%
+  IF ~~ THEN REPLY #%csr290_s44322%  DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 70
+  IF ~~ THEN REPLY #%csr290_s44323%  DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 71
+  IF ~~ THEN REPLY #%csr290_s44324%  DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 69
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 68 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 68
+  IF ~~ THEN REPLY #%csr290_s44322%  DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 70
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 68
+  IF ~~ THEN REPLY #%csr290_s44323%  DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 71
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 68
+  IF ~~ THEN REPLY #%csr290_s44324%  DO ~SetGlobal("bd_plot","global",592)
+~ GOTO 69
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 70 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 70 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 70
+  SAY #%csr290_s61429%
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+  IF ~  IsValidForPartyDialogue("corwin")
+~ THEN EXTERN ~BDCORWIJ~ 203
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 70 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 70
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 70
+  IF ~  IsValidForPartyDialogue("corwin")
+~ THEN EXTERN ~BDCORWIJ~ 203
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 71 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 71 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 71
+  SAY #%csr290_s44329%
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+  IF ~  IsValidForPartyDialogue("corwin")
+~ THEN EXTERN ~BDCORWIJ~ 203
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 71 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 71
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 71
+  IF ~  IsValidForPartyDialogue("corwin")
+~ THEN EXTERN ~BDCORWIJ~ 203
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDBENCE <= 73 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 73 STR_VAR dialog = ~BDBENCE~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDBENCE~
+IF %csr290_weight% ~~ THEN BEGIN 73
+  SAY #%csr290_s44332%
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+  IF ~  IsValidForPartyDialogue("corwin")
+~ THEN EXTERN ~BDCORWIJ~ 203
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDBENCE.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 73 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 73
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDBENCE~ 73
+  IF ~  IsValidForPartyDialogue("corwin")
+~ THEN EXTERN ~BDCORWIJ~ 203
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 77 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 77 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~  !GlobalLT("bd_plot","global",585)
+GlobalLT("bd_plot","global",590)
+~ THEN BEGIN 77
+  SAY #%csr290_s39346%
+  IF ~  Dead("bdcaelar")
+~ THEN REPLY #%csr290_s39347%  DO ~SetGlobal("bd_plot","global",590)
+~ GOTO 78
+  IF ~~ THEN REPLY #%csr290_s39348%  DO ~SetGlobal("bd_plot","global",590)
+~ GOTO 80
+  IF ~~ THEN REPLY #%csr290_s39349%  DO ~SetGlobal("bd_plot","global",590)
+~ GOTO 82
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 77 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 77
+  IF ~  Dead("bdcaelar")
+~ THEN REPLY #%csr290_s39347%  DO ~SetGlobal("bd_plot","global",590)
+~ GOTO 78
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 77
+  IF ~~ THEN REPLY #%csr290_s39348%  DO ~SetGlobal("bd_plot","global",590)
+~ GOTO 80
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 77
+  IF ~~ THEN REPLY #%csr290_s39349%  DO ~SetGlobal("bd_plot","global",590)
+~ GOTO 82
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 78 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 78 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~~ THEN BEGIN 78
+  SAY #%csr290_s39350%
+  IF ~  IsValidForPartyDialogue("VOGHILN")
+~ THEN REPLY #%csr290_s39351%  EXTERN ~BDVOGHIJ~ 47
+  IF ~  !IsValidForPartyDialogue("VOGHILN")
+~ THEN REPLY #%csr290_s39351%  GOTO 79
+  IF ~~ THEN REPLY #%csr290_s39352%  GOTO 79
+  IF ~~ THEN REPLY #%csr290_s39353%  GOTO 79
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 78 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 78
+  IF ~  IsValidForPartyDialogue("VOGHILN")
+~ THEN REPLY #%csr290_s39351%  EXTERN ~BDVOGHIJ~ 47
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 78
+  IF ~  !IsValidForPartyDialogue("VOGHILN")
+~ THEN REPLY #%csr290_s39351%  GOTO 79
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 78
+  IF ~~ THEN REPLY #%csr290_s39352%  GOTO 79
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 78
+  IF ~~ THEN REPLY #%csr290_s39353%  GOTO 79
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 79 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 79 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~~ THEN BEGIN 79
+  SAY #%csr290_s39354%
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s66908%,QUEST)
+PlaySound("AMBDAVC")
+~ GOTO 83
+  IF ~  IsValidForPartyDialogue("VOGHILN")
+~ THEN DO ~AddJournalEntry(%csr290_s66908%,QUEST)
+PlaySound("AMBDAVC")
+~ EXTERN ~BDVOGHIJ~ 46
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 79 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 79
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s66908%,QUEST)
+PlaySound("AMBDAVC")
+~ GOTO 83
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 79
+  IF ~  IsValidForPartyDialogue("VOGHILN")
+~ THEN DO ~AddJournalEntry(%csr290_s66908%,QUEST)
+PlaySound("AMBDAVC")
+~ EXTERN ~BDVOGHIJ~ 46
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 80 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 80 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~~ THEN BEGIN 80
+  SAY #%csr290_s39360%
+  IF ~  InMyArea("bdaun")
+~ THEN REPLY #%csr290_s39361%  GOTO 81
+  IF ~~ THEN REPLY #%csr290_s39362%  GOTO 79
+  IF ~~ THEN REPLY #%csr290_s39363%  GOTO 79
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 80 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 80
+  IF ~  InMyArea("bdaun")
+~ THEN REPLY #%csr290_s39361%  GOTO 81
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 80
+  IF ~~ THEN REPLY #%csr290_s39362%  GOTO 79
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 80
+  IF ~~ THEN REPLY #%csr290_s39363%  GOTO 79
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 81 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 81 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~~ THEN BEGIN 81
+  SAY #%csr290_s39364%
+  IF ~~ THEN GOTO 79
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 81 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 81
+  IF ~~ THEN GOTO 79
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 82 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 82 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~~ THEN BEGIN 82
+  SAY #%csr290_s39366%
+  IF ~~ THEN GOTO 79
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 82 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 82
+  IF ~~ THEN GOTO 79
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 83 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 83 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~~ THEN BEGIN 83
+  SAY #%csr290_s70530%
+  IF ~~ THEN EXTERN ~BDBENCE~ 64
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 83 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 83
+  IF ~~ THEN EXTERN ~BDBENCE~ 64
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 95 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 95 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~  Global("bd_plot","global",590)
+Global("bd_delancie_talk","locals",0)
+~ THEN BEGIN 95
+  SAY #%csr290_s65679%
+  IF ~~ THEN REPLY #%csr290_s65680%  DO ~SetGlobal("bd_delancie_talk","locals",1)
+~ GOTO 96
+  IF ~~ THEN REPLY #%csr290_s65681%  DO ~SetGlobal("bd_delancie_talk","locals",1)
+~ GOTO 101
+  IF ~~ THEN REPLY #%csr290_s65682%  DO ~SetGlobal("bd_delancie_talk","locals",1)
+~ GOTO 100
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 95 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 95
+  IF ~~ THEN REPLY #%csr290_s65680%  DO ~SetGlobal("bd_delancie_talk","locals",1)
+~ GOTO 96
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 95
+  IF ~~ THEN REPLY #%csr290_s65681%  DO ~SetGlobal("bd_delancie_talk","locals",1)
+~ GOTO 101
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 95
+  IF ~~ THEN REPLY #%csr290_s65682%  DO ~SetGlobal("bd_delancie_talk","locals",1)
+~ GOTO 100
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDELANC <= 104 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 104 STR_VAR dialog = ~BDDELANC~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDELANC~
+IF %csr290_weight% ~  Global("bd_plot","global",590)
+Global("bd_delancie_talk","locals",1)
+~ THEN BEGIN 104
+  SAY #%csr290_s65694%
+  IF ~~ THEN EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDELANC.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 104 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDELANC~ 104
+  IF ~~ THEN EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDAZZO <= 0 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 0 STR_VAR dialog = ~BDDAZZO~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDAZZO~
+IF %csr290_weight% ~  True()
+~ THEN BEGIN 0
+  SAY #%csr290_s65669%
+  IF ~~ THEN REPLY #%csr290_s65670%  GOTO 3
+  IF ~~ THEN REPLY #%csr290_s65671%  GOTO 1
+  IF ~~ THEN REPLY #%csr290_s65672%  GOTO 3
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDAZZO.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 0 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 0
+  IF ~~ THEN REPLY #%csr290_s65670%  GOTO 3
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 0
+  IF ~~ THEN REPLY #%csr290_s65671%  GOTO 1
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 0
+  IF ~~ THEN REPLY #%csr290_s65672%  GOTO 3
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDAZZO <= 1 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 1 STR_VAR dialog = ~BDDAZZO~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDAZZO~
+IF %csr290_weight% ~~ THEN BEGIN 1
+  SAY #%csr290_s65673%
+  IF ~~ THEN REPLY #%csr290_s65674%  GOTO 3
+  IF ~~ THEN REPLY #%csr290_s65675%  GOTO 2
+  IF ~~ THEN REPLY #%csr290_s65676%  GOTO 2
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDAZZO.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 1 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 1
+  IF ~~ THEN REPLY #%csr290_s65674%  GOTO 3
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 1
+  IF ~~ THEN REPLY #%csr290_s65675%  GOTO 2
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 1
+  IF ~~ THEN REPLY #%csr290_s65676%  GOTO 2
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDAZZO <= 2 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 2 STR_VAR dialog = ~BDDAZZO~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDAZZO~
+IF %csr290_weight% ~~ THEN BEGIN 2
+  SAY #%csr290_s65677%
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60",FALSE)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDAZZO.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 2 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 2
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60",FALSE)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDAZZO <= 3 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 3 STR_VAR dialog = ~BDDAZZO~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDAZZO~
+IF %csr290_weight% ~~ THEN BEGIN 3
+  SAY #%csr290_s65678%
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60",FALSE)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDAZZO.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 3 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDAZZO~ 3
+  IF ~~ THEN DO ~StartCutSceneMode()
+StartCutSceneEx("bdcut60",FALSE)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDRUMOR3 <= 7 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 7 STR_VAR dialog = ~BDRUMOR3~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDRUMOR3~
+IF %csr290_weight% ~  Global("chapter","global",8)
+~ THEN BEGIN 7
+  SAY #%csr290_s67030%
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s67031%,QUEST)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRUMOR3.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 7 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDRUMOR3~ 7
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s67031%,QUEST)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDRUMOR3 <= 20 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 20 STR_VAR dialog = ~BDRUMOR3~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDRUMOR3~
+IF %csr290_weight% ~  Global("chapter","global",9)
+~ THEN BEGIN 20
+  SAY #%csr290_s67056%
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s67057%,QUEST)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRUMOR3.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 20 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDRUMOR3~ 20
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s67057%,QUEST)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDRUMOR3 <= 37 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 37 STR_VAR dialog = ~BDRUMOR3~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDRUMOR3~
+IF %csr290_weight% ~  Global("chapter","global",10)
+~ THEN BEGIN 37
+  SAY #%csr290_s67090%
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s67091%,QUEST)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDRUMOR3.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 37 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDRUMOR3~ 37
+  IF ~~ THEN DO ~AddJournalEntry(%csr290_s67091%,QUEST)
+~ EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDDEBUG <= 10 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 10 STR_VAR dialog = ~BDDEBUG~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDDEBUG~
+IF %csr290_weight% ~~ THEN BEGIN 10
+  SAY #%csr290_s65262%
+  IF ~~ THEN REPLY #%csr290_s65236%  GOTO 3
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",51)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_clear_bgee_party","global",1)
+SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",50)
+GlobalLT("bd_plot","global",65)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",100)
+GlobalLT("bd_plot","global",199)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",200)
+GlobalLT("bd_plot","global",590)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",51)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_clear_bgee_party","global",1)
+SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",50)
+GlobalLT("bd_plot","global",65)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",100)
+GlobalLT("bd_plot","global",199)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~  GlobalGT("bd_plot","global",200)
+GlobalLT("bd_plot","global",592)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+  IF ~~ THEN REPLY #%csr290_s65234%  EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDDEBUG.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 10 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~~ THEN REPLY #%csr290_s65236%  GOTO 3
+END
+~~~~~
+  END
+  ACTION_IF nt <= 1 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",51)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_clear_bgee_party","global",1)
+SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 2 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",50)
+GlobalLT("bd_plot","global",65)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 3 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",100)
+GlobalLT("bd_plot","global",199)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 4 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",200)
+GlobalLT("bd_plot","global",590)
+~ THEN REPLY #%csr290_s65263%  DO ~SetGlobal("bd_debug_move_to_dream","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 5 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",0)
+GlobalLT("bd_plot","global",51)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_clear_bgee_party","global",1)
+SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 6 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",50)
+GlobalLT("bd_plot","global",65)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_change_wmp","global",1)
+SetGlobal("bd_debug_add_twc_npcs","global",1)
+SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 7 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",100)
+GlobalLT("bd_plot","global",199)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_add_bf_npcs","global",1)
+SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 8 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~  GlobalGT("bd_plot","global",200)
+GlobalLT("bd_plot","global",592)
+~ THEN REPLY #%csr290_s65264%  DO ~SetGlobal("bd_debug_move_to_cell","global",1)
+StartCutSceneMode()
+StartCutSceneEx("bddebug",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+  ACTION_IF nt <= 9 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDDEBUG~ 10
+  IF ~~ THEN REPLY #%csr290_s65234%  EXIT
+END
+~~~~~
+  END
+END
+ACTION_IF csr290_old_BDCORWIJ <= 203 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = 203 STR_VAR dialog = ~BDCORWIJ~ RET csr290_weight = clause END
+  OUTER_SPRINT csr290_fallback ~~~~~
+REPLACE ~BDCORWIJ~
+IF %csr290_weight% ~~ THEN BEGIN 203
+  SAY #%csr290_s44330%
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+END
+END
+~~~~~
+  COMPILE EVALUATE_BUFFER ~.../csr290-fallback.d~
+END ELSE BEGIN
+  COPY_EXISTING - ~BDCORWIJ.dlg~ ~override~ READ_LONG 12 so READ_LONG (so + 203 * 16 + 8) nt
+  ACTION_IF nt <= 0 BEGIN
+    OUTER_SPRINT csr290_transitions ~~~~~%csr290_transitions%
+EXTEND_BOTTOM ~BDCORWIJ~ 203
+  IF ~~ THEN DO ~StartCutSceneMode()
+AddJournalEntry(%csr290_s59855%,INFO)
+AddJournalEntry(%csr290_s59856%,QUEST_DONE)
+StartCutSceneEx("bdcut61",TRUE)
+~ EXIT
+END
+~~~~~
+  END
+END
+COMPILE EVALUATE_BUFFER ~.../csr290-transitions.d~

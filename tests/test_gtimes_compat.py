@@ -181,14 +181,13 @@ END
         self.assertEqual({value: row[0] for value, row in rows.items()},
                          {**{value: VANILLA_NAMES[value] for value in MATCHED_TIMERS}, 60: 'ONE_TURN'})
 
-    def test_unreadable_probe_fails_without_writes(self):
+    def test_action_alias_does_not_stop_timer_resolution(self):
         # Another name for action 115 changes how every SetGlobalTimer prints.
         game = self.make_game(VANILLA_GTIMES, '115 SetTimerAlias(S:Name*,S:Area*,I:Time*GTimes)\n')
         before = tree(game / 'override')
         result = self.run_weidu(game, 'probe.tp2')
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('fixture probe: a probe timer of 6 seconds did not decompile to exactly one '
-                      'SetGlobalTimer argument (found 0)', result.stdout + result.stderr)
+        self.assert_installed(result)
+        self.assertIn('CSRTEST|6|ONE_ROUND|ONE_ROUND||0|0', result.stdout)
         self.assertEqual(tree(game / 'override'), before)
 
 

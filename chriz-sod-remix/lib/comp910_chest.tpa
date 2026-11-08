@@ -1,0 +1,32 @@
+// Supply the native empty staging chest when its record is absent.
+ACTION_IF FILE_EXISTS_IN_GAME ~bd0103.are~ BEGIN
+  COPY_EXISTING ~bd0103.are~ ~override~
+    SET readable = SOURCE_SIZE >= 0x82
+    PATCH_IF readable BEGIN
+      READ_LONG 0x70 co READ_SHORT 0x74 cc READ_LONG 0x7c vo READ_SHORT 0x80 vc
+      SET readable = co + cc * 192 <= SOURCE_SIZE AND vo + vc * 4 <= SOURCE_SIZE
+    END
+    PATCH_IF readable BEGIN
+      SET found = 0
+      FOR (i = 0; i < cc; ++i) BEGIN
+        READ_ASCII (co + i * 192) name (32) NULL
+        INNER_PATCH_SAVE name ~%name%~ BEGIN REPLACE_TEXTUALLY ~ ~ ~~ END
+        PATCH_IF ~%name%~ STRING_EQUAL_CASE ~PlayerChest00~ BEGIN SET found = 1 END
+      END
+      PATCH_IF NOT found BEGIN
+        PATCH_IF cc < 65535 AND vc <= 65524 BEGIN
+          INNER_ACTION BEGIN
+            COPY - ~chriz-sod-remix/data/csr910-chest.bin~ ~.../csr910-read~ READ_ASCII 0 chest (SOURCE_SIZE)
+            COPY - ~chriz-sod-remix/data/csr910-vertices.bin~ ~.../csr910-read~ READ_ASCII 0 polygon (SOURCE_SIZE)
+          END
+          READ_ASCII co entries (cc * 192) SET co = BUFFER_LENGTH
+          INSERT_BYTES co ((cc + 1) * 192) WRITE_ASCIIE co ~%entries%%chest%~
+          WRITE_LONG (co + cc * 192 + 0x50) vc WRITE_LONG 0x70 co WRITE_SHORT 0x74 (cc + 1)
+          READ_ASCII vo vertices (vc * 4) SET vo = BUFFER_LENGTH
+          INSERT_BYTES vo ((vc + 11) * 4) WRITE_ASCIIE vo ~%vertices%%polygon%~
+          WRITE_LONG 0x7c vo WRITE_SHORT 0x80 (vc + 11)
+        END ELSE BEGIN PATCH_PRINT ~#910: the staging chest has no representable table space.~ END
+      END
+    END ELSE BEGIN PATCH_PRINT ~#910: BD0103 container or polygon tables are unreadable; the staging chest is unavailable.~ END
+  BUT_ONLY
+END ELSE BEGIN PRINT ~#910: BD0103 is absent; the staging chest is unavailable.~ END

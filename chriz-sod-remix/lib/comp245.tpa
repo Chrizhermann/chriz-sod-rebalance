@@ -1,41 +1,39 @@
-// ============================================================
-// Component 245 body — comp200's wall removal, skip-proof
-// ============================================================
-// Playtest finding (issue #5, 2026-07-11): CUTSKIP.bcs is SoD's
-// cutscene-skip rig and carries a mirrored end-state for the
-// BDCUT14 bridge cutscene. Skipping the cutscene bypassed
-// comp200's patch: the mirror re-raised the wall of force and set
-// the vanilla THREE_ROUNDS parley timer. This applies comp200's
-// two decisions to the mirror.
-//
-// Verified against the compiled CUTSKIP (2026-07-12, action-block
-// decode): the mirror's wall is ONLY the force_wall ambient
-// ANIMATION toggle + the hidden force_wall_door close — the skip
-// rig carries no bdwforce cast and no SPFLESHS VFX (the [3780.1110]
-// hit in the file is a camera pan, kept). The wall-DOWN restore
-// pair later in CUTSKIP (AmbientActivate FALSE + OpenDoor) stays —
-// with the wall never up, both are harmless no-ops.
-//
-// As in comp200, the old timer is matched by the name this game's
-// GTIMES.IDS prints for 18 seconds (THREE_ROUNDS in vanilla) and the
-// new one is written as 30 seconds (vanilla FIVE_ROUNDS).
-
-LAF csr_gtimes_regexp
-  INT_VAR csr_gtimes_value = 18
-  STR_VAR csr_gtimes_caller = ~chriz-sod-remix comp245 [CUTSKIP]~
-  RET csr245_parley_time = csr_gtimes_regexp
-END
-
+// The skip rig owns response 14, the BDCUT14 end state. Write that complete
+// response; preserve all other cutscene responses and their dispatch order.
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+LAF csr_ensure_script STR_VAR script = ~cutskip~ END
+COPY ~chriz-sod-remix/baf/csr245skip.baf~ ~weidu_external/work/chriz-sod-remix/csr245skip.baf~
+  READ_ASCII 0 csr245_block (BUFFER_LENGTH)
+  SPRINT csr245_response ~%csr245_block%~
+  SPRINT csr245_nl ~%MNL%?%LNL%~
+  INNER_PATCH_SAVE csr245_response ~%csr245_response%~ BEGIN
+    REPLACE_TEXTUALLY ~^IF%csr245_nl%\(  [^%WNL%]*%csr245_nl%\)*THEN%csr245_nl%  RESPONSE #100~ ~  RESPONSE #14~
+    REPLACE_TEXTUALLY ~END[%WNL%]*$~ ~~
+  END
 COPY_EXISTING ~cutskip.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~AmbientActivate("force_wall",TRUE)~ csr_cnt_amb
-    COUNT_REGEXP_INSTANCES ~CloseDoor("force_wall_door")~ csr_cnt_door
-    COUNT_REGEXP_INSTANCES ~SetGlobalTimer("bd_caelar_timer","bd1000",%csr245_parley_time%)~ csr_cnt_timer
-    PATCH_IF NOT ((csr_cnt_amb = 1) AND (csr_cnt_door = 1) AND (csr_cnt_timer = 1)) BEGIN
-      PATCH_FAIL ~chriz-sod-remix comp245: CUTSKIP.bcs does not match the verified BDCUT14 mirror (ambient x%csr_cnt_amb%, door x%csr_cnt_door%, timer x%csr_cnt_timer%; expected 1 each). Another mod rewrote the skip rig - resolve manually.~
+    LPF csr_replace_script_blocks
+      STR_VAR pattern = ~Global("BD_CUTSCENE_BREAKABLE","GLOBAL",14)~ END
+    SET csr245_switch = 0
+    SPRINT nl ~%MNL%?%LNL%~
+    REPLACE_EVALUATE ~^IF%nl%\(\([ %TAB%]+[^%WNL%]*%nl%\|THEN%nl%\)*\)END~ BEGIN
+      SPRINT body ~%MATCH0%~
+      PATCH_IF ~%body%~ STRING_CONTAINS_REGEXP ~Switch("BD_CUTSCENE_BREAKABLE","GLOBAL")~ = 0 BEGIN
+        SET csr245_switch = 1
+        INNER_PATCH_SAVE body ~%body%~ BEGIN
+          SET found = 0
+          REPLACE_EVALUATE ~  RESPONSE #14%nl%\(    [^%WNL%]*%nl%\)*~ BEGIN
+            SPRINT response ~~
+            PATCH_IF NOT found BEGIN SPRINT response ~%csr245_response%~ END
+            SET found = 1
+          END ~%response%~
+          PATCH_IF NOT found BEGIN REPLACE_TEXTUALLY ~END$~ ~%csr245_response%END~ END
+        END
+      END
+    END ~%body%~
+    PATCH_IF NOT csr245_switch BEGIN
+      INSERT_BYTES 0 (STRING_LENGTH ~%csr245_block%~)
+      WRITE_ASCIIE 0 ~%csr245_block%~
     END
-    REPLACE_TEXTUALLY ~AmbientActivate("force_wall",TRUE)~ ~~
-    REPLACE_TEXTUALLY ~CloseDoor("force_wall_door")~ ~~
-    REPLACE_TEXTUALLY ~SetGlobalTimer("bd_caelar_timer","bd1000",%csr245_parley_time%)~ ~SetGlobalTimer("bd_caelar_timer","bd1000",30)~
   END
 BUT_ONLY

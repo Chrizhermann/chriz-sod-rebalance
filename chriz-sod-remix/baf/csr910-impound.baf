@@ -1,0 +1,18 @@
+IF
+  Global("BD_PARTY_ITEMS","BD0103",0)
+  GlobalLT("BD_PLOT","GLOBAL",51)
+  OR(2)
+    !Global("SOD_fromimport","GLOBAL",1)
+    Global("CSR_SKIP_CHOICE","GLOBAL",2)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_PARTY_ITEMS","BD0103",1)
+    ActionOverride("PlayerChest00",TakeCreatureItems(Player1,BACKPACK))
+    ActionOverride("PlayerChest00",TakeCreatureItems(Player2,BACKPACK))
+    ActionOverride("PlayerChest00",TakeCreatureItems(Player3,BACKPACK))
+    ActionOverride("PlayerChest00",TakeCreatureItems(Player4,BACKPACK))
+    ActionOverride("PlayerChest00",TakeCreatureItems(Player5,BACKPACK))
+    ActionOverride("PlayerChest00",TakeCreatureItems(Player6,BACKPACK))
+    SetInterrupt(TRUE)
+END

@@ -36,7 +36,7 @@ class RelocatedLootIdentificationTests(unittest.TestCase):
         game = TreasureGame(area([]))
         self.addCleanup(game.cleanup)
         source = SOURCE.read_text(encoding="utf-8")
-        prefix = source[:source.index("// 0. Loud preconditions:")]
+        prefix = source[:source.index("INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~")]
         control = item("CONTROL", expiration=42, charges=(8, 7, 6), flags=0x82)
         template = creature([control])
         (game.root / "recipient.cre").write_bytes(template)

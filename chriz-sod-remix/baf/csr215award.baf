@@ -1,0 +1,28 @@
+IF
+  GlobalLT("chapter","global",9)
+THEN
+  RESPONSE #100
+    StartCutSceneMode()
+    ClearAllActions()
+    FadeToColor([0.0],0)
+    AddJournalEntry(%csr215_str259653%,INFO)
+    SmallWait(5)
+    SetGlobal("bd_npc_camp_chapter","global",3)
+    IncrementChapter("SODTXT9")
+    AddJournalEntry(%csr215_str256368%,INFO)
+    AddXPObject(Player1,10000)
+    AddexperienceParty(16500)
+    AddXPObject(Player2,10000)
+    AddXPObject(Player3,10000)
+    AddXPObject(Player4,10000)
+    AddXPObject(Player5,10000)
+    AddXPObject(Player6,10000)
+    ApplySpellRES("bdrejuve",Player1)
+    ApplySpellRES("bdrejuve",Player2)
+    ApplySpellRES("bdrejuve",Player3)
+    ApplySpellRES("bdrejuve",Player4)
+    ApplySpellRES("bdrejuve",Player5)
+    ApplySpellRES("bdrejuve",Player6)
+    SetCutSceneLite(TRUE)
+    EndCutSceneMode()
+END

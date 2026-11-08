@@ -1,0 +1,32 @@
+// Component 115 owns these complete blocks.
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  !Global("csr_kh_carry","GLOBAL",1)
+  Global("bd_mdd206","global",0)
+  GlobalGT("bd_plot","global",250)
+  GlobalLT("bd_plot","global",295)
+  !Dead("JAHEIRA")
+  See("JAHEIRA")
+  CombatCounter(0)
+  !Detect([ENEMY])
+  See([PC])
+THEN
+  RESPONSE #100
+    SetGlobal("bd_mdd206","global",1)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  !Global("csr_kh_carry","GLOBAL",1)
+  Global("bd_mdd206","global",1)
+  GlobalGT("bd_plot","global",250)
+  GlobalLT("bd_plot","global",295)
+  !Dead("JAHEIRA")
+  See("JAHEIRA")
+  CombatCounter(0)
+  !Detect([ENEMY])
+  See([PC])
+THEN
+  RESPONSE #100
+    StartDialogNoSet(Player1)
+END

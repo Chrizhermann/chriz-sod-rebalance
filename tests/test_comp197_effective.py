@@ -49,7 +49,7 @@ class EffectiveSkieCompatibilityTests(unittest.TestCase):
                           for n in (110, 150, 185, 210)).encode()
         else:
             log = self.log
-        (game.root / "WeiDU.log").write_bytes(log)
+        (game.root / "weidu.log").write_bytes(log)
         return game
 
     def install(self, game, component):
@@ -143,7 +143,7 @@ class EffectiveSkieCompatibilityTests(unittest.TestCase):
         old_action = old_dialogue[32].transitions[0].action
         self.assertEqual(new_dialogue[32].transitions[0].action, old_action.replace(
             'actionoverride("bdskie",escapeareaobject("crusade_camp_exit"))', ''))
-        final_rows = [line for line in (game.root / "WeiDU.log").read_text().splitlines()
+        final_rows = [line for line in (game.root / "weidu.log").read_text().splitlines()
                       if line.startswith("~")]
         # --quick-log avoids loading the absent 332 other mod sources in this
         # minimal fixture and strips display comments. Installed identities,

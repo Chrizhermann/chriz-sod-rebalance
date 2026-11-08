@@ -34,6 +34,37 @@ def continuity_script(source=SCRIPT):
     return BLOCK.sub(fork, source)
 
 
+def assert_spawn_controllers(case, source, *, timed=False):
+    blocks = baf_blocks(source)
+    spawns = [(guard, actions) for guard, actions in blocks
+              if 'setglobal("csr256_stage","bd2000",1)' in actions]
+    expected = {
+        'difficultylt(normal)': ('CSR256FM', 'CSR256CM', 'CSR26E1L', 'CSR26E2L', 'CSR26F1L', 'CSR26F2L'),
+        'difficulty(normal)': ('CSR256FM', 'CSR256CM', 'CSR26E1S', 'CSR26E2S', 'CSR26F1S', 'CSR26F2S'),
+        'difficulty(hard)': ('CSR256FM', 'CSR256CM', 'CSR26E1G', 'CSR26E2S', 'CSR26F1S', 'CSR26F2S'),
+        'difficultygt(hard)': ('CSR26FMI', 'CSR26CMI', 'CSR26E1G', 'CSR26E2S', 'CSR26F1G', 'CSR26F2S'),
+    }
+    case.assertEqual(len(spawns), 4)
+    for difficulty, roster in expected.items():
+        guard, actions = next((g, a) for g, a in spawns if difficulty in g)
+        for condition in ('global("csr256_request","bd2000",1)',
+                          'global("csr256_stage","bd2000",0)',
+                          'global("bd_plot","global",280)',
+                          'global("bd_bridge_plot","bd2000",2)'):
+            case.assertIn(condition, guard)
+        case.assertIn('setglobal("csr256_request","bd2000",2)', actions)
+        case.assertCountEqual(re.findall(r'createcreature\("([^" ]+)"', actions),
+                              [name.lower() for name in (*roster, 'CSR256G1', 'CSR256G2')])
+    stage = [(g, a) for g, a in blocks if 'setglobal("csr256_stage","bd2000",2)' in a]
+    case.assertEqual(len(stage), 1)
+    case.assertIn('global("csr256_stage","bd2000",1)', stage[0][0])
+    if timed:
+        case.assertIn('setglobal("csr256_timer_v2","bd2000",1)', stage[0][1])
+    else:
+        case.assertIn('displaystringnoname(player1,123)', stage[0][1])
+    return spawns + stage
+
+
 def assert_victory_routes(case, source):
     routes = [(guard, actions) for guard, actions in baf_blocks(source)
               if 'createcreatureobject("bdbence",player1,6,0,0)' in actions]
@@ -78,14 +109,11 @@ class SyntheticBridgeOrderTests(unittest.TestCase):
         result = self.harness.install()
         return before, result
 
-    def reject(self, script):
+    def overwrite(self, script):
         before, result = self.install(script)
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("chriz-sod-remix #256", result.stdout + result.stderr)
-        self.assertEqual(tree(self.harness.override), before)
-        backup = self.harness.game / "world-backup/256"
-        self.assertFalse(backup.exists() and any(
-            p.suffix.lower() in {".bcs", ".are"} for p in backup.iterdir()))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        assert_victory_routes(self, self.harness.decompile())
 
     def test_115_first_retains_both_victory_routes_and_unrelated_branches(self):
         foreign = '''IF
@@ -107,6 +135,22 @@ END
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(tree(self.harness.override), before)
 
+    def test_victory_only_second_tail_preserves_every_spawn_and_stage_controller(self):
+        _, result = self.install(continuity_script())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        controllers = assert_spawn_controllers(self, self.harness.decompile())
+        (self.harness.game / "victory-tail.tp2").write_text(
+            'BACKUP ~victory-tail-backup~ AUTHOR ~test~ BEGIN ~victory writer~ '
+            'INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~ '
+            'COPY_EXISTING ~BD2000.BCS~ ~override~ DECOMPILE_AND_PATCH BEGIN '
+            'LPM csr256_world_script END', encoding="ascii")
+        result = self.harness.weidu("victory-tail.tp2", "--force-install-list", "0")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
+        source = self.harness.decompile()
+        self.assertEqual(controllers, assert_spawn_controllers(self, source))
+        assert_victory_routes(self, source)
+
     def test_native_skie_is_preserved_in_both_continuity_routes(self):
         source = SCRIPT.replace('    CreateCreature("bdbence",[2425.2660],NW)',
             '    CreateCreature("bdbence",[2425.2660],NW)\n'
@@ -117,31 +161,31 @@ END
         for _, actions in routes:
             self.assertEqual(actions.count('createcreature("bdskie",[2485.2655],nw)'), 1)
 
-    def test_missing_carried_branch_is_rejected_before_writes(self):
+    def test_missing_carried_branch_is_rebuilt(self):
         source = continuity_script()
         carried = next(m.group(0) for m in BLOCK.finditer(source)
                        if 'Global("csr_kh_fort"' in m.group(0)
                        and '!Global("csr_kh_fort"' not in m.group(0))
-        self.reject(source.replace(carried, "", 1))
+        self.overwrite(source.replace(carried, "", 1))
 
-    def test_only_one_native_victory_forked_is_rejected(self):
+    def test_only_one_native_victory_forked_is_overwritten(self):
         first = next(m.group(0) for m in BLOCK.finditer(SCRIPT) if RETREAT in m.group(0))
-        self.reject(SCRIPT.replace(first, continuity_script(first), 1))
+        self.overwrite(SCRIPT.replace(first, continuity_script(first), 1))
 
-    def test_carried_and_ordinary_payload_disagreement_is_rejected(self):
-        self.reject(continuity_script().replace('AddJournalEntry(123,QUEST)',
+    def test_carried_and_ordinary_payload_disagreement_is_overwritten(self):
+        self.overwrite(continuity_script().replace('AddJournalEntry(123,QUEST)',
                                                'AddJournalEntry(124,QUEST)', 1))
 
-    def test_unknown_added_action_even_in_both_copies_is_rejected(self):
-        self.reject(continuity_script(SCRIPT.replace('    AddJournalEntry(123,QUEST)',
+    def test_unknown_added_action_even_in_both_copies_is_overwritten(self):
+        self.overwrite(continuity_script(SCRIPT.replace('    AddJournalEntry(123,QUEST)',
             '    NoAction()\n    AddJournalEntry(123,QUEST)')))
 
-    def test_duplicate_carried_branch_is_rejected(self):
+    def test_duplicate_carried_branch_is_overwritten(self):
         source = continuity_script()
         carried = next(m.group(0) for m in BLOCK.finditer(source)
                        if 'Global("csr_kh_fort"' in m.group(0)
                        and '!Global("csr_kh_fort"' not in m.group(0))
-        self.reject(source + carried)
+        self.overwrite(source + carried)
 
 
 @unittest.skipUnless(WEIDU.is_file(), "real WeiDU unavailable; set WEIDU_EXE")
@@ -187,6 +231,7 @@ LAF csr256_world_install END
         game = self.fixture()
         if world_first:
             self.world(game)
+            controllers = assert_spawn_controllers(self, game.decompile("bd2000.bcs")["bd2000.bcs"])
         result, transcript = game.install()
         self.assertEqual(result.returncode, 0, transcript)
         self.assertIn("SUCCESSFULLY INSTALLED", transcript)
@@ -199,12 +244,40 @@ LAF csr256_world_install END
                              {"bd2000.bcs", "bd2000.are"})
         source = game.decompile("bd2000.bcs")["bd2000.bcs"]
         assert_victory_routes(self, source)
+        after_controllers = assert_spawn_controllers(self, source)
+        if world_first:
+            self.assertEqual(controllers, after_controllers)
         # The independently installed #115 route/history and spokesman changes
         # must survive regardless of which component sees the native finale.
         for token in ('csr_kh_fort', 'csr_kh_carry', 'csr_jh_carry', 'bdbfort'):
             self.assertIn(token, source.lower())
         for protected, original in game.protected_before.items():
             self.assertEqual((game.root / protected).read_bytes(), original)
+
+    def test_timed_bridge_then_public_115_preserves_controllers_and_clock_gate(self):
+        from test_comp256_timer import write_timer_ids, write_timer_package
+        game = self.fixture()
+        self.world(game)
+        write_timer_ids(game.root)
+        write_timer_package(game.root)
+        result = subprocess.run([str(WEIDU), "timer.tp2", "--force-install-list", "258",
+            "--language", "0", "--use-lang", "en_us", "--no-exit-pause"],
+            cwd=game.root, capture_output=True, text=True, errors="replace", timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        before = game.decompile("bd2000.bcs")["bd2000.bcs"]
+        controllers = assert_spawn_controllers(self, before, timed=True)
+        clocks = [(g, a) for g, a in baf_blocks(before) if '"csr256_clock"' in g + a
+                  and 'setglobal("csr256_stage","bd2000",3)' not in a]
+        self.assertTrue(clocks)
+        result, transcript = game.install()
+        self.assertEqual(result.returncode, 0, transcript)
+        self.assertNotIn("WARNING", transcript.upper())
+        source = game.decompile("bd2000.bcs")["bd2000.bcs"]
+        self.assertEqual(controllers, assert_spawn_controllers(self, source, timed=True))
+        self.assertEqual(clocks, [(g, a) for g, a in baf_blocks(source) if '"csr256_clock"' in g + a
+                                 and 'setglobal("csr256_stage","bd2000",3)' not in a])
+        for guard, _ in assert_victory_routes(self, source):
+            self.assertIn('global("csr256_clock","bd2000",2)', guard)
 
     def test_public_115_then_production_256_world(self):
         self.run_order(world_first=False)

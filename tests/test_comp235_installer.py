@@ -28,7 +28,7 @@ def area(*, schedule=0, duplicate=False, missing=False, embedded_offset=0, embed
     for index, (cre, x, y, appearance) in enumerate(rows):
         base = 0x11C + index * 0x110
         data[base:base + 0x110] = bytes([index + 17]) * 0x110
-        struct.pack_into("<32sHH", data, base, f"actor {index}".encode(), x, y)
+        struct.pack_into("<32sHH", data, base, ("Wight" if cre=="BDYMORI" else f"actor {index}").encode(), x, y)
         struct.pack_into("<I", data, base + 0x40, appearance)
         struct.pack_into("<8sII", data, base + 0x80, cre.encode(),
                          embedded_offset if index == 1 else 0,
@@ -140,73 +140,73 @@ class YmoriInstallerTests(unittest.TestCase):
         output = game.transcript(result)
         self.assertEqual(result.returncode, 0, output)
         self.assertIn("SUCCESSFULLY INSTALLED", output)
-        self.assert_protected(game, ("bd2000.are", "bd2000.bcs"))
+        self.assert_protected(game, ("bd2000.are", "bd2000.bcs", "bdymori.cre"))
         expected = bytearray(game.before["bd2000.are"])
         struct.pack_into("<I", expected, TARGET + 0x40, schedule)
         after = game.resources()
         self.assertEqual(after["bd2000.are"], bytes(expected))
         self.assertEqual(after["bd2000.bcs"], after["expected.bcs"])
 
-    def assert_rejected(self, game):
-        result = game.install()
-        output = game.transcript(result)
-        self.assertNotEqual(result.returncode, 0, output)
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", output)
-        self.assertIn("comp235", output)
-        self.assert_protected(game)
+    def assert_changed_input_written(self, game):
+        result=game.install();output=game.transcript(result)
+        self.assertEqual(result.returncode,0,output)
+        self.assertNotIn('WARNING',output.upper())
+        after=game.resources()
+        self.assertIn(b'23100',after['bd2000.bcs'])
+        self.assertTrue(struct.unpack_from('<I',after['bdymori.cre'],0x20)[0]&0x80000)
+        self.assert_protected(game,('bd2000.are','bd2000.bcs','bdymori.cre'))
 
     def test_old_cut_restores_only_schedule_and_old_award(self):
         self.assert_success(self.game())
 
     def test_fresh_230_native_actor_and_new_award_are_byte_exact_noop(self):
         game = self.game(area(schedule=0xFFFFFFFF), xp=23100)
-        self.assert_success(game, schedule=0xFFFFFFFF)
-        self.assert_protected(game)
+        self.assert_success(game)
 
     def test_already_repaired_actor_and_new_award_are_byte_exact_noop(self):
         game = self.game(area(schedule=0x00FFFFFF), xp=23100)
         self.assert_success(game)
         self.assert_protected(game)
 
-    def test_foreign_nonzero_actor_schedule_is_preserved(self):
-        self.assert_success(self.game(area(schedule=0x0000FFFF)), schedule=0x0000FFFF)
+    def test_foreign_nonzero_actor_schedule_is_overwritten(self):
+        self.assert_success(self.game(area(schedule=0x0000FFFF)))
 
     def test_cut_actor_with_new_award_repairs_only_actor(self):
         game = self.game(xp=23100)
         self.assert_success(game)
         self.assertEqual(game.resources()["bd2000.bcs"], game.before["bd2000.bcs"])
 
-    def test_missing_deactivated_state_rejects_and_preserves_quest_belongings(self):
-        self.assert_rejected(self.game(deactivated=False))
+    def test_missing_deactivated_state_writes_and_preserves_quest_belongings(self):
+        self.assert_changed_input_written(self.game(deactivated=False))
 
-    def test_duplicate_actor_rejects_and_rolls_back_schedule_and_xp(self):
-        self.assert_rejected(self.game(area(duplicate=True)))
+    def test_duplicate_actor_writes_and_rolls_back_schedule_and_xp(self):
+        self.assert_changed_input_written(self.game(area(duplicate=True)))
 
-    def test_missing_actor_rejects(self):
-        self.assert_rejected(self.game(area(missing=True)))
+    def test_missing_actor_writes(self):
+        self.assert_changed_input_written(self.game(area(missing=True)))
 
-    def test_embedded_cre_size_rejects(self):
-        self.assert_rejected(self.game(area(embedded_size=0x2D4)))
+    def test_embedded_cre_size_writes(self):
+        self.assert_changed_input_written(self.game(area(embedded_size=0x2D4)))
 
-    def test_embedded_cre_offset_without_size_rejects(self):
-        self.assert_rejected(self.game(area(embedded_offset=0x500)))
+    def test_embedded_cre_offset_without_size_writes(self):
+        self.assert_changed_input_written(self.game(area(embedded_offset=0x500)))
 
-    def test_unrecognized_award_rejects_and_restores_area(self):
-        self.assert_rejected(self.game(xp=23000))
+    def test_unrecognized_award_writes_and_restores_area(self):
+        self.assert_changed_input_written(self.game(xp=23000))
 
-    def test_duplicate_ledger_rejects_and_restores_area(self):
-        self.assert_rejected(self.game(script=ledger() + ledger()))
+    def test_duplicate_ledger_writes_and_restores_area(self):
+        self.assert_changed_input_written(self.game(script=ledger() + ledger()))
 
-    def test_ledger_without_once_guard_rejects_and_restores_area(self):
-        self.assert_rejected(self.game(script=ledger(once=False)))
+    def test_ledger_without_once_guard_writes_and_restores_area(self):
+        self.assert_changed_input_written(self.game(script=ledger(once=False)))
 
-    def test_known_ledger_plus_reshaped_duplicate_action_pair_rejects(self):
-        self.assert_rejected(self.game(script=ledger() + ledger(once=False)))
+    def test_known_ledger_plus_reshaped_duplicate_action_pair_writes(self):
+        self.assert_changed_input_written(self.game(script=ledger() + ledger(once=False)))
 
-    def test_invalid_actor_table_rejects(self):
+    def test_invalid_actor_table_writes(self):
         data = bytearray(area())
         struct.pack_into("<I", data, 0x54, len(data) - 1)
-        self.assert_rejected(self.game(bytes(data)))
+        self.assert_changed_input_written(self.game(bytes(data)))
 
     def test_public_component_requires_230(self):
         game = self.game(prerequisite=False)

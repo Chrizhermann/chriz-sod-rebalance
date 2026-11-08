@@ -4,10 +4,25 @@
 // The coordinates use existing cameo positions or clear searchmap cells near
 // native city/camp placements; see docs/design/wave1/11-early-bg1-companions.md.
 
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+// Remove our prior dispatcher blocks, then write this installation's roster.
+ACTION_FOR_EACH area IN ~BDBALDUR~ ~BD0010~ ~BD0101~ ~BD0110~ ~BD0109~ ~BD0020~ ~BD1000~ ~BD0104~ ~BD0102~ ~BD7100~ ~BD3000~ BEGIN
+  LAF csr_ensure_script STR_VAR script = EVAL ~%area%~ END
+  COPY_EXISTING ~%area%.bcs~ ~override~
+    DECOMPILE_AND_PATCH BEGIN
+      LPF csr_replace_script_blocks STR_VAR pattern = ~"CSR198_~ END
+    END
+  BUT_ONLY
+END
+INCLUDE ~chriz-sod-remix/lib/overwrite_2da.tpa~
+LAF csr_ensure_bddialog END
 LOAD_TRA ~chriz-sod-remix/languages/english/comp198.tra~
 MKDIR ~weidu_external/work/chriz-sod-remix/198~
 
 INCLUDE ~chriz-sod-remix/lib/comp198_skie.tpa~
+OUTER_SET csr198_shift = 0
+ACTION_IF GAME_IS ~eet~ BEGIN OUTER_SET csr198_shift = 200000 END
+INCLUDE ~chriz-sod-remix/lib/comp198_seed.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp198_cameos.tpa~
 
 COPY ~chriz-sod-remix/baf/csrskixp.baf~ ~weidu_external/work/chriz-sod-remix/198/xp.baf~
@@ -15,12 +30,14 @@ COPY ~chriz-sod-remix/baf/csrskixp.baf~ ~weidu_external/work/chriz-sod-remix/198
 
 // The palace has two campaign-variant city exits. Follow the installed ARE's
 // active destination, as #180 does when restoring its first-evening door lock.
-OUTER_SPRINT csr198_palace_area ~~
+OUTER_SPRINT csr198_palace_area ~BD0010~
+ACTION_IF FILE_EXISTS_IN_GAME ~bd0102.are~ BEGIN
 COPY_EXISTING - ~bd0102.are~ ~override~
+  PATCH_IF SOURCE_SIZE >= 0x60 BEGIN
   READ_LONG 0x5c csr198_regions
   READ_SHORT 0x5a csr198_region_count
   SET csr198_exits = 0
-  FOR (csr198_i = 0; csr198_i < csr198_region_count; ++csr198_i) BEGIN
+  FOR (csr198_i = 0; csr198_i < csr198_region_count AND csr198_regions + (csr198_i + 1) * 0xc4 <= SOURCE_SIZE; ++csr198_i) BEGIN
     SET csr198_region = csr198_regions + csr198_i * 0xc4
     READ_ASCII csr198_region csr198_region_name (32) NULL
     READ_LONG (csr198_region + 0x60) csr198_region_flags
@@ -31,10 +48,8 @@ COPY_EXISTING - ~bd0102.are~ ~override~
       SET csr198_exits += 1
     END
   END
-  PATCH_IF csr198_exits != 1 BEGIN
-    PATCH_FAIL ~chriz-sod-remix #198: expected one active palace city exit; cannot choose the near-palace recruitment area.~
   END
-
+END ELSE BEGIN PRINT ~#198: palace area is absent; recruits use BD0010.~ END
 // ID, key, BG1 donor, original identity, supported alternate identity, cameo,
 // first area/x/y, Coast Way x/y, Troll Claw x/y, Coalition x/y => greeting.
 // Read the actual donor DV too: modpack 199 may have normalized Xan/Yeslick.
@@ -79,16 +94,36 @@ ACTION_PHP_EACH csr198_roster AS csr198_row => csr198_greeting BEGIN
     OUTER_SPRINT csr198_dialogue ~CSR198SK~
   END
 
+  OUTER_SPRINT csr198_actual ~%csr198_canonical%~
+  OUTER_SPRINT csr198_old_override ~~
+  ACTION_IF FILE_EXISTS_IN_GAME ~%csr198_donor%.cre~ BEGIN
+  OUTER_SET csr198_readable = 0
   COPY_EXISTING - ~%csr198_donor%.cre~ ~override~
+    SET csr198_readable = SOURCE_SIZE >= 0x2d4
+    PATCH_IF csr198_readable BEGIN
+      READ_BYTE 0x33 effect_version
+      PATCH_FOR_EACH header IN 0x2a0 0x2a8 0x2b0 0x2bc 0x2c4 BEGIN
+        READ_LONG header table READ_LONG (header + 4) count
+        SET size = header = 0x2a8 ? 16 : (header = 0x2bc ? 20 : (header = 0x2c4 ? (effect_version ? 264 : 48) : 12))
+        SET csr198_readable = csr198_readable AND (count = 0 OR (table >= 0x2d4 AND count <= (SOURCE_SIZE - table) / size))
+      END
+      READ_LONG 0x2b8 slots
+      SET csr198_readable = csr198_readable AND slots >= 0x2d4 AND slots + 80 <= SOURCE_SIZE
+    END
+    PATCH_IF csr198_readable BEGIN
     READ_ASCII 0x280 csr198_actual (32) NULL
     READ_ASCII 0x248 csr198_old_override (8) NULL
     PATCH_IF ~%csr198_actual%~ STRING_EQUAL ~~ OR ~%csr198_actual%~ STRING_EQUAL_CASE ~NONE~ BEGIN
-      PATCH_FAIL ~chriz-sod-remix #198: %csr198_donor% has no usable companion identity.~
+      SPRINT csr198_actual ~%csr198_canonical%~
     END
 
+    END
+  ACTION_IF csr198_readable BEGIN
   // A new fallback has the installed BG1 build and modest donor equipment.
   // These are clone-only edits; never apply them to a saved imported actor.
   COPY_EXISTING ~%csr198_donor%.cre~ ~override/%csr198_code%.cre~
+    PATCH_IF SOURCE_SIZE >= 0x2d4 BEGIN
+    WRITE_ASCIIE 0x280 ~%csr198_actual%~ #32
     WRITE_ASCIIE 0x248 ~%csr198_code%~ #8
     WRITE_ASCII 0x250 ~~ #24 // obsolete non-player BG1 AI slots
     WRITE_ASCIIE 0x2cc ~%csr198_dialogue%~ #8
@@ -99,11 +134,16 @@ ACTION_PHP_EACH csr198_roster AS csr198_row => csr198_greeting BEGIN
       READ_LONG 0x20 csr198_state
       WRITE_LONG 0x20 (csr198_state BAND (BNOT 0x80))
     END
-    READ_LONG 0x2c0 csr198_items
-    PATCH_IF csr198_items = 0 BEGIN
+    PATCH_IF (~%csr198_key%~ STRING_EQUAL ~XAN~) OR (~%csr198_key%~ STRING_EQUAL ~YESLICK~) OR (~%csr198_key%~ STRING_EQUAL ~BRANWEN~) BEGIN
+      REMOVE_CRE_ITEM ~STAF01~
       // Prisoner donors (e.g. Xan/Yeslick) can have no starting inventory.
       ADD_CRE_ITEM ~STAF01~ #0 #0 #0 ~IDENTIFIED~ ~WEAPON1~ EQUIP
     END
+
+    END
+  BUT_ONLY
+  END ELSE BEGIN PRINT ~#198: unreadable companion donor %csr198_donor%; its fallback clone is unavailable.~ END
+  END ELSE BEGIN PRINT ~#198: companion donor %csr198_donor% is absent; imported companions remain supported.~ END
 
   ACTION_DEFINE_ARRAY csr198_candidates BEGIN ~%csr198_actual%~ ~%csr198_canonical%~ ~%csr198_alias%~ ~%csr198_cameo%~ END
   OUTER_SPRINT csr198_party_selection ~~
@@ -113,8 +153,11 @@ ACTION_PHP_EACH csr198_roster AS csr198_row => csr198_greeting BEGIN
   OUTER_SPRINT csr198_fresh_guards ~Global("BD_%csr198_key%_DIED_IN_BG","GLOBAL",0)~
   OUTER_SPRINT csr198_cameo_restore ~~
   ACTION_IF NOT (~%csr198_cameo%~ STRING_EQUAL ~***~) BEGIN
-    COPY_EXISTING - ~%csr198_cameo%.cre~ ~override~
-      READ_ASCII 0x248 csr198_cameo_override (8) NULL
+    OUTER_SPRINT csr198_cameo_override ~~
+    ACTION_IF FILE_EXISTS_IN_GAME ~%csr198_cameo%.cre~ BEGIN
+      COPY_EXISTING - ~%csr198_cameo%.cre~ ~override~
+        PATCH_IF SOURCE_SIZE >= 0x250 BEGIN READ_ASCII 0x248 csr198_cameo_override (8) NULL END
+    END
     OUTER_SPRINT csr198_cameo_restore ~IF
   Name("%csr198_cameo%",Myself)
   OR(2)
@@ -196,20 +239,11 @@ END
 
       // BDDIALOG is SoD-specific. Leave PDIALOG and BG2 mod routes untouched.
       COPY_EXISTING ~bddialog.2da~ ~override~
-        COUNT_2DA_ROWS 4 csr198_rows
-        SET csr198_found = 0
-        FOR (csr198_r = 0; csr198_r < csr198_rows; ++csr198_r) BEGIN
-          READ_2DA_ENTRY csr198_r 0 4 csr198_name
-          PATCH_IF ~%csr198_name%~ STRING_EQUAL_CASE ~%csr198_dv%~ BEGIN
-            SET_2DA_ENTRY csr198_r 1 4 ~%csr198_dialogue%~
-            SET_2DA_ENTRY csr198_r 2 4 ~%csr198_dialogue%~
-            SET csr198_found = 1
-          END
-        END
+        LPF csr_set_2da_cell STR_VAR row = EVAL ~%csr198_dv%~
+          column = ~POST_DIALOG_FILE~ value = EVAL ~%csr198_dialogue%~ END
+        LPF csr_set_2da_cell STR_VAR row = EVAL ~%csr198_dv%~
+          column = ~JOIN_DIALOG_FILE~ value = EVAL ~%csr198_dialogue%~ END
       BUT_ONLY
-      ACTION_IF NOT csr198_found BEGIN
-        APPEND ~bddialog.2da~ ~%csr198_dv% %csr198_dialogue% %csr198_dialogue% ***~
-      END
 
       ACTION_FOR_EACH csr198_stage IN ~1~ ~2~ ~3~ BEGIN
         ACTION_IF csr198_stage = 1 BEGIN
@@ -255,7 +289,7 @@ END~
 
   ACTION_IF ~%csr198_key%~ STRING_EQUAL ~SKIE~ BEGIN
     // Adopted BDSKIE must retain #197's stock-potion repair after changing her
-    // personal script. Reuse its validation; imported SKIE is name-excluded.
+    // personal script. Imported SKIE is name-excluded.
     INCLUDE ~chriz-sod-remix/lib/comp197_potions.tpa~
     LAF csr197_install_potion_cleanup STR_VAR target_script = EVAL ~%csr198_code%~ END
   END

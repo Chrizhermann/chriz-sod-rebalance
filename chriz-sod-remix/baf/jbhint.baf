@@ -10,7 +10,7 @@
 // requires (research 11a section 5).
 // Sound dressing = Beamdog's own off-screen-fight faker trio sorcr05/poisn05/fchil05
 // (BD0109.baf:103-117) twice through, plus the HIT_03B door-banging cue BD0116 itself
-// uses for the doppelganger (BD0116.baf:76-90). Journal 261626 QUEST is the vanilla
+// uses for the doppelganger (BD0116.baf:76-90). Journal %csr170_journal% QUEST is the vanilla
 // "Korlasz is loose in the Ducal Palace" entry (re-added by dialog state 27 later;
 // same-strref adds do not duplicate).
 
@@ -27,7 +27,7 @@ THEN
     CreateCreature("csrfistd",[622.246],NW)
     ActionOverride("csrfistd",SetSequence(SEQ_DIE))
     DisplayStringHead("csrfistd",@17005)
-    AddJournalEntry(261626,QUEST)
+    AddJournalEntry(%csr170_journal%,QUEST)
     PlaySound("sorcr05")
     SmallWait(8)
     PlaySound("poisn05")

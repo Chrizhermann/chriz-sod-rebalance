@@ -17,7 +17,7 @@ OUTER_SET csr256_home_x = 1500
 OUTER_SET csr256_home_y = 1950
 OUTER_SET csr256_leash = 18
 
-// Every resource-shape, spell, donor and art check precedes resource mutation.
+// Resolve installed spell identities before writing the owned encounter.
 LAM csr256_spells_preflight
 LAF csr256_creatures_preflight END
 LAF csr256_world_preflight END

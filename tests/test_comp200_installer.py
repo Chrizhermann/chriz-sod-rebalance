@@ -53,12 +53,11 @@ THEN
     SetGlobal("FOREIGN_AFTER","GLOBAL",1)
 END
 '''
-EXPECTED_BRIDGE = (BRIDGE.replace(WALL, '    SmallWait(1)\n')
-                   .replace('THREE_ROUNDS', 'FIVE_ROUNDS'))
+EXPECTED_BRIDGE = BRIDGE[:BRIDGE.index('IF\n  True()')] + (ROOT/'chriz-sod-remix/baf/csr200-bridge.baf').read_text().replace('%csr200_line1%', '64918').replace('%csr200_line2%', '60189')
 
 
 def area() -> bytes:
-    actors = WEST[:4] + KEPT_ACTORS + WEST[4:]
+    actors = WEST + KEPT_ACTORS
     actor_offset = 0x11c
     region_offset = actor_offset + len(actors) * 0x110
     spawn_offset = region_offset + len(REGIONS) * 0xc4
@@ -69,7 +68,7 @@ def area() -> bytes:
     struct.pack_into("<II", data, 0x60, spawn_offset, len(SPAWNS))
     for index, (cre, x, y) in enumerate(actors):
         base = actor_offset + index * 0x110
-        data[base:base + 32] = f"Actor {index}".encode().ljust(32, b"\0")
+        data[base:base + 32] = ("GIANT_SPIDER" if index in (0,1,8) else "HUGE_SPIDER" if index==2 else "PHASE_SPIDER" if index in (3,4,5,9) else "GARGANTUAN_SPIDER" if index in (6,7) else "FOREIGN").encode().ljust(32, b"\0")
         struct.pack_into("<hh", data, base + 0x20, x, y)
         struct.pack_into("<I", data, base + 0x40, 0x000FFFC0)
         data[base + 0x80:base + 0x88] = cre.encode().ljust(8, b"\0")
@@ -117,9 +116,21 @@ class Component200InstallerTests(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.game = Path(temp.name)
         write_fake_game(self.game)
+        # Lowercase: WeiDU on Linux reads weidu.log, and Windows ignores the case.
+        (self.game/"weidu.log").write_text("")
         self.override = self.game / "override"
         extra_ids = {
             "action": '''1 ActionOverride(O:Actor*,A:Action*)
+10 Enemy()
+84 Face(I:Direction*DIR)
+120 CutSceneId(O:Actor*)
+122 EndCutSceneMode()
+161 SetAreaScript(S:Script*,I:Level*SCRLEV)
+169 DestroyItem(S:ResRef*)
+229 FaceObject(O:Object*)
+241 DisplayStringHead(O:Object*,I:StrRef*)
+345 SetSequence(I:Sequence*SEQ)
+370 SetCutSceneBreakable(I:Value*BOOLEAN)
 83 SmallWait(I:Time*)
 114 ForceSpellPointRES(S:RES*,P:Target)
 115 SetGlobalTimer(S:Name*,S:Area*,I:Time*GTimes)
@@ -127,6 +138,7 @@ class Component200InstallerTests(unittest.TestCase):
 272 CreateVisualEffect(S:Object*,P:Location*)
 301 AmbientActivate(O:Object*,I:State*BOOLEAN)
 ''',
+            "dir":"10 NE\n", "seq":"6 SEQ_ATTACK_JAB\n", "scrlev":"0 OVERRIDE\n", "object":"21 Player1\n",
             "gtimes": "18 THREE_ROUNDS\n30 FIVE_ROUNDS\n",
         }
         for name, definitions in extra_ids.items():
@@ -136,9 +148,11 @@ class Component200InstallerTests(unittest.TestCase):
         if gtimes is not None:
             (self.override / "gtimes.ids").write_bytes(gtimes.encode("ascii"))
         (self.game / "chriz-sod-remix/lib").mkdir(parents=True)
-        for library in ("comp200.tpa", "gtimes_compat.tpa"):
+        for library in ("comp200.tpa", "comp200_lists.tpa", "overwrite_actors.tpa", "overwrite.tpa", "gtimes_compat.tpa"):
             shutil.copy2(ROOT / "chriz-sod-remix/lib" / library,
                          self.game / "chriz-sod-remix/lib" / library)
+        (self.game / "chriz-sod-remix/baf").mkdir()
+        shutil.copy2(ROOT/"chriz-sod-remix/baf/csr200-bridge.baf",self.game/"chriz-sod-remix/baf/csr200-bridge.baf")
         (self.game / "fixture").mkdir()
         (self.game / "fixture/setup-fixture.tp2").write_text('''BACKUP ~fixture/backup~
 AUTHOR ~fixture~
@@ -178,6 +192,7 @@ INCLUDE ~chriz-sod-remix/lib/comp200.tpa~
         result = self.install()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("SUCCESSFULLY INSTALLED", result.stdout)
+        self.assertNotIn("WARNING",(result.stdout+result.stderr).upper())
         after = tree(self.override)
         self.assertEqual({name for name in before if before[name] != after[name]},
                          {"BD1000.ARE", "BDCUT14.BCS"})
@@ -200,19 +215,23 @@ INCLUDE ~chriz-sod-remix/lib/comp200.tpa~
                 patched.add(self.assert_patched())
         self.assertEqual(len(patched), 1)
 
-    def test_changed_bridge_cutscene_is_rejected_and_rolled_back(self):
+    def test_changed_bridge_cutscene_is_overwritten(self):
         for label, bridge in (("other timer", BRIDGE.replace("THREE_ROUNDS", "FIVE_ROUNDS")),
                               ("other wall", BRIDGE.replace("SmallWait(10)", "SmallWait(11)"))):
             with self.subTest(change=label):
                 self.make_game(gtimes_variants(18)["name from another mod"][0])
                 self.fixture(bridge)
-                before = tree(self.override)
-                result = self.install()
-                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertIn("BDCUT14.bcs does not match the verified bridge-fight layout",
-                              result.stdout + result.stderr)
-                self.assertEqual(tree(self.override), before)
+                self.assert_patched()
 
+    def test_missing_script_and_second_tail(self):
+        result=self.install()
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertNotIn('WARNING',(result.stdout+result.stderr).upper())
+        first=(self.override/'bdcut14.bcs').read_bytes()
+        (self.game/'second.tp2').write_text((self.game/'patch.tp2').read_text().replace('patch-backup','second-backup'))
+        result=self.run_weidu('second.tp2','--force-install-list','200')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(first,(self.override/'bdcut14.bcs').read_bytes())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

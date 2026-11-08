@@ -1,236 +1,99 @@
-// ============================================================
-// Component 225 body — one text-only Caelar omen at the scrying pool
-// ============================================================
-// The three-scepter puzzle and its 3,000 party-total completion award remain
-// intact. Once the pedestal is complete, csr225om owns every in-range click:
-// both Essences of Clarity are required and consumed together, the combined XP
-// of the two visions formerly left reachable after component 120 and before
-// component 225 is paid once, and the pool then stays permanently dormant. The
-// retired BDSCRY cutscene resources remain installed but have no live launcher
-// or picker reply.
-
-// ------------------------------------------------------------
-// 225.0 — read-only ARE preflight before any text-bearing operation
-// ------------------------------------------------------------
-// WeiDU can leave newly allocated TLK strings behind when a later patch fails,
-// even though resource files roll back. Reject the two unsafe ARE shapes before
-// csr225om.tra is loaded; the full mutation pass repeats these guards below.
-COPY_EXISTING ~bd1200.are~ ~override~
-  READ_SHORT 0x76 csr225_pre_item_count
-  PATCH_IF (csr225_pre_item_count > 65533) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: BD1200.are item count %csr225_pre_item_count% cannot grow by two without overflowing the 16-bit item-count field; aborting before any ARE bytes are changed.~
-  END
-
-  READ_LONG  0x70 csr225_pre_container_off
-  READ_SHORT 0x74 csr225_pre_container_count
-  SET csr225_pre_target = 0 - 1
-  SET csr225_pre_target_hits = 0
-  FOR (csr225_pre_i = 0; csr225_pre_i < csr225_pre_container_count; csr225_pre_i += 1) BEGIN
-    SET csr225_pre_base = csr225_pre_container_off + csr225_pre_i * 0xc0
-    READ_ASCII csr225_pre_base csr225_pre_name (32) NULL
-    READ_SHORT (csr225_pre_base + 0x20) csr225_pre_x
-    READ_SHORT (csr225_pre_base + 0x22) csr225_pre_y
-    PATCH_IF ((~%csr225_pre_name%~ STRING_EQUAL_CASE ~Sarcophagus01~) AND
-              (csr225_pre_x = 2414) AND (csr225_pre_y = 1736)) BEGIN
-      SET csr225_pre_target = csr225_pre_base
-      SET csr225_pre_target_hits += 1
-    END
-  END
-  PATCH_IF (csr225_pre_target_hits != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: expected exactly one Sarcophagus01 at (2414,1736) in BD1200.are, found %csr225_pre_target_hits%; aborting before any text or ARE bytes are changed.~
-  END
-
-  READ_SHORT (csr225_pre_target + 0x26) csr225_pre_lock
-  READ_LONG  (csr225_pre_target + 0x28) csr225_pre_flags
-  READ_SHORT (csr225_pre_target + 0x30) csr225_pre_trapped
-  READ_ASCII (csr225_pre_target + 0x48) csr225_pre_script (8) NULL
-  READ_ASCII (csr225_pre_target + 0x78) csr225_pre_key (8) NULL
-  PATCH_IF NOT ((csr225_pre_lock = 0) AND
-                (csr225_pre_flags = 0) AND
-                (csr225_pre_trapped = 0) AND
-                (~%csr225_pre_script%~ STRING_EQUAL_CASE ~~) AND
-                (~%csr225_pre_key%~ STRING_EQUAL_CASE ~~)) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: the Sarcophagus01 rehome target at (2414,1736) is not the verified accessible baseline (lock %csr225_pre_lock%, flags %csr225_pre_flags%, trapped %csr225_pre_trapped%, script "%csr225_pre_script%", key "%csr225_pre_key%"); aborting before any text or ARE bytes are changed.~
-  END
-BUT_ONLY
-
-// ------------------------------------------------------------
-// 225.1 — neutralize the vanilla one-vial and dialog-launch routes
-// ------------------------------------------------------------
-// Every edit is count-guarded against the component-120-patched script.
-OUTER_SPRINT ~csr225_nl~ ~%MNL%?%LNL%~
+// The pool's owned click behavior is complete and independent of the retired
+// visions. The pedestal puzzle and its original reward remain in their blocks.
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+LOAD_TRA ~chriz-sod-remix/languages/english/csr225om.tra~
+LAF csr_ensure_script STR_VAR script = ~bdodscry~ END
 COPY_EXISTING ~bdodscry.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
-    SPRINT ~csr225_cloudy_one_pat~ ~Global("BD_SDDD12_CLOUDY","MYAREA",1)%csr225_nl%  Range(LastTrigger,12)~
-    SPRINT ~csr225_cloudy_zero_pat~ ~Global("BD_SDDD12_CLOUDY","MYAREA",0)%csr225_nl%  Range(LastTrigger,12)~
-    COUNT_REGEXP_INSTANCES ~ActionOverride("BDSCRY",StartDialogNoSet(LastTrigger))~ csr225_launchers
-    COUNT_REGEXP_INSTANCES ~TakePartyItem("BDMISC59")~ csr225_one_vial
-    COUNT_REGEXP_INSTANCES ~%csr225_cloudy_one_pat%~ csr225_cloudy_one
-    COUNT_REGEXP_INSTANCES ~%csr225_cloudy_zero_pat%~ csr225_cloudy_zero
-    PATCH_IF NOT ((csr225_launchers = 1) AND (csr225_one_vial = 1) AND
-                  (csr225_cloudy_one = 2) AND (csr225_cloudy_zero = 1)) BEGIN
-      PATCH_FAIL ~chriz-sod-remix #225: BDODSCRY.bcs does not match the verified post-component-120 pool script (dialog launcher %csr225_launchers%/1, one-vial consume %csr225_one_vial%/1, cloudy=1 triggers %csr225_cloudy_one%/2, cloudy=0 trigger %csr225_cloudy_zero%/1). Another mod changed the pool; aborting instead of leaving a partial vision route.~
-    END
-    REPLACE_TEXTUALLY ~ActionOverride("BDSCRY",StartDialogNoSet(LastTrigger))~ ~NoAction()~
-    REPLACE_TEXTUALLY ~TakePartyItem("BDMISC59")~ ~NoAction()~
-    REPLACE_TEXTUALLY ~%csr225_cloudy_one_pat%~
-~False()
-  Global("BD_SDDD12_CLOUDY","MYAREA",1)
-  Range(LastTrigger,12)~
-    REPLACE_TEXTUALLY ~%csr225_cloudy_zero_pat%~
-~False()
-  Global("BD_SDDD12_CLOUDY","MYAREA",0)
-  Range(LastTrigger,12)~
+    LPF csr_replace_script_blocks STR_VAR pattern = ~"CSR_SCRY_DONE"\|^[ %TAB%]+Global("BD_SDDD12_CLOUDY"\|ActionOverride("BDSCRY",StartDialogNoSet(LastTrigger))\|TakePartyItem("BDMISC59")~ END
   END
 BUT_ONLY
-
 EXTEND_TOP ~bdodscry.bcs~ ~chriz-sod-remix/baf/csr225om.baf~
+LAF csr_disable_bdscry_picker_route STR_VAR csr_scry_flag = ~bd_sddd12_imoen~ csr_scry_component = ~225~ END
+LAF csr_disable_bdscry_picker_route STR_VAR csr_scry_flag = ~bd_sddd12_caelar~ csr_scry_component = ~225~ END
 
-// The Hooded-Man replies were retired by required component 120. Retire the
-// Imoen and Caelar replies too. BDSCRY's structure stays installed even though
-// the object script can no longer launch it.
-// The semantic helper targets the current no-Aura four-state picker.
-LAF csr_disable_bdscry_picker_route
-  STR_VAR
-    csr_scry_flag = ~bd_sddd12_imoen~
-    csr_scry_component = ~225~
-END
-LAF csr_disable_bdscry_picker_route
-  STR_VAR
-    csr_scry_flag = ~bd_sddd12_caelar~
-    csr_scry_component = ~225~
-END
-
-// ------------------------------------------------------------
-// 225.2 — rehome the cut wight's Essence in the existing sarcophagus
-// ------------------------------------------------------------
-// ARE container item runs index a shared 20-byte item array. Relocate that
-// array to EOF, retain every original record at its original index, then append
-// a byte-for-byte copy of Sarcophagus01's scepter plus a fresh Essence. Only
-// the item-table header and that one container run are repointed.
-COPY_EXISTING ~bd1200.are~ ~override~
-  READ_LONG  0x54 csr225_actor_off
-  READ_SHORT 0x58 csr225_actor_count
-  READ_LONG  0x70 csr225_container_off
-  READ_SHORT 0x74 csr225_container_count
-  READ_SHORT 0x76 csr225_item_count
-  READ_LONG  0x78 csr225_item_off
-
-  // The header count is a 16-bit word. Refuse to wrap it when this component
-  // appends the target scepter copy plus the rehomed Essence.
-  PATCH_IF (csr225_item_count > 65533) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: BD1200.are item count %csr225_item_count% cannot grow by two without overflowing the 16-bit item-count field; aborting before any ARE bytes are changed.~
-  END
-
-  SET csr225_target = 0 - 1
-  SET csr225_target_hits = 0
-  SET csr225_scepters = 0
-  SET csr225_essences = 0
-
-  FOR (csr225_i = 0; csr225_i < csr225_container_count; csr225_i += 1) BEGIN
-    SET csr225_base = csr225_container_off + csr225_i * 0xc0
-    READ_ASCII csr225_base csr225_name (32) NULL
-    READ_SHORT (csr225_base + 0x20) csr225_x
-    READ_SHORT (csr225_base + 0x22) csr225_y
-    READ_LONG (csr225_base + 0x40) csr225_first
-    READ_LONG (csr225_base + 0x44) csr225_count
-    PATCH_IF (csr225_first + csr225_count > csr225_item_count) BEGIN
-      PATCH_FAIL ~chriz-sod-remix #225: BD1200.are container %csr225_name% has an out-of-bounds item run; refusing to relocate a malformed item table.~
-    END
-
-    PATCH_IF ((~%csr225_name%~ STRING_EQUAL_CASE ~Sarcophagus01~) AND
-              (csr225_x = 2414) AND (csr225_y = 1736)) BEGIN
-      SET csr225_target = csr225_base
-      SET csr225_target_hits += 1
-      SET csr225_target_first = csr225_first
-      SET csr225_target_count = csr225_count
-    END
-
-    FOR (csr225_j = 0; csr225_j < csr225_count; csr225_j += 1) BEGIN
-      READ_ASCII (csr225_item_off + (csr225_first + csr225_j) * 0x14) csr225_res (8) NULL
-      PATCH_IF (~%csr225_res%~ STRING_EQUAL_CASE ~BDMISC55~) BEGIN
-        SET csr225_scepters += 1
-      END
-      PATCH_IF (~%csr225_res%~ STRING_EQUAL_CASE ~BDMISC59~) BEGIN
-        SET csr225_essences += 1
+// The sarcophagus owns one scepter and the rehomed Essence. Preserve unrelated
+// contents, including their raw item metadata; create the target if absent.
+ACTION_IF FILE_EXISTS_IN_GAME ~bd1200.are~ BEGIN
+  COPY_EXISTING ~bd1200.are~ ~override~
+    SET writable = SOURCE_SIZE >= 0xf4
+    PATCH_IF writable BEGIN
+      READ_LONG 0x54 ao READ_SHORT 0x58 ac READ_LONG 0x70 co READ_SHORT 0x74 cc
+      READ_SHORT 0x76 ic READ_LONG 0x78 io READ_LONG 0x7c vo READ_SHORT 0x80 vc
+      SET writable = ao + ac * 0x110 <= SOURCE_SIZE AND co + cc * 0xc0 <= SOURCE_SIZE AND io + ic * 20 <= SOURCE_SIZE AND vo + vc * 4 <= SOURCE_SIZE
+      FOR (i = 0; writable AND i < cc; ++i) BEGIN
+        READ_LONG (co + i * 0xc0 + 0x40) first READ_LONG (co + i * 0xc0 + 0x44) count
+        SET writable = first + count <= ic
       END
     END
-  END
-
-  PATCH_IF (csr225_target_hits != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: expected exactly one Sarcophagus01 at (2414,1736) in BD1200.are, found %csr225_target_hits%.~
-  END
-  PATCH_IF NOT ((csr225_scepters = 3) AND (csr225_essences = 1)) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: expected exactly three container-held BDMISC55 and one container-held BDMISC59 before rehoming, found %csr225_scepters% and %csr225_essences%. Another mod changed the quest-item economy.~
-  END
-  PATCH_IF (csr225_target_count != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: Sarcophagus01 at (2414,1736) has %csr225_target_count% items; expected its single Silver Scepter before rebuilding the run.~
-  END
-  READ_SHORT (csr225_target + 0x26) csr225_target_lock
-  READ_LONG  (csr225_target + 0x28) csr225_target_flags
-  READ_SHORT (csr225_target + 0x30) csr225_target_trapped
-  READ_ASCII (csr225_target + 0x48) csr225_target_script (8) NULL
-  READ_ASCII (csr225_target + 0x78) csr225_target_key (8) NULL
-  PATCH_IF NOT ((csr225_target_lock = 0) AND
-                (csr225_target_flags = 0) AND
-                (csr225_target_trapped = 0) AND
-                (~%csr225_target_script%~ STRING_EQUAL_CASE ~~) AND
-                (~%csr225_target_key%~ STRING_EQUAL_CASE ~~)) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: the Sarcophagus01 rehome target at (2414,1736) is not the verified accessible baseline (lock %csr225_target_lock%, flags %csr225_target_flags%, trapped %csr225_target_trapped%, script "%csr225_target_script%", key "%csr225_target_key%"); aborting before any ARE bytes are changed.~
-  END
-  READ_ASCII (csr225_item_off + csr225_target_first * 0x14) csr225_target_item (8) NULL
-  PATCH_IF NOT (~%csr225_target_item%~ STRING_EQUAL_CASE ~BDMISC55~) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: Sarcophagus01 at (2414,1736) holds %csr225_target_item%, not the verified BDMISC55; refusing to overwrite third-party contents.~
-  END
-
-  // Component 220 removes this exact wight with schedule zero. Assert that it
-  // remains removed; the second Essence comes from the sarcophagus, not revival.
-  SET csr225_wight_hits = 0
-  FOR (csr225_i = 0; csr225_i < csr225_actor_count; csr225_i += 1) BEGIN
-    SET csr225_base = csr225_actor_off + csr225_i * 0x110
-    READ_ASCII (csr225_base + 0x80) csr225_cre (8) NULL
-    READ_SHORT (csr225_base + 0x20) csr225_x
-    READ_SHORT (csr225_base + 0x22) csr225_y
-    PATCH_IF ((~%csr225_cre%~ STRING_EQUAL_CASE ~BDWIGHDD~) AND
-              (csr225_x = 2474) AND (csr225_y = 1951)) BEGIN
-      READ_LONG (csr225_base + 0x40) csr225_schedule
-      PATCH_IF (csr225_schedule != 0) BEGIN
-        PATCH_FAIL ~chriz-sod-remix #225: BDWIGHDD at (2474,1951) is live (schedule %csr225_schedule%); component 220's removal no longer matches the verified state.~
+    PATCH_IF writable BEGIN
+      SET target = (0 - 1) SET first = 0 SET count = 0
+      FOR (i = 0; i < cc; ++i) BEGIN
+        SET at = co + i * 0xc0 READ_ASCII at name (32) NULL
+        PATCH_IF ~%name%~ STRING_EQUAL_CASE ~Sarcophagus01~ AND target < 0 BEGIN SET target = i END
       END
-      SET csr225_wight_hits += 1
-    END
-  END
-  PATCH_IF (csr225_wight_hits != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix #225: expected exactly one schedule-zero BDWIGHDD at (2474,1951), found %csr225_wight_hits%.~
-  END
-
-  SET csr225_new_item_off = BUFFER_LENGTH
-  SET csr225_new_item_count = csr225_item_count + 2
-  INSERT_BYTES csr225_new_item_off (csr225_new_item_count * 0x14)
-
-  // Preserve the original item array byte-for-byte at the same indices.
-  FOR (csr225_i = 0; csr225_i < csr225_item_count * 0x14; csr225_i += 4) BEGIN
-    READ_LONG (csr225_item_off + csr225_i) csr225_value
-    WRITE_LONG (csr225_new_item_off + csr225_i) csr225_value
-  END
-
-  // Rebuild the target run at the tail: exact old scepter record, then Essence.
-  SET csr225_scepter_src = csr225_item_off + csr225_target_first * 0x14
-  SET csr225_scepter_dst = csr225_new_item_off + csr225_item_count * 0x14
-  FOR (csr225_i = 0; csr225_i < 0x14; csr225_i += 4) BEGIN
-    READ_LONG (csr225_scepter_src + csr225_i) csr225_value
-    WRITE_LONG (csr225_scepter_dst + csr225_i) csr225_value
-  END
-  SET csr225_essence_dst = csr225_scepter_dst + 0x14
-  WRITE_ASCIIE csr225_essence_dst ~BDMISC59~ #8
-  WRITE_SHORT (csr225_essence_dst + 0x08) 0
-  WRITE_SHORT (csr225_essence_dst + 0x0a) 0
-  WRITE_SHORT (csr225_essence_dst + 0x0c) 0
-  WRITE_SHORT (csr225_essence_dst + 0x0e) 0
-  WRITE_LONG  (csr225_essence_dst + 0x10) 0
-
-  WRITE_LONG  0x78 csr225_new_item_off
-  WRITE_SHORT 0x76 csr225_new_item_count
-  WRITE_LONG  (csr225_target + 0x40) csr225_item_count
-  WRITE_LONG  (csr225_target + 0x44) 2
-BUT_ONLY
+      SPRINT run ~~ SET total = 0 SET scepter = 0
+      PATCH_IF target >= 0 BEGIN
+        READ_LONG (co + target * 0xc0 + 0x40) first READ_LONG (co + target * 0xc0 + 0x44) count
+        FOR (j = 0; j < count; ++j) BEGIN
+          READ_ASCII (io + (first + j) * 20) res (8) NULL
+          PATCH_IF NOT (~%res%~ STRING_EQUAL_CASE ~BDMISC59~) AND (NOT (~%res%~ STRING_EQUAL_CASE ~BDMISC55~) OR NOT scepter) BEGIN
+            READ_ASCII (io + (first + j) * 20) item (20) SPRINT run ~%run%%item%~ SET total += 1
+          END
+          PATCH_IF ~%res%~ STRING_EQUAL_CASE ~BDMISC55~ BEGIN SET scepter = 1 END
+        END
+      END
+      PATCH_IF NOT scepter BEGIN
+        INNER_PATCH_SAVE item ~~ BEGIN INSERT_BYTES 0 20 WRITE_ASCII 0 ~BDMISC55~ #8 END
+        SPRINT run ~%run%%item%~ SET total += 1
+      END
+      INNER_PATCH_SAVE item ~~ BEGIN INSERT_BYTES 0 20 WRITE_ASCII 0 ~BDMISC59~ #8 END
+      SPRINT run ~%run%%item%~ SET total += 1
+      SET shared = 0
+      FOR (i = 0; i < cc; ++i) BEGIN
+        READ_LONG (co + i * 0xc0 + 0x40) other_first READ_LONG (co + i * 0xc0 + 0x44) other_count
+        PATCH_IF i != target AND other_count AND count AND first < other_first + other_count AND other_first < first + count BEGIN SET shared = 1 END
+      END
+      SET append = shared OR total > count
+      SET writable = (NOT append OR ic + total <= 65535) AND (target >= 0 OR (cc < 65535 AND vc <= 65515))
+      PATCH_IF writable BEGIN
+        PATCH_IF target < 0 BEGIN
+          READ_ASCII co entries (cc * 0xc0)
+          SET co = BUFFER_LENGTH INSERT_BYTES co ((cc + 1) * 0xc0)
+          WRITE_ASCIIE co ~%entries%~ WRITE_LONG 0x70 co WRITE_SHORT 0x74 (cc + 1)
+          SET target = cc SET at = co + cc * 0xc0
+          WRITE_ASCII at ~Sarcophagus01~ #32
+          WRITE_SHORT (at + 0x20) 2414 WRITE_SHORT (at + 0x22) 1736 WRITE_SHORT (at + 0x24) 8
+          WRITE_SHORT (at + 0x38) 2329 WRITE_SHORT (at + 0x3a) 1583 WRITE_SHORT (at + 0x3c) 2397 WRITE_SHORT (at + 0x3e) 1701
+          WRITE_LONG (at + 0x50) vc WRITE_SHORT (at + 0x54) 20
+          READ_ASCII vo vertices (vc * 4)
+          SET vo = BUFFER_LENGTH INSERT_BYTES vo ((vc + 20) * 4)
+          WRITE_ASCIIE vo ~%vertices%~ WRITE_LONG 0x7c vo WRITE_SHORT 0x80 (vc + 20)
+          DEFINE_ASSOCIATIVE_ARRAY csr225_poly BEGIN
+            0,2344 => 1701 1,2375 => 1693 2,2380 => 1692 3,2380 => 1690 4,2397 => 1672
+            5,2397 => 1665 6,2394 => 1663 7,2394 => 1601 8,2397 => 1597 9,2397 => 1592
+            10,2393 => 1592 11,2388 => 1595 12,2386 => 1596 13,2371 => 1583 14,2333 => 1601
+            15,2329 => 1608 16,2329 => 1676 17,2345 => 1689 18,2345 => 1691 19,2343 => 1692
+          END
+          PHP_EACH csr225_poly AS point => y BEGIN
+            WRITE_SHORT (vo + (vc + point_0) * 4) point_1 WRITE_SHORT (vo + (vc + point_0) * 4 + 2) y
+          END
+        END
+        SET at = co + target * 0xc0
+        WRITE_SHORT (at + 0x26) 0 WRITE_LONG (at + 0x28) 0 WRITE_SHORT (at + 0x30) 0
+        WRITE_ASCII (at + 0x48) ~~ #8 WRITE_ASCII (at + 0x78) ~~ #8
+        PATCH_IF append BEGIN
+          READ_ASCII io old_items (ic * 20)
+          SET io = BUFFER_LENGTH INSERT_BYTES io ((ic + total) * 20)
+          WRITE_ASCIIE io ~%old_items%~ WRITE_LONG 0x78 io WRITE_SHORT 0x76 (ic + total)
+          SET first = ic
+        END
+        WRITE_ASCIIE (io + first * 20) ~%run%~ WRITE_LONG (at + 0x40) first WRITE_LONG (at + 0x44) total
+        FOR (i = 0; i < ac; ++i) BEGIN
+          SET at = ao + i * 0x110 READ_ASCII at name (32) NULL
+          PATCH_IF ~%name%~ STRING_EQUAL_CASE ~IMBUED_WIGHT_POTION~ BEGIN WRITE_LONG (at + 0x40) 0 END
+        END
+      END ELSE BEGIN PATCH_PRINT ~#225: BD1200 has no representable table space for the reward; only this area is unchanged.~ END
+    END ELSE BEGIN PATCH_PRINT ~#225: BD1200 tables are unreadable; only this area is unchanged.~ END
+  BUT_ONLY
+END ELSE BEGIN PRINT ~#225: BD1200 is absent; the other pool changes still apply.~ END

@@ -1,371 +1,525 @@
-// Component 115 dialogue binding/preflight/application. No language-specific
-// TLK offsets or EET-merged party-state numbers are assumed.
-
-DEFINE_ACTION_MACRO csr115_dialog_bind BEGIN
-  OUTER_SPRINT csr115_kh_j ~~
-  OUTER_SPRINT csr115_jh_j ~~
-  ACTION_IF FILE_EXISTS_IN_GAME ~BDDIALOG.2DA~ BEGIN
-    OUTER_SPRINT csr115_party_table ~BDDIALOG.2DA~
-  END ELSE BEGIN
-    OUTER_SPRINT csr115_party_table ~PDIALOG.2DA~
-  END
-  COPY_EXISTING - ~%csr115_party_table%~ ~override~
-    READ_2DA_ENTRIES_NOW csr115_rows 3
-    FOR (csr115_r = 0; csr115_r < csr115_rows; ++csr115_r) BEGIN
-      READ_2DA_ENTRY_FORMER csr115_rows csr115_r 0 csr115_npc
-      PATCH_IF (~%csr115_npc%~ STRING_EQUAL_CASE ~KHALID~) BEGIN
-        READ_2DA_ENTRY_FORMER csr115_rows csr115_r 2 csr115_kh_j
-      END
-      PATCH_IF (~%csr115_npc%~ STRING_EQUAL_CASE ~JAHEIRA~) BEGIN
-        READ_2DA_ENTRY_FORMER csr115_rows csr115_r 2 csr115_jh_j
-      END
-    END
-  ACTION_IF ((~%csr115_kh_j%~ STRING_EQUAL ~~) OR
-             (~%csr115_jh_j%~ STRING_EQUAL ~~) OR
-             NOT FILE_EXISTS_IN_GAME ~%csr115_kh_j%.DLG~ OR
-             NOT FILE_EXISTS_IN_GAME ~%csr115_jh_j%.DLG~) BEGIN
-    FAIL ~Component 115: cannot resolve the installed SoD party dialogue table.~
-  END
-  COPY_EXISTING - ~BDKHALID.DLG~ ~override~
-    READ_LONG 0x08 csr115_nstates
-    PATCH_IF (csr115_nstates < 103) BEGIN
-      PATCH_FAIL ~Component 115: BDKHALID does not contain the audited SoD dialogue.~
-    END
-    READ_LONG 0x0c csr115_so
-    READ_LONG (csr115_so + 79 * 16) csr115_gift_say
-    READ_LONG (csr115_so + 23 * 16) csr115_reunion_say
-  COPY_EXISTING - ~BDBFORT.DLG~ ~override~
-    READ_LONG 0x08 csr115_nstates
-    PATCH_IF (csr115_nstates < 13) BEGIN
-      PATCH_FAIL ~Component 115: BDBFORT does not contain the audited defender dialogue.~
-    END
-    READ_LONG 0x0c csr115_so
-    READ_LONG csr115_so csr115_ad0_say
-    READ_LONG (csr115_so + 16) csr115_ad1_say
-    READ_LONG 0x14 csr115_to
-    READ_LONG 0x28 csr115_at
-    FOR (csr115_i = 2; csr115_i <= 3; ++csr115_i) BEGIN
-      READ_LONG (csr115_so + csr115_i * 16 + 4) csr115_first
-      READ_LONG (csr115_so + csr115_i * 16 + 8) csr115_count
-      READ_ASCII (csr115_to + csr115_first * 32 + 20) csr115_dest (8) NULL
-      READ_LONG (csr115_to + csr115_first * 32 + 28) csr115_dest_state
-      READ_LONG (csr115_to + csr115_first * 32) csr115_flags
-      PATCH_IF (csr115_count != 1 OR
-                NOT (~%csr115_dest%~ STRING_EQUAL_CASE ~BDKHALID~) OR
-                csr115_dest_state != csr115_i + 25 OR
-                (csr115_flags BAND 4) = 0) BEGIN
-        PATCH_FAIL ~Component 115: BDBFORT initial Khalid handoff has changed.~
-      END
-      READ_LONG (csr115_to + csr115_first * 32 + 16) csr115_ai
-      READ_LONG (csr115_at + csr115_ai * 8) csr115_off
-      READ_LONG (csr115_at + csr115_ai * 8 + 4) csr115_len
-      READ_ASCII csr115_off csr115_action (csr115_len)
-      INNER_PATCH_SAVE csr115_compact ~%csr115_action%~ BEGIN
-        REPLACE_TEXTUALLY ~[ %TAB%%MNL%%LNL%]+~ ~~
-      END
-      TO_LOWER csr115_compact
-      PATCH_IF (INDEX(~setglobal("bd_bridgefort_plot","global",5)~ ~%csr115_compact%~) < 0) BEGIN
-        PATCH_FAIL ~Component 115: BDBFORT initial progression action has changed.~
-      END
-    END
-  OUTER_SET csr115_gift_state = (0 - 1)
-  OUTER_SET csr115_reunion_state = (0 - 1)
-  OUTER_SET csr115_gift_hits = 0
-  OUTER_SET csr115_reunion_hits = 0
-  COPY_EXISTING - ~%csr115_kh_j%.DLG~ ~override~
-    READ_LONG 0x08 csr115_nstates
-    READ_LONG 0x0c csr115_so
-    FOR (csr115_i = 0; csr115_i < csr115_nstates; ++csr115_i) BEGIN
-      READ_LONG (csr115_so + csr115_i * 16) csr115_say
-      PATCH_IF (csr115_say = csr115_gift_say) BEGIN
-        SET csr115_gift_state = csr115_i
-        SET csr115_gift_hits += 1
-      END
-      PATCH_IF (csr115_say = csr115_reunion_say) BEGIN
-        SET csr115_reunion_state = csr115_i
-        SET csr115_reunion_hits += 1
-      END
-    END
-  ACTION_IF ((csr115_gift_hits != 1) OR (csr115_reunion_hits != 1)) BEGIN
-    FAIL ~Component 115: Khalid's gift/reunion state binding is ambiguous.~
-  END
-  // The original Neera reply points to the party interjection regardless of
-  // its EET merge offset. Bind the destination instead of guessing 199.
-  COPY_EXISTING - ~BDNEERA.DLG~ ~override~
-    READ_LONG 0x0c csr115_so
-    READ_LONG 0x14 csr115_to
-    READ_LONG (csr115_so + 57 * 16 + 4) csr115_first
-    READ_ASCII (csr115_to + (csr115_first + 1) * 32 + 20) csr115_neera_dlg (8) NULL
-    READ_LONG (csr115_to + (csr115_first + 1) * 32 + 28) csr115_neera_state
-  ACTION_IF NOT (~%csr115_neera_dlg%~ STRING_EQUAL_CASE ~%csr115_kh_j%~) BEGIN
-    FAIL ~Component 115: Neera's Khalid interjection has an unexpected destination.~
-  END
-END
-
-DEFINE_ACTION_FUNCTION csr115_dialog_preflight BEGIN
-  LAM csr115_dialog_bind
-  ACTION_FOR_EACH csr115_required IN ~BDWYNAN.DLG~ ~BDJEGG.DLG~ ~BDJAHEIR.DLG~ ~BDBARGHE.DLG~ BEGIN
-    ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr115_required%~ BEGIN
-      FAIL ~Component 115: missing %csr115_required%.~
-    END
-  END
-  COPY_EXISTING - ~BDVOGHIL.DLG~ ~override~
-    READ_ASCII 0 csr115_sig (8)
-    READ_LONG 0x08 csr115_nstates
-    PATCH_IF (NOT (~%csr115_sig%~ STRING_EQUAL_CASE ~DLG V1.0~) OR csr115_nstates < 69) BEGIN
-      PATCH_FAIL ~Component 115: Voghiln's SoD recruitment dialogue is missing.~
-    END
-    READ_LONG 0x0c csr115_so
-    READ_LONG 0x14 csr115_to
-    READ_LONG 0x28 csr115_at
-    READ_LONG (csr115_so + 9 * 16 + 4) csr115_first
-    READ_LONG (csr115_so + 9 * 16 + 8) csr115_count
-    READ_ASCII (csr115_to + (csr115_first + 1) * 32 + 20) csr115_dest (8) NULL
-    READ_LONG (csr115_to + (csr115_first + 1) * 32 + 28) csr115_dest_state
-    READ_LONG (csr115_to + csr115_first * 32) csr115_flags
-    PATCH_IF (csr115_count != 2 OR
-              NOT (~%csr115_dest%~ STRING_EQUAL_CASE ~BDJAHEIR~) OR
-              csr115_dest_state != 24 OR (csr115_flags BAND 4) = 0) BEGIN
-      PATCH_FAIL ~Component 115: Voghiln's Jaheira introduction has changed.~
-    END
-    READ_LONG (csr115_to + csr115_first * 32 + 16) csr115_ai
-    READ_LONG (csr115_at + csr115_ai * 8) csr115_off
-    READ_LONG (csr115_at + csr115_ai * 8 + 4) csr115_len
-    READ_ASCII csr115_off csr115_action (csr115_len)
-    INNER_PATCH_SAVE csr115_compact ~%csr115_action%~ BEGIN
-      REPLACE_TEXTUALLY ~[ %TAB%%MNL%%LNL%]+~ ~~
-    END
-    TO_LOWER csr115_compact
-    PATCH_IF (INDEX(~setglobal("bd_jaheira_join","global",-1)~ ~%csr115_compact%~) < 0 OR
-              INDEX(~enemy()~ ~%csr115_compact%~) < 0) BEGIN
-      PATCH_FAIL ~Component 115: Voghiln's hostile fallback has changed.~
-    END
-  COPY_EXISTING - ~BDJAHEIR.DLG~ ~override~
-    READ_LONG 0x0c csr115_so
-    READ_LONG 0x14 csr115_to
-    READ_LONG (csr115_so + 25 * 16 + 4) csr115_first
-    READ_LONG (csr115_so + 25 * 16 + 8) csr115_count
-    READ_ASCII (csr115_to + (csr115_first + 1) * 32 + 20) csr115_dest (8) NULL
-    READ_LONG (csr115_to + (csr115_first + 1) * 32 + 28) csr115_dest_state
-    PATCH_IF (csr115_count != 2 OR
-              NOT (~%csr115_dest%~ STRING_EQUAL_CASE ~BDJAHEIR~) OR csr115_dest_state != 27) BEGIN
-      PATCH_FAIL ~Component 115: Jaheira's second introduction reply has changed.~
-    END
-END
-
-// Duplicate one native transition adjacent to itself. This retains
-// original reply/action/journal data and last-valid-transition ordering.
-// Only the mutually exclusive condition and requested destination/text/
-// action substitution differ. Called in descending transition order.
-DEFINE_ACTION_FUNCTION csr115_dialog_branch
-  INT_VAR state = 0 trans = 0 new_text = (0 - 1) quest_journal = (0 - 1)
-  STR_VAR dlg = ~~ target_dlg = ~~ target_state = ~~
-          condition = ~Global("csr_kh_fort","GLOBAL",1)~
-          inverse = ~!Global("csr_kh_fort","GLOBAL",1)~
-          action_pattern = ~~ action_replacement = ~~ action_remove = ~~
-BEGIN
-  COPY_EXISTING - ~%dlg%.DLG~ ~override~
-    READ_LONG 0x0c csr115_so
-    READ_LONG 0x14 csr115_to
-    READ_LONG 0x20 csr115_tt
-    READ_LONG 0x28 csr115_at
-    READ_LONG (csr115_so + state * 16 + 4) csr115_first
-    READ_LONG (csr115_so + state * 16 + 8) csr115_count
-    PATCH_IF (trans >= csr115_count) BEGIN
-      PATCH_FAIL ~Component 115: transition %dlg%/%state%/%trans% missing.~
-    END
-    SET csr115_t = csr115_to + (csr115_first + trans) * 32
-    READ_LONG csr115_t csr115_flags
-    READ_LONG (csr115_t + 4) csr115_text
-    READ_LONG (csr115_t + 8) csr115_journal
-    READ_ASCII (csr115_t + 20) csr115_dest (8) NULL
-    READ_LONG (csr115_t + 28) csr115_dest_state
-    SPRINT csr115_trigger ~~
-    SPRINT csr115_action ~~
-    PATCH_IF (csr115_flags BAND 2) BEGIN
-      READ_LONG (csr115_t + 12) csr115_idx
-      READ_LONG (csr115_tt + csr115_idx * 8) csr115_off
-      READ_LONG (csr115_tt + csr115_idx * 8 + 4) csr115_len
-      READ_ASCII csr115_off csr115_trigger (csr115_len)
-    END
-    PATCH_IF (csr115_flags BAND 4) BEGIN
-      READ_LONG (csr115_t + 16) csr115_idx
-      READ_LONG (csr115_at + csr115_idx * 8) csr115_off
-      READ_LONG (csr115_at + csr115_idx * 8 + 4) csr115_len
-      READ_ASCII csr115_off csr115_action (csr115_len)
-    END
-  ACTION_IF NOT (~%action_pattern%~ STRING_EQUAL ~~) BEGIN
-    OUTER_PATCH_SAVE csr115_action ~%csr115_action%~ BEGIN
-      COUNT_REGEXP_INSTANCES ~%action_pattern%~ csr115_matches
-      PATCH_IF (csr115_matches != 1) BEGIN
-        PATCH_FAIL ~Component 115: expected one action in %dlg%/%state%/%trans%, found %csr115_matches%.~
-      END
-      REPLACE_TEXTUALLY ~%action_pattern%~ ~%action_replacement%~
-    END
-  END
-  // Wynan's first journal is the defender report; his second is the
-  // spellstone quest. Change only the first, preserving all other actions.
-  ACTION_IF (quest_journal >= 0) BEGIN
-    OUTER_PATCH_SAVE csr115_action ~%csr115_action%~ BEGIN
-      SET csr115_journal_seen = 0
-      REPLACE_EVALUATE ~AddJournalEntry(\([0-9]+\),QUEST)~ BEGIN
-        SPRINT csr115_journal_replacement ~%MATCH0%~
-        PATCH_IF (csr115_journal_seen = 0) BEGIN
-          SPRINT csr115_journal_replacement ~AddJournalEntry(@%quest_journal%,QUEST)~
-        END
-        SET csr115_journal_seen += 1
-      END ~%csr115_journal_replacement%~
-      PATCH_IF (csr115_journal_seen = 0) BEGIN
-        PATCH_FAIL ~Component 115: missing defender journal in %dlg%/%state%/%trans%.~
-      END
-    END
-  END
-  ACTION_IF NOT (~%action_remove%~ STRING_EQUAL ~~) BEGIN
-    OUTER_PATCH_SAVE csr115_action ~%csr115_action%~ BEGIN
-      COUNT_REGEXP_INSTANCES ~%action_remove%~ csr115_matches
-      PATCH_IF (csr115_matches != 1) BEGIN
-        PATCH_FAIL ~Component 115: expected one retired cameo action in %dlg%/%state%/%trans%.~
-      END
-      REPLACE_TEXTUALLY ~%action_remove%~ ~~
-    END
-  END
-  OUTER_SPRINT csr115_reply ~~
-  ACTION_IF (new_text >= 0) BEGIN
-    OUTER_SPRINT csr115_reply ~REPLY @%new_text%~
-  END ELSE ACTION_IF (csr115_flags BAND 1) BEGIN
-    OUTER_SPRINT csr115_reply ~REPLY #%csr115_text%~
-  END
-  OUTER_SPRINT csr115_journal_clause ~~
-  ACTION_IF (csr115_flags BAND 0x10) BEGIN
-    ACTION_IF (csr115_flags BAND 0x40) BEGIN
-      OUTER_SPRINT csr115_journal_clause ~UNSOLVED_JOURNAL #%csr115_journal%~
-    END ELSE ACTION_IF (csr115_flags BAND 0x100) BEGIN
-      OUTER_SPRINT csr115_journal_clause ~SOLVED_JOURNAL #%csr115_journal%~
-    END ELSE BEGIN
-      OUTER_SPRINT csr115_journal_clause ~JOURNAL #%csr115_journal%~
-    END
-  END
-  OUTER_SPRINT csr115_epilogue ~EXIT~
-  ACTION_IF NOT (~%target_dlg%~ STRING_EQUAL ~~) BEGIN
-    OUTER_SPRINT csr115_epilogue ~EXTERN "%target_dlg%" %target_state%~
-  END ELSE ACTION_IF NOT (csr115_flags BAND 8) BEGIN
-    OUTER_SPRINT csr115_epilogue ~EXTERN "%csr115_dest%" %csr115_dest_state%~
-  END
-  OUTER_SET csr115_position = trans
-  <<<<<<<< csr115_branch.d
-ADD_TRANS_TRIGGER ~%dlg%~ %state% ~%inverse%~ DO %trans%
-EXTEND_TOP ~%dlg%~ %state% #%csr115_position%
-  IF ~%csr115_trigger%
-%condition%~ THEN %csr115_reply% DO ~%csr115_action%~ %csr115_journal_clause% %csr115_epilogue%
-END
+<<<<<<<< .../csr115-state-addresses.2da
+2DA V1.0
+***
+ BASE
 >>>>>>>>
-  COMPILE EVALUATE_BUFFER ~csr115_branch.d~ USING ~chriz-sod-remix/languages/english/csr115.tra~
-END
 
-// Find all native incoming transitions to an exact state and branch them.
-// Scanning only the supplied audited source dialogue prevents broad edits.
-DEFINE_ACTION_FUNCTION csr115_dialog_inbound
-  INT_VAR old_state = 0 rewrite_state = (0 - 1) rewrite_trans = (0 - 1) rewrite_text = (0 - 1)
-  STR_VAR source = ~~ old_dlg = ~~ new_dlg = ~~ new_state = ~~
-          condition = ~Global("csr_kh_fort","GLOBAL",1)~
-          inverse = ~!Global("csr_kh_fort","GLOBAL",1)~
+// Component 115 writes its owned states in full. Only graph addresses and
+// the mod's own appended state identities are read from the installed resources.
+INCLUDE ~chriz-sod-remix/lib/overwrite_2da.tpa~
+
+DEFINE_ACTION_FUNCTION csr115_tail
+  INT_VAR count = 0 text = 0
+  STR_VAR dialog = ~~
+  RET base
 BEGIN
-  COPY_EXISTING - ~%source%.DLG~ ~override~
-    READ_LONG 0x08 csr115_n
-    READ_LONG 0x0c csr115_so
-    READ_LONG 0x14 csr115_to
-    FOR (csr115_s = 0; csr115_s < csr115_n; ++csr115_s) BEGIN
-      READ_LONG (csr115_so + csr115_s * 16 + 4) csr115_first
-      READ_LONG (csr115_so + csr115_s * 16 + 8) csr115_count
-      FOR (csr115_j = csr115_count - 1; csr115_j >= 0; --csr115_j) BEGIN
-        SET csr115_t = csr115_to + (csr115_first + csr115_j) * 32
-        READ_LONG csr115_t csr115_flags
-        READ_ASCII (csr115_t + 20) csr115_dest (8) NULL
-        READ_LONG (csr115_t + 28) csr115_dest_state
-        PATCH_IF ((csr115_flags BAND 8) = 0 AND
-                  (~%csr115_dest%~ STRING_EQUAL_CASE ~%old_dlg%~) AND
-                  csr115_dest_state = old_state) BEGIN
-          INNER_ACTION BEGIN
-            OUTER_SET csr115_reply_override = (0 - 1)
-            ACTION_IF (csr115_s = rewrite_state AND csr115_j = rewrite_trans) BEGIN
-              OUTER_SET csr115_reply_override = rewrite_text
-            END
-            LAF csr115_dialog_branch INT_VAR state = csr115_s trans = csr115_j new_text = csr115_reply_override
-              STR_VAR dlg = EVAL ~%source%~ target_dlg = EVAL ~%new_dlg%~
-                      target_state = EVAL ~%new_state%~ condition = EVAL ~%condition%~
-                      inverse = EVAL ~%inverse%~ END
-          END
-        END
-      END
+  LAF csr_ensure_dlg_states INT_VAR count = 0 STR_VAR dialog = EVAL ~%dialog%~ END
+  COPY_EXISTING - ~%dialog%.dlg~ ~override~
+    READ_LONG 0x08 n READ_LONG 0x0c off
+    SET base = n
+    FOR (i = 0; i < n; ++i) BEGIN
+      // Locate our own previously written state so a second tail replaces it.
+      PATCH_IF LONG_AT (off + i * 16) = text BEGIN SET base = i SET i = n END
     END
+  // Persist our state addresses separately from dialogue wording. Reinstalling
+  // overwrites the same states even after a player changes every owned line.
+  ACTION_IF FILE_EXISTS_IN_GAME ~CSR115S.2DA~ BEGIN
+    COPY_EXISTING - ~CSR115S.2DA~ ~override~
+      LPF csr_get_2da_cell STR_VAR row = EVAL ~%dialog%~ column = ~BASE~ RET value found END
+      PATCH_IF found AND IS_AN_INT ~%value%~ BEGIN SET base = %value% END
+  END ELSE BEGIN COPY ~.../csr115-state-addresses.2da~ ~override/CSR115S.2DA~ END
+  COPY_EXISTING ~CSR115S.2DA~ ~override~
+    LPF csr_set_2da_cell STR_VAR row = EVAL ~%dialog%~ column = ~BASE~ value = EVAL ~%base%~ END
+  LAF csr_ensure_dlg_states INT_VAR count = base + count STR_VAR dialog = EVAL ~%dialog%~ END
 END
 
 DEFINE_ACTION_FUNCTION csr115_dialog_apply BEGIN
-  LAM csr115_dialog_bind
-  COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr115.d~ USING ~chriz-sod-remix/languages/english/csr115.tra~
-  // Symbolic labels are local to one COMPILE call. Bind the known appended
-  // tails to numeric states before compiling independent transition forks.
-  COPY_EXISTING - ~%csr115_kh_j%.DLG~ ~override~
-    READ_LONG 0x08 csr115_after_count
-    SET csr115_new_gift = csr115_after_count - 2
-    SET csr115_new_neera = csr115_after_count - 1
-  COPY_EXISTING - ~BDKHALID.DLG~ ~override~
-    READ_LONG 0x08 csr115_after_count
-    SET csr115_new_bgift = csr115_after_count - 2
-    SET csr115_new_parting = csr115_after_count - 1
-  COPY_EXISTING - ~BDJAHEIR.DLG~ ~override~
-    READ_LONG 0x08 csr115_after_count
-    SET csr115_new_north = csr115_after_count - 3
-    SET csr115_new_search = csr115_after_count - 2
-    SET csr115_new_jhparting = csr115_after_count - 1
-  OUTER_SPRINT csr115_history ~OR(2)
-Global("csr_kh_carry","GLOBAL",1)
-Global("csr_kh_fort","GLOBAL",1)~
-  OUTER_SPRINT csr115_no_history ~!Global("csr_kh_carry","GLOBAL",1)
-!Global("csr_kh_fort","GLOBAL",1)~
-  LAF csr115_dialog_inbound INT_VAR old_state = csr115_gift_state
-    STR_VAR source = EVAL ~%csr115_kh_j%~ old_dlg = EVAL ~%csr115_kh_j%~
-            new_dlg = EVAL ~%csr115_kh_j%~ new_state = EVAL ~%csr115_new_gift%~
-            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
-  LAF csr115_dialog_inbound INT_VAR old_state = 79
-    STR_VAR source = ~BDKHALID~ old_dlg = ~BDKHALID~ new_dlg = ~BDKHALID~ new_state = EVAL ~%csr115_new_bgift%~
-            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
-  LAF csr115_dialog_inbound INT_VAR old_state = 11
-    STR_VAR source = ~BDKHALID~ old_dlg = ~BDKHALID~ new_dlg = ~BDKHALID~ new_state = EVAL ~%csr115_new_parting%~
-            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
-  LAF csr115_dialog_inbound INT_VAR old_state = 27 rewrite_state = 25 rewrite_trans = 1 rewrite_text = 51
-    STR_VAR source = ~BDJAHEIR~ old_dlg = ~BDJAHEIR~ new_dlg = ~BDJAHEIR~ new_state = EVAL ~%csr115_new_north%~
-            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
-  LAF csr115_dialog_inbound INT_VAR old_state = 43
-    STR_VAR source = ~BDJAHEIR~ old_dlg = ~BDJAHEIR~ new_dlg = ~BDJAHEIR~ new_state = EVAL ~%csr115_new_search%~
-            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
-  ACTION_FOR_EACH csr115_source IN ~BDJAHEIR~ ~%csr115_kh_j%~ BEGIN
-    LAF csr115_dialog_inbound INT_VAR old_state = 12
-      STR_VAR source = EVAL ~%csr115_source%~ old_dlg = ~BDJAHEIR~ new_dlg = ~BDJAHEIR~
-              new_state = EVAL ~%csr115_new_jhparting%~
-              condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
+  LOAD_TRA ~chriz-sod-remix/languages/english/csr115.tra~
+  OUTER_SET csr115_ch11 = 7
+  ACTION_IF GAME_IS ~eet~ BEGIN OUTER_SET csr115_ch11 = 11 END
+  OUTER_SET csr115_have_party_link = 0
+  OUTER_SPRINT csr115_kh_j ~BDKHALIJ~
+  ACTION_IF GAME_IS ~eet~ BEGIN OUTER_SPRINT csr115_kh_j ~KHALIJ~ END
+  ACTION_IF FILE_EXISTS_IN_GAME ~BDDIALOG.2DA~ BEGIN
+    COPY_EXISTING - ~BDDIALOG.2DA~ ~override~
+      SET line = 0 SET column = (0 - 1)
+      REPLACE_EVALUATE ~[^%WNL%]+~ BEGIN
+        SPRINT source ~%MATCH0%~ SET tokens = 0
+        INNER_PATCH ~%source%~ BEGIN
+          REPLACE_TEXTUALLY ~//.*$~ ~~
+          REPLACE_EVALUATE ~[^ %TAB%]+~ BEGIN SPRINT $word(~%tokens%~) ~%MATCH0%~ SET tokens += 1 END ~%MATCH0%~
+        END
+        PATCH_IF tokens > 0 BEGIN
+          PATCH_IF line = 2 BEGIN
+            FOR (i = 0; i < tokens; ++i) BEGIN
+              PATCH_IF $word(~%i%~) STRING_EQUAL_CASE ~JOIN_DIALOG_FILE~ BEGIN SET column = i + 1 END
+            END
+          END ELSE PATCH_IF line > 2 AND column >= 0 AND column < tokens BEGIN
+            PATCH_IF $word(~0~) STRING_EQUAL_CASE ~KHALID~ BEGIN SPRINT csr115_kh_j $word(~%column%~) SET csr115_have_party_link = 1 END
+          END
+          SET line += 1
+        END
+      END ~%source%~
   END
-  LAF csr115_dialog_branch INT_VAR state = 57 trans = 1
-    STR_VAR dlg = ~BDNEERA~ target_dlg = EVAL ~%csr115_kh_j%~ target_state = EVAL ~%csr115_new_neera%~
-            condition = EVAL ~%csr115_history%~ inverse = EVAL ~%csr115_no_history%~ END
-  LAF csr115_dialog_branch INT_VAR state = 31 trans = 4 new_text = 45 STR_VAR dlg = ~BDBARGHE~ END
-  LAF csr115_dialog_branch INT_VAR state = 0 trans = 0 new_text = 47 STR_VAR dlg = ~BDWYNAN~ END
-  LAF csr115_dialog_branch INT_VAR state = 2 trans = 1 quest_journal = 91 STR_VAR dlg = ~BDWYNAN~ END
-  LAF csr115_dialog_branch INT_VAR state = 2 trans = 0 quest_journal = 90 STR_VAR dlg = ~BDWYNAN~ END
-  LAF csr115_dialog_branch INT_VAR state = 20 trans = 1 quest_journal = 90 STR_VAR dlg = ~BDJEGG~ END
-  LAF csr115_dialog_branch INT_VAR state = 20 trans = 0 quest_journal = 91 STR_VAR dlg = ~BDJEGG~ END
-  // Descending independent states: local indices match the audited source.
-  LAF csr115_dialog_branch INT_VAR state = 49 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
-  LAF csr115_dialog_branch INT_VAR state = 5 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
-  LAF csr115_dialog_branch INT_VAR state = 4 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
-  LAF csr115_dialog_branch INT_VAR state = 3 trans = 0 new_text = 48 STR_VAR dlg = ~BDJEGG~ END
-  // Alias only the ephemeral stakeout soldier; the real Adirran persists.
-  LAF csr115_dialog_branch INT_VAR state = 22 trans = 0
-    STR_VAR dlg = ~BDJEGG~ target_dlg = ~CSR115AD~ target_state = ~0~ END
-  LAF csr115_dialog_branch INT_VAR state = 23 trans = 0
-    STR_VAR dlg = ~BDJEGG~ target_dlg = ~CSR115AD~ target_state = ~1~ END
-  LAF csr115_dialog_branch INT_VAR state = 25 trans = 0
-    STR_VAR dlg = ~BDJEGG~ action_pattern = ~ActionOverride("bdbfort",EscapeArea())~
-            action_replacement = ~ActionOverride("csr115ad",EscapeArea())~
-            action_remove = ~ActionOverride("khalid",EscapeArea())~ END
+  // Supply a missing join-dialogue binding.
+  ACTION_IF (~%csr115_kh_j%~ STRING_EQUAL ~***~) OR (~%csr115_kh_j%~ STRING_EQUAL ~0~) BEGIN
+    OUTER_SET csr115_have_party_link = 0
+    OUTER_SPRINT csr115_kh_j ~BDKHALIJ~
+    ACTION_IF GAME_IS ~eet~ BEGIN OUTER_SPRINT csr115_kh_j ~KHALIJ~ END
+  END
+  ACTION_IF NOT csr115_have_party_link BEGIN
+    LAF csr_ensure_bddialog END
+    COPY_EXISTING ~BDDIALOG.2DA~ ~override~
+      LPF csr_set_2da_cell STR_VAR row = ~KHALID~ column = ~JOIN_DIALOG_FILE~ value = EVAL ~%csr115_kh_j%~ END
+  END
+  LAF csr_ensure_dlg_states STR_VAR dialog = EVAL ~%csr115_kh_j%~ END
+  OUTER_SET csr115_kh_delta = 0
+  OUTER_SET csr115_have_quest = 0
+  COPY_EXISTING - ~%csr115_kh_j%.dlg~ ~override~
+    READ_LONG 0x08 csr115_party_count READ_LONG 0x0c off READ_LONG 0x18 triggers
+    READ_LONG 0x1c trigger_count
+    SET csr115_kh_delta = csr115_party_count - 174
+    FOR (i = 0; i < csr115_party_count; ++i) BEGIN
+      READ_SLONG (off + i * 16 + 12) trigger
+      PATCH_IF trigger >= 0 AND trigger < trigger_count BEGIN
+        READ_LONG (triggers + trigger * 8) pos READ_LONG (triggers + trigger * 8 + 4) len
+        READ_ASCII pos script (len)
+        PATCH_IF ~%script%~ STRING_CONTAINS_REGEXP ~Global("BD_SDD223","GLOBAL",0)~ = 0 BEGIN
+          SET csr115_kh_delta = i - 233 SET csr115_have_quest = 1 SET i = csr115_party_count
+        END ELSE PATCH_IF ~%script%~ STRING_CONTAINS_REGEXP ~Global("bd_mdd206","global",1)~ = 0 BEGIN
+          // An independent native entry supplies the same merge address if
+          // the gift entry itself was removed. No text identity is needed.
+          SET csr115_kh_delta = i - 190
+        END
+      END
+    END
+  OUTER_SPRINT csr115_jhd1166 ~BDJAHEIR~ OUTER_SET csr115_jhs1166 = 19
+  OUTER_SPRINT csr115_jhd1167 ~BDJAHEIR~ OUTER_SET csr115_jhs1167 = 20
+  OUTER_SPRINT csr115_jhd1176 ~BDJAHEIR~ OUTER_SET csr115_jhs1176 = 45
+  LAF csr_ensure_dlg_states INT_VAR count = 126 STR_VAR dialog = ~BDKHALID~ END
+  COPY_EXISTING - ~BDKHALID.dlg~ ~override~
+    READ_LONG 0x0c so READ_LONG 0x14 tr
+    PATCH_FOR_EACH key IN 1166 1167 1176 BEGIN
+      SET state = key = 1176 ? 23 : 11
+      SET transition = key = 1167 ? 1 : 0
+      READ_LONG (so + state * 16 + 4) first READ_LONG (so + state * 16 + 8) n
+      PATCH_IF transition < n BEGIN
+        READ_ASCII (tr + (first + transition) * 32 + 20) dest (8) NULL
+        READ_LONG (tr + (first + transition) * 32 + 28) target
+        PATCH_IF NOT (LONG_AT (tr + (first + transition) * 32) BAND 8) BEGIN
+          SPRINT EVAL ~csr115_jhd%key%~ ~%dest%~ SET EVAL ~csr115_jhs%key%~ = target
+        END
+      END
+    END
+  LAF csr_ensure_dlg_states INT_VAR count = 13 STR_VAR dialog = ~bdbfort~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 104 STR_VAR dialog = ~bdjaheir~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 32 STR_VAR dialog = ~bdbarghe~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 50 STR_VAR dialog = ~bdjegg~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 58 STR_VAR dialog = ~bdneera~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 10 STR_VAR dialog = ~bdvoghil~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 3 STR_VAR dialog = ~bdwynan~ END
+  LAF csr_ensure_dlg_states INT_VAR count = 2 STR_VAR dialog = ~csr115ad~ END
+  OUTER_SET csr115_kh_174 = 174 + csr115_kh_delta
+  OUTER_SET csr115_kh_175 = 175 + csr115_kh_delta
+  OUTER_SET csr115_kh_176 = 176 + csr115_kh_delta
+  OUTER_SET csr115_kh_177 = 177 + csr115_kh_delta
+  OUTER_SET csr115_kh_178 = 178 + csr115_kh_delta
+  OUTER_SET csr115_kh_179 = 179 + csr115_kh_delta
+  OUTER_SET csr115_kh_180 = 180 + csr115_kh_delta
+  OUTER_SET csr115_kh_181 = 181 + csr115_kh_delta
+  OUTER_SET csr115_kh_182 = 182 + csr115_kh_delta
+  OUTER_SET csr115_kh_183 = 183 + csr115_kh_delta
+  OUTER_SET csr115_kh_184 = 184 + csr115_kh_delta
+  OUTER_SET csr115_kh_185 = 185 + csr115_kh_delta
+  OUTER_SET csr115_kh_186 = 186 + csr115_kh_delta
+  OUTER_SET csr115_kh_187 = 187 + csr115_kh_delta
+  OUTER_SET csr115_kh_188 = 188 + csr115_kh_delta
+  OUTER_SET csr115_kh_189 = 189 + csr115_kh_delta
+  OUTER_SET csr115_kh_190 = 190 + csr115_kh_delta
+  OUTER_SET csr115_kh_191 = 191 + csr115_kh_delta
+  OUTER_SET csr115_kh_192 = 192 + csr115_kh_delta
+  OUTER_SET csr115_kh_193 = 193 + csr115_kh_delta
+  OUTER_SET csr115_kh_194 = 194 + csr115_kh_delta
+  OUTER_SET csr115_kh_195 = 195 + csr115_kh_delta
+  OUTER_SET csr115_kh_196 = 196 + csr115_kh_delta
+  OUTER_SET csr115_kh_197 = 197 + csr115_kh_delta
+  OUTER_SET csr115_kh_198 = 198 + csr115_kh_delta
+  OUTER_SET csr115_kh_199 = 199 + csr115_kh_delta
+  OUTER_SET csr115_kh_200 = 200 + csr115_kh_delta
+  OUTER_SET csr115_kh_201 = 201 + csr115_kh_delta
+  OUTER_SET csr115_kh_202 = 202 + csr115_kh_delta
+  OUTER_SET csr115_kh_203 = 203 + csr115_kh_delta
+  OUTER_SET csr115_kh_204 = 204 + csr115_kh_delta
+  OUTER_SET csr115_kh_205 = 205 + csr115_kh_delta
+  OUTER_SET csr115_kh_206 = 206 + csr115_kh_delta
+  OUTER_SET csr115_kh_207 = 207 + csr115_kh_delta
+  OUTER_SET csr115_kh_208 = 208 + csr115_kh_delta
+  OUTER_SET csr115_kh_209 = 209 + csr115_kh_delta
+  OUTER_SET csr115_kh_210 = 210 + csr115_kh_delta
+  OUTER_SET csr115_kh_211 = 211 + csr115_kh_delta
+  OUTER_SET csr115_kh_212 = 212 + csr115_kh_delta
+  OUTER_SET csr115_kh_213 = 213 + csr115_kh_delta
+  OUTER_SET csr115_kh_214 = 214 + csr115_kh_delta
+  OUTER_SET csr115_kh_215 = 215 + csr115_kh_delta
+  OUTER_SET csr115_kh_216 = 216 + csr115_kh_delta
+  OUTER_SET csr115_kh_217 = 217 + csr115_kh_delta
+  OUTER_SET csr115_kh_218 = 218 + csr115_kh_delta
+  OUTER_SET csr115_kh_219 = 219 + csr115_kh_delta
+  OUTER_SET csr115_kh_220 = 220 + csr115_kh_delta
+  OUTER_SET csr115_kh_221 = 221 + csr115_kh_delta
+  OUTER_SET csr115_kh_222 = 222 + csr115_kh_delta
+  OUTER_SET csr115_kh_223 = 223 + csr115_kh_delta
+  OUTER_SET csr115_kh_224 = 224 + csr115_kh_delta
+  OUTER_SET csr115_kh_225 = 225 + csr115_kh_delta
+  OUTER_SET csr115_kh_226 = 226 + csr115_kh_delta
+  OUTER_SET csr115_kh_227 = 227 + csr115_kh_delta
+  OUTER_SET csr115_kh_228 = 228 + csr115_kh_delta
+  OUTER_SET csr115_kh_229 = 229 + csr115_kh_delta
+  OUTER_SET csr115_kh_230 = 230 + csr115_kh_delta
+  OUTER_SET csr115_kh_231 = 231 + csr115_kh_delta
+  OUTER_SET csr115_kh_232 = 232 + csr115_kh_delta
+  OUTER_SET csr115_kh_233 = 233 + csr115_kh_delta
+  OUTER_SET csr115_kh_234 = 234 + csr115_kh_delta
+  OUTER_SET csr115_kh_235 = 235 + csr115_kh_delta
+  OUTER_SET csr115_kh_236 = 236 + csr115_kh_delta
+  OUTER_SET csr115_kh_237 = 237 + csr115_kh_delta
+  OUTER_SET csr115_kh_238 = 238 + csr115_kh_delta
+  OUTER_SET csr115_kh_239 = 239 + csr115_kh_delta
+  OUTER_SET csr115_kh_240 = 240 + csr115_kh_delta
+  OUTER_SET csr115_kh_241 = 241 + csr115_kh_delta
+  OUTER_SET csr115_kh_242 = 242 + csr115_kh_delta
+  OUTER_SET csr115_kh_243 = 243 + csr115_kh_delta
+  OUTER_SET csr115_kh_244 = 244 + csr115_kh_delta
+  OUTER_SET csr115_kh_245 = 245 + csr115_kh_delta
+  OUTER_SET csr115_kh_246 = 246 + csr115_kh_delta
+  OUTER_SET csr115_kh_247 = 247 + csr115_kh_delta
+  OUTER_SET csr115_kh_248 = 248 + csr115_kh_delta
+  OUTER_SET csr115_kh_249 = 249 + csr115_kh_delta
+  OUTER_SET csr115_kh_250 = 250 + csr115_kh_delta
+  OUTER_SET csr115_kh_251 = 251 + csr115_kh_delta
+  OUTER_SET csr115_kh_252 = 252 + csr115_kh_delta
+  OUTER_SET csr115_kh_253 = 253 + csr115_kh_delta
+  OUTER_SET csr115_kh_254 = 254 + csr115_kh_delta
+  OUTER_SET csr115_kh_255 = 255 + csr115_kh_delta
+  OUTER_SET csr115_kh_256 = 256 + csr115_kh_delta
+  OUTER_SET csr115_kh_257 = 257 + csr115_kh_delta
+  LAF csr_ensure_dlg_states INT_VAR count = csr115_kh_257 + 1 STR_VAR dialog = EVAL ~%csr115_kh_j%~ END
+  OUTER_SET csr115_s36444 = 36444 + csr115_shift
+  OUTER_SET csr115_s36445 = 36445 + csr115_shift
+  OUTER_SET csr115_s36837 = 36837 + csr115_shift
+  OUTER_SET csr115_s36847 = 36847 + csr115_shift
+  OUTER_SET csr115_s36868 = 36868 + csr115_shift
+  OUTER_SET csr115_s36869 = 36869 + csr115_shift
+  OUTER_SET csr115_s36870 = 36870 + csr115_shift
+  OUTER_SET csr115_s36871 = 36871 + csr115_shift
+  OUTER_SET csr115_s36878 = 36878 + csr115_shift
+  OUTER_SET csr115_s36879 = 36879 + csr115_shift
+  OUTER_SET csr115_s36880 = 36880 + csr115_shift
+  OUTER_SET csr115_s38222 = 38222 + csr115_shift
+  OUTER_SET csr115_s42313 = 42313 + csr115_shift
+  OUTER_SET csr115_s42319 = 42319 + csr115_shift
+  OUTER_SET csr115_s42320 = 42320 + csr115_shift
+  OUTER_SET csr115_s42321 = 42321 + csr115_shift
+  OUTER_SET csr115_s42325 = 42325 + csr115_shift
+  OUTER_SET csr115_s42326 = 42326 + csr115_shift
+  OUTER_SET csr115_s42349 = 42349 + csr115_shift
+  OUTER_SET csr115_s42350 = 42350 + csr115_shift
+  OUTER_SET csr115_s42374 = 42374 + csr115_shift
+  OUTER_SET csr115_s43407 = 43407 + csr115_shift
+  OUTER_SET csr115_s43408 = 43408 + csr115_shift
+  OUTER_SET csr115_s43409 = 43409 + csr115_shift
+  OUTER_SET csr115_s43411 = 43411 + csr115_shift
+  OUTER_SET csr115_s43412 = 43412 + csr115_shift
+  OUTER_SET csr115_s43413 = 43413 + csr115_shift
+  OUTER_SET csr115_s43415 = 43415 + csr115_shift
+  OUTER_SET csr115_s43431 = 43431 + csr115_shift
+  OUTER_SET csr115_s43699 = 43699 + csr115_shift
+  OUTER_SET csr115_s43700 = 43700 + csr115_shift
+  OUTER_SET csr115_s43701 = 43701 + csr115_shift
+  OUTER_SET csr115_s43702 = 43702 + csr115_shift
+  OUTER_SET csr115_s43704 = 43704 + csr115_shift
+  OUTER_SET csr115_s43706 = 43706 + csr115_shift
+  OUTER_SET csr115_s43707 = 43707 + csr115_shift
+  OUTER_SET csr115_s43709 = 43709 + csr115_shift
+  OUTER_SET csr115_s43711 = 43711 + csr115_shift
+  OUTER_SET csr115_s43712 = 43712 + csr115_shift
+  OUTER_SET csr115_s43713 = 43713 + csr115_shift
+  OUTER_SET csr115_s43825 = 43825 + csr115_shift
+  OUTER_SET csr115_s43826 = 43826 + csr115_shift
+  OUTER_SET csr115_s43827 = 43827 + csr115_shift
+  OUTER_SET csr115_s43828 = 43828 + csr115_shift
+  OUTER_SET csr115_s43829 = 43829 + csr115_shift
+  OUTER_SET csr115_s46541 = 46541 + csr115_shift
+  OUTER_SET csr115_s46545 = 46545 + csr115_shift
+  OUTER_SET csr115_s46546 = 46546 + csr115_shift
+  OUTER_SET csr115_s46547 = 46547 + csr115_shift
+  OUTER_SET csr115_s46548 = 46548 + csr115_shift
+  OUTER_SET csr115_s46549 = 46549 + csr115_shift
+  OUTER_SET csr115_s46550 = 46550 + csr115_shift
+  OUTER_SET csr115_s46554 = 46554 + csr115_shift
+  OUTER_SET csr115_s50705 = 50705 + csr115_shift
+  OUTER_SET csr115_s50706 = 50706 + csr115_shift
+  OUTER_SET csr115_s50707 = 50707 + csr115_shift
+  OUTER_SET csr115_s50708 = 50708 + csr115_shift
+  OUTER_SET csr115_s50709 = 50709 + csr115_shift
+  OUTER_SET csr115_s50710 = 50710 + csr115_shift
+  OUTER_SET csr115_s50711 = 50711 + csr115_shift
+  OUTER_SET csr115_s50712 = 50712 + csr115_shift
+  OUTER_SET csr115_s50714 = 50714 + csr115_shift
+  OUTER_SET csr115_s50715 = 50715 + csr115_shift
+  OUTER_SET csr115_s50716 = 50716 + csr115_shift
+  OUTER_SET csr115_s50717 = 50717 + csr115_shift
+  OUTER_SET csr115_s50718 = 50718 + csr115_shift
+  OUTER_SET csr115_s50719 = 50719 + csr115_shift
+  OUTER_SET csr115_s50720 = 50720 + csr115_shift
+  OUTER_SET csr115_s50721 = 50721 + csr115_shift
+  OUTER_SET csr115_s50722 = 50722 + csr115_shift
+  OUTER_SET csr115_s50724 = 50724 + csr115_shift
+  OUTER_SET csr115_s50725 = 50725 + csr115_shift
+  OUTER_SET csr115_s50726 = 50726 + csr115_shift
+  OUTER_SET csr115_s50727 = 50727 + csr115_shift
+  OUTER_SET csr115_s50728 = 50728 + csr115_shift
+  OUTER_SET csr115_s50729 = 50729 + csr115_shift
+  OUTER_SET csr115_s50736 = 50736 + csr115_shift
+  OUTER_SET csr115_s50737 = 50737 + csr115_shift
+  OUTER_SET csr115_s50738 = 50738 + csr115_shift
+  OUTER_SET csr115_s50739 = 50739 + csr115_shift
+  OUTER_SET csr115_s50740 = 50740 + csr115_shift
+  OUTER_SET csr115_s50741 = 50741 + csr115_shift
+  OUTER_SET csr115_s50742 = 50742 + csr115_shift
+  OUTER_SET csr115_s50743 = 50743 + csr115_shift
+  OUTER_SET csr115_s50744 = 50744 + csr115_shift
+  OUTER_SET csr115_s50745 = 50745 + csr115_shift
+  OUTER_SET csr115_s50746 = 50746 + csr115_shift
+  OUTER_SET csr115_s50750 = 50750 + csr115_shift
+  OUTER_SET csr115_s50751 = 50751 + csr115_shift
+  OUTER_SET csr115_s50752 = 50752 + csr115_shift
+  OUTER_SET csr115_s50753 = 50753 + csr115_shift
+  OUTER_SET csr115_s50754 = 50754 + csr115_shift
+  OUTER_SET csr115_s50755 = 50755 + csr115_shift
+  OUTER_SET csr115_s50756 = 50756 + csr115_shift
+  OUTER_SET csr115_s50757 = 50757 + csr115_shift
+  OUTER_SET csr115_s50758 = 50758 + csr115_shift
+  OUTER_SET csr115_s50759 = 50759 + csr115_shift
+  OUTER_SET csr115_s50760 = 50760 + csr115_shift
+  OUTER_SET csr115_s50761 = 50761 + csr115_shift
+  OUTER_SET csr115_s50762 = 50762 + csr115_shift
+  OUTER_SET csr115_s50763 = 50763 + csr115_shift
+  OUTER_SET csr115_s50764 = 50764 + csr115_shift
+  OUTER_SET csr115_s50765 = 50765 + csr115_shift
+  OUTER_SET csr115_s50766 = 50766 + csr115_shift
+  OUTER_SET csr115_s50767 = 50767 + csr115_shift
+  OUTER_SET csr115_s50768 = 50768 + csr115_shift
+  OUTER_SET csr115_s50769 = 50769 + csr115_shift
+  OUTER_SET csr115_s50770 = 50770 + csr115_shift
+  OUTER_SET csr115_s50771 = 50771 + csr115_shift
+  OUTER_SET csr115_s50772 = 50772 + csr115_shift
+  OUTER_SET csr115_s50773 = 50773 + csr115_shift
+  OUTER_SET csr115_s50774 = 50774 + csr115_shift
+  OUTER_SET csr115_s50775 = 50775 + csr115_shift
+  OUTER_SET csr115_s50776 = 50776 + csr115_shift
+  OUTER_SET csr115_s50777 = 50777 + csr115_shift
+  OUTER_SET csr115_s50778 = 50778 + csr115_shift
+  OUTER_SET csr115_s50779 = 50779 + csr115_shift
+  OUTER_SET csr115_s51905 = 51905 + csr115_shift
+  OUTER_SET csr115_s56833 = 56833 + csr115_shift
+  OUTER_SET csr115_s56838 = 56838 + csr115_shift
+  OUTER_SET csr115_s56839 = 56839 + csr115_shift
+  OUTER_SET csr115_s56840 = 56840 + csr115_shift
+  OUTER_SET csr115_s57092 = 57092 + csr115_shift
+  OUTER_SET csr115_s57094 = 57094 + csr115_shift
+  OUTER_SET csr115_s57095 = 57095 + csr115_shift
+  OUTER_SET csr115_s57096 = 57096 + csr115_shift
+  OUTER_SET csr115_s57098 = 57098 + csr115_shift
+  OUTER_SET csr115_s57104 = 57104 + csr115_shift
+  OUTER_SET csr115_s57105 = 57105 + csr115_shift
+  OUTER_SET csr115_s57106 = 57106 + csr115_shift
+  OUTER_SET csr115_s57107 = 57107 + csr115_shift
+  OUTER_SET csr115_s57108 = 57108 + csr115_shift
+  OUTER_SET csr115_s57122 = 57122 + csr115_shift
+  OUTER_SET csr115_s57123 = 57123 + csr115_shift
+  OUTER_SET csr115_s57124 = 57124 + csr115_shift
+  OUTER_SET csr115_s57125 = 57125 + csr115_shift
+  OUTER_SET csr115_s57126 = 57126 + csr115_shift
+  OUTER_SET csr115_s57128 = 57128 + csr115_shift
+  OUTER_SET csr115_s57129 = 57129 + csr115_shift
+  OUTER_SET csr115_s57130 = 57130 + csr115_shift
+  OUTER_SET csr115_s57924 = 57924 + csr115_shift
+  OUTER_SET csr115_s57925 = 57925 + csr115_shift
+  OUTER_SET csr115_s57926 = 57926 + csr115_shift
+  OUTER_SET csr115_s57927 = 57927 + csr115_shift
+  OUTER_SET csr115_s57928 = 57928 + csr115_shift
+  OUTER_SET csr115_s57929 = 57929 + csr115_shift
+  OUTER_SET csr115_s57970 = 57970 + csr115_shift
+  OUTER_SET csr115_s57971 = 57971 + csr115_shift
+  OUTER_SET csr115_s57972 = 57972 + csr115_shift
+  OUTER_SET csr115_s57973 = 57973 + csr115_shift
+  OUTER_SET csr115_s57974 = 57974 + csr115_shift
+  OUTER_SET csr115_s57975 = 57975 + csr115_shift
+  OUTER_SET csr115_s57976 = 57976 + csr115_shift
+  OUTER_SET csr115_s57977 = 57977 + csr115_shift
+  OUTER_SET csr115_s58651 = 58651 + csr115_shift
+  OUTER_SET csr115_s58652 = 58652 + csr115_shift
+  OUTER_SET csr115_s58706 = 58706 + csr115_shift
+  OUTER_SET csr115_s58707 = 58707 + csr115_shift
+  OUTER_SET csr115_s58708 = 58708 + csr115_shift
+  OUTER_SET csr115_s59763 = 59763 + csr115_shift
+  OUTER_SET csr115_s61738 = 61738 + csr115_shift
+  OUTER_SET csr115_s65486 = 65486 + csr115_shift
+  OUTER_SET csr115_s65915 = 65915 + csr115_shift
+  OUTER_SET csr115_s65916 = 65916 + csr115_shift
+  OUTER_SET csr115_s65917 = 65917 + csr115_shift
+  OUTER_SET csr115_s65918 = 65918 + csr115_shift
+  OUTER_SET csr115_s65919 = 65919 + csr115_shift
+  OUTER_SET csr115_s65934 = 65934 + csr115_shift
+  OUTER_SET csr115_s65935 = 65935 + csr115_shift
+  OUTER_SET csr115_s65936 = 65936 + csr115_shift
+  OUTER_SET csr115_s65937 = 65937 + csr115_shift
+  OUTER_SET csr115_s65938 = 65938 + csr115_shift
+  OUTER_SET csr115_s65939 = 65939 + csr115_shift
+  OUTER_SET csr115_s65940 = 65940 + csr115_shift
+  OUTER_SET csr115_s65941 = 65941 + csr115_shift
+  OUTER_SET csr115_s65942 = 65942 + csr115_shift
+  OUTER_SET csr115_s65944 = 65944 + csr115_shift
+  OUTER_SET csr115_s65945 = 65945 + csr115_shift
+  OUTER_SET csr115_s65992 = 65992 + csr115_shift
+  OUTER_SET csr115_s65993 = 65993 + csr115_shift
+  OUTER_SET csr115_s65994 = 65994 + csr115_shift
+  OUTER_SET csr115_s65995 = 65995 + csr115_shift
+  OUTER_SET csr115_s65996 = 65996 + csr115_shift
+  OUTER_SET csr115_s65997 = 65997 + csr115_shift
+  OUTER_SET csr115_s66014 = 66014 + csr115_shift
+  OUTER_SET csr115_s66015 = 66015 + csr115_shift
+  OUTER_SET csr115_s66016 = 66016 + csr115_shift
+  OUTER_SET csr115_s67123 = 67123 + csr115_shift
+  OUTER_SET csr115_s67124 = 67124 + csr115_shift
+  OUTER_SET csr115_s67430 = 67430 + csr115_shift
+  OUTER_SET csr115_s69851 = 69851 + csr115_shift
+  OUTER_SET csr115_s70006 = 70006 + csr115_shift
+  OUTER_SET csr115_s70439 = 70439 + csr115_shift
+  OUTER_SET csr115_s70441 = 70441 + csr115_shift
+  OUTER_SET csr115_s70442 = 70442 + csr115_shift
+  ACTION_IF NOT csr115_have_quest OR csr115_party_count < csr115_kh_257 + 1 BEGIN
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_177% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_0 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_178% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_1 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_190% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_2 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_199% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_3 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_201% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_4 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_233% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_5 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_234% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_6 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_235% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_7 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_236% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_8 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_237% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_9 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_238% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_10 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_239% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_11 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_240% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_12 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_241% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_13 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_242% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_14 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_243% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_15 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_244% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_16 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_245% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_17 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_246% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_18 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_247% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_19 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_248% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_20 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_249% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_21 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_250% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_22 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_251% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_23 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_252% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_24 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_253% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_25 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_254% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_26 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_255% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_27 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_256% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_28 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_257% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_party_fallback_29 = clause END
+    COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr115-party-fallback.d~
+  END
+  LAF csr115_tail INT_VAR count = 16 text = RESOLVE_STR_REF(@0) STR_VAR dialog = EVAL ~bdbfort~ RET base END
+  OUTER_SET csr115_bdbfort_13 = base + 0
+  OUTER_SET csr115_bdbfort_14 = base + 1
+  OUTER_SET csr115_bdbfort_15 = base + 2
+  OUTER_SET csr115_bdbfort_16 = base + 3
+  OUTER_SET csr115_bdbfort_17 = base + 4
+  OUTER_SET csr115_bdbfort_18 = base + 5
+  OUTER_SET csr115_bdbfort_19 = base + 6
+  OUTER_SET csr115_bdbfort_20 = base + 7
+  OUTER_SET csr115_bdbfort_21 = base + 8
+  OUTER_SET csr115_bdbfort_22 = base + 9
+  OUTER_SET csr115_bdbfort_23 = base + 10
+  OUTER_SET csr115_bdbfort_24 = base + 11
+  OUTER_SET csr115_bdbfort_25 = base + 12
+  OUTER_SET csr115_bdbfort_26 = base + 13
+  OUTER_SET csr115_bdbfort_27 = base + 14
+  OUTER_SET csr115_bdbfort_28 = base + 15
+  LAF csr115_tail INT_VAR count = 2 text = RESOLVE_STR_REF(@40) STR_VAR dialog = EVAL ~bdkhalid~ RET base END
+  OUTER_SET csr115_bdkhalid_126 = base + 0
+  OUTER_SET csr115_bdkhalid_127 = base + 1
+  LAF csr115_tail INT_VAR count = 3 text = RESOLVE_STR_REF(@42) STR_VAR dialog = EVAL ~bdjaheir~ RET base END
+  OUTER_SET csr115_bdjaheir_104 = base + 0
+  OUTER_SET csr115_bdjaheir_105 = base + 1
+  OUTER_SET csr115_bdjaheir_106 = base + 2
+  LAF csr115_tail INT_VAR count = 3 text = RESOLVE_STR_REF(@4) STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET base END
+  OUTER_SET csr115_khalij_272 = base + 0
+  OUTER_SET csr115_khalij_273 = base + 1
+  OUTER_SET csr115_khalij_274 = base + 2
+  LAF csr_dlg_state_weight INT_VAR state = 31 STR_VAR dialog = EVAL ~bdbarghe~ RET csr115_weight_csr115_0 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 2 STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_1 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 3 STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_2 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_13% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_3 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_14% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_4 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_15% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_5 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_16% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_6 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_17% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_7 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_18% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_8 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_19% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_9 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_20% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_10 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_21% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_11 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_22% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_12 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_23% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_13 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_24% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_14 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_25% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_15 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_26% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_16 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_27% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_17 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdbfort_28% STR_VAR dialog = EVAL ~bdbfort~ RET csr115_weight_csr115_18 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 11 STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_19 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 14 STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_20 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 25 STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_21 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 26 STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_22 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 42 STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_23 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdjaheir_104% STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_24 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdjaheir_105% STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_25 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdjaheir_106% STR_VAR dialog = EVAL ~bdjaheir~ RET csr115_weight_csr115_26 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 3 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_27 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 4 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_28 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 5 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_29 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 20 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_30 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 22 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_31 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 23 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_32 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 25 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_33 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 49 STR_VAR dialog = EVAL ~bdjegg~ RET csr115_weight_csr115_34 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 10 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_35 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 23 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_36 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 30 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_37 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 48 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_38 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 49 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_39 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 50 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_40 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 51 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_41 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 52 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_42 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 70 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_43 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 71 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_44 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 119 STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_45 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdkhalid_126% STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_46 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_bdkhalid_127% STR_VAR dialog = EVAL ~bdkhalid~ RET csr115_weight_csr115_47 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 57 STR_VAR dialog = EVAL ~bdneera~ RET csr115_weight_csr115_48 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 9 STR_VAR dialog = EVAL ~bdvoghil~ RET csr115_weight_csr115_49 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 0 STR_VAR dialog = EVAL ~bdwynan~ RET csr115_weight_csr115_50 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 2 STR_VAR dialog = EVAL ~bdwynan~ RET csr115_weight_csr115_51 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_177% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_52 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_178% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_53 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_190% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_54 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_kh_234% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_55 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_khalij_272% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_56 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_khalij_273% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_57 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = %csr115_khalij_274% STR_VAR dialog = EVAL ~%csr115_kh_j%~ RET csr115_weight_csr115_58 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 0 STR_VAR dialog = EVAL ~csr115ad~ RET csr115_weight_csr115_59 = clause END
+  LAF csr_dlg_state_weight INT_VAR state = 1 STR_VAR dialog = EVAL ~csr115ad~ RET csr115_weight_csr115_60 = clause END
+  COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr115.d~
 END

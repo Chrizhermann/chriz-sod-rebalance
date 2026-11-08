@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Exercise component 290's real container preflights in disposable fake games.
+"""Exercise component 290's real container writes in disposable fake games.
 
 Set WEIDU_EXE to a WeiDU executable. These fixtures deliberately omit the carrier's
-movie action: reaching that later guard proves the ARE preflights accepted the
+movie action: reaching that later guard proves the ARE writes accepted the
 fixture, while malformed bank names must fail at the earlier ARE guard instead.
 No resource is read from or written to an installed game.
 """
@@ -19,7 +19,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-COMP290 = ROOT / "chriz-sod-remix" / "lib" / "comp290.tpa"
+COMP290 = ROOT / "chriz-sod-remix" / "lib" / "comp290_bank.tpa"
 WEIDU = os.environ.get("WEIDU_EXE") or shutil.which("weidu")
 
 
@@ -54,6 +54,7 @@ class ContainerPreflightTests(unittest.TestCase):
             game = Path(tmp)
             override = game / "override"
             override.mkdir()
+            (game/"weidu.log").write_text("")
             # Every resource used by this early production preflight is in
             # override. A TLK default entry prevents WeiDU creating one itself.
             (game / "chitin.key").write_bytes(
@@ -90,35 +91,44 @@ class ContainerPreflightTests(unittest.TestCase):
                 cwd=game, capture_output=True, text=True, errors="replace", timeout=30,
             )
             output = result.stdout + result.stderr
-            self.assertNotEqual(result.returncode, 0, output)
-            self.assertIn(expected_guard, output)
-            self.assertIn("NOT INSTALLED DUE TO ERRORS", output)
-            self.assertEqual(
-                {p.name.upper(): p.read_bytes() for p in override.iterdir()}, fixtures,
-                "A rejected preflight must leave every resource unchanged",
-            )
-            for name, before in immutable.items():
-                self.assertEqual((game / name).read_bytes(), before, str(name))
+            self.assertEqual(result.returncode,0,output)
+            self.assertNotIn('WARNING',output.upper())
+            patched=(override/'bd4300.are').read_bytes()
+            co,cc=struct.unpack_from('<IH',patched,0x70)
+            banks=[]
+            for i in range(cc):
+                at=co+i*192
+                name=patched[at:at+32].split(b'\0')[0].replace(b' ',b'').upper()
+                if name==b'K#IMPORTCONTAINER':banks.append(at)
+            self.assertEqual(len(banks),1)
+            self.assertEqual(struct.unpack_from('<HHH',patched,banks[0]+32),(88,76,8))
+            self.assertEqual((override/'bd6100.are').read_bytes(),fixtures['BD6100.ARE'])
+            first=patched
+            second=game/'second.tp2'
+            second.write_text(harness.read_text().replace('BACKUP ~backup~','BACKUP ~second-backup~'))
+            result=subprocess.run([str(WEIDU),str(second),'--game',str(game),'--force-install-list','0','--no-exit-pause'],cwd=game,capture_output=True,text=True,timeout=30)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            self.assertEqual(first,(override/'bd4300.are').read_bytes())
 
-    def test_distinct_spaced_names_pass_both_area_preflights(self) -> None:
+    def test_distinct_spaced_names_pass_both_area_writes(self) -> None:
         self.run_preflight(
             [("Ordinary Treasure Chest", 0)], [("K#ImportContainer", 0)],
             "[K# carrier INTRO15F anchor]: expected 1 occurrence(s)",
         )
 
-    def test_local_space_alias_conflicts_with_new_bank(self) -> None:
+    def test_local_space_alias_is_reused(self) -> None:
         self.run_preflight(
             [("K#Import Container", 0)], [("K#ImportContainer", 0)],
             "[BD4300 local bank]: expected zero K#ImportContainer records before installation, found 1",
         )
 
-    def test_local_mixed_case_and_multiple_spaces_also_conflict(self) -> None:
+    def test_local_mixed_case_and_multiple_spaces_are_reused(self) -> None:
         self.run_preflight(
             [(" k# import CONTAINER ", 0)], [("K#ImportContainer", 0)],
             "[BD4300 local bank]: expected zero K#ImportContainer records before installation, found 1",
         )
 
-    def test_destination_space_alias_is_an_ambiguous_duplicate(self) -> None:
+    def test_destination_space_alias_stays_untouched(self) -> None:
         self.run_preflight(
             [], [("K#ImportContainer", 0), ("K#Import Container", 0)],
             "[BD6100 destination]: expected exactly one empty K#ImportContainer, found 2 named container(s), 2 empty",
@@ -130,7 +140,7 @@ class ContainerPreflightTests(unittest.TestCase):
             "[K# carrier INTRO15F anchor]: expected 1 occurrence(s)",
         )
 
-    def test_single_nonempty_destination_alias_is_rejected(self) -> None:
+    def test_single_nonempty_destination_alias_stays_untouched(self) -> None:
         self.run_preflight(
             [], [("K#Import Container", 1)],
             "[BD6100 destination]: expected exactly one empty K#ImportContainer, found 1 named container(s), 0 empty",

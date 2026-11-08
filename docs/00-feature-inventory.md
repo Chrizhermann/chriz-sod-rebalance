@@ -1,23 +1,26 @@
 # chriz-sod-remix — Feature Inventory
 
-**Living reference doc** (started 2026-07-10; release inventory updated 2026-10-29).
+**Living reference doc** (started 2026-07-10; release inventory updated 2026-11-08).
 Single deduplicated view of the
 mod: code/component reality drives status; design detail is folded into the matching
 component. This is INVENTORY, not decisions — decisions live in
 `docs/01-remix-wishlist.md` and `docs/design/`.
 
 Source-of-truth files: `chriz-sod-remix/setup-chriz-sod-remix.tp2` (**49 component
-declarations in seven groups** for v0.6.16),
+declarations in seven groups** for v0.6.17),
 `docs/01-remix-wishlist.md` (scope anchor),
 `docs/design/wave1/`, and `docs/design/chapters/`.
 
 ---
 
-## 1. Implemented in source — v0.6.16
+## 1. Implemented in source — v0.6.17
 
-Release **v0.6.16**. This section describes release source, not a claim
+Release **v0.6.17**. This section describes release source, not a claim
 that every component is installed or natively accepted.
 Isolated Combined playtest results are recorded separately below.
+
+**v0.6.17:** every component writes its decided result over whatever the game files
+hold; edited or missing input no longer stops, warns or skips it.
 
 **v0.6.16:** 290 checks the shape of every `BD4300` block that sets the victory
 remarks' timer, whoever added it, and shortens all of them to 2 seconds instead of

@@ -1,0 +1,174 @@
+// Native handoff framework for an absent external carrier.
+// No foreign import rules are invented; unmatched equipment goes to the bank.
+IF
+  Global("K#FrameDelay","LOCALS",0)
+THEN
+  RESPONSE #100
+    DisableAI(Player1,FALSE)
+    DisableAI(Player2,FALSE)
+    DisableAI(Player3,FALSE)
+    DisableAI(Player4,FALSE)
+    DisableAI(Player5,FALSE)
+    DisableAI(Player6,FALSE)
+    SetGlobal("K#FrameDelay","LOCALS",1)
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",1)
+  !Name("None",Player2)
+THEN
+  RESPONSE #100
+    ActionOverride(Player2,MakeUnselectable(1))
+    Continue()
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",1)
+  !Name("None",Player3)
+THEN
+  RESPONSE #100
+    ActionOverride(Player3,MakeUnselectable(1))
+    Continue()
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",1)
+  !Name("None",Player4)
+THEN
+  RESPONSE #100
+    ActionOverride(Player4,MakeUnselectable(1))
+    Continue()
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",1)
+  !Name("None",Player5)
+THEN
+  RESPONSE #100
+    ActionOverride(Player5,MakeUnselectable(1))
+    Continue()
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",1)
+  !Name("None",Player6)
+THEN
+  RESPONSE #100
+    ActionOverride(Player6,MakeUnselectable(1))
+    Continue()
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",1)
+THEN
+  RESPONSE #100
+    SetGlobal("K#FrameDelay","LOCALS",2)
+    AdvanceTime(ONE_MONTH)
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player1,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player2,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player3,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player4,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player5,ALL))
+    ActionOverride("K#ImportContainer",TakeCreatureItems(Player6,ALL))
+END
+
+IF
+  Global("K#FrameDelay","LOCALS",2)
+THEN
+  RESPONSE #100
+    SetGlobal("K#FrameDelay","LOCALS",3)
+    ApplySpellRES("K#UNREST",Player1)
+    ApplySpellRES("K#UNREST",Player2)
+    ApplySpellRES("K#UNREST",Player3)
+    ApplySpellRES("K#UNREST",Player4)
+    ApplySpellRES("K#UNREST",Player5)
+    ApplySpellRES("K#UNREST",Player6)
+    ActionOverride(Player1,Rest())
+    ActionOverride(Player2,Rest())
+    ActionOverride(Player3,Rest())
+    ActionOverride(Player4,Rest())
+    ActionOverride(Player5,Rest())
+    ActionOverride(Player6,Rest())
+END
+
+IF
+  InPartyAllowDead(Player2)
+  !Name("None",Player2)
+THEN
+  RESPONSE #100
+    ActionOverride(Player2,LeaveParty())
+    ActionOverride(Player2,DestroySelf())
+    Continue()
+END
+
+IF
+  InPartyAllowDead(Player3)
+  !Name("None",Player3)
+THEN
+  RESPONSE #100
+    ActionOverride(Player3,LeaveParty())
+    ActionOverride(Player3,DestroySelf())
+    Continue()
+END
+
+IF
+  InPartyAllowDead(Player4)
+  !Name("None",Player4)
+THEN
+  RESPONSE #100
+    ActionOverride(Player4,LeaveParty())
+    ActionOverride(Player4,DestroySelf())
+    Continue()
+END
+
+IF
+  InPartyAllowDead(Player5)
+  !Name("None",Player5)
+THEN
+  RESPONSE #100
+    ActionOverride(Player5,LeaveParty())
+    ActionOverride(Player5,DestroySelf())
+    Continue()
+END
+
+IF
+  InPartyAllowDead(Player6)
+  !Name("None",Player6)
+THEN
+  RESPONSE #100
+    ActionOverride(Player6,LeaveParty())
+    ActionOverride(Player6,DestroySelf())
+    Continue()
+END
+
+IF
+  True()
+THEN
+  RESPONSE #100
+    GivePartyAllEquipment()
+    SetGlobal("bd_plot","GLOBAL",700)
+    SetGlobal("SPRITE_IS_DEADKHALID","GLOBAL",1)
+    SetGlobal("SPRITE_IS_DEADDYNAHEIR","GLOBAL",1)
+    SetGlobal("SPRITE_IS_DEADCALAHAN","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADCARBOS","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADDIANA","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADEDWIN","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADFTOWNNASH3","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADGORF","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADIMOEN2","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADKING","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADKNIGHT1","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADPAWN","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADQUEEN","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADROGER","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADSENDAI","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADSHANK","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADTARNOR","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADTAZOK","GLOBAL",0)
+    SetGlobal("SPRITE_IS_DEADWILLIAM","GLOBAL",0)
+    Wait(1)
+    StartMovie("INTRO15F")
+    MoveToCampaign("SoA")
+    MultiPlayerSync()
+    DestroySelf()
+END

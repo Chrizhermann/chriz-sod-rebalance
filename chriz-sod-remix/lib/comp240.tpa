@@ -1,165 +1,115 @@
-// ============================================================
-// Component 240 body — Forest of Wyrms: cave out, temple direct
-// ============================================================
-// Design: docs/design/chapters/03-roadnorth.md "Quick-win pass"
-// (CONFIRMED 2026-07-11; bugbear-cave removal decided 2026-07-10).
-//
-// The vanilla chain is overland -> dragon cave -> BUGBEAR CAVE ->
-// temple (verified from the .are travel regions, 2026-07-11: the
-// only two travel regions in the game pointing at BD7220 are
-// BD7210's and BD7230's "TranBD7220"; BD7220 has no worldmap
-// entry). This component:
-//
-//   240.1  BD7200 cuts (28): the bugbear door-guard camp at the
-//          cave mouth (orphaned with their cave), displacer pack,
-//          dire wolves, small spiders. Wyverns (all 13), the phase
-//          spider pocket incl. the astral, and the hill giant stay.
-//   240.2  BD7230 cuts (6): the post-Neothelid invisible ambushers
-//          ("impossible to beat on higher difficulties" - user).
-//          Their region script (BD7230AM) keys every block on the
-//          named actor being alive-and-neutral, so with the actors
-//          never spawning the ambush is permanently inert - no
-//          script edit needed. Loot verified mundane.
-//   240.3  The rewire: BD7210's TranBD7220 -> BD7230 (arrive at the
-//          temple's vanilla entrance "ExitBD7220"), and BD7230's
-//          TranBD7220 -> BD7210 (arrive at the cave's vanilla
-//          "ExitBD7220"). Region NAMES are untouched, so every
-//          vanilla EscapeAreaObject("TranBD7220") keeps working -
-//          including CULTIST_NEO_ESCAPE (BD7230.baf:128), who now
-//          flees INTO the dragon cave (the user's "move the fleeing
-//          cultist to that exit" fulfilled by construction). BD7220
-//          then has zero inbound links: removed by unreachability,
-//          its file untouched, fully reversible.
-//   240.4  XP chunk on the Neothelid kill (the loop's one closure
-//          point; BD7230.baf itself keys on Dead("bdneothe")).
-//
-// Ledger: BD7200 10,835 + BD7230 ambushers 2,750 + unreachable
-// BD7220 14,810 (hostiles + the quest-only Greater Shadow) =
-// 28,395 cut -> generator-computed chunk (cut * 0.8 / 6, to 100).
-// The spectacles gimmick item (bdmisc01) is carried by BDZAVIAK in
-// BD0109 - the game-wide shadow mechanic survives; only the cave's
-// own shadow instance is lost (counted above).
-
+// Forest of Wyrms: the approved named enemies are absent, and the dragon
+// cave and temple connect directly. Other actors and area records are retained.
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
 ACTION_CLEAR_ARRAY csr_cut_bd7200
 ACTION_CLEAR_ARRAY csr_cut_bd7230
 INCLUDE ~chriz-sod-remix/lib/comp240_lists.tpa~
 
-// ------------------------------------------------------------
-// 240.0 — preflight: both landing entrances must exist
-// ------------------------------------------------------------
-OUTER_SET csr_ent_7210 = 0
-COPY_EXISTING - ~bd7210.are~ ~override~
-  READ_LONG  0x68 csr_eo
-  READ_LONG  0x6C csr_ec
-  FOR (csr_i = 0; csr_i < csr_ec; csr_i += 1) BEGIN
-    READ_ASCII (csr_eo + csr_i * 0x68) csr_en (32) NULL
-    PATCH_IF (~%csr_en%~ STRING_EQUAL_CASE ~ExitBD7220~) BEGIN
-      SET csr_ent_7210 = 1
+DEFINE_PATCH_MACRO csr240_cut_actors BEGIN
+  FOR (i = 0; i < ac; ++i) BEGIN
+    SET at = ao + i * 0x110 READ_ASCII at name (32) NULL TO_UPPER name
+    SET cut = 0
+    PATCH_IF ~%area%~ STRING_EQUAL ~bd7200~ BEGIN
+      PATCH_IF VARIABLE_IS_SET $csr_cut_bd7200(~%name%~) BEGIN SET cut = 1 END
+    END ELSE BEGIN
+      PATCH_IF VARIABLE_IS_SET $csr_cut_bd7230(~%name%~) BEGIN SET cut = 1 END
     END
+    PATCH_IF cut BEGIN WRITE_LONG (at + 0x40) 0 END
   END
-OUTER_SET csr_ent_7230 = 0
-COPY_EXISTING - ~bd7230.are~ ~override~
-  READ_LONG  0x68 csr_eo
-  READ_LONG  0x6C csr_ec
-  FOR (csr_i = 0; csr_i < csr_ec; csr_i += 1) BEGIN
-    READ_ASCII (csr_eo + csr_i * 0x68) csr_en (32) NULL
-    PATCH_IF (~%csr_en%~ STRING_EQUAL_CASE ~ExitBD7220~) BEGIN
-      SET csr_ent_7230 = 1
-    END
-  END
-ACTION_IF NOT ((csr_ent_7210 = 1) AND (csr_ent_7230 = 1)) BEGIN
-  FAIL ~chriz-sod-remix comp240: entrance "ExitBD7220" missing in bd7210.are (%csr_ent_7210%) or bd7230.are (%csr_ent_7230%). The areas differ from the verified layout (another mod?).~
 END
 
-// ------------------------------------------------------------
-// 240.1 — BD7200 overland cuts
-// ------------------------------------------------------------
-COPY_EXISTING ~bd7200.are~ ~override~
-  READ_LONG  0x54 csr_ao
-  READ_SHORT 0x58 csr_ac
-  SET csr_hits = 0
-  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
-    SET csr_b = csr_ao + csr_i * 0x110
-    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
-    TO_UPPER csr_cre
-    READ_SSHORT (csr_b + 0x20) csr_x
-    READ_SSHORT (csr_b + 0x22) csr_y
-    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd7200(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
-      WRITE_LONG (csr_b + 0x40) 0
-      SET csr_hits += 1
-    END
+ACTION_FOR_EACH area IN ~bd7200~ ~bd7230~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%area%.are~ BEGIN
+    COPY_EXISTING ~%area%.are~ ~override~
+      SET writable = SOURCE_SIZE >= 0x5a
+      PATCH_IF writable BEGIN
+        READ_LONG 0x54 ao READ_SHORT 0x58 ac
+        SET writable = ao + ac * 0x110 <= SOURCE_SIZE
+      END
+      PATCH_IF writable BEGIN LPM csr240_cut_actors END
+      ELSE BEGIN PATCH_PRINT ~#240: %area% actor table is unreadable; only this table is unchanged.~ END
+    BUT_ONLY
+  END ELSE BEGIN PRINT ~#240: %area% is absent; its removed actors are already unavailable.~ END
+END
+
+ACTION_FOR_EACH area IN ~bd7210~ ~bd7230~ BEGIN
+  OUTER_SPRINT destination ~BD7230~
+  OUTER_SET entrance_x = 1626 OUTER_SET entrance_y = 1259 OUTER_SET entrance_face = 7
+  OUTER_SET use_x = 1845 OUTER_SET use_y = 1374
+  OUTER_SET left = 1665 OUTER_SET top = 1239 OUTER_SET right = 1909 OUTER_SET bottom = 1494
+  ACTION_CLEAR_ARRAY csr240_polygon
+  ACTION_DEFINE_ASSOCIATIVE_ARRAY csr240_polygon BEGIN 0,1755 => 1275 1,1665 => 1410 2,1909 => 1494 3,1909 => 1239 END
+  ACTION_IF ~%area%~ STRING_EQUAL ~bd7230~ BEGIN
+    OUTER_SPRINT destination ~BD7210~
+    OUTER_SET entrance_x = 1578 OUTER_SET entrance_y = 589 OUTER_SET entrance_face = 14
+    OUTER_SET use_x = 1460 OUTER_SET use_y = 543
+    OUTER_SET left = 1222 OUTER_SET top = 333 OUTER_SET right = 1544 OUTER_SET bottom = 611
+    ACTION_CLEAR_ARRAY csr240_polygon
+    ACTION_DEFINE_ASSOCIATIVE_ARRAY csr240_polygon BEGIN 0,1464 => 611 1,1544 => 437 2,1342 => 333 3,1222 => 542 END
   END
-  PATCH_IF (csr_hits != csr_cutn_bd7200) BEGIN
-    PATCH_FAIL ~chriz-sod-remix comp240: BD7200.are matched %csr_hits% of %csr_cutn_bd7200% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp240_lists.tpa before installing.~
+  ACTION_IF FILE_EXISTS_IN_GAME ~%area%.are~ BEGIN
+    COPY_EXISTING ~%area%.are~ ~override~
+      SET writable = SOURCE_SIZE >= 0x84
+      PATCH_IF writable BEGIN
+        READ_SHORT 0x5a rc READ_LONG 0x5c ro READ_LONG 0x68 eo READ_LONG 0x6c ec
+        READ_LONG 0x7c vo READ_SHORT 0x80 vc
+        SET writable = ro + rc * 0xc4 <= SOURCE_SIZE AND eo + ec * 0x68 <= SOURCE_SIZE AND vo + vc * 4 <= SOURCE_SIZE
+      END
+      PATCH_IF writable BEGIN
+        SET entrance = 0
+        FOR (i = 0; i < ec; ++i) BEGIN
+          READ_ASCII (eo + i * 0x68) name (32) NULL
+          PATCH_IF ~%name%~ STRING_EQUAL_CASE ~ExitBD7220~ BEGIN SET entrance = 1 END
+        END
+        PATCH_IF NOT entrance BEGIN
+          READ_ASCII eo entries (ec * 0x68)
+          SET eo = BUFFER_LENGTH INSERT_BYTES eo ((ec + 1) * 0x68)
+          WRITE_ASCIIE eo ~%entries%~ WRITE_LONG 0x68 eo WRITE_LONG 0x6c (ec + 1)
+          SET at = eo + ec * 0x68
+          WRITE_ASCII at ~ExitBD7220~ #32
+          WRITE_SHORT (at + 32) entrance_x WRITE_SHORT (at + 34) entrance_y WRITE_SHORT (at + 36) entrance_face
+        END
+        SET region = 0
+        FOR (i = 0; i < rc; ++i) BEGIN
+          SET at = ro + i * 0xc4 READ_ASCII at name (32) NULL
+          PATCH_IF ~%name%~ STRING_EQUAL_CASE ~TranBD7220~ BEGIN
+            WRITE_SHORT (at + 0x20) 2
+            WRITE_ASCIIE (at + 0x38) ~%destination%~ #8
+            WRITE_ASCII (at + 0x40) ~ExitBD7220~ #32
+            WRITE_LONG (at + 0x60) (LONG_AT (at + 0x60) BAND (BNOT 0x100))
+            SET region = 1
+          END
+        END
+        PATCH_IF NOT region BEGIN
+          READ_ASCII ro entries (rc * 0xc4)
+          SET ro = BUFFER_LENGTH INSERT_BYTES ro ((rc + 1) * 0xc4)
+          WRITE_ASCIIE ro ~%entries%~ WRITE_LONG 0x5c ro WRITE_SHORT 0x5a (rc + 1)
+          SET at = ro + rc * 0xc4
+          WRITE_ASCII at ~TranBD7220~ #32 WRITE_SHORT (at + 0x20) 2
+          WRITE_SHORT (at + 0x22) left WRITE_SHORT (at + 0x24) top
+          WRITE_SHORT (at + 0x26) right WRITE_SHORT (at + 0x28) bottom
+          WRITE_SHORT (at + 0x2a) 4 WRITE_LONG (at + 0x2c) vc
+          WRITE_ASCIIE (at + 0x38) ~%destination%~ #8 WRITE_ASCII (at + 0x40) ~ExitBD7220~ #32
+          WRITE_LONG (at + 0x60) 1540 WRITE_LONG (at + 0x64) 0xffffffff
+          WRITE_SHORT (at + 0x84) use_x WRITE_SHORT (at + 0x86) use_y
+          READ_ASCII vo vertices (vc * 4)
+          SET vo = BUFFER_LENGTH INSERT_BYTES vo ((vc + 4) * 4)
+          WRITE_ASCIIE vo ~%vertices%~ WRITE_LONG 0x7c vo WRITE_SHORT 0x80 (vc + 4)
+          PHP_EACH csr240_polygon AS vertex => y BEGIN
+            WRITE_SHORT (vo + (vc + vertex_0) * 4) vertex_1 WRITE_SHORT (vo + (vc + vertex_0) * 4 + 2) y
+          END
+        END
+      END ELSE BEGIN PATCH_PRINT ~#240: %area% travel tables are unreadable; only this file is unchanged.~ END
+    BUT_ONLY
+  END ELSE BEGIN PRINT ~#240: %area% is absent; the other forest changes still apply.~ END
+END
+
+LAF csr_ensure_script STR_VAR script = ~BD7230~ END
+MKDIR ~weidu_external/work/chriz-sod-remix/240~
+COPY ~chriz-sod-remix/baf/csr240xp.baf~ ~weidu_external/work/chriz-sod-remix/240/xp.baf~
+  EVALUATE_BUFFER READ_ASCII 0 award (BUFFER_LENGTH)
+COPY_EXISTING ~BD7230.BCS~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks STR_VAR pattern = ~"CSR_FOW_CHUNK"~ replacement = EVAL ~%award%~ END
   END
 BUT_ONLY
-
-// ------------------------------------------------------------
-// 240.2 + 240.3a — BD7230: ambusher cuts + exit re-target
-// ------------------------------------------------------------
-COPY_EXISTING ~bd7230.are~ ~override~
-  READ_LONG  0x54 csr_ao
-  READ_SHORT 0x58 csr_ac
-  SET csr_hits = 0
-  FOR (csr_i = 0; csr_i < csr_ac; csr_i += 1) BEGIN
-    SET csr_b = csr_ao + csr_i * 0x110
-    READ_ASCII (csr_b + 0x80) csr_cre (8) NULL
-    TO_UPPER csr_cre
-    READ_SSHORT (csr_b + 0x20) csr_x
-    READ_SSHORT (csr_b + 0x22) csr_y
-    PATCH_IF (VARIABLE_IS_SET $csr_cut_bd7230(~%csr_cre%@%csr_x%@%csr_y%~)) BEGIN
-      WRITE_LONG (csr_b + 0x40) 0
-      SET csr_hits += 1
-    END
-  END
-  PATCH_IF (csr_hits != csr_cutn_bd7230) BEGIN
-    PATCH_FAIL ~chriz-sod-remix comp240: BD7230.are matched %csr_hits% of %csr_cutn_bd7230% cut-list actors. The placed actors differ from the verified layout (another mod?) - regenerate lib/comp240_lists.tpa before installing.~
-  END
-  READ_LONG  0x5C csr_ro
-  READ_SHORT 0x5A csr_rc
-  SET csr_rhits = 0
-  FOR (csr_i = 0; csr_i < csr_rc; csr_i += 1) BEGIN
-    SET csr_rb = csr_ro + csr_i * 0xC4
-    READ_ASCII csr_rb csr_rname (32) NULL
-    READ_SHORT (csr_rb + 0x20) csr_rtype
-    READ_ASCII (csr_rb + 0x38) csr_rdest (8) NULL
-    TO_UPPER csr_rdest
-    PATCH_IF ((~%csr_rname%~ STRING_EQUAL_CASE ~TranBD7220~) AND (csr_rtype = 2) AND (~%csr_rdest%~ STRING_EQUAL ~BD7220~)) BEGIN
-      WRITE_ASCIIE (csr_rb + 0x38) ~BD7210~ #8
-      WRITE_ASCIIE (csr_rb + 0x40) ~ExitBD7220~ #32
-      SET csr_rhits += 1
-    END
-  END
-  PATCH_IF (csr_rhits != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix comp240: BD7230.are has %csr_rhits% travel regions named TranBD7220 -> BD7220 (expected exactly 1). The area differs from the verified layout (another mod?).~
-  END
-BUT_ONLY
-
-// ------------------------------------------------------------
-// 240.3b — BD7210: deep passage now opens into the temple
-// ------------------------------------------------------------
-COPY_EXISTING ~bd7210.are~ ~override~
-  READ_LONG  0x5C csr_ro
-  READ_SHORT 0x5A csr_rc
-  SET csr_rhits = 0
-  FOR (csr_i = 0; csr_i < csr_rc; csr_i += 1) BEGIN
-    SET csr_rb = csr_ro + csr_i * 0xC4
-    READ_ASCII csr_rb csr_rname (32) NULL
-    READ_SHORT (csr_rb + 0x20) csr_rtype
-    READ_ASCII (csr_rb + 0x38) csr_rdest (8) NULL
-    TO_UPPER csr_rdest
-    PATCH_IF ((~%csr_rname%~ STRING_EQUAL_CASE ~TranBD7220~) AND (csr_rtype = 2) AND (~%csr_rdest%~ STRING_EQUAL ~BD7220~)) BEGIN
-      WRITE_ASCIIE (csr_rb + 0x38) ~BD7230~ #8
-      WRITE_ASCIIE (csr_rb + 0x40) ~ExitBD7220~ #32
-      SET csr_rhits += 1
-    END
-  END
-  PATCH_IF (csr_rhits != 1) BEGIN
-    PATCH_FAIL ~chriz-sod-remix comp240: BD7210.are has %csr_rhits% travel regions named TranBD7220 -> BD7220 (expected exactly 1). The area differs from the verified layout (another mod?).~
-  END
-BUT_ONLY
-
-// ------------------------------------------------------------
-// 240.4 — the XP ledger chunk on the Neothelid
-// ------------------------------------------------------------
-EXTEND_TOP ~bd7230.bcs~ ~chriz-sod-remix/baf/csr240xp.baf~ EVALUATE_BUFFER

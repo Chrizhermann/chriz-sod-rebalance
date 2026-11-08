@@ -1,0 +1,70 @@
+IF
+  DifficultyGT(NORMAL)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  !GlobalTimerNotExpired("BD_IInv","LOCALS")
+  Global("CSR285_INVIS","LOCALS",0)
+  !StateCheck(Myself,STATE_IMPROVEDINVISIBILITY)
+  !CheckSpellState(Myself,CANNOT_TURN_INVISIBLE)
+  !CheckStatGT(Player1,0,TRUE_SIGHT)
+  !CheckStatGT(Player2,0,TRUE_SIGHT)
+  !CheckStatGT(Player3,0,TRUE_SIGHT)
+  !CheckStatGT(Player4,0,TRUE_SIGHT)
+  !CheckStatGT(Player5,0,TRUE_SIGHT)
+  !CheckStatGT(Player6,0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.PLANATAR],0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.DARKPLANATAR],0,TRUE_SIGHT)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    SetGlobalTimer("BD_IInv","LOCALS",TWO_ROUNDS)
+    SetGlobal("CSR285_INVIS","LOCALS",1)
+    ForceSpell(Myself,WIZARD_IMPROVED_INVISIBILITY)
+END
+
+IF
+  Difficulty(NORMAL)
+  HPPercentLT(Myself,76)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  !GlobalTimerNotExpired("BD_IInv","LOCALS")
+  Global("CSR285_INVIS","LOCALS",0)
+  !StateCheck(Myself,STATE_IMPROVEDINVISIBILITY)
+  !CheckSpellState(Myself,CANNOT_TURN_INVISIBLE)
+  !CheckStatGT(Player1,0,TRUE_SIGHT)
+  !CheckStatGT(Player2,0,TRUE_SIGHT)
+  !CheckStatGT(Player3,0,TRUE_SIGHT)
+  !CheckStatGT(Player4,0,TRUE_SIGHT)
+  !CheckStatGT(Player5,0,TRUE_SIGHT)
+  !CheckStatGT(Player6,0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.PLANATAR],0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.DARKPLANATAR],0,TRUE_SIGHT)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    SetGlobalTimer("BD_IInv","LOCALS",TWO_ROUNDS)
+    SetGlobal("CSR285_INVIS","LOCALS",1)
+    ForceSpell(Myself,WIZARD_IMPROVED_INVISIBILITY)
+END
+
+IF
+  DifficultyLT(NORMAL)
+  HPPercentLT(Myself,51)
+  !GlobalTimerNotExpired("BD_Cast","LOCALS")
+  !GlobalTimerNotExpired("BD_IInv","LOCALS")
+  Global("CSR285_INVIS","LOCALS",0)
+  !StateCheck(Myself,STATE_IMPROVEDINVISIBILITY)
+  !CheckSpellState(Myself,CANNOT_TURN_INVISIBLE)
+  !CheckStatGT(Player1,0,TRUE_SIGHT)
+  !CheckStatGT(Player2,0,TRUE_SIGHT)
+  !CheckStatGT(Player3,0,TRUE_SIGHT)
+  !CheckStatGT(Player4,0,TRUE_SIGHT)
+  !CheckStatGT(Player5,0,TRUE_SIGHT)
+  !CheckStatGT(Player6,0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.PLANATAR],0,TRUE_SIGHT)
+  !CheckStatGT([GOODCUTOFF.0.DARKPLANATAR],0,TRUE_SIGHT)
+THEN
+  RESPONSE #100
+    SetGlobalTimer("BD_Cast","LOCALS",ONE_ROUND)
+    SetGlobalTimer("BD_IInv","LOCALS",FOUR_ROUNDS)
+    SetGlobal("CSR285_INVIS","LOCALS",1)
+    ForceSpell(Myself,WIZARD_IMPROVED_INVISIBILITY)
+END

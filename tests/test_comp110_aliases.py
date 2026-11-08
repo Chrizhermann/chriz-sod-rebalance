@@ -46,6 +46,7 @@ def write_alias_fixture(game, source=None, expected=None):
     }.items():
         path = game / 'override' / f'{name}.ids'
         path.write_text(path.read_text() + extra, encoding='ascii')
+    (game/'override/bd0120.are').write_bytes(b'AREAV1.0')
     shutil.copytree(ROOT / 'chriz-sod-remix', game / 'chriz-sod-remix')
     fixture = game / 'fixture'
     fixture.mkdir()
@@ -128,22 +129,30 @@ class RenamedCompanionTests(unittest.TestCase):
         self.assertEqual(self.repair('second.tp2').returncode, 0)
         self.assertEqual(tree(self.game / 'override'), before)
 
-    def test_duplicate_target_fails_before_any_write(self):
-        before = self.fixture(strip_block('O#XAN') * 2 + strip_block('LK#YESLK'))
-        self.assertNotEqual(self.repair().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+    def test_duplicate_targets_are_all_removed(self):
+        source = strip_block('O#XAN') * 2 + strip_block('LK#YESLK')
+        expected = strip_block('O#XAN', clean=True) * 2 + strip_block('LK#YESLK', clean=True)
+        before = self.fixture(source, expected)
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('WARNING', (result.stdout + result.stderr).upper())
+        self.assert_only_palace_changes(before)
 
-    def test_late_unknown_action_fails_before_earlier_alias_write(self):
-        changed = strip_block('LK#YESLK').replace('SmallWait(1)',
-                  'SmallWait(1)\nSetGlobal("FOREIGN_INSIDE","GLOBAL",1)')
-        before = self.fixture(strip_block('O#XAN') + changed)
-        self.assertNotEqual(self.repair().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+    def test_extra_action_is_preserved_while_strip_actions_are_removed(self):
+        extra = 'SmallWait(1)\nSetGlobal("FOREIGN_INSIDE","GLOBAL",1)'
+        changed = strip_block('LK#YESLK').replace('SmallWait(1)', extra)
+        expected = strip_block('O#XAN', clean=True) + strip_block('LK#YESLK', clean=True).replace('SmallWait(1)', extra)
+        before = self.fixture(strip_block('O#XAN') + changed, expected)
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assert_only_palace_changes(before)
 
-    def test_partial_strip_fails_without_removing_the_remaining_action(self):
-        before = self.fixture(strip_block('O#XAN').replace('ActionOverride("O#XAN",LeaveParty())', ''))
-        self.assertNotEqual(self.repair().returncode, 0)
-        self.assertEqual(tree(self.game / 'override'), before)
+    def test_partial_strip_removes_the_remaining_action(self):
+        before = self.fixture(strip_block('O#XAN').replace('ActionOverride("O#XAN",LeaveParty())', ''),
+                              strip_block('O#XAN', clean=True))
+        result = self.repair()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assert_only_palace_changes(before)
 
     def test_case_insensitive_aliases(self):
         source = strip_block('o#xan') + strip_block('lk#yeslk')

@@ -1,0 +1,37 @@
+OUTER_SET first_text = RESOLVE_STR_REF(@0)
+LAF csr_claim_dialogue_tail INT_VAR count = 7 first_text STR_VAR dialog = ~BDSKIE~ key = ~197_BDSKIE~ RET base END
+OUTER_SET csr197_meet = base + 0
+LAF csr_dlg_state_weight INT_VAR state = csr197_meet STR_VAR dialog = ~BDSKIE~ RET csr197_w_meet = clause END
+OUTER_SET csr197_condolence = base + 1
+LAF csr_dlg_state_weight INT_VAR state = csr197_condolence STR_VAR dialog = ~BDSKIE~ RET csr197_w_condolence = clause END
+OUTER_SET csr197_ask = base + 2
+LAF csr_dlg_state_weight INT_VAR state = csr197_ask STR_VAR dialog = ~BDSKIE~ RET csr197_w_ask = clause END
+OUTER_SET csr197_join = base + 3
+LAF csr_dlg_state_weight INT_VAR state = csr197_join STR_VAR dialog = ~BDSKIE~ RET csr197_w_join = clause END
+OUTER_SET csr197_stay = base + 4
+LAF csr_dlg_state_weight INT_VAR state = csr197_stay STR_VAR dialog = ~BDSKIE~ RET csr197_w_stay = clause END
+OUTER_SET csr197_again = base + 5
+LAF csr_dlg_state_weight INT_VAR state = csr197_again STR_VAR dialog = ~BDSKIE~ RET csr197_w_again = clause END
+OUTER_SET csr197_field = base + 6
+LAF csr_dlg_state_weight INT_VAR state = csr197_field STR_VAR dialog = ~BDSKIE~ RET csr197_w_field = clause END
+OUTER_SET lost = (0 - 1)
+COPY_EXISTING - ~bdbence.dlg~ ~override~
+  READ_LONG 12 so READ_LONG 20 tr READ_LONG (so + 25 * 16 + 4) first READ_LONG (so + 25 * 16 + 8) n
+  FOR (j = 1; j < n; ++j) BEGIN
+    SET at = tr + (first + j) * 32 READ_ASCII (at + 20) dest (8) NULL READ_LONG (at + 28) state
+    PATCH_IF ~%dest%~ STRING_EQUAL_CASE ~BDBENCE~ AND state = 31 BEGIN SET lost = j END
+  END
+ACTION_IF lost < 0 BEGIN
+  OUTER_SPRINT csr197_bence_route ~~~~~
+EXTEND_BOTTOM ~BDBENCE~ 25
+  IF ~!Global("bd_bridgefort_saved","GLOBAL",1)~ THEN DO ~SetGlobal("bd_plot","global",294)~ GOTO 31
+END
+~~~~~
+END ELSE BEGIN
+  OUTER_SPRINT csr197_bence_route ~~~~~
+ALTER_TRANS ~BDBENCE~ BEGIN 25 END BEGIN %lost% END BEGIN
+  TRIGGER ~!Global("bd_bridgefort_saved","GLOBAL",1)~ ACTION ~SetGlobal("bd_plot","global",294)~ EPILOGUE ~GOTO 31~
+END
+~~~~~
+END
+COMPILE EVALUATE_BUFFER ~chriz-sod-remix/dlg/csr197skie.d~

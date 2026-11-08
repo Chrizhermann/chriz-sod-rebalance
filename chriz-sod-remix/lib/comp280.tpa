@@ -17,32 +17,14 @@
 // dispel (Caelar, lieutenants) decompiles with a creature target
 // and stays.
 
-COPY_EXISTING ~bdcut45a.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~ReallyForceSpellRES("bddispel",Player[123456])~ csr_cnt_disp
-    PATCH_IF NOT (csr_cnt_disp = 6) BEGIN
-      PATCH_FAIL ~chriz-sod-remix comp280: expected exactly six player-targeted bddispel casts in BDCUT45A.bcs, found %csr_cnt_disp%. The reveal cutscene differs from the verified layout - resolve manually.~
-    END
-    REPLACE_TEXTUALLY ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
+ACTION_FOR_EACH script IN ~bdcut45a~ ~bdcut45b~ ~cutskip~ BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%script%.bcs~ BEGIN
+    COPY_EXISTING ~%script%.bcs~ ~override~
+      DECOMPILE_AND_PATCH BEGIN
+        REPLACE_TEXTUALLY CASE_INSENSITIVE ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
+      END
+    BUT_ONLY
+  END ELSE BEGIN
+    PRINT ~#280: %script%.bcs is absent; there is no party-dispel action to remove there.~
   END
-BUT_ONLY
-
-COPY_EXISTING ~bdcut45b.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~ReallyForceSpellRES("bddispel",Player[123456])~ csr_cnt_disp
-    PATCH_IF NOT (csr_cnt_disp = 6) BEGIN
-      PATCH_FAIL ~chriz-sod-remix comp280: expected exactly six player-targeted bddispel casts in BDCUT45B.bcs, found %csr_cnt_disp%. The reveal cutscene differs from the verified layout - resolve manually.~
-    END
-    REPLACE_TEXTUALLY ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
-  END
-BUT_ONLY
-
-COPY_EXISTING ~cutskip.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    COUNT_REGEXP_INSTANCES ~ReallyForceSpellRES("bddispel",Player[123456])~ csr_cnt_disp
-    PATCH_IF NOT (csr_cnt_disp = 12) BEGIN
-      PATCH_FAIL ~chriz-sod-remix comp280: expected exactly twelve player-targeted bddispel casts in CUTSKIP.bcs (the 45A+45B skip mirrors), found %csr_cnt_disp%. The skip rig differs from the verified layout - resolve manually.~
-    END
-    REPLACE_TEXTUALLY ~ReallyForceSpellRES("bddispel",Player[123456])~ ~~
-  END
-BUT_ONLY
+END

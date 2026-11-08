@@ -1,0 +1,55 @@
+IF
+  Global("BD_BELH_ALLIES","MYAREA",0)
+  Difficulty(HARDEST)
+  !Dead("bdbelhif")
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_BELH_ALLIES","MYAREA",1)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D1","DDOORH",[695.890],E)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D2","DDOORH",[1300.1325],N)
+    SmallWait(5)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D3","DDOORH",[1320.450],S)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D4","DDOORH",[1940.915],W)
+    SmallWait(5)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_BELH_ALLIES","MYAREA",0)
+  Difficulty(HARD)
+  !Dead("bdbelhif")
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_BELH_ALLIES","MYAREA",1)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D1","DDOORH",[695.890],E)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D2","DDOORH",[1300.1325],N)
+    SmallWait(5)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D3","DDOORH",[1320.450],S)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D4","DDOORH",[1940.915],W)
+    SetInterrupt(TRUE)
+END
+
+IF
+  Global("BD_BELH_ALLIES","MYAREA",0)
+  Difficulty(NORMAL)
+  !Dead("bdbelhif")
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    SetGlobal("BD_BELH_ALLIES","MYAREA",1)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D1","DDOORH",[695.890],E)
+    IncrementGlobal("CSR285_ADDS","BD4700",1)
+    CreateCreatureEffect("CSR285D2","DDOORH",[1300.1325],N)
+    SetInterrupt(TRUE)
+END

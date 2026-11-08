@@ -1,0 +1,12 @@
+IF
+  !Dead("BDKORLAS")
+  Global("BD_SPAWN_KORLASZ","BD0116",0)
+THEN
+  RESPONSE #100
+    SetGlobal("BD_SPAWN_KORLASZ","BD0116",1)
+    AddMapNoteColor([1030.300],%csr170_cell%,SLATE)
+    CreateCreature("csrkorl",[1003.298],SW)
+    CreateCreature("BDFIST1B",[893.407],SW)
+    CreateCreature("BDFIST1A",[643.477],SE)
+    CreateCreature("BDFIST1C",[590.729],NE)
+END

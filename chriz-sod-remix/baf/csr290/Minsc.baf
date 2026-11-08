@@ -1,0 +1,11 @@
+IF
+  Global("bd_plot","global",586)
+  !GlobalTimerNotExpired("bd_mdd1341a_ot_timer","bd4300")
+  Global("bd_ot2_Minsc","bd4300",0)
+  IsValidForPartyDialogue("MINSC")
+THEN
+  RESPONSE #100
+    SetGlobalTimer("bd_mdd1341a_ot_timer","bd4300",2)
+    SetGlobal("bd_ot2_Minsc","bd4300",1)
+    DisplayStringHead("MINSC",%csr290_s39332%)
+END

@@ -1,0 +1,54 @@
+// Own the local equipment bank, preserving any items already stored there.
+ACTION_IF FILE_EXISTS_IN_GAME ~bd4300.are~ BEGIN
+  COPY_EXISTING ~bd4300.are~ ~override~
+    SET readable = SOURCE_SIZE >= 0x82
+    PATCH_IF readable BEGIN
+      READ_LONG 0x70 co READ_SHORT 0x74 cc READ_LONG 0x7c vo READ_SHORT 0x80 vc
+      SET readable = co + cc * 192 <= SOURCE_SIZE AND vo + vc * 4 <= SOURCE_SIZE
+    END
+    PATCH_IF readable BEGIN
+      SET target = (0 - 1)
+      FOR (i = 0; i < cc; ++i) BEGIN
+        READ_ASCII (co + i * 192) name (32) NULL
+        INNER_PATCH_SAVE name ~%name%~ BEGIN REPLACE_TEXTUALLY ~ ~ ~~ END
+        PATCH_IF ~%name%~ STRING_EQUAL_CASE ~K#ImportContainer~ AND target < 0 BEGIN SET target = i END
+      END
+      PATCH_IF target < 0 AND cc < 65535 BEGIN
+        READ_ASCII co entries (cc * 192) SET co = BUFFER_LENGTH
+        INSERT_BYTES co ((cc + 1) * 192) WRITE_ASCIIE co ~%entries%~
+        SET target = cc SET cc += 1 WRITE_LONG 0x70 co WRITE_SHORT 0x74 cc
+      END
+      PATCH_IF target >= 0 BEGIN
+        SET at = co + target * 192
+        READ_LONG (at + 0x50) first READ_SHORT (at + 0x54) count
+        PATCH_IF count < 4 OR first + 4 > vc BEGIN
+          PATCH_IF vc <= 65531 BEGIN
+            READ_ASCII vo vertices (vc * 4) SET vo = BUFFER_LENGTH
+            INSERT_BYTES vo ((vc + 4) * 4) WRITE_ASCIIE vo ~%vertices%~
+            SET first = vc SET vc += 4 WRITE_LONG 0x7c vo WRITE_SHORT 0x80 vc
+            WRITE_LONG (at + 0x50) first
+          END ELSE BEGIN SET readable = 0 END
+        END
+        PATCH_IF readable BEGIN
+          WRITE_ASCII at ~K#ImportContainer~ #32
+          WRITE_SHORT (at + 0x20) 88 WRITE_SHORT (at + 0x22) 76
+          WRITE_SHORT (at + 0x24) 8 WRITE_SHORT (at + 0x26) 100 WRITE_LONG (at + 0x28) 0
+          WRITE_SHORT (at + 0x2c) 0 WRITE_SHORT (at + 0x2e) 100
+          WRITE_SHORT (at + 0x30) 0 WRITE_SHORT (at + 0x32) 0
+          WRITE_SHORT (at + 0x34) 80 WRITE_SHORT (at + 0x36) 70
+          WRITE_SHORT (at + 0x38) 72 WRITE_SHORT (at + 0x3a) 26
+          WRITE_SHORT (at + 0x3c) 120 WRITE_SHORT (at + 0x3e) 58
+          WRITE_ASCII (at + 0x48) ~~ #8 WRITE_SHORT (at + 0x54) 4 WRITE_SHORT (at + 0x56) 0
+          WRITE_ASCII (at + 0x58) ~~ #32 WRITE_ASCII (at + 0x78) ~~ #8
+          WRITE_LONG (at + 0x80) 0 WRITE_LONG (at + 0x84) (0 - 1)
+          FOR (i = 0x88; i < 192; i += 4) BEGIN WRITE_LONG (at + i) 0 END
+          SET pt = vo + first * 4
+          WRITE_SHORT pt 111 WRITE_SHORT (pt + 2) 58
+          WRITE_SHORT (pt + 4) 72 WRITE_SHORT (pt + 6) 45
+          WRITE_SHORT (pt + 8) 82 WRITE_SHORT (pt + 10) 26
+          WRITE_SHORT (pt + 12) 120 WRITE_SHORT (pt + 14) 39
+        END ELSE BEGIN PATCH_PRINT ~#290: the local bank has no representable polygon space.~ END
+      END ELSE BEGIN PATCH_PRINT ~#290: the local bank has no representable container slot.~ END
+    END ELSE BEGIN PATCH_PRINT ~#290: BD4300 container or polygon tables are unreadable; only the local bank is unavailable.~ END
+  BUT_ONLY
+END ELSE BEGIN PRINT ~#290: BD4300 is absent; the local bank is unavailable.~ END

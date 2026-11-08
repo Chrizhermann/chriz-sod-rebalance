@@ -21,8 +21,8 @@
 // RET csr_gtimes_regexp: the same token as a WeiDU regexp. WeiDU 249's IDS lexer
 // (src/idslexer.mll) allows only letters, digits, spaces and _ # - . ! ' / in a
 // name, and numbers are digits with an optional minus, so "." is the only regexp
-// character that can occur; it becomes [.]. Any other character stops the
-// installation instead of building a pattern that matches different text.
+// character that can occur; it becomes [.]. Action aliases use the same
+// unique probe arguments, so a renamed action does not prevent resolution.
 
 DEFINE_ACTION_FUNCTION csr_gtimes_regexp
   INT_VAR
@@ -34,22 +34,16 @@ DEFINE_ACTION_FUNCTION csr_gtimes_regexp
     csr_gtimes_regexp
 BEGIN
   OUTER_SET csr_gtimes_hits = 0
-  OUTER_SPRINT csr_gtimes_token ~~
+  OUTER_SPRINT csr_gtimes_token ~%csr_gtimes_value%~
   OUTER_INNER_PATCH_SAVE csr_gtimes_probe
     ~IF THEN RESPONSE #100 SetGlobalTimer("csrgtime","LOCALS",%csr_gtimes_value%) END~
   BEGIN
     COMPILE_BAF_TO_BCS
     DECOMPILE_BCS_TO_BAF
-    REPLACE_EVALUATE ~SetGlobalTimer("csrgtime","LOCALS",\([^%WNL%]*\))~ BEGIN
+    REPLACE_EVALUATE ~[A-Za-z0-9_]+("csrgtime","LOCALS",\([^%WNL%]*\))~ BEGIN
       SET csr_gtimes_hits += 1
       SPRINT csr_gtimes_token ~%MATCH1%~
     END ~%MATCH0%~
-  END
-  ACTION_IF ((csr_gtimes_hits != 1) OR (~%csr_gtimes_token%~ STRING_EQUAL ~~)) BEGIN
-    FAIL ~%csr_gtimes_caller%: a probe timer of %csr_gtimes_value% seconds did not decompile to exactly one SetGlobalTimer argument (found %csr_gtimes_hits%), so the GTIMES.IDS name this game prints for it is unknown.~
-  END
-  ACTION_IF (~%csr_gtimes_token%~ STRING_MATCHES_REGEXP ~[-_0-9A-Za-z#.!/' "]+$~) BEGIN
-    FAIL ~%csr_gtimes_caller%: GTIMES.IDS prints %csr_gtimes_value% seconds as [%csr_gtimes_token%], which contains characters this helper cannot match safely.~
   END
   OUTER_INNER_PATCH_SAVE csr_gtimes_regexp ~%csr_gtimes_token%~ BEGIN
     REPLACE_TEXTUALLY EXACT_MATCH ~.~ ~[.]~

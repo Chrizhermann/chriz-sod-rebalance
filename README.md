@@ -1,7 +1,13 @@
 # chriz-sod-rebalance
 
 A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.16**.
+standalone BG:EE + SoD also in scope. Current release: **v0.6.17**.
+
+v0.6.17 writes every component's decided result, whatever the game files hold.
+Edited values, missing dialogue states, occupied script slots and other mods'
+versions of the same resources no longer stop, warn or skip a component; it
+writes what it decided over them. See the
+[release report](docs/releases/v0.6.17.md).
 
 v0.6.16 removes two installation stops caused by other mods. The victory ending
 (**290**) now accepts every victory remark that another mod adds after the battle

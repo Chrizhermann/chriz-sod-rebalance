@@ -1,0 +1,38 @@
+IF
+  Global("BD_KORLAS_FREED","BD0116",1)
+  AreaCheck("BD0116")
+  Allegiance(Myself,NEUTRAL)
+THEN
+  RESPONSE #100
+    SetInterrupt(FALSE)
+    StartMusic(MISC0,QUICK_FADE)
+    ReallyForceSpell(Myself,WIZARD_STONE_SKIN)
+    ReallyForceSpell(Myself,WIZARD_MINOR_GLOBE_OF_INVULNERABILITY)
+    ReallyForceSpell(Myself,WIZARD_MIRROR_IMAGE)
+    SmallWait(5)
+    CreateCreature("cutspy",[846.485],S)
+    DisplayStringHead("bdfist1a",%csr170_s46364%)
+    ActionOverride("bdfist1a",FaceObject("bdkorlas"))
+    SmallWait(3)
+    DisplayStringHead("bdfist1b",%csr170_s715%)
+    SmallWait(2)
+    ActionOverride("bdfist1b",FaceObject("bdkorlas"))
+    SmallWait(2)
+    ForceSpellPointRES("BDKORLAS",[932.366])
+    Unlock("Door03")
+    OpenDoor("Door03")
+    Kill("bdfist1b")
+    ActionOverride("bdfist1a",SetSequence(SEQ_DIE))
+    SetInterrupt(TRUE)
+    StartCutSceneMode()
+    StartCutSceneEx("bdcutkor",FALSE)
+END
+
+IF
+  AreaCheck("BD0116")
+  NumTimesTalkedTo(0)
+  See([PC])
+THEN
+  RESPONSE #100
+    StartDialogNoSet(Player1)
+END

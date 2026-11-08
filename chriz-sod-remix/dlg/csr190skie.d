@@ -11,4 +11,4 @@
 // The broader Skie SoD-plot lines (crypt state 3, council 12/13, dig-site
 // 87-89) are entangled with her recruitment/camp/BDBENCE flow and are deferred
 // to the dedicated Skie-companion pass — not touched here.
-ADD_STATE_TRIGGER ~BDSKIE~ 16 ~False()~
+REPLACE_STATE_TRIGGER ~BDSKIE~ 16 ~False()~

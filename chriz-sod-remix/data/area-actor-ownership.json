@@ -1,0 +1,2954 @@
+{
+  "200": {
+    "bd1000": [
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 1,
+        "index": 117,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 2,
+        "index": 118,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 1,
+        "index": 119,
+        "cut": 1
+      },
+      {
+        "name": "PHASE_SPIDER",
+        "ordinal": 1,
+        "index": 120,
+        "cut": 1
+      },
+      {
+        "name": "GARGANTUAN_SPIDER",
+        "ordinal": 1,
+        "index": 121,
+        "cut": 1
+      },
+      {
+        "name": "GARGANTUAN_SPIDER",
+        "ordinal": 2,
+        "index": 122,
+        "cut": 1
+      },
+      {
+        "name": "PHASE_SPIDER",
+        "ordinal": 2,
+        "index": 123,
+        "cut": 1
+      },
+      {
+        "name": "PHASE_SPIDER",
+        "ordinal": 3,
+        "index": 124,
+        "cut": 1
+      }
+    ]
+  },
+  "220": {
+    "bd1100": [
+      {
+        "name": "UMBER4",
+        "ordinal": 1,
+        "index": 14,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 4,
+        "index": 22,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 1,
+        "index": 23,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 5,
+        "index": 24,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 2,
+        "index": 25,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 3,
+        "index": 28,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 8,
+        "index": 29,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 1,
+        "index": 32,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 1,
+        "index": 33,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 3,
+        "index": 34,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 1,
+        "index": 35,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 2,
+        "index": 36,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 4,
+        "index": 37,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 5,
+        "index": 38,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 2,
+        "index": 39,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 4,
+        "index": 40,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 9,
+        "index": 41,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 5,
+        "index": 42,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 10,
+        "index": 43,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 1,
+        "index": 44,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 2,
+        "index": 45,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 3,
+        "index": 49,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 4,
+        "index": 50,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 5,
+        "index": 51,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 1,
+        "index": 52,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 2,
+        "index": 53,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 6,
+        "index": 54,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 3,
+        "index": 55,
+        "cut": 1
+      },
+      {
+        "name": "OTYUGH",
+        "ordinal": 1,
+        "index": 56,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 4,
+        "index": 57,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 5,
+        "index": 58,
+        "cut": 1
+      },
+      {
+        "name": "NEO_OTYUGH",
+        "ordinal": 1,
+        "index": 59,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 7,
+        "index": 60,
+        "cut": 1
+      },
+      {
+        "name": "CARRION_CRAWLER",
+        "ordinal": 8,
+        "index": 61,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 6,
+        "index": 62,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 7,
+        "index": 63,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 8,
+        "index": 64,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 9,
+        "index": 65,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 10,
+        "index": 66,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 11,
+        "index": 67,
+        "cut": 1
+      },
+      {
+        "name": "MUTATED_CRAWLER",
+        "ordinal": 12,
+        "index": 68,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 3,
+        "index": 69,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 1,
+        "index": 70,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED WIGHT",
+        "ordinal": 1,
+        "index": 71,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 2,
+        "index": 72,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 2,
+        "index": 73,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED WIGHT",
+        "ordinal": 2,
+        "index": 74,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 3,
+        "index": 75,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 4,
+        "index": 76,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 6,
+        "index": 77,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 11,
+        "index": 78,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 12,
+        "index": 79,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 13,
+        "index": 80,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 7,
+        "index": 82,
+        "cut": 1
+      },
+      {
+        "name": "SKELDED",
+        "ordinal": 1,
+        "index": 84,
+        "cut": 1
+      },
+      {
+        "name": "SKELDED",
+        "ordinal": 2,
+        "index": 85,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 3,
+        "index": 87,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 4,
+        "index": 88,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 5,
+        "index": 89,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 8,
+        "index": 90,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 9,
+        "index": 91,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 3,
+        "index": 92,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 4,
+        "index": 93,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 5,
+        "index": 94,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 6,
+        "index": 95,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 7,
+        "index": 96,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 5,
+        "index": 97,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 8,
+        "index": 98,
+        "cut": 1
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 9,
+        "index": 99,
+        "cut": 1
+      }
+    ],
+    "bd1200": [
+      {
+        "name": "DROWNED01",
+        "ordinal": 1,
+        "index": 4,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED02",
+        "ordinal": 1,
+        "index": 5,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED03",
+        "ordinal": 1,
+        "index": 6,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED04",
+        "ordinal": 1,
+        "index": 7,
+        "cut": 1
+      },
+      {
+        "name": "BLADED_SKELETON",
+        "ordinal": 1,
+        "index": 8,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 1,
+        "index": 9,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 2,
+        "index": 10,
+        "cut": 1
+      },
+      {
+        "name": "ARMORED_SKELETON",
+        "ordinal": 1,
+        "index": 11,
+        "cut": 1
+      },
+      {
+        "name": "TATTERED_SKELETON",
+        "ordinal": 1,
+        "index": 12,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 1,
+        "index": 13,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 2,
+        "index": 14,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 1,
+        "index": 15,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 1,
+        "index": 16,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 2,
+        "index": 17,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 4,
+        "index": 21,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 1,
+        "index": 22,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 1,
+        "index": 23,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 2,
+        "index": 24,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 1,
+        "index": 27,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 3,
+        "index": 28,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 4,
+        "index": 29,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 5,
+        "index": 30,
+        "cut": 1
+      },
+      {
+        "name": "SKELDED",
+        "ordinal": 1,
+        "index": 31,
+        "cut": 1
+      },
+      {
+        "name": "SKELDED",
+        "ordinal": 2,
+        "index": 32,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED_IN_BLOOD",
+        "ordinal": 1,
+        "index": 33,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED_IN_BLOOD",
+        "ordinal": 2,
+        "index": 34,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED WIGHT",
+        "ordinal": 1,
+        "index": 35,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED WIGHT",
+        "ordinal": 2,
+        "index": 36,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 6,
+        "index": 37,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 7,
+        "index": 38,
+        "cut": 1
+      },
+      {
+        "name": "SKELDED",
+        "ordinal": 3,
+        "index": 39,
+        "cut": 1
+      },
+      {
+        "name": "SKELDED",
+        "ordinal": 4,
+        "index": 40,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 5,
+        "index": 45,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 2,
+        "index": 46,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 3,
+        "index": 47,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 4,
+        "index": 48,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 1,
+        "index": 49,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 2,
+        "index": 50,
+        "cut": 1
+      },
+      {
+        "name": "COLD_WIGHT",
+        "ordinal": 3,
+        "index": 51,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 6,
+        "index": 53,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 2,
+        "index": 58,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 3,
+        "index": 59,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 2,
+        "index": 61,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 8,
+        "index": 62,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 9,
+        "index": 63,
+        "cut": 1
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 7,
+        "index": 64,
+        "mvx": 2561,
+        "mvy": 1636,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor64.bin",
+        "created_name": "CSR220M64"
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 4,
+        "index": 65,
+        "mvx": 2665,
+        "mvy": 1992,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor65.bin",
+        "created_name": "CSR220M65"
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 2,
+        "index": 66,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 3,
+        "index": 67,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 4,
+        "index": 68,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED WIGHT",
+        "ordinal": 3,
+        "index": 69,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 1,
+        "index": 70,
+        "mvx": 2006,
+        "mvy": 1237,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor70.bin",
+        "created_name": "CSR220M70"
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 5,
+        "index": 71,
+        "mvx": 2801,
+        "mvy": 2074,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor71.bin",
+        "created_name": "CSR220M71"
+      },
+      {
+        "name": "ZOMBIE_OLD",
+        "ordinal": 6,
+        "index": 72,
+        "mvx": 2741,
+        "mvy": 1838,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor72.bin",
+        "created_name": "CSR220M72"
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 8,
+        "index": 73,
+        "mvx": 2719,
+        "mvy": 2175,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor73.bin",
+        "created_name": "CSR220M73"
+      },
+      {
+        "name": "ZOMBIE",
+        "ordinal": 9,
+        "index": 74,
+        "mvx": 2412,
+        "mvy": 1813,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor74.bin",
+        "created_name": "CSR220M74"
+      },
+      {
+        "name": "GHAST",
+        "ordinal": 3,
+        "index": 75,
+        "cut": 1
+      },
+      {
+        "name": "GHOUL",
+        "ordinal": 3,
+        "index": 76,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 7,
+        "index": 77,
+        "cut": 1
+      },
+      {
+        "name": "MUMMY",
+        "ordinal": 1,
+        "index": 78,
+        "mvx": 3533,
+        "mvy": 1643,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor78.bin",
+        "created_name": "CSR220M78"
+      },
+      {
+        "name": "MUMMY",
+        "ordinal": 2,
+        "index": 79,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_GHAST",
+        "ordinal": 2,
+        "index": 80,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED WIGHT",
+        "ordinal": 4,
+        "index": 81,
+        "cut": 1
+      },
+      {
+        "name": "WIGHT",
+        "ordinal": 5,
+        "index": 82,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 3,
+        "index": 83,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 4,
+        "index": 84,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 10,
+        "index": 85,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 11,
+        "index": 86,
+        "cut": 1
+      },
+      {
+        "name": "BLADED_SKELETON",
+        "ordinal": 2,
+        "index": 87,
+        "cut": 1
+      },
+      {
+        "name": "BLADED_SKELETON",
+        "ordinal": 3,
+        "index": 88,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 5,
+        "index": 89,
+        "cut": 1
+      },
+      {
+        "name": "ARMORED_SKELETON",
+        "ordinal": 3,
+        "index": 90,
+        "cut": 1
+      },
+      {
+        "name": "SHADOW",
+        "ordinal": 1,
+        "index": 91,
+        "cut": 1
+      },
+      {
+        "name": "SHADOW",
+        "ordinal": 2,
+        "index": 92,
+        "cut": 1
+      },
+      {
+        "name": "WRAITH",
+        "ordinal": 1,
+        "index": 93,
+        "cut": 1
+      },
+      {
+        "name": "WRAITH",
+        "ordinal": 2,
+        "index": 94,
+        "cut": 1
+      },
+      {
+        "name": "MUMMY",
+        "ordinal": 3,
+        "index": 96,
+        "mvx": 3315,
+        "mvy": 1772,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor96.bin",
+        "created_name": "CSR220M96"
+      },
+      {
+        "name": "DROWNED_IN_BLOOD",
+        "ordinal": 3,
+        "index": 97,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 12,
+        "index": 98,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 13,
+        "index": 99,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_SHADOW",
+        "ordinal": 1,
+        "index": 100,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED_IN_BLOOD",
+        "ordinal": 4,
+        "index": 101,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 6,
+        "index": 102,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED_IN_BLOOD",
+        "ordinal": 5,
+        "index": 103,
+        "cut": 1
+      },
+      {
+        "name": "DROWNED_IN_BLOOD",
+        "ordinal": 6,
+        "index": 104,
+        "cut": 1
+      },
+      {
+        "name": "BLADED_SKELETON",
+        "ordinal": 4,
+        "index": 105,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 8,
+        "index": 106,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 9,
+        "index": 107,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_WARRIOR",
+        "ordinal": 1,
+        "index": 108,
+        "mvx": 3482,
+        "mvy": 1682,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor108.bin",
+        "created_name": "CSR220M108"
+      },
+      {
+        "name": "SKELETON_WARRIOR",
+        "ordinal": 2,
+        "index": 109,
+        "mvx": 3471,
+        "mvy": 1632,
+        "mvo": 4,
+        "fallback": "chriz-sod-remix/data/csr220/actor109.bin",
+        "created_name": "CSR220M109"
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 7,
+        "index": 110,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 14,
+        "index": 111,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 15,
+        "index": 112,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 16,
+        "index": 113,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 17,
+        "index": 114,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 8,
+        "index": 115,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 9,
+        "index": 116,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 10,
+        "index": 117,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 3,
+        "index": 118,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 4,
+        "index": 119,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 5,
+        "index": 120,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 1,
+        "index": 121,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 2,
+        "index": 122,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 3,
+        "index": 123,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 4,
+        "index": 124,
+        "cut": 1
+      },
+      {
+        "name": "SKELETAL_MAGE",
+        "ordinal": 1,
+        "index": 125,
+        "cut": 1
+      },
+      {
+        "name": "SKELETAL_MAGE",
+        "ordinal": 2,
+        "index": 126,
+        "cut": 1
+      },
+      {
+        "name": "UNSLEEPING_GUARDIAN",
+        "ordinal": 1,
+        "index": 127,
+        "cut": 1
+      },
+      {
+        "name": "WRAITH",
+        "ordinal": 3,
+        "index": 128,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_SHADOW",
+        "ordinal": 2,
+        "index": 129,
+        "cut": 1
+      },
+      {
+        "name": "IMBUED_WIGHT_POTION",
+        "ordinal": 1,
+        "index": 130,
+        "cut": 1
+      }
+    ]
+  },
+  "230": {
+    "bd7100": [
+      {
+        "name": "SMALL_TROLL",
+        "ordinal": 3,
+        "index": 35,
+        "cut": 1
+      },
+      {
+        "name": "SMALL_TROLL",
+        "ordinal": 4,
+        "index": 36,
+        "cut": 1
+      },
+      {
+        "name": "TROLL",
+        "ordinal": 5,
+        "index": 37,
+        "cut": 1
+      },
+      {
+        "name": "TROLL",
+        "ordinal": 6,
+        "index": 38,
+        "cut": 1
+      },
+      {
+        "name": "TROLL",
+        "ordinal": 8,
+        "index": 45,
+        "cut": 1
+      },
+      {
+        "name": "TROLL",
+        "ordinal": 9,
+        "index": 46,
+        "cut": 1
+      },
+      {
+        "name": "ORC_PRIEST",
+        "ordinal": 1,
+        "index": 48,
+        "cut": 1
+      },
+      {
+        "name": "ORC_LEADER",
+        "ordinal": 1,
+        "index": 49,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 1,
+        "index": 50,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 1,
+        "index": 51,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 2,
+        "index": 52,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 3,
+        "index": 53,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 4,
+        "index": 54,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 2,
+        "index": 55,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 3,
+        "index": 56,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 1,
+        "index": 87,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 2,
+        "index": 88,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 1,
+        "index": 89,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 2,
+        "index": 90,
+        "cut": 1
+      },
+      {
+        "name": "ORC_BOWMASTER",
+        "ordinal": 1,
+        "index": 116,
+        "cut": 1
+      },
+      {
+        "name": "ORC_BOWMASTER",
+        "ordinal": 2,
+        "index": 117,
+        "cut": 1
+      },
+      {
+        "name": "ORC_RAIDER",
+        "ordinal": 1,
+        "index": 118,
+        "cut": 1
+      },
+      {
+        "name": "ORC_RAIDER",
+        "ordinal": 2,
+        "index": 119,
+        "cut": 1
+      },
+      {
+        "name": "ORC_SHAMAN",
+        "ordinal": 1,
+        "index": 120,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 1,
+        "index": 121,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 2,
+        "index": 122,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 3,
+        "index": 123,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 4,
+        "index": 124,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 5,
+        "index": 125,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_PACK_LORD",
+        "ordinal": 1,
+        "index": 126,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 3,
+        "index": 127,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 4,
+        "index": 128,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 3,
+        "index": 129,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 4,
+        "index": 130,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 1,
+        "index": 135,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 2,
+        "index": 136,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 3,
+        "index": 137,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 1,
+        "index": 138,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 2,
+        "index": 139,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 3,
+        "index": 140,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 4,
+        "index": 141,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 4,
+        "index": 142,
+        "cut": 1
+      },
+      {
+        "name": "SPECTRAL_TROLL",
+        "ordinal": 6,
+        "index": 144,
+        "cut": 1
+      },
+      {
+        "name": "SPECTRAL_TROLL",
+        "ordinal": 7,
+        "index": 145,
+        "cut": 1
+      },
+      {
+        "name": "TROLL",
+        "ordinal": 11,
+        "index": 146,
+        "cut": 1
+      },
+      {
+        "name": "TROLL",
+        "ordinal": 12,
+        "index": 147,
+        "cut": 1
+      },
+      {
+        "name": "SPECTRAL_TROLL",
+        "ordinal": 8,
+        "index": 148,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_CAPTAIN",
+        "ordinal": 1,
+        "index": 156,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_VETERAN",
+        "ordinal": 1,
+        "index": 157,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_VETERAN",
+        "ordinal": 2,
+        "index": 158,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_VETERAN",
+        "ordinal": 3,
+        "index": 159,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_VETERAN",
+        "ordinal": 4,
+        "index": 160,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 1,
+        "index": 161,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 2,
+        "index": 162,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 3,
+        "index": 163,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 4,
+        "index": 164,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 5,
+        "index": 165,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 6,
+        "index": 166,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 7,
+        "index": 167,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 1,
+        "index": 168,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 2,
+        "index": 169,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 3,
+        "index": 170,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_PRIEST",
+        "ordinal": 1,
+        "index": 171,
+        "cut": 1
+      }
+    ],
+    "bd2000": [
+      {
+        "name": "WARG",
+        "ordinal": 1,
+        "index": 86,
+        "cut": 1
+      },
+      {
+        "name": "WARG",
+        "ordinal": 2,
+        "index": 87,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 1,
+        "index": 135,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 2,
+        "index": 136,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 3,
+        "index": 137,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 4,
+        "index": 138,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 5,
+        "index": 139,
+        "cut": 1
+      }
+    ],
+    "bd2010": [
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 1,
+        "index": 3,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 2,
+        "index": 4,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 3,
+        "index": 5,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 4,
+        "index": 6,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 5,
+        "index": 7,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 6,
+        "index": 8,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 7,
+        "index": 9,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 8,
+        "index": 10,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_WARRIOR",
+        "ordinal": 3,
+        "index": 12,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_WARRIOR",
+        "ordinal": 4,
+        "index": 13,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_WARRIOR",
+        "ordinal": 5,
+        "index": 14,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_WARRIOR",
+        "ordinal": 6,
+        "index": 15,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_WARRIOR",
+        "ordinal": 8,
+        "index": 17,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_WARRIOR",
+        "ordinal": 9,
+        "index": 18,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ARCHER",
+        "ordinal": 9,
+        "index": 19,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 1,
+        "index": 24,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 2,
+        "index": 25,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 3,
+        "index": 26,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 4,
+        "index": 27,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 5,
+        "index": 28,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 6,
+        "index": 29,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 7,
+        "index": 30,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 8,
+        "index": 31,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 9,
+        "index": 32,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 10,
+        "index": 33,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 11,
+        "index": 34,
+        "cut": 1
+      },
+      {
+        "name": "GOBLIN_ELITE_ARCHER",
+        "ordinal": 12,
+        "index": 35,
+        "cut": 1
+      }
+    ]
+  },
+  "260": {
+    "bd7300": [
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 1,
+        "index": 4,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 2,
+        "index": 5,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 3,
+        "index": 6,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 4,
+        "index": 7,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 5,
+        "index": 8,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 1,
+        "index": 32,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 2,
+        "index": 33,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 3,
+        "index": 34,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 4,
+        "index": 35,
+        "cut": 1
+      },
+      {
+        "name": "WORG",
+        "ordinal": 1,
+        "index": 36,
+        "cut": 1
+      },
+      {
+        "name": "WORG",
+        "ordinal": 2,
+        "index": 37,
+        "cut": 1
+      },
+      {
+        "name": "OROG_CHIEFTAIN",
+        "ordinal": 1,
+        "index": 38,
+        "cut": 1
+      },
+      {
+        "name": "OROG_PRIEST",
+        "ordinal": 1,
+        "index": 39,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 5,
+        "index": 40,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 6,
+        "index": 41,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 7,
+        "index": 42,
+        "cut": 1
+      },
+      {
+        "name": "OROG",
+        "ordinal": 8,
+        "index": 43,
+        "cut": 1
+      },
+      {
+        "name": "WORG",
+        "ordinal": 3,
+        "index": 44,
+        "cut": 1
+      },
+      {
+        "name": "WORG",
+        "ordinal": 4,
+        "index": 45,
+        "cut": 1
+      },
+      {
+        "name": "OROG_ELITE",
+        "ordinal": 1,
+        "index": 48,
+        "cut": 1
+      },
+      {
+        "name": "OROG_ELITE",
+        "ordinal": 2,
+        "index": 49,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 1,
+        "index": 54,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 2,
+        "index": 55,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 1,
+        "index": 56,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_CAPTAIN",
+        "ordinal": 1,
+        "index": 57,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 1,
+        "index": 58,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 1,
+        "index": 59,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 2,
+        "index": 60,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 2,
+        "index": 61,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_SCOUT",
+        "ordinal": 3,
+        "index": 62,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 3,
+        "index": 64,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 4,
+        "index": 65,
+        "cut": 1
+      },
+      {
+        "name": "PHASE_SPIDER",
+        "ordinal": 1,
+        "index": 66,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_MAGE",
+        "ordinal": 1,
+        "index": 87,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_BERSERKER",
+        "ordinal": 1,
+        "index": 88,
+        "cut": 1
+      },
+      {
+        "name": "OGRE",
+        "ordinal": 1,
+        "index": 89,
+        "cut": 1
+      },
+      {
+        "name": "OGRE",
+        "ordinal": 2,
+        "index": 90,
+        "cut": 1
+      },
+      {
+        "name": "OGRE",
+        "ordinal": 3,
+        "index": 91,
+        "cut": 1
+      },
+      {
+        "name": "OROG_ELITE",
+        "ordinal": 3,
+        "index": 103,
+        "cut": 1
+      },
+      {
+        "name": "OROG_ELITE",
+        "ordinal": 4,
+        "index": 104,
+        "cut": 1
+      },
+      {
+        "name": "OROG_SHAMAN",
+        "ordinal": 1,
+        "index": 105,
+        "cut": 1
+      },
+      {
+        "name": "OROG_SCOUT",
+        "ordinal": 1,
+        "index": 106,
+        "cut": 1
+      },
+      {
+        "name": "OROG_SCOUT",
+        "ordinal": 2,
+        "index": 107,
+        "cut": 1
+      },
+      {
+        "name": "OROG_SCOUT",
+        "ordinal": 3,
+        "index": 108,
+        "cut": 1
+      },
+      {
+        "name": "OROG_SCOUT",
+        "ordinal": 4,
+        "index": 109,
+        "cut": 1
+      },
+      {
+        "name": "OROG_ELITE",
+        "ordinal": 5,
+        "index": 110,
+        "cut": 1
+      },
+      {
+        "name": "OROG_ELITE",
+        "ordinal": 6,
+        "index": 111,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_PRIEST",
+        "ordinal": 1,
+        "index": 112,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 3,
+        "index": 113,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 4,
+        "index": 114,
+        "cut": 1
+      },
+      {
+        "name": "HOBGOBLIN_ELITE_ARCHER",
+        "ordinal": 5,
+        "index": 115,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 1,
+        "index": 116,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 2,
+        "index": 117,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 3,
+        "index": 118,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 4,
+        "index": 119,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_PACK_LORD",
+        "ordinal": 1,
+        "index": 120,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 5,
+        "index": 121,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 6,
+        "index": 122,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 7,
+        "index": 123,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 8,
+        "index": 124,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_PACK_LORD",
+        "ordinal": 2,
+        "index": 125,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 9,
+        "index": 126,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 10,
+        "index": 127,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 11,
+        "index": 128,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 12,
+        "index": 129,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 13,
+        "index": 130,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 14,
+        "index": 131,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 15,
+        "index": 132,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 16,
+        "index": 133,
+        "cut": 1
+      },
+      {
+        "name": "DISPLACER_BEAST",
+        "ordinal": 17,
+        "index": 134,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 3,
+        "index": 135,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 4,
+        "index": 136,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 5,
+        "index": 137,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 2,
+        "index": 138,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 3,
+        "index": 139,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 4,
+        "index": 140,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 5,
+        "index": 141,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 6,
+        "index": 142,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 7,
+        "index": 143,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 6,
+        "index": 144,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 7,
+        "index": 145,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 9,
+        "index": 147,
+        "cut": 1
+      },
+      {
+        "name": "HILL_GIANT",
+        "ordinal": 10,
+        "index": 148,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 5,
+        "index": 150,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 6,
+        "index": 151,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 7,
+        "index": 152,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 8,
+        "index": 153,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 9,
+        "index": 154,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 10,
+        "index": 155,
+        "cut": 1
+      },
+      {
+        "name": "DIRE_WOLF",
+        "ordinal": 11,
+        "index": 156,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 8,
+        "index": 159,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 9,
+        "index": 160,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 6,
+        "index": 161,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 10,
+        "index": 162,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 7,
+        "index": 163,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 11,
+        "index": 164,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 1,
+        "index": 167,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 2,
+        "index": 168,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 3,
+        "index": 169,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 4,
+        "index": 170,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 5,
+        "index": 171,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 6,
+        "index": 172,
+        "cut": 1
+      },
+      {
+        "name": "WILD_BOAR",
+        "ordinal": 7,
+        "index": 173,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 1,
+        "index": 174,
+        "cut": 1
+      },
+      {
+        "name": "GIANT_SPIDER",
+        "ordinal": 2,
+        "index": 175,
+        "cut": 1
+      },
+      {
+        "name": "PHASE_SPIDER",
+        "ordinal": 2,
+        "index": 176,
+        "cut": 1
+      },
+      {
+        "name": "PHASE_SPIDER",
+        "ordinal": 3,
+        "index": 177,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 12,
+        "index": 179,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 13,
+        "index": 180,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 14,
+        "index": 181,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 8,
+        "index": 182,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 9,
+        "index": 183,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_BERSERKER",
+        "ordinal": 2,
+        "index": 187,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_BERSERKER",
+        "ordinal": 3,
+        "index": 188,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_BERSERKER",
+        "ordinal": 4,
+        "index": 189,
+        "cut": 1
+      },
+      {
+        "name": "HALF_OGRE_VETERAN",
+        "ordinal": 1,
+        "index": 190,
+        "cut": 1
+      },
+      {
+        "name": "HALF_OGRE_VETERAN",
+        "ordinal": 2,
+        "index": 191,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_CHIEFTAIN",
+        "ordinal": 1,
+        "index": 192,
+        "cut": 1
+      },
+      {
+        "name": "OGRE_SHAMAN",
+        "ordinal": 1,
+        "index": 193,
+        "cut": 1
+      }
+    ],
+    "bd7400": [
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 2,
+        "index": 7,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_W",
+        "ordinal": 3,
+        "index": 9,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 1,
+        "index": 12,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 2,
+        "index": 13,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 1,
+        "index": 14,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 2,
+        "index": 15,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 3,
+        "index": 25,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 3,
+        "index": 33,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 4,
+        "index": 34,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 5,
+        "index": 35,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 3,
+        "index": 40,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 4,
+        "index": 41,
+        "cut": 1
+      },
+      {
+        "name": "BURNING_SKELETON_A",
+        "ordinal": 5,
+        "index": 42,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 6,
+        "index": 43,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 7,
+        "index": 44,
+        "cut": 1
+      },
+      {
+        "name": "BORING_BEETLE",
+        "ordinal": 4,
+        "index": 45,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 1,
+        "index": 47,
+        "cut": 1
+      },
+      {
+        "name": "BONEBAT",
+        "ordinal": 2,
+        "index": 48,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 1,
+        "index": 52,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 8,
+        "index": 53,
+        "cut": 1
+      },
+      {
+        "name": "BOMBARDIER_BEETLE",
+        "ordinal": 9,
+        "index": 54,
+        "cut": 1
+      }
+    ],
+    "bd7310": [
+      {
+        "name": "UNSLEEPING_GUARDIAN",
+        "ordinal": 1,
+        "index": 0,
+        "cut": 1
+      }
+    ],
+    "bd5000": [
+      {
+        "name": "GREATER_WYVERN",
+        "ordinal": 2,
+        "index": 41,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_WYVERN",
+        "ordinal": 3,
+        "index": 44,
+        "cut": 1
+      },
+      {
+        "name": "GREATER_WYVERN",
+        "ordinal": 4,
+        "index": 45,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 1,
+        "index": 46,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 2,
+        "index": 47,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 3,
+        "index": 48,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 4,
+        "index": 49,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 5,
+        "index": 50,
+        "cut": 1
+      },
+      {
+        "name": "ORC_ARCHER",
+        "ordinal": 6,
+        "index": 51,
+        "cut": 1
+      },
+      {
+        "name": "ORC_LEADER",
+        "ordinal": 1,
+        "index": 52,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 1,
+        "index": 53,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 2,
+        "index": 54,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 3,
+        "index": 55,
+        "cut": 1
+      },
+      {
+        "name": "ORC_WARRIOR",
+        "ordinal": 4,
+        "index": 56,
+        "cut": 1
+      },
+      {
+        "name": "ORC_SHAMAN",
+        "ordinal": 1,
+        "index": 57,
+        "cut": 1
+      },
+      {
+        "name": "ORC_BOWMASTER",
+        "ordinal": 1,
+        "index": 58,
+        "cut": 1
+      },
+      {
+        "name": "ORC_BOWMASTER",
+        "ordinal": 2,
+        "index": 59,
+        "cut": 1
+      },
+      {
+        "name": "ORC_BOWMASTER",
+        "ordinal": 3,
+        "index": 60,
+        "cut": 1
+      },
+      {
+        "name": "ORC_BOWMASTER",
+        "ordinal": 4,
+        "index": 61,
+        "cut": 1
+      },
+      {
+        "name": "ORC_RAIDER",
+        "ordinal": 1,
+        "index": 62,
+        "cut": 1
+      },
+      {
+        "name": "ORC_RAIDER",
+        "ordinal": 2,
+        "index": 63,
+        "cut": 1
+      },
+      {
+        "name": "ORC_RAIDER",
+        "ordinal": 3,
+        "index": 64,
+        "cut": 1
+      },
+      {
+        "name": "ORC_RAIDER",
+        "ordinal": 4,
+        "index": 65,
+        "cut": 1
+      },
+      {
+        "name": "Displacer Beast 3",
+        "ordinal": 1,
+        "index": 66,
+        "cut": 1
+      },
+      {
+        "name": "Displacer Beast 2",
+        "ordinal": 1,
+        "index": 67,
+        "cut": 1
+      },
+      {
+        "name": "Displacer Beast 1",
+        "ordinal": 1,
+        "index": 68,
+        "cut": 1
+      },
+      {
+        "name": "Displacer Beast",
+        "ordinal": 1,
+        "index": 69,
+        "cut": 1
+      },
+      {
+        "name": "Displacer Beast",
+        "ordinal": 2,
+        "index": 70,
+        "cut": 1
+      },
+      {
+        "name": "Displacer Pack Lord",
+        "ordinal": 1,
+        "index": 71,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 1,
+        "index": 82,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 2,
+        "index": 83,
+        "cut": 1
+      },
+      {
+        "name": "HUGE_SPIDER",
+        "ordinal": 3,
+        "index": 86,
+        "cut": 1
+      }
+    ],
+    "bd5100": [
+      {
+        "name": "DARK_TREANT",
+        "ordinal": 2,
+        "index": 75,
+        "cut": 1
+      },
+      {
+        "name": "DARK_TREANT",
+        "ordinal": 3,
+        "index": 76,
+        "cut": 1
+      },
+      {
+        "name": "DARK_TREANT",
+        "ordinal": 6,
+        "index": 85,
+        "cut": 1
+      },
+      {
+        "name": "SHAMBLING_MOUND",
+        "ordinal": 2,
+        "index": 86,
+        "cut": 1
+      },
+      {
+        "name": "GARGANTUAN_SPIDER",
+        "ordinal": 2,
+        "index": 88,
+        "cut": 1
+      },
+      {
+        "name": "DARK_TREANT",
+        "ordinal": 7,
+        "index": 89,
+        "cut": 1
+      },
+      {
+        "name": "GARGANTUAN_SPIDER",
+        "ordinal": 3,
+        "index": 90,
+        "cut": 1
+      },
+      {
+        "name": "SHAMBLING_MOUND",
+        "ordinal": 3,
+        "index": 91,
+        "cut": 1
+      },
+      {
+        "name": "UMBER_HULK",
+        "ordinal": 1,
+        "index": 94,
+        "cut": 1
+      },
+      {
+        "name": "GARGANTUAN_SPIDER",
+        "ordinal": 5,
+        "index": 104,
+        "cut": 1
+      }
+    ]
+  },
+  "270": {
+    "bd5300": [
+      {
+        "name": "ARMORED_SKELETON",
+        "ordinal": 1,
+        "index": 17,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 1,
+        "index": 20,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 1,
+        "index": 21,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 2,
+        "index": 22,
+        "cut": 1
+      },
+      {
+        "name": "BLADED_SKELETON",
+        "ordinal": 2,
+        "index": 27,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 3,
+        "index": 28,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 2,
+        "index": 29,
+        "cut": 1
+      },
+      {
+        "name": "SHADOWED_SOUL",
+        "ordinal": 3,
+        "index": 30,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 4,
+        "index": 32,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 5,
+        "index": 33,
+        "cut": 1
+      },
+      {
+        "name": "SKELETON_ARCHER",
+        "ordinal": 6,
+        "index": 34,
+        "cut": 1
+      }
+    ]
+  }
+}

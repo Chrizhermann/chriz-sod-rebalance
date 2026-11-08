@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/chriz-sod-remix~
 AUTHOR ~Christopher Hermann (github.com/Chrizhermann/chriz-sod-rebalance)~
-VERSION ~v0.6.16~
+VERSION ~v0.6.17~
 
 ALWAYS
   INCLUDE ~chriz-sod-remix/lib/bdscry_compat.tpa~
@@ -85,53 +85,12 @@ LANGUAGE ~English~ ~english~ ~chriz-sod-remix/languages/english/setup.tra~
 // ============================================================
 // 100 — Rest-ambush chance: reduce the FELT rate ~5x
 // ============================================================
-// The engine rolls the .are rest-header day/night% PER IN-GAME
-// HOUR, so listed 6-18% is felt 39-80% per 8h rest (see
-// docs/research/01). This patch maps the CURRENT value through
-// felt->felt/5->inverted (lib/restmap.tpa), so it composes with
-// whatever another mod set. BDNOREST pseudo-tables (value 100,
-// "cannot rest here") are excluded by the <100 guard and by the
-// area list itself. Pack size (max/difficulty) is intentionally
-// untouched — that is a per-chapter decision.
-
+// The authored values reproduce the approved felt-rate reduction on the 30
+// selected native areas. Other encounter fields and non-target areas remain
+// independent; a changed chance receives the same decided value on each tail.
 BEGIN @100 DESIGNATED 100 GROUP @1000 LABEL ~csr_rest_ambush_5x~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
-
-INCLUDE ~chriz-sod-remix/lib/restmap.tpa~
-
-// The 30 SoD areas with an active, non-BDNOREST random rest table
-// (docs/design/wave1/01, table generated from sod_areas_dataset.csv).
-ACTION_FOR_EACH csr_area IN
-  ~bd0060~ ~bd0061~ ~bd0062~ ~bd0064~ ~bd0066~ ~bd0067~
-  ~bd0113~ ~bd0114~ ~bd0115~ ~bd0120~ ~bd0130~
-  ~bd1000~ ~bd1010~ ~bd1100~ ~bd1200~
-  ~bd2000~ ~bd2010~
-  ~bd4400~ ~bd4500~
-  ~bd5000~ ~bd5100~ ~bd5110~
-  ~bd7000~ ~bd7100~ ~bd7110~ ~bd7200~ ~bd7220~ ~bd7230~ ~bd7300~ ~bd7400~
-BEGIN
-  ACTION_IF (FILE_EXISTS_IN_GAME ~%csr_area%.are~) BEGIN
-    COPY_EXISTING ~%csr_area%.are~ ~override~
-      READ_LONG 0xc0 csr_rest_off
-      PATCH_IF (csr_rest_off > 0) BEGIN
-        READ_SHORT (csr_rest_off + 0x98) csr_cnt   // creature-table entries
-        READ_SHORT (csr_rest_off + 0xa4) csr_max   // max spawned creatures
-        READ_SHORT (csr_rest_off + 0xa6) csr_enab  // enabled flag
-        // engine only ever spawns if count>0 && enabled && max>0
-        PATCH_IF ((csr_cnt > 0) AND (csr_max > 0) AND (csr_enab > 0)) BEGIN
-          READ_SHORT (csr_rest_off + 0xa8) csr_day
-          PATCH_IF ((csr_day > 0) AND (csr_day < 100)) BEGIN
-            WRITE_SHORT (csr_rest_off + 0xa8) $csr_restmap(~%csr_day%~)
-          END
-          READ_SHORT (csr_rest_off + 0xaa) csr_night
-          PATCH_IF ((csr_night > 0) AND (csr_night < 100)) BEGIN
-            WRITE_SHORT (csr_rest_off + 0xaa) $csr_restmap(~%csr_night%~)
-          END
-        END
-      END
-    BUT_ONLY
-  END
-END
+INCLUDE ~chriz-sod-remix/lib/comp100.tpa~
 
 // ============================================================
 // 110 — Keep ALL companions at SoD start
@@ -160,7 +119,9 @@ END
 // world-copy into the SoD camp system.
 
 BEGIN @110 DESIGNATED 110 GROUP @1000 LABEL ~csr_keep_companions~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0103.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+LAF csr_ensure_script STR_VAR script = ~BD0103~ END
 
 COPY_EXISTING ~bd0103.bcs~ ~override~
   DECOMPILE_AND_PATCH BEGIN
@@ -170,8 +131,8 @@ COPY_EXISTING ~bd0103.bcs~ ~override~
       ~kagain~ ~shar-teel~ ~sharteel~ ~minsc~ ~dynaheir~ ~safana~
       ~viconia~ ~baeloth~ ~edwin~ ~jaheira~ ~khalid~ ~neera~ ~rasaad~ ~dorn~
     BEGIN
-      REPLACE_TEXTUALLY ~ActionOverride("%csr_npc%",LeaveParty())~ ~~
-      REPLACE_TEXTUALLY ~ActionOverride("%csr_npc%",DestroySelf())~ ~~
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~ActionOverride("%csr_npc%",LeaveParty())~ ~~
+      REPLACE_TEXTUALLY CASE_INSENSITIVE ~ActionOverride("%csr_npc%",DestroySelf())~ ~~
     END
   END
 BUT_ONLY
@@ -184,22 +145,14 @@ LAF csr110_keep_renamed_companions END
 INCLUDE ~chriz-sod-remix/lib/comp110_field.tpa~
 LAF csr110_sharteel_field_rejoin END
 
-EXTEND_TOP ~bd0101.bcs~ ~chriz-sod-remix/baf/skip0101.baf~   // Viconia
-EXTEND_TOP ~bd0108.bcs~ ~chriz-sod-remix/baf/skip0108.baf~   // Minsc, Dynaheir
-EXTEND_TOP ~bd0110.bcs~ ~chriz-sod-remix/baf/skip0110.baf~   // Safana
-EXTEND_TOP ~bd0111.bcs~ ~chriz-sod-remix/baf/skip0111.baf~   // Rasaad
-EXTEND_TOP ~bd1000.bcs~ ~chriz-sod-remix/baf/skip1000.baf~   // Edwin, Baeloth
-EXTEND_TOP ~bd2000.bcs~ ~chriz-sod-remix/baf/skip2000.baf~   // Khalid, Dorn (+gear grab)
-EXTEND_TOP ~bd2100.bcs~ ~chriz-sod-remix/baf/skip2100.baf~   // Neera
-EXTEND_TOP ~bd7000.bcs~ ~chriz-sod-remix/baf/skip7000.baf~   // Rasaad
-EXTEND_TOP ~bd7100.bcs~ ~chriz-sod-remix/baf/skip7100.baf~   // Jaheira
+INCLUDE ~chriz-sod-remix/lib/comp110_sites.tpa~
 
 // ============================================================
 // 115 — Khalid continuity for a carried BG1 party
 // ============================================================
 BEGIN @115 DESIGNATED 115 GROUP @1000 LABEL ~csr_khalid_continuity~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ 110 @9015
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp115.tpa~
 
 // ============================================================
@@ -222,45 +175,8 @@ INCLUDE ~chriz-sod-remix/lib/comp115.tpa~
 //  BDSCRY/BDIMOEN: False()-gate the dangling dialogue options.
 
 BEGIN @120 DESIGNATED 120 GROUP @1000 LABEL ~csr_no_hooded_man_midgame~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0103.bcs~) @9000
-
-COPY_EXISTING ~bd0103.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    REPLACE_TEXTUALLY ~CreateCreature("bdireni",\[300\.515\],W)~ ~~
-  END
-BUT_ONLY
-
-COPY_EXISTING ~bdcut10.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    REPLACE_TEXTUALLY ~StartCutSceneEx("bdcut11",TRUE)~
-~FadeFromColor([20.0],0)
-    EndCutSceneMode()~
-  END
-BUT_ONLY
-
-COPY_EXISTING ~bdcut28.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    REPLACE_TEXTUALLY ~CreateCreature("bdireni",\[650\.1320\],SE)~ ~~
-    REPLACE_TEXTUALLY ~ActionOverride("bdireni",MoveToPoint(\[875\.1490\]))~ ~~
-    REPLACE_TEXTUALLY ~ActionOverride("bdireni",StartDialogNoSet(Player1))~ ~EndCutSceneMode()~
-  END
-BUT_ONLY
-
-COPY_EXISTING ~bd5100.bcs~ ~override~
-  DECOMPILE_AND_PATCH BEGIN
-    REPLACE_TEXTUALLY ~Global("bd_unnamed_ugr","bd5100",0)~
-~False()
-  Global("bd_unnamed_ugr","bd5100",0)~
-  END
-BUT_ONLY
-
-LAF csr_disable_bdscry_picker_route
-  STR_VAR
-    csr_scry_flag = ~bd_sddd12_hood~
-    csr_scry_component = ~120~
-END
-
-COMPILE ~chriz-sod-remix/dlg/csrhood.d~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+INCLUDE ~chriz-sod-remix/lib/comp120.tpa~
 
 // ============================================================
 // 130 — Skip the four chapter rest-dreams
@@ -277,13 +193,20 @@ COMPILE ~chriz-sod-remix/dlg/csrhood.d~
 // (normal healing, normal — now 5x-reduced — ambush rolls).
 
 BEGIN @130 DESIGNATED 130 GROUP @1000 LABEL ~csr_skip_chapter_dreams~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbaldur.bcs~) @9000
-
-EXTEND_TOP ~bdbaldur.bcs~ ~chriz-sod-remix/baf/skipdrm.baf~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
+INCLUDE ~chriz-sod-remix/lib/overwrite.tpa~
+LAF csr_ensure_script STR_VAR script = ~BDBALDUR~ END
+COPY - ~chriz-sod-remix/baf/skipdrm.baf~ ~.../csr130-read~ READ_ASCII 0 csr130_blocks (SOURCE_SIZE)
+COPY_EXISTING ~BDBALDUR.bcs~ ~override~
+  DECOMPILE_AND_PATCH BEGIN
+    LPF csr_replace_script_blocks INT_VAR in_place = 1
+      STR_VAR pattern = ~SetGlobal("bd_ddd"~ replacement = EVAL ~%csr130_blocks%~ END
+  END
+BUT_ONLY
 
 // 135 — Default URE2 treatment: preserve the fight, remove dead magic.
 BEGIN @135 DESIGNATED 135 GROUP @1000 LABEL ~csr_assassins_without_dead_magic~ INSTALL_BY_DEFAULT
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0063.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0063.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
 
@@ -415,7 +338,6 @@ INCLUDE ~chriz-sod-remix/lib/comp175.tpa~
 // 176 — Append-only update for the older 24,000-per-character quest award.
 BEGIN @176 DESIGNATED 176 GROUP @1001 LABEL ~csr_prologue_flat_xp~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~175~ ~Component 176 updates Liia's existing quest reward; install 175 first.~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~csrcele.dlg~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp176.tpa~
 
@@ -558,7 +480,7 @@ INCLUDE ~chriz-sod-remix/lib/comp200.tpa~
 // chunk (16,500) on the guaranteed chapter-9 transition award.
 
 BEGIN @215 DESIGNATED 215 GROUP @1002 LABEL ~csr_bd7000_xp_ledger~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7100.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7100.are~) @9000
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~210~ ~Component 215 (the BD7000 XP ledger) compensates content removed by component 210 (Coast Way Forest removed) - install 210 first.~
 
 INCLUDE ~chriz-sod-remix/lib/comp215.tpa~
@@ -592,8 +514,6 @@ INCLUDE ~chriz-sod-remix/lib/comp220.tpa~
 
 BEGIN @225 DESIGNATED 225 GROUP @1002 LABEL ~csr_scrying_pool_omen~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1200.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdodscry.bcs~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdscry.dlg~) @9000
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~120~ ~Component 225 (the single Caelar omen) retires the final scrying choices after component 120 removes the Hooded Man - install 120 first.~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~220~ ~Component 225 rehomes an Essence from content removed by component 220 (the dig-site re-garrisoning) - install 220 first.~
 
@@ -609,7 +529,6 @@ INCLUDE ~chriz-sod-remix/lib/comp225.tpa~
 
 BEGIN @245 DESIGNATED 245 GROUP @1002 LABEL ~csr_coastway_skipproof~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd1000.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~200~ ~Component 245 (skip-proof wall removal) mirrors component 200's bridge-cutscene changes into the cutscene-skip rig - install 200 first.~
 
 INCLUDE ~chriz-sod-remix/lib/comp245.tpa~
@@ -632,7 +551,7 @@ INCLUDE ~chriz-sod-remix/lib/comp230.tpa~
 
 BEGIN @235 DESIGNATED 235 GROUP @1003 LABEL ~csr_ymori_quest_repair~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~230~ ~Component 235 preserves Ymori's quest after component 230; install 230 first.~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~ AND FILE_EXISTS_IN_GAME ~bd2000.bcs~ AND FILE_EXISTS_IN_GAME ~bdymori.cre~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp235.tpa~
 
@@ -665,7 +584,6 @@ INCLUDE ~chriz-sod-remix/lib/comp240.tpa~
 
 BEGIN @250 DESIGNATED 250 GROUP @1003 LABEL ~csr_morentherene_tiers~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7210.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdmorent.cre~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp250.tpa~
 
@@ -679,14 +597,13 @@ INCLUDE ~chriz-sod-remix/lib/comp250.tpa~
 
 BEGIN @255 DESIGNATED 255 GROUP @1003 LABEL ~csr_durable_barrels~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdkegx.cre~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp255.tpa~
 
 // 256 supersedes the barrel finale, with or without the older 255 stopgap.
 // Append to existing installs; never uninstall an installed 255 to use this.
 BEGIN @256 DESIGNATED 256 GROUP @1003 LABEL ~csr_elemental_bridge_finale~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~ AND FILE_EXISTS_IN_GAME ~bd2000.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd2000.are~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp256.tpa~
 
 BEGIN @257 DESIGNATED 257 GROUP @1006 LABEL ~csr_bridge_extra_challenge~
@@ -713,15 +630,13 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7400.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd7310.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5000.are~) @9000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5100.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4000.bcs~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp260.tpa~
 
 // 265 — Approved filler-audit corrections for existing chapter cuts.
 BEGIN @265 DESIGNATED 265 GROUP @1004 LABEL ~csr_filler_corrections~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~260~ ~Component 265 repairs quest loot and missed creature cuts after component 260; install 260 first.~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5000.are~ AND FILE_EXISTS_IN_GAME ~bd5000.bcs~ AND FILE_EXISTS_IN_GAME ~bd5110.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdashiru.bcs~ AND FILE_EXISTS_IN_GAME ~bd4000.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5000.are~ AND FILE_EXISTS_IN_GAME ~bd5110.are~) @9000
 
 OUTER_SET csr265_repair260 = 1
 // The Shadowed Soul ban is global; it does not depend on the optional cave cut.
@@ -730,7 +645,7 @@ INCLUDE ~chriz-sod-remix/lib/comp265.tpa~
 INCLUDE ~chriz-sod-remix/lib/comp265_xp.tpa~
 
 BEGIN @266 DESIGNATED 266 GROUP @1004 LABEL ~csr_shadow_aspect_finite_mislead~ INSTALL_BY_DEFAULT
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdashiru.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
 INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
 
 // ============================================================
@@ -741,7 +656,6 @@ INCLUDE ~chriz-sod-remix/lib/comp266.tpa~
 // Cut kill-XP returns on the Kherriun/Dark-Magicians award.
 BEGIN @270 DESIGNATED 270 GROUP @1004 LABEL ~csr_kanaglym_trim~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5300.are~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd5300.bcs~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp270.tpa~
 
@@ -754,9 +668,7 @@ INCLUDE ~chriz-sod-remix/lib/comp270.tpa~
 // ward visuals and the enemy-side parley dispels stay.
 
 BEGIN @280 DESIGNATED 280 GROUP @1004 LABEL ~csr_no_reveal_dispel~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcut45a.bcs~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcut45b.bcs~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~cutskip.bcs~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd0120.are~) @9000
 
 INCLUDE ~chriz-sod-remix/lib/comp280.tpa~
 
@@ -777,15 +689,7 @@ INCLUDE ~chriz-sod-remix/lib/comp285.tpa~
 // launch. Original K#/AR0602/BD6100 resources remain untouched.
 
 BEGIN @290 DESIGNATED 290 GROUP @1005 LABEL ~csr_victory_ending~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4300.bcs~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdpalace.bcs~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddebug.bcs~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddebug.dlg~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddazzo.dlg~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdbence.dlg~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bddelanc.dlg~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdrumor3.dlg~) @9000
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bdcorwij.dlg~) @9000
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd4300.are~) @9000
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~120~ ~Component 290 (the direct victory ending) requires component 120 (the Hooded Man removed from the mid-campaign).~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~130~ ~Component 290 (the direct victory ending) requires component 130 (the chapter rest-dreams removed).~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~185~ ~Component 290 (the direct victory ending) requires component 185 (Entar Silvershield removed).~
@@ -804,7 +708,7 @@ INCLUDE ~chriz-sod-remix/lib/comp290.tpa~
 
 BEGIN @291 DESIGNATED 291 GROUP @1005 LABEL ~csr_victory_ending_script_fix~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~290~ ~Component 291 repairs the EET handoff of component 290; install component 290 first.~
-REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~K#TELBGT.BCS~ AND FILE_EXISTS_IN_GAME ~K#TELBGT.CRE~ AND FILE_EXISTS_IN_GAME ~AR0602.BCS~) @9001
+REQUIRE_PREDICATE (GAME_IS ~eet~) @9001
 
 INCLUDE ~chriz-sod-remix/lib/comp291.tpa~
 
@@ -834,7 +738,7 @@ INCLUDE ~chriz-sod-remix/lib/comp900.tpa~
 // item-import rules (including other mods' additions) can be inspected.
 BEGIN @910 DESIGNATED 910 GROUP @1001 LABEL ~csr_optional_sod_skip~
 REQUIRE_PREDICATE (GAME_IS ~eet~) ~The optional bedroom skip requires EET.~
-REQUIRE_COMPONENT ~EET_END/EET_END.TP2~ ~0~ ~Install EET_end before the optional bedroom skip.~
+REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~bd6100.are~) @9000
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~110~ ~Install remix component 110 first.~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~140~ ~Install remix component 140 first.~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~150~ ~Install remix component 150 first.~
@@ -854,7 +758,7 @@ INCLUDE ~chriz-sod-remix/lib/comp910.tpa~
 
 BEGIN @292 DESIGNATED 292 SUBCOMPONENT @2920 GROUP @1005 LABEL ~csr_imoen_soa_bg2~
 REQUIRE_PREDICATE (GAME_IS ~eet~) ~Imoen's handover into Shadows of Amn requires EET.~
-REQUIRE_COMPONENT ~EET_END/EET_END.TP2~ ~0~ ~Install EET_end before Imoen's handover into Shadows of Amn.~
+
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~160~ ~Imoen's handover into Shadows of Amn requires component 160 (Imoen stays).~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~290~ ~Imoen's handover into Shadows of Amn requires component 290 (the victory ending hosts it).~
 OUTER_SET csr292_choice = 1
@@ -862,7 +766,7 @@ INCLUDE ~chriz-sod-remix/lib/comp292.tpa~
 
 BEGIN @293 DESIGNATED 293 SUBCOMPONENT @2920 GROUP @1005 LABEL ~csr_imoen_soa_carried~
 REQUIRE_PREDICATE (GAME_IS ~eet~) ~Imoen's handover into Shadows of Amn requires EET.~
-REQUIRE_COMPONENT ~EET_END/EET_END.TP2~ ~0~ ~Install EET_end before Imoen's handover into Shadows of Amn.~
+
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~160~ ~Imoen's handover into Shadows of Amn requires component 160 (Imoen stays).~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~290~ ~Imoen's handover into Shadows of Amn requires component 290 (the victory ending hosts it).~
 OUTER_SET csr292_choice = 2
@@ -871,7 +775,7 @@ INCLUDE ~chriz-sod-remix/lib/comp292.tpa~
 BEGIN @294 DESIGNATED 294 SUBCOMPONENT @2920 GROUP @1005 LABEL ~csr_imoen_soa_dual~
 REQUIRE_PREDICATE (GAME_IS ~eet~) ~Imoen's handover into Shadows of Amn requires EET.~
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~M___EEex.lua~) ~Dual-classing Imoen at her SoD thief level requires EEex.~
-REQUIRE_COMPONENT ~EET_END/EET_END.TP2~ ~0~ ~Install EET_end before Imoen's handover into Shadows of Amn.~
+
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~160~ ~Imoen's handover into Shadows of Amn requires component 160 (Imoen stays).~
 REQUIRE_COMPONENT ~chriz-sod-remix/setup-chriz-sod-remix.tp2~ ~290~ ~Imoen's handover into Shadows of Amn requires component 290 (the victory ending hosts it).~
 OUTER_SET csr292_choice = 3

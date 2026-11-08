@@ -1,90 +1,46 @@
-// Shared by fresh #256 and the append-only #258 upgrade.
-// Saved area variables: CLOCK 0=unstarted, 1=running, 2=safe, 3=Story, 4=failed.
-// Use game-time deadlines, never wall-clock timers or per-script-pass counters.
+// Shared by #256 and #258. Saved CLOCK: 0 unstarted, 1 running,
+// 2 safe, 3 Story, 4 failed. Authored timers are refreshed on every install.
+INCLUDE ~chriz-sod-remix/lib/comp256_world.tpa~
 OUTER_SPRINT csr256_timer_nl ~%MNL%?%LNL%~
-
+DEFINE_PATCH_MACRO csr256_timer_after_guard BEGIN
+  SET aftermath_written = 0
+  REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr256_timer_nl%\(\([ %TAB%]+[^%WNL%]*%csr256_timer_nl%\|THEN%csr256_timer_nl%\)*\)END~ BEGIN
+    SPRINT after_block ~%MATCH0%~
+    PATCH_IF ~%after_block%~ STRING_CONTAINS_REGEXP ~SetGlobal("CSR256_STAGE","BD2000",3)~ = 0 BEGIN
+      SET aftermath_written = 1
+      INNER_PATCH_SAVE after_block ~%after_block%~ BEGIN
+        REPLACE_TEXTUALLY CASE_INSENSITIVE ~^[ %TAB%]*!?Global("CSR256_CLOCK","BD2000",[-0-9]+)[%WNL%]+~ ~~
+        REPLACE_TEXTUALLY ~^THEN~ ~  Global("CSR256_CLOCK","BD2000",2)
+THEN~
+      END
+    END ELSE PATCH_IF ~%after_block%~ STRING_CONTAINS_REGEXP ~"CSR256_CLOCK"~ = 0 BEGIN
+      SPRINT after_block ~~
+    END
+  END ~%after_block%~
+END
 DEFINE_PATCH_MACRO csr256_timer_patch_world BEGIN
-  SPRINT csr256_ready ~IF%csr256_timer_nl%  Global("CSR256_STAGE","BD2000",1)%csr256_timer_nl%THEN%csr256_timer_nl%  RESPONSE #100%csr256_timer_nl%    SetGlobal("CSR256_STAGE","BD2000",2)%csr256_timer_nl%    DisplayStringNoName(Player1,[0-9]+)[^%WNL%]*%csr256_timer_nl%END~
-  COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~%csr256_ready%~ csr256_ready_hits
-  PATCH_IF (csr256_ready_hits != 1) BEGIN
-    PATCH_FAIL ~#258: expected one original #256 encounter-ready warning; no timer resources changed.~
+  LPM csr256_timer_after_guard
+  PATCH_IF NOT aftermath_written BEGIN
+    LPM csr256_world_script
+    LPM csr256_timer_after_guard
   END
-  REPLACE_TEXTUALLY CASE_INSENSITIVE ~%csr256_ready%~ ~IF
+  LPF csr_replace_script_blocks INT_VAR in_place = 1
+    STR_VAR pattern = ~SetGlobal("CSR256_STAGE","BD2000",2)~ replacement = ~IF
   Global("CSR256_STAGE","BD2000",1)
 THEN
   RESPONSE #100
     SetGlobal("CSR256_STAGE","BD2000",2)
     SetGlobal("CSR256_TIMER_V2","BD2000",1)
-END~
-
-  // Keep the complete installed aftermath (including #115/#197 variants).
-  // Its extra condition follows the eight actor checks, preserving the native
-  // prefix recognized by the companion-continuity patches.
-  SET csr256_after_hits = 0
-  REPLACE_EVALUATE CASE_INSENSITIVE ~^IF%csr256_timer_nl%\(\([ %TAB%]+[^%WNL%]*%csr256_timer_nl%\|THEN%csr256_timer_nl%\)*\)END~ BEGIN
-    SPRINT csr256_after_block ~%MATCH0%~
-    INNER_PATCH ~%csr256_after_block%~ BEGIN
-      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~CreateCreatureObject("bdbence",Player1,6,0,0)~ csr256_after_bence
-      COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~SetGlobal("CSR256_STAGE","BD2000",3)~ csr256_after_stage
-    END
-    PATCH_IF (csr256_after_bence > 0 OR csr256_after_stage > 0) BEGIN
-      PATCH_IF (csr256_after_bence != 1 OR csr256_after_stage != 1) BEGIN
-        PATCH_FAIL ~#258: unrecognized #256 aftermath; refusing a partial timer upgrade.~
-      END
-      INNER_PATCH_SAVE csr256_after_block ~%csr256_after_block%~ BEGIN
-        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~  Global("CSR256_STAGE","BD2000",2)~ csr256_after_guard
-        PATCH_IF (csr256_after_guard != 1) BEGIN
-          PATCH_FAIL ~#258: missing #256 combat-stage guard.~
-        END
-        REPLACE_TEXTUALLY ~^THEN~ ~  Global("CSR256_CLOCK","BD2000",2)
-THEN~
-      END
-      SET csr256_after_hits += 1
-    END
-  END ~%csr256_after_block%~
-  PATCH_IF (csr256_after_hits < 1 OR csr256_after_hits > 2) BEGIN
-    PATCH_FAIL ~#258: expected the original #256 aftermath or its #115 pair.~
-  END
 END
-
-DEFINE_ACTION_FUNCTION csr256_timer_preflight
-  INT_VAR check_world=0
-  RET already_installed
-BEGIN
+~ END
+END
+DEFINE_ACTION_FUNCTION csr256_timer_preflight INT_VAR check_world = 0 RET already_installed BEGIN
   OUTER_SET already_installed = 0
-  ACTION_IF check_world BEGIN
-    COPY_EXISTING - ~BD2000.BCS~ ~override~
-      DECOMPILE_AND_PATCH BEGIN
-        COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~SetGlobal("CSR256_TIMER_V2","BD2000",1)~ csr256_timer_markers
-        PATCH_IF (csr256_timer_markers = 1) BEGIN
-          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~StartCutSceneEx("CSR26END",FALSE)~ csr256_timer_ends
-          PATCH_IF (csr256_timer_ends != 1 OR NOT FILE_EXISTS_IN_GAME ~CSR26END.BCS~) BEGIN
-            PATCH_FAIL ~#258: incomplete existing bridge timer; refusing to duplicate it.~
-          END
-          SET already_installed = 1
-        END ELSE BEGIN
-          PATCH_IF csr256_timer_markers BEGIN PATCH_FAIL ~#258: duplicate bridge timer marker.~ END
-          COUNT_REGEXP_INSTANCES CASE_INSENSITIVE ~"CSR256_CLOCK"~ csr256_timer_foreign
-          PATCH_IF csr256_timer_foreign BEGIN PATCH_FAIL ~#258: unrecognized bridge timer variables.~ END
-          LPM csr256_timer_patch_world
-        END
-      END
-  END
-  ACTION_IF NOT already_installed BEGIN
-    ACTION_IF FILE_EXISTS_IN_GAME ~CSR26END.BCS~ BEGIN
-      FAIL ~#258: owned script name CSR26END.BCS already exists; no resources changed.~
-    END
-    ACTION_FOR_EACH csr256_rocks IN ~AMB_E17A.WAV~ ~AMB_E17B.WAV~ BEGIN
-      ACTION_IF NOT FILE_EXISTS_IN_GAME ~%csr256_rocks%~ BEGIN
-        FAIL ~#258: missing native rockfall sound %csr256_rocks%; no resources changed.~
-      END
-    END
-  END
 END
 
 DEFINE_ACTION_FUNCTION csr256_timer_install BEGIN
   LAF csr256_timer_preflight INT_VAR check_world=1 RET already_installed END
-  ACTION_IF NOT already_installed BEGIN
+  ACTION_IF 1 BEGIN
     OUTER_SET csr256_t_start = RESOLVE_STR_REF(@25610)
     OUTER_SET csr256_t_25 = RESOLVE_STR_REF(@25611)
     OUTER_SET csr256_t_50 = RESOLVE_STR_REF(@25612)

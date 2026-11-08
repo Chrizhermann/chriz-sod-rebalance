@@ -101,6 +101,7 @@ class Component135InstallerTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.game = Path(self.temp.name)
         write_fake_game(self.game)
+        shutil.copytree(ROOT / "chriz-sod-remix", self.game / "chriz-sod-remix")
         self.override = self.game / "override"
         extra_ids = {
             "action": '''66 DayNight(I:TimeOfDay*TIME)
@@ -141,7 +142,7 @@ class Component135InstallerTests(unittest.TestCase):
         tlk = struct.pack("<8sHII", b"TLK V1  ", 0, count, 18 + count * 26) + records + text * count
         for path in (self.game / "dialog.tlk", self.game / "lang/en_us/dialog.tlk"):
             path.write_bytes(tlk)
-        (self.game / "chriz-sod-remix/lib").mkdir(parents=True)
+        (self.game / "chriz-sod-remix/lib").mkdir(parents=True, exist_ok=True)
         for library in ("comp135.tpa", "gtimes_compat.tpa"):
             shutil.copy2(ROOT / "chriz-sod-remix/lib" / library,
                          self.game / "chriz-sod-remix/lib" / library)
@@ -214,19 +215,10 @@ INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
         result = self.install()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("SUCCESSFULLY INSTALLED", result.stdout)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
         self.assert_preserved(before, changed)
         self.assertEqual((self.override / "bd0063.bcs").read_bytes(),
                          (self.override / "expected.bcs").read_bytes())
-
-    def assert_rejected(self, before: dict) -> None:
-        result = self.install()
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("NOT INSTALLED DUE TO ERRORS", result.stdout)
-        self.assertIn("#135", result.stdout + result.stderr)
-        self.assert_preserved(before, False)
-        self.assertFalse(any(path.suffix.upper() == ".BCS"
-                             for path in (self.game / "patch-backup/135").rglob("*")),
-                         "preflight failure must precede resource backups")
 
     def test_vanilla_without_aura_preserves_compiled_keeper_script_exactly(self):
         self.fixture()
@@ -263,32 +255,32 @@ INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
         shutil.copy2(self.game / "patch.tp2", self.game / "second.tp2")
         result = self.install("second.tp2")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("already has no dead-magic", result.stdout)
+        self.assertNotIn("WARNING", (result.stdout + result.stderr).upper())
         self.assert_preserved(before, False)
 
-    def test_missing_original_remark_rejects_partial_change_before_write(self):
+    def test_missing_original_remark_keeps_removal_complete(self):
         self.fixture(dead_magic_blocks()[:-1])
-        self.assert_rejected(self.snapshot())
+        self.assert_success(self.snapshot())
 
-    def test_duplicate_antimagic_block_is_rejected_before_write(self):
+    def test_duplicate_antimagic_blocks_are_all_removed(self):
         self.fixture(dead_magic_blocks() + [ANTIMAGIC])
-        self.assert_rejected(self.snapshot())
+        self.assert_success(self.snapshot())
 
-    def test_extra_action_inside_target_is_rejected_before_write(self):
+    def test_extra_action_does_not_preserve_the_dead_magic_block(self):
         targets = dead_magic_blocks()
         targets[0] = targets[0].replace("    ApplySpell", "    Continue()\n    ApplySpell")
         self.fixture(targets)
-        self.assert_rejected(self.snapshot())
+        self.assert_success(self.snapshot())
 
-    def test_changed_optional_aura_block_is_rejected_before_write(self):
+    def test_changed_optional_remark_is_removed(self):
         targets = dead_magic_blocks(aura=True)
         targets[-1] = targets[-1].replace("Delay(3)", "Delay(4)")
         self.fixture(targets)
-        self.assert_rejected(self.snapshot())
+        self.assert_success(self.snapshot())
 
-    def test_missing_preserved_warning_rejects_before_write(self):
+    def test_missing_unowned_warning_does_not_gate_removal(self):
         self.fixture(keepers=[value for value in KEEPERS if value != WARNINGS[0]])
-        self.assert_rejected(self.snapshot())
+        self.assert_success(self.snapshot())
 
     def test_antimagic_contract_follows_the_gtimes_name_for_six_seconds(self):
         # Another mod may append its own name for 6 seconds; the decompiler
@@ -299,12 +291,12 @@ INCLUDE ~chriz-sod-remix/lib/comp135.tpa~
                 self.fixture(dead_magic_blocks(aura=True))
                 self.assert_success(self.snapshot())
 
-    def test_changed_antimagic_timer_is_rejected_with_an_appended_gtimes_name(self):
+    def test_changed_antimagic_timer_is_removed_with_an_appended_gtimes_name(self):
         self.make_game(gtimes_variants(6)["name from another mod"][0])
         targets = dead_magic_blocks()
         targets[0] = targets[0].replace("ONE_ROUND", "TWO_ROUNDS")
         self.fixture(targets)
-        self.assert_rejected(self.snapshot())
+        self.assert_success(self.snapshot())
 
 
 if __name__ == "__main__":

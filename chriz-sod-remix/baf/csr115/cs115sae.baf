@@ -1,0 +1,41 @@
+IF
+  Global("csr_kh_fort","GLOBAL",1)
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId("bdwynan")
+    SetInterrupt(FALSE)
+    ActionOverride("csr115ad",Face(NW))
+    Wait(3)
+    ActionOverride("csr115ad",DisplayStringWait(Myself,%csr115_s46542%))
+    MoveToPoint([1730.761])
+    ActionOverride("csr115ad",FaceObject("bdwynan"))
+    DisplayStringWait(Myself,%csr115_s46543%)
+    MoveToPoint([2199.943])
+    ActionOverride("csr115ad",EscapeArea())
+    SetInterrupt(TRUE)
+    SetGlobal("bd_205_stakeout","global",2)
+    Wait(8)
+    StartCutSceneEx("bdc205bc",FALSE)
+END
+
+IF
+  !Global("csr_kh_fort","GLOBAL",1)
+  True()
+THEN
+  RESPONSE #100
+    CutSceneId("bdwynan")
+    SetInterrupt(FALSE)
+    ActionOverride("bdbfort",Face(NW))
+    Wait(3)
+    ActionOverride("bdbfort",DisplayStringWait(Myself,%csr115_s46542%))
+    MoveToPoint([1730.761])
+    ActionOverride("bdbfort",FaceObject("bdwynan"))
+    DisplayStringWait(Myself,%csr115_s46543%)
+    MoveToPoint([2199.943])
+    ActionOverride("bdbfort",EscapeArea())
+    SetInterrupt(TRUE)
+    SetGlobal("bd_205_stakeout","global",2)
+    Wait(8)
+    StartCutSceneEx("bdc205bc",FALSE)
+END

@@ -13,8 +13,8 @@
 // (DO 3 -> BDENTAR 5) are gated. The greeting reply (DO 0 -> BDELTAN 4) carries
 // the council forward; comp150 already gated DO 1.
 REPLACE_SAY ~BDLIIA~ 9 @18500
-ADD_TRANS_TRIGGER BDLIIA 9 ~False()~ DO 2   // #257841 "Weren't you...killed?" -> BDENTAR 6
-ADD_TRANS_TRIGGER BDLIIA 9 ~False()~ DO 3   // #257842 "Who is the young lady?" -> BDENTAR 5
+ALTER_TRANS BDLIIA BEGIN 9 END BEGIN 2 END BEGIN TRIGGER ~False()~ END// #257841 "Weren't you...killed?" -> BDENTAR 6
+ALTER_TRANS BDLIIA BEGIN 9 END BEGIN 3 END BEGIN TRIGGER ~False()~ END// #257842 "Who is the young lady?" -> BDENTAR 5
 
 // ============================================================
 // B. Departure send-off, rebuilt Belt-side
@@ -29,20 +29,20 @@ ADD_TRANS_TRIGGER BDLIIA 9 ~False()~ DO 3   // #257842 "Who is the young lady?" 
 // (45) orphan with no speaker; the Skie ring "family matter" branch (BDENTAR
 // 8-23: ring07 + journal 256390) dies with them — consistent with the Skie
 // SoD-plot removal (comp190).
-APPEND ~BDBELT~
-IF ~~ THEN BEGIN ~csr185_dep_open~
+REPLACE ~BDBELT~
+IF %csr185_open_weight% ~~ THEN BEGIN %csr185_open%
   SAY @18501
   IF ~~ THEN REPLY @18502 GOTO 62                 // route -> Belt's existing route line
   IF ~~ THEN REPLY @18503 EXTERN ~BDLIIA~ 31      // mission -> Liia's existing rendezvous line
-  IF ~~ THEN REPLY @18504 GOTO ~csr185_dep_close~
+  IF ~~ THEN REPLY @18504 GOTO %csr185_close%
 END
-IF ~~ THEN BEGIN ~csr185_dep_loop~
+IF %csr185_loop_weight% ~~ THEN BEGIN %csr185_loop%
   SAY @18505
   IF ~~ THEN REPLY @18502 GOTO 62
   IF ~~ THEN REPLY @18503 EXTERN ~BDLIIA~ 31
-  IF ~~ THEN REPLY @18504 GOTO ~csr185_dep_close~
+  IF ~~ THEN REPLY @18504 GOTO %csr185_close%
 END
-IF ~~ THEN BEGIN ~csr185_dep_close~
+IF %csr185_close_weight% ~~ THEN BEGIN %csr185_close%
   SAY @18506
   IF ~~ THEN EXIT
 END
@@ -52,13 +52,13 @@ END
 // action (EPILOGUE re-points target only). Belt 62 (route) and Liia 31 (mission)
 // both looped back through Entar 42 -> now the Belt loop hub.
 ALTER_TRANS BDBELT BEGIN 61 END BEGIN 0 END BEGIN
-  EPILOGUE ~GOTO csr185_dep_open~
+  EPILOGUE ~GOTO %csr185_open%~
 END
 ALTER_TRANS BDBELT BEGIN 62 END BEGIN 0 END BEGIN
-  EPILOGUE ~GOTO csr185_dep_loop~
+  EPILOGUE ~GOTO %csr185_loop%~
 END
 ALTER_TRANS BDLIIA BEGIN 31 END BEGIN 0 END BEGIN
-  EPILOGUE ~EXTERN BDBELT csr185_dep_loop~
+  EPILOGUE ~EXTERN BDBELT %csr185_loop%~
 END
 
 // ============================================================
@@ -69,4 +69,4 @@ END
 // (comp150 substitutes csrserv, and comp190 owns the second-sleep beat), so this
 // is belt-and-suspenders; gating DO 0 leaves the two wake-at-dawn replies
 // (states 4/5) intact.
-ADD_TRANS_TRIGGER BDSERV 2 ~False()~ DO 0   // #235244 "Fetch Duke Entar. I must speak to him about his daughter."
+ALTER_TRANS BDSERV BEGIN 2 END BEGIN 0 END BEGIN TRIGGER ~False()~ END// #235244 "Fetch Duke Entar. I must speak to him about his daughter."
