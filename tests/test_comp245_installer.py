@@ -137,7 +137,7 @@ class Component245InstallerTests(unittest.TestCase):
         self.game = Path(temp.name)
         write_fake_game(self.game)
         self.override = self.game / "override"
-        (self.game / "WeiDU.log").write_text("")
+        (self.game / "weidu.log").write_text("")
         extra_ids = {'action': '1 ActionOverride(O:Actor*,A:Action*)\n10 Enemy()\n48 JumpToPoint(P:Target*)\n49 MoveViewPoint(P:Target*,I:ScrollSpeed*Scroll)\n67 Weather(I:Weather*Weather)\n83 SmallWait(I:Time*)\n84 Face(I:Direction*DIR)\n111 DestroySelf()\n115 SetGlobalTimer(S:Name*,S:Area*,I:Time*GTimes)\n122 EndCutSceneMode()\n143 OpenDoor(O:Object*)\n144 CloseDoor(O:Object*)\n153 ChangeEnemyAlly(O:Object*,I:Value*EA)\n169 DestroyItem(S:ResRef*)\n177 TriggerActivation(O:Object*,I:State*Boolean)\n203 FadeFromColor(P:Point*,I:Blue*)\n229 FaceObject(O:Object*)\n301 AmbientActivate(O:Object*,I:State*BOOLEAN)\n306 ApplyDamagePercent(O:Object*,I:Amount*,I:Type*DMGTYPE)\n345 SetSequence(I:Sequence*SEQ)\n', 'trigger': '0x00EB CutSceneBroken()\n0x40E5 Switch(S:Global*,S:Area*)\n', 'scroll': '0 INSTANT\n', 'weather': '3 FOG\n', 'ea': '128 NEUTRAL\n', 'dir': '9 NNE\n10 NE\n11 NEE\n12 E\n', 'dmgtype': '0x00080000 FIRE\n', 'seq': '1 SEQ_AWAKE\n', 'gtimes': '18 THREE_ROUNDS\n30 FIVE_ROUNDS\n'}
         extra_ids["object"] = "21 Player1\n22 Player2\n23 Player3\n24 Player4\n25 Player5\n26 Player6\n"
         for name, definitions in extra_ids.items():

@@ -54,7 +54,7 @@ class ContainerPreflightTests(unittest.TestCase):
             game = Path(tmp)
             override = game / "override"
             override.mkdir()
-            (game/"WeiDU.log").write_text("")
+            (game/"weidu.log").write_text("")
             # Every resource used by this early production preflight is in
             # override. A TLK default entry prevents WeiDU creating one itself.
             (game / "chitin.key").write_bytes(

@@ -258,7 +258,7 @@ class EffectiveKhalidGame:
             path.write_bytes(tlk)
         shutil.copytree(ROOT / "chriz-sod-remix", self.root / "chriz-sod-remix")
         # A fabricated prerequisite applies only to this disposable fake game.
-        (self.root / "WeiDU.log").write_text(
+        (self.root / "weidu.log").write_text(
             "~CHRIZ-SOD-REMIX/SETUP-CHRIZ-SOD-REMIX.TP2~ #0 #110 // fixture prerequisite\n"
             if prerequisite else "")
         self.before = self.tree()
