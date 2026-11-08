@@ -116,7 +116,8 @@ class Component200InstallerTests(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.game = Path(temp.name)
         write_fake_game(self.game)
-        (self.game/"WeiDU.log").write_text("")
+        # Lowercase: WeiDU on Linux reads weidu.log, and Windows ignores the case.
+        (self.game/"weidu.log").write_text("")
         self.override = self.game / "override"
         extra_ids = {
             "action": '''1 ActionOverride(O:Actor*,A:Action*)

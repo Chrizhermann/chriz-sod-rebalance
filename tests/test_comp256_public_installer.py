@@ -25,6 +25,7 @@ from test_comp291_installer import WEIDU, tree
 from test_comp256_timer import write_timer_ids
 
 
+ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_TP2 = 'chriz-sod-remix/setup-chriz-sod-remix.tp2'
 
 
@@ -265,8 +266,9 @@ class PublicBridgeInstallerTests(unittest.TestCase):
     def test_owned_texture_collision_is_overwritten_by_public_install(self):
         (self.override/'b2000n90.pvrz').write_bytes(b'FOREIGN NIGHT TEXTURE PAGE')
         self.success(self.run_public('--force-install-list', '256'))
+        # The tracked source: setUp lowercases the disposable copy on Linux.
         self.assertEqual((self.override/'b2000n90.pvrz').read_bytes(),
-                         (self.game/'chriz-sod-remix/art/bridge/CSR256N.PVRZ').read_bytes())
+                         (ROOT/'chriz-sod-remix/art/bridge/CSR256N.PVRZ').read_bytes())
         self.assertTrue((self.override/'csr26fmi.cre').exists())
 
     def test_challenge_recreates_missing_owned_mage_and_ai(self):
