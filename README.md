@@ -1,153 +1,128 @@
-# chriz-sod-rebalance
+# SoD Remix (`chriz-sod-rebalance`)
 
-A Siege of Dragonspear remix and companion rebalance for BG2:EE + EET, with
-standalone BG:EE + SoD also in scope. Current release: **v0.6.17**.
+Streamlines *Siege of Dragonspear* between Baldur's Gate I and Shadows of Amn for
+**BG2:EE + EET** and standalone **BG:EE + SoD** (**v0.6.17**). Part of
+**[Chriz Easy BG](https://bg.chrizfader.org/collection)**.
 
-v0.6.17 writes every component's decided result, whatever the game files hold.
-Edited values, missing dialogue states, occupied script slots and other mods'
-versions of the same resources no longer stop, warn or skip a component; it
-writes what it decided over them. See the
-[release report](docs/releases/v0.6.17.md).
+**[Chriz Easy BG](https://bg.chrizfader.org/collection)** · **[Rules & Balance](https://bg.chrizfader.org/rules)** · **[Latest Release](https://github.com/Chrizhermann/chriz-sod-rebalance/releases/latest)**
 
-v0.6.16 removes two installation stops caused by other mods. The victory ending
-(**290**) now accepts every victory remark that another mod adds after the battle
-of Avernus, such as Sirene NPC for BG:EE's, and shortens it like the vanilla
-ones. **265** and six more components read their timer names from the game's own
-`GTIMES.IDS`, so a mod that gives a timer value another name no longer stops
-them. See the [release report](docs/releases/v0.6.16.md).
+---
 
-v0.6.15 lets the Boareskyr bridge finale (**256**) install alongside Tweaks
-Anthology's "Summoned Creatures Clear Fog of War" (`cdtweaks` 3500). The
-hostile bridge elementals now leave that tweak's ally-only fog clearing behind
-instead of stopping the installation. See the
-[release report](docs/releases/v0.6.15.md).
+## Part 1 — For Players
 
-v0.6.14 hands Imoen over into Shadows of Amn on EET (**292 / 293 / 294**, choose
-one). Her SoD gear goes through EET's import rules like the party's, and she keeps
-only her BG2 belt, correctly equipped. Then she becomes EET's Shadows of Amn Imoen
-plus her tome boosts (292, the CEBG default), continues as taken along (293), or
-dual-classes to mage at her end-of-SoD thief level (294, requires EEex). All three
-passed the lab on engine 2.7.3.0. Raise a dead Imoen before ending SoD. See the
-[release report](docs/releases/v0.6.14.md).
+*SoD Remix* keeps the best moments of *Siege of Dragonspear* while cutting slow
+filler, keeping your classic Baldur's Gate companions together, and cleaning up the
+campaign transition into Baldur's Gate II.
 
-v0.6.13 adds early BG1 companion recruitment in SoD (**198**): Skie can join in
-the palace hall before the first rest, and Yeslick, Branwen, Ajantis, Coran,
-Garrick, Kagain, Alora, Xan, Tiax, Kivan and Shar-Teel are simple early recruits.
-Saved companions keep their builds and possessions, known deaths are respected,
-and dismissed recruits follow the army's camps. Requires 110 and 197. **177**
-lets you report Korlasz's defeat to Liia after the first night for the same
-once-only 22,000 XP per present party member. **285** turns the Avernus lift
-into a portal and makes the final battle fairer. Relocated Korlasz and
-camp-chest loot now keeps its original identification state. See the
-[release report](docs/releases/v0.6.13.md); in-game checks are pending the
-next collection test pass.
+### What It Changes
 
-v0.6.12 adds the approved Boareskyr Bridge collapse timer, with difficulty-scaled
-allowances, escalating warnings and a simple game over. Story Mode has no timer.
-Fresh **256** includes it; append **258** to upgrade an existing 256. See the
-[release report](docs/releases/v0.6.12.md). Native playtesting is deferred to the
-next collection test pass.
+- **Cuts filler, keeps XP pacing:**
+  Trims repetitive mob waves across Coast Way, the road north, the Coalition Camp
+  scouting maps, and Kanaglym while re-injecting milestone XP onto key battles and
+  chapter transitions so campaign progression stays balanced.
+- **Classic BG1 companions stay & join early:**
+  Your full BG1 party stays intact at the start of SoD (`110`), carried Khalid
+  remains controllable at Bridgefort while Adirran handles the local briefing
+  (`115`), Skie can join in the palace hall before the first rest (`197`/`198`),
+  and classic BG1 companions become available early around Baldur's Gate and the
+  Coast Way camp (`198`).
+- **Streamlined prologue & optional Palace SoD Skip:**
+  Instantly skips Korlasz's opening dungeon (`140`) with a reworked post-dungeon
+  Korlasz jailbreak (`170`) and flat `22,000 XP` per character from Liia (`175`–`177`).
+  Removes the forced assassination night and mid-campaign hooded-man/dream
+  interruptions (`120`/`130`/`150`). On continuous EET runs, optional **component
+  `910`** offers a full Palace SoD Skip on first palace arrival (`250,000 XP` +
+  normal EET gear import).
+- **Revamped Boareskyr Bridge finale (`256`, optional `257`):**
+  Replaces the vanilla barrel/portal event with a focused two-mage, two-veteran,
+  and four-elemental demolition fight backed by a difficulty-scaled collapse timer
+  (10 / 8 / 7 / 6 / 5 minutes on Easy / Normal / Core / Hard / Insane; disabled on
+  Story Mode).
+- **Avernus portal & fairer Belhifet (`285`):**
+  Converts the Avernus lift ride into a direct portal and tunes Belhifet (+1
+  weapons, 60% MR, +25% movement, difficulty-scaled HP, targeted Breach instead of
+  mass dispel, bounded devil reinforcements).
+- **Clean Dragonspear ending & Imoen handoff:**
+  Wraps up SoD after the Dragonspear victory celebration (`290`, dropping the arrest
+  and trial chain) and hands Imoen cleanly into Shadows of Amn (`292`/`293`/`294`)
+  with proper EET gear handling and tome boosts.
 
-v0.6.11 fixes Skie's component **197** installing after Khalid continuity **115**
-or the bridge overhaul **256**. It removes her obsolete bridge spawns while
-preserving the installed victory routes and Bence's guarded wrap. See the
-[release report](docs/releases/v0.6.11.md) and
-[collection recovery handoff](docs/recovery/2026-09-16-cebg-alpha16-skie.md).
+### Simple Install
 
-**115 fixes carried Khalid at Bridgefort:** he stays a controllable companion while
-Adirran supplies the fort briefing and command choices. It preserves the ordinary
-commander route when Khalid is absent and works alongside the bridge overhaul in
-either install order. Requires **110**; append **115** before first entering BD2000.
-If Khalid has already been reset as an NPC, load a save from before that visit.
+1. Close the game and any mod manager using the game directory.
+2. Download the [latest release ZIP](https://github.com/Chrizhermann/chriz-sod-rebalance/releases/latest)
+   and extract it into your game folder containing `chitin.key`.
+3. Run `setup-chriz-sod-remix.exe` and install as a **tail mod after `EET_end`**
+   (standalone BG:EE + SoD automatically excludes EET-only `291`, `292`–`294`, and `910`).
+4. For active campaigns, install before first entering modified areas (`BD2000`,
+   `BD4700`, `BD5000`, `BD5110`). On EET, raise a dead Imoen before ending SoD.
 
-v0.6.9 adds **135** (default: keep the assassin ambush without
-dead magic), **235** (preserve Ymori's staged quest after older cuts), and **265**
-(Mizhena's amulet on the existing corpse and the missed creature-ban fixes).
-See the [approved scope and save boundaries](docs/design/wave1/07-filler-triage.md).
-Liia's prologue reward is a flat **22,000 XP per character** on every difficulty;
-fresh 175 includes it, while **176** updates older 24,000 installations.
+---
 
-**256** replaces the Boareskyr barrel/portal finale with two wizards,
-four fire/earth elementals and two veteran guards. It includes finite defensive
-recasting, Haste on enemy sighting, coordinated engagement and cleaned day/night
-bridge artwork. Mages are level 13 below Insane and level 14 on Insane. Bence
-arrives beside the party after combat to open the passage through his dialogue.
-Optional **257** adds only the two Insane mage sequencers: Greater Malison/Slow
-and Dispel Magic with Spell Revisions (Remove Magic otherwise)/Flame Arrow.
-It requires the current 256 resources and installation before the enemies spawn;
-regular 256 retains the same stats and spellbooks without sequencer use. Install
-256 before first entering BD2000; an installed 255 can stay in place.
+## Part 2 — Component Groups, Technical Notes & License
 
-**Bridge timer:** fresh 256 now includes a visible collapse timer;
-append **258** to an older 256 without uninstalling it. Story Mode has no timer.
-Easy/Normal/Core/Hard/Insane allow 10/8/7/6/5 minutes of unpaused play; Legacy of
-Bhaal initially uses five minutes. Warnings appear above the protagonist and in
-the log at 25%, 50% and 75%, with rock sounds and brief shakes. Defeating the two
-mages and four elementals stops demolition even while guards survive. Failure
-uses a brief fade and game over. Native timer presentation/balance testing is
-pending; see the [verification record](docs/playtest/2026-09-27-bridge-timer.md).
+### Install Groups Overview (7 groups, 49 declarations)
 
-Default-selected **266** limits Shadow Aspect's Insane Mislead to one use per
-actor. Component **197** also gains Skie's normal, protagonist-dependent SoD XP
-catch-up, corrected recruitment/rejoin dialogue, and movable SCS stock potions.
-It does not grant a flat 250,000 XP regardless of the protagonist's XP.
+| Group | Components | What It Covers |
+|---|---|---|
+| **1. Wave 1 — Global levers** | `100`, `110`, `115`, `120`, `130`, `135` | 5× rest-ambush reduction (`100`), keep BG1 party (`110`), Khalid Bridgefort continuity (`115`), remove mid-campaign hooded man (`120`), skip 4 rest-dreams (`130`), keep assassin ambush without dead magic (`135`, default) |
+| **2. Prologue** | `140`–`198`, `910` | Korlasz dungeon skip (`140`), no auto-start party (`145`), crusade council without assassination night (`150`/`187`/`190`/`195`), Imoen stays (`160`), jailbreak & flat 22,000 XP/char (`170`/`175`/`177`), proclamation (`180`), Entar stays dead (`185`), Skie talk-to-join (`197`), early BG1 recruits (`198`), optional Palace SoD Skip (`910`, EET) |
+| **3. Coast Way** | `200`–`225`, `245`, `900`/`901` | Crossing spiders & skip-proof bridge (`200`/`245`), Coast Way Forest cut & Rasaad at camp (`210`/`215`), Dwarven Dig Site & text-only Caelar omen (`220`/`225`), Treasure from removed content (`900` collect / `901` remove) |
+| **4. The Road North** | `230`–`258` | Cleaner road-north camps (`230`), Forest of Wyrms cave skip (`240`), Morentherene Hard/Insane tiers (`250`), Boareskyr Bridge elemental battle + timer (`256`, legacy `255`) |
+| **5. Coalition Camp & Avernus** | `260`–`285` | Fewer scouting enemies & Mizhena amulet (`260`/`265`), finite Shadow Aspect Mislead on Insane (`266`, default), Kanaglym trim (`270`), no basement reveal dispel (`280`), Avernus portal & fairer Belhifet (`285`) |
+| **6. Ending & EET Handoff** | `290`–`294` | Dragonspear victory celebration ending (`290`) and EET Imoen handoff into Shadows of Amn (`292`/`293`/`294`) |
+| **7. Extra Challenge** | `257` | Optional Insane Boareskyr Bridge mage sequencers (Greater Malison/Slow and Dispel or Remove Magic/Flame Arrow; requires `256`) |
 
-Download the Windows installer ZIP from [Releases](https://github.com/Chrizhermann/chriz-sod-rebalance/releases/latest),
-extract it into the game directory containing `chitin.key`, close the game, and run
-`setup-chriz-sod-remix.exe`. Install as a tail mod after EET_end. Keep existing
-WeiDU history: do not uninstall or reinstall earlier components to apply this repair.
+### Key Selection Options & Update Components
 
-v0.6.8 fixes component **900** rejecting camp chests modified by earlier mods.
-It preserves all existing items and their charges/flags, then adds the eight
-approved treasure records. Component 910 and the selection/order are unchanged.
-For a mod-manager installation paused after 900 failed, use that manager's
-recovery flow; replacing the archive alone does not reconcile its recorded step.
+- **Treasure (`900` / `901`):** Mutually exclusive — collect removed Coast Way Forest
+  treasure in the Coast Way camp chest (`900`), or remove it with the area (`901`).
+- **Imoen in Shadows of Amn (`292` / `293` / `294`, EET):** Choose at most one after
+  `160`, `290`, and `EET_end`:
+  - `292`: BG2 dual-class Imoen plus her BG1/SoD tome boosts (Chriz Easy BG default).
+  - `293`: Continue with Imoen exactly as taken along.
+  - `294`: Dual-class Imoen to mage at her end-of-SoD thief level (requires EEex).
+- **Palace SoD Skip (`910`, EET):** Optional choice on first palace bedroom arrival
+  (`110`, `140`, `150`, `160`, `EET_end`); carries inventory through normal EET import
+  and grants `250,000 XP` once in BG2.
+- **Append-only updates (`176`, `235`, `258`, `291`):** Only needed when upgrading older
+  installed versions; fresh `v0.6.17` installations already include every correction.
 
-Component **290** ends SoD after the short victory celebration. Dazzo starts the
-normal BG2 opening on EET, retaining existing import and item-placement rules.
-There is no new equipment handout. Install it before first visiting BD4300.
-For EET copies that already have an older 290, append **291**; fresh 290 already
-includes the correction. Standalone players should not select the EET-only repair.
+### Compatibility & We Overwrite Policy
 
-Optional EET component **910** offers a full SoD skip at the first palace-bedroom
-arrival. Confirming Yes uses normal carried-inventory import rules and adds
-250,000 XP to the protagonist once, on BG2 arrival. Ground-loot recovery is not
-included. Requires EET_end and components 110, 140, 150, and 160; install before
-the first palace arrival. It adds no EEex dependency.
+- **We Overwrite:** As of `v0.6.17`, every component writes its decided result directly
+  over edited values, missing dialogue states, or other mods' changes
+  (`chriz-sod-remix/lib/overwrite.tpa`). Only the game type and declared prerequisite
+  components remain required.
+- **Mod interoperability:** Timer names resolve dynamically from `GTIMES.IDS` (e.g., Dark
+  Tidings), Tweaks Anthology's ally fog clearing (`cdtweaks` `3500`) stays intact on
+  bridge elementals, and `290` adapts victory remarks added by mods such as Sirene NPC.
+- **Live-save boundaries & uninstall:** `.are`, `.bcs`, and `.dlg` edits apply when
+  entering areas not yet saved in your campaign. Fully reversible via WeiDU backups in
+  `weidu_external/backup/chriz-sod-remix`.
 
-Optional EET components **292 / 293 / 294** (choose one) hand Imoen over into
-Shadows of Amn. Before the campaign switch, her SoD gear goes through EET's import
-rules like the party's, and she keeps only her BG2 belt, now correctly equipped.
-Then she becomes EET's Shadows of Amn Imoen plus her tome boosts (292, the CEBG
-default), continues as taken along (293), or dual-classes to mage at her
-end-of-SoD thief level (294, requires EEex). They require components 160 and 290
-and EET_end, and work with 910 in either install order. Raise a dead Imoen before
-ending SoD: EET has no case for a dead Imoen who has been in the party, and SoA's
-opening scene would never give control back (this already applies to 160 and 290
-alone).
+### Further Documentation & Verification
 
-The release has **49 component declarations in seven install groups**.
-Selection depends on installed prerequisites and earlier versions: 176, 235, 258
-and 291 update older components; fresh versions already include those corrections.
-Choose one of 900/901, add 257 only for Extra Challenge, select 910 only on
-supported EET setups, and choose at most one of 292/293/294 on EET.
-See [component instructions](chriz-sod-remix/README.md), the
-[feature inventory](docs/00-feature-inventory.md), and [changelog](CHANGELOG.md).
+- [Component Notes](chriz-sod-remix/README.md) · [Complete 49-Component Inventory](docs/00-feature-inventory.md) · [Changelog](CHANGELOG.md)
+- CI (`.github/workflows/ci.yml`) runs WeiDU 249 `--parse-check` across the TP2 and all
+  `.tpa` libraries alongside Python unit and research-script suites
+  (`python -m unittest discover -s tests`).
 
-The EET safety guard, victory sequence, save/reload, and sampled import preservation
-passed native testing. Standalone credits and broader party/multiplayer coverage
-remain pending; see the [runtime record](docs/playtest/2026-09-06-ending-runtime.md).
-The full-skip Yes route also passed a six-person native test with saved XP/import
-evidence. Transition polish and additional native variants remain open; see its
-[acceptance record](docs/design/wave1/06-optional-sod-skip-testing.md).
-The harder bridge build, prompt Bence arrival, save/reload and onward crossing
-passed the user's [combined playtest](docs/playtest/2026-09-08-bridge-finale.md).
-The final 256/257 split and finite Mislead correction have not received new native
-acceptance; Shadow Aspect testing is deferred. The companion appearance issue
-after palace rest remains unresolved. Khalid's corrected arrival, wardstone transfer
-and Adirran briefing passed native testing, with normal control preserved in the save.
-The [v0.6.10 report](docs/releases/v0.6.10.md) records that Khalid acceptance.
-The current compatibility fix has installer/script verification and no new native
-playtest. Offline checks do not establish a complete campaign playthrough.
-Research and approved designs remain in `docs/`; new encounter designs require
-discussion before implementation.
+### Credits
+
+- **[Sword Coast Stratagems](https://github.com/Gibberlings3/SwordCoastStratagems)**
+  by DavidW — Boareskyr Bridge mage defensive priority and manual sequencer
+  inspirations (`v35.21`).
+- **Beamdog** — *Baldur's Gate: Siege of Dragonspear* base game and scenery assets.
+- **[WeiDU](https://github.com/WeiDUorg/weidu/tree/v249.00)** (`v249.00`) — installer runtime.
+
+## License
+
+First-party code, WeiDU scripts, and documentation are licensed under the
+**[MIT License](LICENSE)** (`Copyright (c) 2026 Christopher Hermann`).
+
+Third-party notices and license boundaries are documented in
+**[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)**, covering:
+- The bundled **WeiDU 249.00** executable (GNU GPL v2, shipped as `WEIDU-COPYING.txt`).
+- **Sword Coast Stratagems 35.21** defensive-priority inspirations (`chriz-sod-remix/lib/comp256_ai.tpa`).
+- Edited **SoD bridge scenery tiles** (`chriz-sod-remix/art/bridge/README.md`).
