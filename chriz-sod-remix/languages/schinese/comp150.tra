@@ -1,0 +1,26 @@
+// chriz-sod-remix — component 150 strings (@15000-@15099)
+
+// component name (referenced as a literal in the tp2 BEGIN line; kept here
+// for translators and a possible future setup.tra consolidation)
+@15000 = ~龙矛围攻混编：序章——取消刺杀之夜与圣战会议~
+
+// --- csrserv, the palace servant (neutral palace-staff tone) ---
+// bedtime offer (bd_plot < 51, CSR_BEDTIME unset)
+@15001 = ~您想就寝时，房间随时都收拾好了。要我告诉下人们您今晚就此歇息了，还是您还要在宫里待一阵子？~
+@15002 = ~我们现在就歇息。这一天够长了。~
+// wake-for-council (bd_plot = 51)
+@15003 = ~请原谅唤醒您，但大公爵们已在下面的议事厅聚齐。他们请您尽快下去。~
+@15004 = ~告诉他们我们马上下去。~
+// bedtime offer, declined
+@15005 = ~还不用。我还有些事要先处理。~
+// re-clicked after agreeing to retire
+@15006 = ~好好休息。下人们会确保您不受打扰。~
+// clicked after the council (bd_plot > 51)
+@15007 = ~您有什么需要吗？宫殿的下人随时为您效劳。~
+
+// --- journal ---
+// replaces 266701 (QUEST_DONE, quest 266700 "Important Events"), whose text
+// blamed the palace assassins; same title so the journal reads consistently
+@15010 = ~龙矛围攻
+
+军事会议已经结束。公爵们正调集他们能召集的每一把剑去对抗凯拉·白银的圣战军，他们已命我随焰拳远征队北上，前往龙矛堡。~

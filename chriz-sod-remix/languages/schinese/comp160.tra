@@ -1,0 +1,26 @@
+// chriz-sod-remix component 160 — Prologue: Imoen stays / recruitable
+
+// component name (mirrored in setup.tra as @160 for the BEGIN line)
+@16000 = ~龙矛围攻混编：序章——爱蒙留下并可招募~
+
+// --- csrimoen.d ---
+
+// greet: first meeting in the BD0103 palace bedroom
+@16001 = ~嘿呀！你可算来了，懒虫。整座宫殿都在嗡嗡议论北边那场光鲜的大圣战——你要是以为这次又能把我甩下，那你可就想错了。怎么样？又在一起了，对吧？~
+
+@16002 = ~又在一起了，爱蒙。就像从前一样。~
+
+@16003 = ~还不是时候，爱蒙。先留在这里——我会回来找你的。~
+
+// she waits
+@16004 = ~好——吧。我就坐这儿数挂毯。别磨蹭太久，行吗？~
+
+// dismissed, offering to rejoin
+@16005 = ~嘿呀。不打算再把我甩下了？因为我随时都准备好了。~
+
+@16006 = ~那就来吧——重新加入队伍。~
+
+@16007 = ~还不行。~
+
+// in-party small talk
+@16008 = ~别戳我。我要把力气省着赶路呢！~
